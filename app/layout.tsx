@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: "PideTirúa — Sabores de nuestra tierra | Tirúa y Quidico",
   description:
     "Plataforma gastronómica comunal de Tirúa y Quidico (Región del Biobío, Chile). Explora cartas digitales por QR y realiza tu pedido directo al WhatsApp de cada local.",
+  icons: {
+    icon: "/logo-pidetirua.jpg",
+    apple: "/logo-pidetirua.jpg",
+  },
 };
 
 export default function RootLayout({

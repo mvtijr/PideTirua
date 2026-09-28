@@ -224,11 +224,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         <div className="h-20 max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md">
           <div className="flex items-center gap-space-md flex-shrink-0">
             <Link href="/" className="flex items-center gap-space-xs">
-              <div className="h-11 w-11 rounded-full bg-primary text-secondary-fixed flex items-center justify-center shadow-sm mr-2">
-                <span className="material-symbols-outlined text-2xl">
-                  waves
-                </span>
-              </div>
+              <img
+                src="/logo-pidetirua.jpg"
+                alt="Logo PideTirúa"
+                className="h-12 w-12 object-contain rounded-full border border-outline-variant/40 bg-white shadow-sm mr-2"
+              />
               <div>
                 <span className="font-headline-sm text-headline-sm text-primary font-bold tracking-tight block leading-none">
                   PideTirúa
@@ -953,10 +953,12 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       <footer className="w-full bg-surface-container-low mt-space-xl border-t border-outline-variant/30">
         <div className="max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-space-md text-center md:text-left">
-            <div className="flex items-center gap-space-xs">
-              <span className="material-symbols-outlined text-secondary text-2xl">
-                waves
-              </span>
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/logo-pidetirua.jpg"
+                alt="Logo PideTirúa"
+                className="h-11 w-11 rounded-full object-contain border border-outline-variant/40 bg-white shadow-sm"
+              />
               <span className="font-headline-sm text-headline-sm text-primary font-bold">
                 PideTirúa — Sabores de nuestra tierra
               </span>

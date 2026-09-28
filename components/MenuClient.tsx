@@ -160,9 +160,14 @@ export default function MenuClient({ local }: MenuClientProps) {
             <div className="absolute left-3 right-3 top-3 flex items-center justify-between">
               <Link
                 href="/"
-                className="inline-flex items-center gap-1.5 rounded-full bg-primary/85 px-3.5 py-2 text-xs font-bold text-on-primary backdrop-blur-md transition hover:bg-primary"
+                className="inline-flex items-center gap-2 rounded-full bg-primary/85 pl-2 pr-3.5 py-1.5 text-xs font-bold text-on-primary backdrop-blur-md transition hover:bg-primary"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <img
+                  src="/logo-pidetirua.jpg"
+                  alt="Logo PideTirúa"
+                  className="h-6 w-6 rounded-full object-contain bg-white"
+                />
                 <span>PideTirúa</span>
               </Link>
 
@@ -374,12 +379,19 @@ export default function MenuClient({ local }: MenuClientProps) {
             {local.direccionDetalle} · WhatsApp{" "}
             {formatPhoneDisplay(local.telefonoWhatsapp)}
           </p>
-          <p className="mt-2 text-[11px] text-outline">
-            Menú digital interactivo impulsado por{" "}
-            <Link href="/" className="font-bold text-secondary hover:underline">
-              PideTirúa
-            </Link>
-          </p>
+          <div className="mt-3 flex items-center justify-center gap-2 text-[11px] text-outline">
+            <img
+              src="/logo-pidetirua.jpg"
+              alt="Logo PideTirúa"
+              className="h-6 w-6 rounded-full object-contain border border-outline-variant/40 bg-white"
+            />
+            <span>
+              Menú digital interactivo impulsado por{" "}
+              <Link href="/" className="font-bold text-secondary hover:underline">
+                PideTirúa
+              </Link>
+            </span>
+          </div>
         </footer>
       </div>
 
