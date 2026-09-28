@@ -30,25 +30,18 @@ interface WhatsAppOrderPayload {
 }
 
 /**
- * Calcula subtotal, recargo de delivery (solo si aplica) y total general.
+ * Calcula subtotal y total general del pedido (sin costos de delivery).
  */
-export function calcularTotalesCarrito(
-  items: ItemCarrito[],
-  costoDeliveryLocal: number,
-  tipoEntrega: DatosCheckout["tipoEntrega"]
-) {
+export function calcularTotalesCarrito(items: ItemCarrito[]) {
   const subtotal = items.reduce(
     (acc, item) => acc + item.producto.precio * item.cantidad,
     0
   );
-  const recargoDelivery =
-    tipoEntrega === "Delivery a domicilio" ? costoDeliveryLocal : 0;
-  const total = subtotal + recargoDelivery;
+  const total = subtotal;
   const totalUnidades = items.reduce((acc, item) => acc + item.cantidad, 0);
 
   return {
     subtotal,
-    recargoDelivery,
     total,
     totalUnidades,
   };
@@ -62,23 +55,13 @@ export function formatWhatsAppMessage({
   items,
   datos,
 }: WhatsAppOrderPayload): string {
-  const { subtotal, recargoDelivery, total } = calcularTotalesCarrito(
-    items,
-    local.costoDelivery,
-    datos.tipoEntrega
-  );
+  const { total } = calcularTotalesCarrito(items);
 
-  const emojiEntrega =
-    datos.tipoEntrega === "Delivery a domicilio"
-      ? "🛵"
-      : datos.tipoEntrega === "Retiro en local"
-      ? "🛍️"
-      : "🍽️";
+  const emojiModalidad =
+    datos.tipoEntrega === "Retiro en local" ? "🛍️" : "🍽️";
 
   const etiquetaUbicacion =
-    datos.tipoEntrega === "Delivery a domicilio"
-      ? "📍 *Dirección de entrega:*"
-      : datos.tipoEntrega === "Consumo en mesa"
+    datos.tipoEntrega === "Consumo en mesa"
       ? "🪑 *Número de mesa:*"
       : "🏪 *Sucursal de retiro:*";
 
@@ -96,17 +79,6 @@ export function formatWhatsAppMessage({
     )
     .join("\n");
 
-  const bloqueTotales =
-    datos.tipoEntrega === "Delivery a domicilio"
-      ? [
-          `🧾 *Subtotal:* ${formatCLP(subtotal)}`,
-          `🛵 *Delivery (${local.sector}):* ${
-            recargoDelivery > 0 ? formatCLP(recargoDelivery) : "Gratis"
-          }`,
-          `💰 *TOTAL A PAGAR: ${formatCLP(total)}*`,
-        ].join("\n")
-      : `💰 *TOTAL A PAGAR: ${formatCLP(total)}*`;
-
   const lineasMensaje = [
     `🌊 *¡Hola ${local.nombre}!*`,
     `Te envío un nuevo pedido desde *PideTirúa* 📲`,
@@ -115,10 +87,10 @@ export function formatWhatsAppMessage({
     `🛒 *DETALLE DEL PEDIDO:*`,
     detalleLineas,
     `━━━━━━━━━━━━━━━━━━━━`,
-    bloqueTotales,
+    `💰 *TOTAL A PAGAR: ${formatCLP(total)}*`,
     `━━━━━━━━━━━━━━━━━━━━`,
     `👤 *Cliente:* ${datos.nombreCliente.trim()}`,
-    `${emojiEntrega} *Modalidad:* ${datos.tipoEntrega}`,
+    `${emojiModalidad} *Modalidad:* ${datos.tipoEntrega}`,
     `${etiquetaUbicacion} ${valorUbicacion}`,
     `💳 *Método de pago:* ${datos.metodoPago}`,
   ];

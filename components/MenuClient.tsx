@@ -11,11 +11,11 @@ import {
   Search,
   X,
   QrCode,
-  Bike,
+  Store,
   UtensilsCrossed,
 } from "lucide-react";
 import { ItemCarrito, Local, Producto } from "@/types/local";
-import { formatCLP, formatPhoneDisplay } from "@/lib/formatters";
+import { formatPhoneDisplay } from "@/lib/formatters";
 import ProductCard from "@/components/ProductCard";
 import FloatingCartBar from "@/components/FloatingCartBar";
 import CartDrawer from "@/components/CartDrawer";
@@ -236,7 +236,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-tertiary" />
                 <div>
                   <span className="font-bold text-primary">
-                    Entrega est.: {local.tiempoEstimado}
+                    Preparación est.: {local.tiempoEstimado}
                   </span>
                   <p className="text-[11px] text-on-surface-variant">
                     {local.horarioEntrega}
@@ -245,18 +245,11 @@ export default function MenuClient({ local }: MenuClientProps) {
               </div>
             </div>
 
-            {/* Acciones rápidas: Llamada directa y costo de envío */}
+            {/* Acciones rápidas: Modalidades de atención y llamada directa */}
             <div className="mt-3.5 flex items-center justify-between gap-3">
               <div className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container px-3 py-2 text-xs font-semibold text-primary">
-                <Bike className="h-4 w-4 text-secondary" />
-                <span>
-                  Delivery:{" "}
-                  <strong>
-                    {local.costoDelivery > 0
-                      ? formatCLP(local.costoDelivery)
-                      : "Gratis"}
-                  </strong>
-                </span>
+                <Store className="h-4 w-4 text-secondary" />
+                <span>Retiro en local y Consumo en mesa</span>
               </div>
 
               <a

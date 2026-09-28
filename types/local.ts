@@ -7,10 +7,7 @@ export type CategoriaFiltro =
 
 export type SectorComuna = "Tirúa Centro" | "Quidico";
 
-export type TipoEntrega =
-  | "Delivery a domicilio"
-  | "Retiro en local"
-  | "Consumo en mesa";
+export type TipoEntrega = "Retiro en local" | "Consumo en mesa";
 
 export type MetodoPago = "Efectivo" | "Transferencia Bancaria";
 
@@ -42,7 +39,7 @@ export interface Local {
   telefonoWhatsapp: string;
   horarioEntrega: string;
   tiempoEstimado: string;
-  costoDelivery: number;
+  costoDelivery?: number;
   calificacion: number;
   descripcionCorta: string;
   fotoPortada: string;

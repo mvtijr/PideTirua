@@ -448,7 +448,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     <span className="material-symbols-outlined text-sm text-secondary-fixed">
                       verified
                     </span>
-                    Delivery, Retiro o Consumo en mesa
+                    Retiro en local o Consumo en mesa
                   </div>
                 </div>
               </div>
@@ -564,7 +564,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                       </Link>
                     </div>
 
-                    {/* Micro Badge Flotante Reparto Dinámico */}
+                    {/* Micro Badge Flotante Tiempo de Preparación */}
                     <div className="absolute -bottom-4 -left-4 bg-surface-container-lowest text-on-surface p-space-sm rounded-xl shadow-lg flex items-center gap-space-sm z-30">
                       <div className="w-10 h-10 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary">
                         <span className="material-symbols-outlined text-xl">
@@ -573,7 +573,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                       </div>
                       <div>
                         <p className="font-label-sm text-label-sm text-on-surface-variant font-bold">
-                          Entrega estimada
+                          Tiempo preparación
                         </p>
                         <p className="font-headline-sm text-headline-sm text-primary font-extrabold leading-none">
                           {platoActualHero.tiempoEstimado}

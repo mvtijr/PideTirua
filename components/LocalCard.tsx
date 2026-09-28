@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { Local } from "@/types/local";
-import { formatCLP } from "@/lib/formatters";
 
 interface LocalCardProps {
   local: Local;
@@ -84,10 +83,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
                 : "bg-tertiary-container text-on-tertiary"
             }`}
           >
-            Delivery:{" "}
-            {local.costoDelivery > 0
-              ? formatCLP(local.costoDelivery)
-              : "Gratis"}
+            {totalProductos} platos en carta
           </span>
         </div>
       </div>
@@ -107,7 +103,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
                 {local.rubro}
               </span>
               <span className="text-[11px] text-outline block">
-                {totalProductos} platos · {local.horarioEntrega}
+                {local.horarioEntrega}
               </span>
             </div>
           </div>
