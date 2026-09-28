@@ -15,7 +15,7 @@
     "calificacion": 4.8,
     "descripcionCorta": "Los clásicos pollos asados al spiedo de Tirúa, papas fritas caseras, churrascos y completos gigantes para toda la familia.",
     "fotoPortada": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1800&q=95",
-    "logo": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=600&q=95",
+    "logo": "/logos/las-tranqueras.png.jpg",
     "abierto": true,
     "categorias": [
       {
@@ -128,7 +128,7 @@
     "calificacion": 4.9,
     "descripcionCorta": "Fusión nikkei-costera con salmón fresco, camarones ecuatorianos, rolls furay calientes y smash burgers artesanales.",
     "fotoPortada": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1800&q=95",
-    "logo": "https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=600&q=95",
+    "logo": "/logos/sushi-burger.png.jpg",
     "abierto": true,
     "categorias": [
       {
@@ -235,7 +235,7 @@
     "calificacion": 4.9,
     "descripcionCorta": "Vista privilegiada al encuentro del río y el mar. Café de grano recién molido, kuchen sureño, desayunos y almuerzos caseros.",
     "fotoPortada": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1800&q=95",
-    "logo": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=600&q=95",
+    "logo": "/logos/rio-mar.png.jpg",
     "abierto": true,
     "categorias": [
       {
@@ -329,7 +329,7 @@
     "calificacion": 5.0,
     "descripcionCorta": "Gastronomía marina frente al mar de Quidico. Famosos por nuestras empanadas de mariscos recién fritas, pailas marinas y pescados frescos de caleta.",
     "fotoPortada": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1800&q=95",
-    "logo": "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=95",
+    "logo": "/logos/gran-pacifico.png.jpg",
     "abierto": true,
     "categorias": [
       {

@@ -677,15 +677,29 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                       style={estilo}
                       className="coverflow-card absolute w-[280px] sm:w-[310px] md:w-[340px] h-[450px] md:h-[490px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl bg-surface-container-lowest border border-white/70"
                     >
-                      {/* Contenedor central con el LOGO del negocio (tal como el formato de referencia) */}
+                      {/* Contenedor central con el LOGO del negocio sin recortar bordes */}
                       <div className="absolute inset-0 bg-surface-container-low flex items-center justify-center p-8 pb-36">
-                        <img
-                          src={local.logo}
-                          alt={`Logo ${local.nombre}`}
-                          decoding="async"
-                          fetchPriority={esCentro ? "high" : "auto"}
-                          className="w-44 h-44 md:w-52 md:h-52 object-cover rounded-full shadow-xl border-4 border-white bg-white"
-                        />
+                        <div
+                          className="w-44 h-44 md:w-52 md:h-52 rounded-full shadow-xl border-4 border-white overflow-hidden flex items-center justify-center"
+                          style={{
+                            backgroundColor:
+                              local.slug === "las-tranqueras"
+                                ? "#f8dc4b"
+                                : local.slug === "rio-mar"
+                                ? "#000000"
+                                : local.slug === "gran-pacifico"
+                                ? "#194a6e"
+                                : "#ffffff",
+                          }}
+                        >
+                          <img
+                            src={local.logo}
+                            alt={`Logo ${local.nombre}`}
+                            decoding="async"
+                            fetchPriority={esCentro ? "high" : "auto"}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
                       </div>
 
                       {/* Gradiente editorial de contraste nítido */}
