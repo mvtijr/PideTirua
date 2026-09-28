@@ -64,7 +64,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       setTimeout(() => {
         setIndicePlatoHero((prev) => (prev + 1) % platosDestacados.length);
         setAnimandoTextoHero(false);
-      }, 160);
+      }, 5000);
     }, 5000);
     return () => clearInterval(timer);
   }, [pausaHero, platosDestacados.length]);
@@ -92,6 +92,10 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
     return () => clearInterval(timer);
   }, [pausaCoverflow, locales.length]);
 
+  /**
+   * Calcula posición 3D manteniendo la tarjeta central en escala 1:1 nativa (translateZ(0) y scale(1))
+   * y sin usar CSS filter:brightness() para evitar que el navegador rasterice el texto e imágenes en baja resolución.
+   */
   const obtenerEstiloCoverflow = (idx: number) => {
     const total = locales.length;
     let offset = idx - indiceCoverflow;
@@ -100,48 +104,58 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
     if (offset === 0) {
       return {
-        transform: `translateX(0px) translateZ(120px) rotateY(0deg) scale(1.05)`,
-        zIndex: 30,
-        opacity: 1,
-        filter: "brightness(1)",
-        boxShadow:
-          "0 25px 50px -12px rgba(12, 74, 110, 0.45), 0 0 0 2px rgba(255,255,255,0.7)",
+        estilo: {
+          transform: "translate3d(0px, 0px, 0px) rotateY(0deg) scale(1)",
+          zIndex: 30,
+          opacity: 1,
+          boxShadow:
+            "0 25px 50px -12px rgba(12, 74, 110, 0.5), 0 0 0 2px rgba(255,255,255,0.85)",
+        },
+        nivelOscurecimiento: "opacity-0",
       };
     } else if (offset === 1) {
-      const tx = esPantallaMovil ? 155 : 250;
+      const tx = esPantallaMovil ? 165 : 265;
       return {
-        transform: `translateX(${tx}px) translateZ(-40px) rotateY(-28deg) scale(0.88)`,
-        zIndex: 20,
-        opacity: 0.88,
-        filter: "brightness(0.85)",
-        boxShadow: "0 20px 35px -10px rgba(0,0,0,0.35)",
+        estilo: {
+          transform: `translate3d(${tx}px, 0px, -110px) rotateY(-24deg) scale(0.86)`,
+          zIndex: 20,
+          opacity: 0.92,
+          boxShadow: "0 20px 35px -10px rgba(0,0,0,0.35)",
+        },
+        nivelOscurecimiento: "opacity-25",
       };
     } else if (offset === -1) {
-      const tx = esPantallaMovil ? -155 : -250;
+      const tx = esPantallaMovil ? -165 : -265;
       return {
-        transform: `translateX(${tx}px) translateZ(-40px) rotateY(28deg) scale(0.88)`,
-        zIndex: 20,
-        opacity: 0.88,
-        filter: "brightness(0.85)",
-        boxShadow: "0 20px 35px -10px rgba(0,0,0,0.35)",
+        estilo: {
+          transform: `translate3d(${tx}px, 0px, -110px) rotateY(24deg) scale(0.86)`,
+          zIndex: 20,
+          opacity: 0.92,
+          boxShadow: "0 20px 35px -10px rgba(0,0,0,0.35)",
+        },
+        nivelOscurecimiento: "opacity-25",
       };
     } else if (offset >= 2) {
-      const tx = esPantallaMovil ? 250 : 420;
+      const tx = esPantallaMovil ? 260 : 440;
       return {
-        transform: `translateX(${tx}px) translateZ(-140px) rotateY(-40deg) scale(0.76)`,
-        zIndex: 10,
-        opacity: 0.45,
-        filter: "brightness(0.6)",
-        boxShadow: "0 10px 25px -8px rgba(0,0,0,0.2)",
+        estilo: {
+          transform: `translate3d(${tx}px, 0px, -220px) rotateY(-36deg) scale(0.74)`,
+          zIndex: 10,
+          opacity: 0.55,
+          boxShadow: "0 10px 25px -8px rgba(0,0,0,0.2)",
+        },
+        nivelOscurecimiento: "opacity-45",
       };
     } else {
-      const tx = esPantallaMovil ? -250 : -420;
+      const tx = esPantallaMovil ? -260 : -440;
       return {
-        transform: `translateX(${tx}px) translateZ(-140px) rotateY(40deg) scale(0.76)`,
-        zIndex: 10,
-        opacity: 0.45,
-        filter: "brightness(0.6)",
-        boxShadow: "0 10px 25px -8px rgba(0,0,0,0.2)",
+        estilo: {
+          transform: `translate3d(${tx}px, 0px, -220px) rotateY(36deg) scale(0.74)`,
+          zIndex: 10,
+          opacity: 0.55,
+          boxShadow: "0 10px 25px -8px rgba(0,0,0,0.2)",
+        },
+        nivelOscurecimiento: "opacity-45",
       };
     }
   };
@@ -457,6 +471,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                             key={plato.localSlug}
                             src={plato.imagen}
                             alt={plato.nombre}
+                            decoding="async"
                             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out ${
                               idx === indicePlatoHero
                                 ? "opacity-100"
@@ -624,7 +639,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     (prev) => (prev - 1 + locales.length) % locales.length
                   )
                 }
-                className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 z-40 w-11 h-11 md:w-13 md:h-13 rounded-full bg-surface-container-lowest/90 hover:bg-white text-primary shadow-xl border border-outline-variant/40 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 z-40 w-11 h-11 md:w-13 md:h-13 rounded-full bg-surface-container-lowest/95 hover:bg-white text-primary shadow-xl border border-outline-variant/40 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
               >
                 <span className="material-symbols-outlined text-2xl font-bold">
                   chevron_left
@@ -638,17 +653,18 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 onClick={() =>
                   setIndiceCoverflow((prev) => (prev + 1) % locales.length)
                 }
-                className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 z-40 w-11 h-11 md:w-13 md:h-13 rounded-full bg-surface-container-lowest/90 hover:bg-white text-primary shadow-xl border border-outline-variant/40 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+                className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 z-40 w-11 h-11 md:w-13 md:h-13 rounded-full bg-surface-container-lowest/95 hover:bg-white text-primary shadow-xl border border-outline-variant/40 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
               >
                 <span className="material-symbols-outlined text-2xl font-bold">
                   chevron_right
                 </span>
               </button>
 
-              {/* Pista Coverflow 3D */}
-              <div className="coverflow-stage relative w-full h-[470px] md:h-[510px] flex items-center justify-center">
+              {/* Pista Coverflow 3D (Tarjeta central a escala 1:1 nativa para máxima nitidez de texto e imagen) */}
+              <div className="coverflow-stage relative w-full h-[480px] md:h-[520px] flex items-center justify-center">
                 {locales.map((local, idx) => {
-                  const estilo = obtenerEstiloCoverflow(idx);
+                  const { estilo, nivelOscurecimiento } =
+                    obtenerEstiloCoverflow(idx);
                   const esCentro = idx === indiceCoverflow;
                   return (
                     <div
@@ -659,45 +675,58 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                         }
                       }}
                       style={estilo}
-                      className="coverflow-card absolute w-[260px] sm:w-[290px] md:w-[320px] h-[430px] md:h-[470px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl bg-surface-container-lowest border border-white/60"
+                      className="coverflow-card absolute w-[280px] sm:w-[310px] md:w-[340px] h-[450px] md:h-[490px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl bg-primary border border-white/70"
                     >
                       <img
                         src={local.fotoPortada}
                         alt={local.nombre}
+                        decoding="async"
+                        fetchPriority={esCentro ? "high" : "auto"}
                         className="absolute inset-0 w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/90" />
+
+                      {/* Gradiente editorial de contraste nítido */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/15 to-black/92" />
+
+                      {/* Capa de atenuación para tarjetas laterales (reemplaza filter:brightness para no desenfocar el texto) */}
+                      <div
+                        className={`pointer-events-none absolute inset-0 bg-slate-950 transition-opacity duration-500 ${nivelOscurecimiento}`}
+                      />
 
                       {/* Pill superior estilo Stories */}
                       <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 pointer-events-none">
-                        <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-white shadow-lg min-w-0">
+                        <div className="flex items-center gap-2.5 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/25 text-white shadow-lg min-w-0">
                           <img
                             src={local.logo}
                             alt={`Logo ${local.nombre}`}
-                            className="w-7 h-7 rounded-full object-cover border border-white/40 bg-white shadow-sm flex-shrink-0"
+                            decoding="async"
+                            className="w-8 h-8 rounded-full object-cover border border-white/60 bg-white shadow-sm flex-shrink-0"
                           />
                           <div className="leading-tight truncate">
-                            <span className="block text-xs font-bold tracking-tight truncate">
+                            <span className="block text-xs font-bold tracking-tight text-white truncate">
                               {local.nombre}
                             </span>
-                            <span className="block text-[9px] text-white/75 truncate">
+                            <span className="block text-[10px] font-medium text-secondary-fixed truncate">
                               {local.ubicacion}
                             </span>
                           </div>
                         </div>
-                        <div className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-secondary-fixed shrink-0">
+                        <div className="px-2.5 h-8 rounded-full bg-black/65 backdrop-blur-md border border-white/25 flex items-center justify-center gap-1 text-amber-300 shrink-0">
                           <span
-                            className="material-symbols-outlined text-sm"
+                            className="material-symbols-outlined text-sm text-amber-400"
                             style={{ fontVariationSettings: "'FILL' 1" }}
                           >
                             star
+                          </span>
+                          <span className="text-xs font-bold text-white">
+                            {local.calificacion.toFixed(1)}
                           </span>
                         </div>
                       </div>
 
                       {/* Badge de Estado */}
                       <div className="absolute top-16 left-4 z-10 pointer-events-none">
-                        <span className="inline-flex items-center gap-1.5 bg-green-500/90 backdrop-blur-sm text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-md">
+                        <span className="inline-flex items-center gap-1.5 bg-green-600 text-white px-3 py-1 rounded-full text-[11px] font-bold shadow-md">
                           <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
                           {local.abierto ? "Abierto ahora" : "Cerrado"} ·{" "}
                           {local.tiempoEstimado}
@@ -706,20 +735,20 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
                       {/* Pie de Card con Información y Botón a Carta Digital */}
                       <div className="absolute bottom-0 inset-x-0 p-5 text-white z-10 space-y-2">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-secondary-fixed block">
+                        <span className="text-xs font-bold uppercase tracking-wider text-secondary-fixed block drop-shadow-xs">
                           {local.rubro}
                         </span>
-                        <h3 className="font-headline-sm text-lg md:text-xl font-bold leading-tight">
+                        <h3 className="font-headline-sm text-xl md:text-[22px] font-bold leading-snug text-white drop-shadow-sm">
                           {local.nombre}
                         </h3>
-                        <p className="text-xs text-white/80 line-clamp-2">
+                        <p className="text-[13px] leading-relaxed text-white/95 line-clamp-2">
                           {local.descripcionCorta}
                         </p>
-                        <div className="pt-2">
+                        <div className="pt-2.5">
                           <Link
                             href={`/${local.slug}`}
                             onClick={(e) => e.stopPropagation()}
-                            className="w-full bg-surface-container-lowest text-primary hover:bg-secondary-fixed font-label-md text-xs font-bold py-2.5 px-3 rounded-xl flex items-center justify-center gap-1.5 shadow-lg transition-transform"
+                            className="w-full bg-surface-container-lowest text-primary hover:bg-secondary-fixed font-label-md text-xs font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-1.5 shadow-lg transition-colors"
                           >
                             <span>Ver Carta</span>
                             <span className="material-symbols-outlined text-sm">

@@ -46,6 +46,9 @@ a,
 div,
 span:not(.material-symbols-outlined) {
   font-family: "Libre Baskerville", serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .material-symbols-outlined {
@@ -107,15 +110,22 @@ a,
   }
 }
 
-/* Estilos Coverflow 3D */
+/* Estilos Coverflow 3D optimizados para nitidez HiDPI / Retina (sin rasterizado borroso) */
 .coverflow-stage {
-  perspective: 1200px;
-  transform-style: preserve-3d;
+  perspective: 1400px;
 }
 
 .coverflow-card {
   transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease,
     box-shadow 0.5s ease;
-  transform-style: preserve-3d;
-  will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  -webkit-font-smoothing: subpixel-antialiased;
+  text-rendering: geometricPrecision;
+}
+
+.coverflow-card img {
+  image-rendering: -webkit-optimize-contrast;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
