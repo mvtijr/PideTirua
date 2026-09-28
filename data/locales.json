@@ -1,0 +1,439 @@
+[
+  {
+    "id": "loc-1",
+    "slug": "las-tranqueras",
+    "nombre": "Las Tranqueras Tirúa",
+    "rubro": "Pollos Asados y Comida Rápida",
+    "categoriaFiltro": [
+      "Comida Rápida"
+    ],
+    "sector": "Tirúa Centro",
+    "ubicacion": "Tirúa Centro",
+    "direccionDetalle": "Av. Costanera esq. Galvarino, Tirúa Centro",
+    "telefonoWhatsapp": "56994761692",
+    "horarioEntrega": "Lun a Dom · 12:00 a 23:00 hrs",
+    "tiempoEstimado": "25 - 35 min",
+    "costoDelivery": 1500,
+    "calificacion": 4.8,
+    "descripcionCorta": "Los clásicos pollos asados al spiedo de Tirúa, papas fritas caseras, churrascos y completos gigantes para toda la familia.",
+    "fotoPortada": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1200&q=80",
+    "logo": "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?auto=format&fit=crop&w=300&q=80",
+    "abierto": true,
+    "categorias": [
+      {
+        "id": "cat-pollos",
+        "nombre": "Pollos",
+        "productos": [
+          {
+            "id": "lt-1",
+            "nombre": "Pollo Entero Asado + Papas Fritas Familiar",
+            "descripcion": "Pollo entero dorado al spiedo con adobo de la casa, porción grande de papas fritas rústicas y ají pebre.",
+            "precio": 14500,
+            "imagen": "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=600&q=80",
+            "destacado": true,
+            "etiqueta": "Más pedido"
+          },
+          {
+            "id": "lt-2",
+            "nombre": "Medio Pollo Asado + Papas Fritas",
+            "descripcion": "Jugoso medio pollo al spiedo acompañado de papas fritas crujientes y ensalada chilena individual.",
+            "precio": 8500,
+            "imagen": "https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=600&q=80"
+          },
+          {
+            "id": "lt-3",
+            "nombre": "Cuarto de Pollo + Arroz o Papas Mayo",
+            "descripcion": "Colación individual ideal para el almuerzo, incluye pan amasado caliente y pebre cuchareado.",
+            "precio": 5500,
+            "imagen": "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      },
+      {
+        "id": "cat-sandwiches",
+        "nombre": "Sándwiches",
+        "productos": [
+          {
+            "id": "lt-4",
+            "nombre": "Churrasco Italiano XL",
+            "descripcion": "Posta rosada a la plancha en pan frica artesanal, palta hass molida, tomate fresco y mayonesa casera.",
+            "precio": 6800,
+            "imagen": "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80",
+            "destacado": true,
+            "etiqueta": "Clásico"
+          },
+          {
+            "id": "lt-5",
+            "nombre": "Chacarero Las Tranqueras",
+            "descripcion": "Láminas de carne a la plancha, porotos verdes tiernos, tomate, ají verde cristal y toque de mayo.",
+            "precio": 7200,
+            "imagen": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=600&q=80"
+          },
+          {
+            "id": "lt-6",
+            "nombre": "Promo 2 Completos Italianos Gigantes",
+            "descripcion": "Dos vienesas Llanquihue en pan lengua tibio con abundante palta, tomate en cubos y mayo casera.",
+            "precio": 5900,
+            "imagen": "https://images.unsplash.com/photo-1619740455993-9e612b1af08a?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      },
+      {
+        "id": "cat-papas",
+        "nombre": "Chorrillanas",
+        "productos": [
+          {
+            "id": "lt-7",
+            "nombre": "Chorrillana Tiruana (Para 3)",
+            "descripcion": "Cama de papas fritas caseras con carne salteada, longaniza ahumada del sur, cebolla caramelizada y 2 huevos fritos.",
+            "precio": 13500,
+            "imagen": "https://images.unsplash.com/photo-1585109649139-366815a0d713?auto=format&fit=crop&w=600&q=80",
+            "etiqueta": "Para compartir"
+          }
+        ]
+      },
+      {
+        "id": "cat-bebidas-lt",
+        "nombre": "Bebidas",
+        "productos": [
+          {
+            "id": "lt-8",
+            "nombre": "Bebida Familiar 1.5 Litros",
+            "descripcion": "Coca-Cola Original, Coca-Cola Zero, Fanta o Sprite bien helada (indicar sabor en notas).",
+            "precio": 2800,
+            "imagen": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=600&q=80"
+          },
+          {
+            "id": "lt-9",
+            "nombre": "Bebida Lata 350cc",
+            "descripcion": "Lata individual helada Coca-Cola, Sprite o Fanta.",
+            "precio": 1500,
+            "imagen": "https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "loc-2",
+    "slug": "sushi-burger",
+    "nombre": "Sushi Burger Tirúa",
+    "rubro": "Sushi y Hamburguesas",
+    "categoriaFiltro": [
+      "Sushi",
+      "Comida Rápida"
+    ],
+    "sector": "Tirúa Centro",
+    "ubicacion": "Calle Arturo Prat, Tirúa",
+    "direccionDetalle": "Arturo Prat #420, frente a Plaza de Armas de Tirúa",
+    "telefonoWhatsapp": "56987654321",
+    "horarioEntrega": "Mar a Dom · 17:30 a 23:30 hrs",
+    "tiempoEstimado": "30 - 45 min",
+    "costoDelivery": 1500,
+    "calificacion": 4.9,
+    "descripcionCorta": "Fusión nikkei-costera con salmón fresco, camarones ecuatorianos, rolls furay calientes y smash burgers artesanales.",
+    "fotoPortada": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=80",
+    "logo": "https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=300&q=80",
+    "abierto": true,
+    "categorias": [
+      {
+        "id": "cat-tablas",
+        "nombre": "Tablas de Sushi",
+        "productos": [
+          {
+            "id": "sb-1",
+            "nombre": "Tabla Costera 40 Piezas",
+            "descripcion": "10 Camarón Queso en Palta, 10 Salmón Queso en Sésamo, 10 Pollo Teriyaki Furay caliente y 10 Hosomaki. Incluye soya, teriyaki y jengibre.",
+            "precio": 18900,
+            "imagen": "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=600&q=80",
+            "destacado": true,
+            "etiqueta": "Favorito en Tirúa"
+          },
+          {
+            "id": "sb-2",
+            "nombre": "Tabla Full Tempura 30 Piezas (Todo Caliente)",
+            "descripcion": "3 rolls apanados en panko crujiente: Camarón-Queso-Cebollín, Pollo-Queso-Palta y Salmón-Queso Crema.",
+            "precio": 15500,
+            "imagen": "https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&w=600&q=80",
+            "etiqueta": "100% Panko"
+          }
+        ]
+      },
+      {
+        "id": "cat-rolls",
+        "nombre": "Sushi Burgers y Rolls",
+        "productos": [
+          {
+            "id": "sb-3",
+            "nombre": "Sushi Burger Camarón & Salmón",
+            "descripcion": "Doble tapa de arroz de sushi apanado en panko rellena de salmón fresco, camarón tempura, queso crema, palta y salsa tare.",
+            "precio": 8900,
+            "imagen": "https://images.unsplash.com/photo-1563612116625-3012372fccce?auto=format&fit=crop&w=600&q=80",
+            "destacado": true,
+            "etiqueta": "Especialidad"
+          },
+          {
+            "id": "sb-4",
+            "nombre": " Tori Roll Furay (10 cortes)",
+            "descripcion": "Relleno de pollo teriyaki, queso crema y cebollín, envuelto en panko dorado con topping de salsa acevichada.",
+            "precio": 6500,
+            "imagen": "https://images.unsplash.com/photo-1559410545-0bdcd187e0a6?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      },
+      {
+        "id": "cat-burgers",
+        "nombre": "Hamburguesas",
+        "productos": [
+          {
+            "id": "sb-5",
+            "nombre": "Doble Smash Cheddar Bacon + Papas",
+            "descripcion": "Doble medallón de res 120g aplastado a la plancha, cuádruple queso cheddar fundido, tocino ahumado crocante y salsa burger en pan brioche.",
+            "precio": 9500,
+            "imagen": "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80",
+            "destacado": true
+          },
+          {
+            "id": "sb-6",
+            "nombre": "Burger Austral Caramelizada + Papas",
+            "descripcion": "Hamburguesa casera 180g, queso mantecoso del sur, champiñones salteados, cebolla al merkén y mayo ajo tostado.",
+            "precio": 8900,
+            "imagen": "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      },
+      {
+        "id": "cat-bebidas-sb",
+        "nombre": "Bebidas y Extras",
+        "productos": [
+          {
+            "id": "sb-7",
+            "nombre": "Salsa Acevichada o Unagi Extra (2 oz)",
+            "descripcion": "Pote adicional de salsa casera a elección.",
+            "precio": 1200,
+            "imagen": "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?auto=format&fit=crop&w=600&q=80"
+          },
+          {
+            "id": "sb-8",
+            "nombre": "Lata Pepsi / Bilz / Pap 350cc",
+            "descripcion": "Bebida en lata bien fría.",
+            "precio": 1500,
+            "imagen": "https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "loc-3",
+    "slug": "rio-mar",
+    "nombre": "Cafetería y Restaurante Río Mar",
+    "rubro": "Cafetería y Almuerzos",
+    "categoriaFiltro": [
+      "Cafetería",
+      "Pescados y Mariscos"
+    ],
+    "sector": "Tirúa Centro",
+    "ubicacion": "Costanera Tirúa",
+    "direccionDetalle": "Paseo Costanera Río Tirúa s/n, frente a la desembocadura",
+    "telefonoWhatsapp": "56911223344",
+    "horarioEntrega": "Lun a Dom · 09:30 a 20:30 hrs",
+    "tiempoEstimado": "20 - 35 min",
+    "costoDelivery": 1000,
+    "calificacion": 4.9,
+    "descripcionCorta": "Vista privilegiada al encuentro del río y el mar. Café de grano recién molido, kuchen sureño, desayunos y almuerzos caseros.",
+    "fotoPortada": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=80",
+    "logo": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=300&q=80",
+    "abierto": true,
+    "categorias": [
+      {
+        "id": "cat-almuerzos",
+        "nombre": "Almuerzos",
+        "productos": [
+          {
+            "id": "rm-1",
+            "nombre": "Salmón a la Plancha con Puré Rústico al Merkén",
+            "descripcion": "Filete de salmón austral sellado a la mantequilla con alcaparras, acompañado de puré de papas nativas y ensalada del huerto.",
+            "precio": 11900,
+            "imagen": "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=600&q=80",
+            "destacado": true,
+            "etiqueta": "Plato del día"
+          },
+          {
+            "id": "rm-2",
+            "nombre": "Cazuela de Vacuno Sureña",
+            "descripcion": "Caldo reponedor con tapapecho tierno, papa de la zona, zapallo camote, choclo, porotos verdes y cilantro fresco.",
+            "precio": 7900,
+            "imagen": "https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=600&q=80",
+            "etiqueta": "Receta Casera"
+          },
+          {
+            "id": "rm-3",
+            "nombre": "Pastel de Choclo en Greda",
+            "descripcion": "Pino de carne picada, pollo, aceituna y huevo duro cubierto con pastelera de choclo dulce gratinada al horno.",
+            "precio": 8500,
+            "imagen": "https://images.unsplash.com/photo-1574484284002-952d92456975?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      },
+      {
+        "id": "cat-cafeteria",
+        "nombre": "Cafetería y Dulces",
+        "productos": [
+          {
+            "id": "rm-4",
+            "nombre": "Kuchen de Murtilla y Frambuesa",
+            "descripcion": "Masa quebrada artesanal con crema pastelera horneada y murtillas recolectadas en los cerros de Tirúa.",
+            "precio": 3800,
+            "imagen": "https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=600&q=80",
+            "destacado": true,
+            "etiqueta": "Tradición"
+          },
+          {
+            "id": "rm-5",
+            "nombre": "Cappuccino Doble Grano Arábica (12 oz)",
+            "descripcion": "Espresso doble con leche texturizada sedosa y cacao amargo espolvoreado.",
+            "precio": 3200,
+            "imagen": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=600&q=80"
+          },
+          {
+            "id": "rm-6",
+            "nombre": "Once Costera Completa (Para 2)",
+            "descripcion": "2 tazas de café de grano o té en hoja, 2 trozos de torta o kuchen del día y pailita de huevos revueltos con tostadas de pan amasado.",
+            "precio": 13500,
+            "imagen": "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=600&q=80",
+            "etiqueta": "Ideal Tarde"
+          }
+        ]
+      },
+      {
+        "id": "cat-jugos",
+        "nombre": "Jugos Naturales",
+        "productos": [
+          {
+            "id": "rm-7",
+            "nombre": "Jugo Natural Frambuesa-Menta 500cc",
+            "descripcion": "Elaborado al momento con fruta natural seleccionada, sin azúcar añadida o endulzado a gusto.",
+            "precio": 3500,
+            "imagen": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "loc-4",
+    "slug": "gran-pacifico",
+    "nombre": "Restaurant Gran Pacífico",
+    "rubro": "Pescados, Mariscos y Empanadas",
+    "categoriaFiltro": [
+      "Pescados y Mariscos"
+    ],
+    "sector": "Quidico",
+    "ubicacion": "Quidico",
+    "direccionDetalle": "Av. Costanera Playa Quidico #185, Balneario de Quidico",
+    "telefonoWhatsapp": "56999887766",
+    "horarioEntrega": "Lun a Dom · 11:30 a 21:30 hrs",
+    "tiempoEstimado": "30 - 45 min",
+    "costoDelivery": 2000,
+    "calificacion": 5.0,
+    "descripcionCorta": "Gastronomía marina frente al mar de Quidico. Famosos por nuestras empanadas de mariscos recién fritas, pailas marinas y pescados frescos de caleta.",
+    "fotoPortada": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1200&q=80",
+    "logo": "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=300&q=80",
+    "abierto": true,
+    "categorias": [
+      {
+        "id": "cat-empanadas",
+        "nombre": "Empanadas",
+        "productos": [
+          {
+            "id": "gp-1",
+            "nombre": "Empanada Camarón Queso Gigante",
+            "descripcion": "Masa casera crujiente frita al momento, rellena con abundantes camarones y queso mantecoso fundido.",
+            "precio": 3800,
+            "imagen": "https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&w=600&q=80",
+            "destacado": true,
+            "etiqueta": "Imperdible Quidico"
+          },
+          {
+            "id": "gp-2",
+            "nombre": "Empanada Machas a la Parmesana",
+            "descripcion": "Lenguas de machas frescas de la costa con queso mantecoso y toque de vino blanco en masa dorada.",
+            "precio": 4200,
+            "imagen": "https://images.unsplash.com/photo-1541529086526-db283c563270?auto=format&fit=crop&w=600&q=80",
+            "destacado": true
+          },
+          {
+            "id": "gp-3",
+            "nombre": "Empanada Pino de Mariscos Surtidos",
+            "descripcion": "Pino tradicional de navajuelas, choritos, almejas y piures picados con cebolla suave y especias.",
+            "precio": 3500,
+            "imagen": "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      },
+      {
+        "id": "cat-mariscos",
+        "nombre": "Pailas y Mariscos",
+        "productos": [
+          {
+            "id": "gp-4",
+            "nombre": "Paila Marina Gran Pacífico",
+            "descripcion": "Concentrado marino en librillo de greda con almejas, choritos, machas, picorocos, salmón y congrio al vino blanco.",
+            "precio": 12500,
+            "imagen": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=600&q=80",
+            "destacado": true,
+            "etiqueta": "Especialidad"
+          },
+          {
+            "id": "gp-5",
+            "nombre": "Chupe de Jaiba Gratinado en Greda",
+            "descripcion": "Cremoso chupe de carne de jaiba desmenuzada de nuestras costas, gratinado con queso parmesano y pan amasado.",
+            "precio": 13900,
+            "imagen": "https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      },
+      {
+        "id": "cat-pescados",
+        "nombre": "Pescados de Caleta",
+        "productos": [
+          {
+            "id": "gp-6",
+            "nombre": "Reineta Frita con Agregado a Elección",
+            "descripcion": "Filete de reineta fresca en batido crujiente acompañado de papas mayo, arroz o ensalada chilena.",
+            "precio": 11500,
+            "imagen": "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=600&q=80"
+          },
+          {
+            "id": "gp-7",
+            "nombre": "Caldillo de Congrio a lo Neruda",
+            "descripcion": "Medallón de congrio colorado en caldo perfumado con camarones, crema fresca, papas y cilantro.",
+            "precio": 13500,
+            "imagen": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      },
+      {
+        "id": "cat-bebidas-gp",
+        "nombre": "Bebidas",
+        "productos": [
+          {
+            "id": "gp-8",
+            "nombre": "Limonada Menta Jengibre 500cc",
+            "descripcion": "Refrescante limonada natural recién exprimida.",
+            "precio": 3200,
+            "imagen": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=600&q=80"
+          },
+          {
+            "id": "gp-9",
+            "nombre": "Bebida Individual 350cc",
+            "descripcion": "Coca-Cola, Fanta, Sprite o Agua Mineral Cachantun.",
+            "precio": 1600,
+            "imagen": "https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=600&q=80"
+          }
+        ]
+      }
+    ]
+  }
+]
