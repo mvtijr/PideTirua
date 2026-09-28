@@ -1,0 +1,1 @@
+Coloca aquí los archivos de imagen de los logos de cada negocio (por ejemplo: las-tranqueras.png, sushi-burger.png, rio-mar.png, gran-pacifico.png) y luego actualiza el campo "logo" en data/locales.json con "/logos/nombre-archivo.png".

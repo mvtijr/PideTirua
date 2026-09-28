@@ -64,7 +64,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       setTimeout(() => {
         setIndicePlatoHero((prev) => (prev + 1) % platosDestacados.length);
         setAnimandoTextoHero(false);
-      }, 5000);
+      }, 160);
     }, 5000);
     return () => clearInterval(timer);
   }, [pausaHero, platosDestacados.length]);
@@ -586,7 +586,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             </div>
           </section>
 
-          {/* SECCIÓN COVERFLOW 3D PERSPECTIVE CON LOS LOCALES DE LA COMUNA */}
+          {/* SECCIÓN COVERFLOW 3D PERSPECTIVE CON LOS LOGOS DE LOS NEGOCIOS */}
           <section
             id="coverflow-locales"
             className="relative w-full bg-gradient-to-b from-surface-container-low via-surface to-surface-container-lowest py-space-xl overflow-hidden border-b border-outline-variant/30"
@@ -660,7 +660,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 </span>
               </button>
 
-              {/* Pista Coverflow 3D (Tarjeta central a escala 1:1 nativa para máxima nitidez de texto e imagen) */}
+              {/* Pista Coverflow 3D mostrando los LOGOS de cada negocio */}
               <div className="coverflow-stage relative w-full h-[480px] md:h-[520px] flex items-center justify-center">
                 {locales.map((local, idx) => {
                   const { estilo, nivelOscurecimiento } =
@@ -675,32 +675,35 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                         }
                       }}
                       style={estilo}
-                      className="coverflow-card absolute w-[280px] sm:w-[310px] md:w-[340px] h-[450px] md:h-[490px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl bg-primary border border-white/70"
+                      className="coverflow-card absolute w-[280px] sm:w-[310px] md:w-[340px] h-[450px] md:h-[490px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl bg-surface-container-lowest border border-white/70"
                     >
-                      <img
-                        src={local.fotoPortada}
-                        alt={local.nombre}
-                        decoding="async"
-                        fetchPriority={esCentro ? "high" : "auto"}
-                        className="absolute inset-0 w-full h-full object-cover"
-                      />
+                      {/* Contenedor central con el LOGO del negocio (tal como el formato de referencia) */}
+                      <div className="absolute inset-0 bg-surface-container-low flex items-center justify-center p-8 pb-36">
+                        <img
+                          src={local.logo}
+                          alt={`Logo ${local.nombre}`}
+                          decoding="async"
+                          fetchPriority={esCentro ? "high" : "auto"}
+                          className="w-44 h-44 md:w-52 md:h-52 object-cover rounded-full shadow-xl border-4 border-white bg-white"
+                        />
+                      </div>
 
                       {/* Gradiente editorial de contraste nítido */}
-                      <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/15 to-black/92" />
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/90" />
 
-                      {/* Capa de atenuación para tarjetas laterales (reemplaza filter:brightness para no desenfocar el texto) */}
+                      {/* Capa de atenuación para tarjetas laterales */}
                       <div
                         className={`pointer-events-none absolute inset-0 bg-slate-950 transition-opacity duration-500 ${nivelOscurecimiento}`}
                       />
 
-                      {/* Pill superior estilo Stories */}
+                      {/* Pill superior estilo Stories con miniatura del logo */}
                       <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 pointer-events-none">
-                        <div className="flex items-center gap-2.5 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/25 text-white shadow-lg min-w-0">
+                        <div className="flex items-center gap-2.5 bg-black/65 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/25 text-white shadow-lg min-w-0">
                           <img
                             src={local.logo}
                             alt={`Logo ${local.nombre}`}
                             decoding="async"
-                            className="w-8 h-8 rounded-full object-cover border border-white/60 bg-white shadow-sm flex-shrink-0"
+                            className="w-7 h-7 rounded-full object-cover border border-white/60 bg-white shadow-sm flex-shrink-0"
                           />
                           <div className="leading-tight truncate">
                             <span className="block text-xs font-bold tracking-tight text-white truncate">
@@ -711,7 +714,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                             </span>
                           </div>
                         </div>
-                        <div className="px-2.5 h-8 rounded-full bg-black/65 backdrop-blur-md border border-white/25 flex items-center justify-center gap-1 text-amber-300 shrink-0">
+                        <div className="px-2.5 h-8 rounded-full bg-black/60 backdrop-blur-md border border-white/25 flex items-center justify-center gap-1 text-amber-300 shrink-0">
                           <span
                             className="material-symbols-outlined text-sm text-amber-400"
                             style={{ fontVariationSettings: "'FILL' 1" }}
