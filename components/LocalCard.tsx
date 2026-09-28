@@ -1,15 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import {
-  Clock,
-  MapPin,
-  UtensilsCrossed,
-  Star,
-  ArrowRight,
-  QrCode,
-  Bike,
-} from "lucide-react";
 import { Local } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 
@@ -25,33 +16,45 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
   );
 
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
-      {/* Foto de portada */}
-      <div className="relative h-48 w-full overflow-hidden bg-slate-900">
+    <article
+      id={`local-${local.slug}`}
+      className="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group"
+    >
+      {/* Imagen & Badges Flotantes */}
+      <div className="relative h-48 w-full overflow-hidden">
         <img
           src={local.fotoPortada}
           alt={`Portada de ${local.nombre}`}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/25 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-transparent to-transparent" />
 
-        {/* Badges superiores */}
-        <div className="absolute left-3 right-3 top-3 flex items-center justify-between gap-2">
-          <span
-            className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-md ${
-              local.sector === "Quidico"
-                ? "bg-sky-500/90 text-white"
-                : "bg-amber-500/95 text-slate-950"
-            }`}
-          >
-            <MapPin className="h-3.5 w-3.5" />
-            {local.ubicacion}
-          </span>
+        <div className="absolute top-space-sm left-space-sm right-space-sm flex items-center justify-between gap-1">
+          <div className="flex flex-wrap items-center gap-1">
+            <span
+              className={`${
+                local.sector === "Quidico"
+                  ? "bg-secondary text-on-secondary"
+                  : "bg-primary text-on-primary"
+              } font-label-sm text-label-sm px-space-sm py-0.5 rounded-full font-bold`}
+            >
+              {local.ubicacion}
+            </span>
+            <span className="bg-green-600 text-white font-label-sm text-label-sm px-space-sm py-0.5 rounded-full font-bold flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+              {local.abierto ? "Abierto ahora" : "Cerrado"}
+            </span>
+          </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-semibold text-amber-400 backdrop-blur-md">
-              <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+          <div className="flex items-center gap-1">
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-black/55 px-2 py-0.5 text-[11px] font-bold text-amber-300 backdrop-blur-md">
+              <span
+                className="material-symbols-outlined text-xs text-amber-400"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                star
+              </span>
               {local.calificacion.toFixed(1)}
             </span>
             {onOpenQr && (
@@ -59,75 +62,98 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
                 type="button"
                 onClick={() => onOpenQr(local)}
                 title={`Ver código QR de ${local.nombre}`}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-slate-800 shadow transition hover:bg-white hover:text-sky-700"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-surface-container-lowest/90 text-primary shadow transition hover:bg-white"
               >
-                <QrCode className="h-3.5 w-3.5" />
+                <span className="material-symbols-outlined text-sm">
+                  qr_code_2
+                </span>
               </button>
             )}
           </div>
         </div>
 
-        {/* Logo superpuesto e info en portada */}
-        <div className="absolute bottom-3 left-3 right-3 flex items-end gap-3">
-          <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border-2 border-white bg-white shadow-md">
-            <img
-              src={local.logo}
-              alt={`Logo ${local.nombre}`}
-              className="h-full w-full object-cover"
-              loading="lazy"
-            />
-          </div>
-          <div className="min-w-0 flex-1 text-white">
-            <span className="inline-block rounded bg-emerald-500/90 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-              {local.abierto ? "Abierto ahora" : "Cerrado"}
-            </span>
-            <h3 className="truncate text-lg font-bold leading-tight drop-shadow-sm">
-              {local.nombre}
-            </h3>
-          </div>
+        <div className="absolute bottom-space-sm left-space-sm right-space-sm flex items-center justify-between text-white">
+          <span className="font-label-sm text-label-sm bg-black/40 backdrop-blur-md px-space-sm py-0.5 rounded-md flex items-center gap-1">
+            <span className="material-symbols-outlined text-xs">schedule</span>
+            {local.tiempoEstimado}
+          </span>
+          <span
+            className={`font-label-sm text-label-sm font-bold px-space-sm py-0.5 rounded-md ${
+              local.sector === "Quidico"
+                ? "bg-surface-container-lowest text-primary"
+                : "bg-tertiary-container text-on-tertiary"
+            }`}
+          >
+            Delivery:{" "}
+            {local.costoDelivery > 0
+              ? formatCLP(local.costoDelivery)
+              : "Gratis"}
+          </span>
         </div>
       </div>
 
-      {/* Cuerpo de la tarjeta */}
-      <div className="flex flex-1 flex-col justify-between p-4">
+      {/* Contenido del Comercio */}
+      <div className="p-space-md flex-1 flex flex-col justify-between space-y-space-sm">
         <div>
-          <div className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-sky-700">
-            <UtensilsCrossed className="h-3.5 w-3.5 shrink-0" />
-            <span>{local.rubro}</span>
+          <div className="flex items-center gap-2 mb-2">
+            <img
+              src={local.logo}
+              alt={`Logo ${local.nombre}`}
+              className="w-10 h-10 rounded-full object-cover border border-outline-variant/30 shadow-sm bg-white p-0.5 flex-shrink-0"
+              loading="lazy"
+            />
+            <div className="flex-1 min-w-0">
+              <span className="font-label-sm text-label-sm uppercase font-bold text-secondary block truncate">
+                {local.rubro}
+              </span>
+              <span className="text-[11px] text-outline block">
+                {totalProductos} platos · {local.horarioEntrega}
+              </span>
+            </div>
           </div>
 
-          <p className=" line-clamp-2 text-sm text-slate-600">
+          <h3 className="font-headline-sm text-headline-sm text-primary font-bold mt-1 group-hover:text-secondary transition-colors">
+            {local.nombre}
+          </h3>
+          <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-1">
             {local.descripcionCorta}
           </p>
         </div>
 
-        <div className="mt-4 space-y-3 border-t border-slate-100 pt-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
-            <span className="inline-flex items-center gap-1 font-medium text-slate-700">
-              <Clock className="h-3.5 w-3.5 text-amber-600" />
-              {local.tiempoEstimado}
+        {/* Micro Metadatos y Pedido Directo */}
+        <div className="space-y-space-xs pt-space-xs">
+          <div className="flex items-center gap-1 font-body-sm text-body-sm text-on-surface-variant">
+            <span className="material-symbols-outlined text-sm text-outline">
+              location_on
             </span>
-            <span className="inline-flex items-center gap-1">
-              <Bike className="h-3.5 w-3.5 text-sky-600" />
-              Delivery:{" "}
-              <strong className="text-slate-700">
-                {local.costoDelivery > 0
-                  ? formatCLP(local.costoDelivery)
-                  : "Gratis"}
-              </strong>
-            </span>
-            <span className="rounded-md bg-slate-100 px-2 py-0.5 font-medium text-slate-600">
-              {totalProductos} platos
-            </span>
+            <span className="truncate">{local.direccionDetalle}</span>
           </div>
 
-          <Link
-            href={`/${local.slug}`}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-sky-700 active:scale-[0.99]"
-          >
-            <span>Ver Carta</span>
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          {/* Botones de Acción */}
+          <div className="grid grid-cols-2 gap-space-xs pt-space-xs">
+            <Link
+              href={`/${local.slug}`}
+              className="bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md font-bold py-space-xs px-space-sm rounded-lg flex items-center justify-center gap-1 transition-colors"
+            >
+              <span className="material-symbols-outlined text-base">
+                restaurant_menu
+              </span>
+              <span>Ver Carta</span>
+            </Link>
+            <a
+              href={`https://wa.me/${
+                local.telefonoWhatsapp
+              }?text=${encodeURIComponent(
+                `Hola ${local.nombre}, quisiera pedir desde PideTirúa`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#25D366] hover:bg-[#20bd5a] text-white font-label-md text-label-md font-bold py-space-xs px-space-sm rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm"
+            >
+              <span className="material-symbols-outlined text-base">chat</span>
+              <span>WhatsApp</span>
+            </a>
+          </div>
         </div>
       </div>
     </article>

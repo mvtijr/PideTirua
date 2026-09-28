@@ -21,8 +21,8 @@ export default function ProductCard({
     <div
       className={`group relative flex gap-3.5 rounded-2xl border p-3.5 transition-all sm:gap-4 sm:p-4 ${
         cantidadEnCarrito > 0
-          ? "border-sky-500/60 bg-sky-50/30 shadow-sm"
-          : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
+          ? "border-secondary bg-surface-container-low shadow-sm"
+          : "border-outline-variant/40 bg-surface-container-lowest hover:border-secondary/50 hover:shadow-md"
       }`}
     >
       {/* Información del producto */}
@@ -30,29 +30,29 @@ export default function ProductCard({
         <div>
           <div className="flex flex-wrap items-center gap-1.5">
             {producto.etiqueta && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-900">
-                <Sparkles className="h-3 w-3 text-amber-600" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-tertiary-fixed px-2 py-0.5 text-[11px] font-bold text-on-tertiary-fixed-variant">
+                <Sparkles className="h-3 w-3 text-tertiary" />
                 {producto.etiqueta}
               </span>
             )}
             {cantidadEnCarrito > 0 && (
-              <span className="inline-flex items-center rounded-full bg-sky-700 px-2 py-0.5 text-[11px] font-bold text-white">
+              <span className="inline-flex items-center rounded-full bg-primary px-2 py-0.5 text-[11px] font-bold text-on-primary">
                 {cantidadEnCarrito} en tu pedido
               </span>
             )}
           </div>
 
-          <h4 className="mt-1 text-base font-bold leading-snug text-slate-900">
+          <h4 className="mt-1 font-headline-sm text-base font-bold leading-snug text-primary">
             {producto.nombre}
           </h4>
 
-          <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-slate-600 sm:text-sm">
+          <p className="mt-1 line-clamp-2 font-body-sm text-xs leading-relaxed text-on-surface-variant sm:text-sm">
             {producto.descripcion}
           </p>
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-2">
-          <span className="text-base font-extrabold tracking-tight text-slate-900 sm:text-lg">
+          <span className="text-base font-extrabold tracking-tight text-tertiary sm:text-lg">
             {formatCLP(producto.precio)}
           </span>
 
@@ -61,28 +61,28 @@ export default function ProductCard({
             <button
               type="button"
               onClick={() => onAgregar(producto)}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-sky-700 active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-xs font-bold text-on-primary shadow-sm transition hover:bg-primary-container active:scale-95"
             >
               <Plus className="h-4 w-4" />
               <span>Agregar</span>
             </button>
           ) : (
-            <div className="inline-flex items-center gap-2 rounded-xl border border-sky-200 bg-white p-1 shadow-sm">
+            <div className="inline-flex items-center gap-2 rounded-xl border border-outline-variant/50 bg-surface-container-lowest p-1 shadow-sm">
               <button
                 type="button"
                 onClick={() => onDisminuir(producto.id)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-700 transition hover:bg-slate-200 active:scale-95"
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-container text-primary transition hover:bg-surface-container-high active:scale-95"
                 aria-label={`Quitar una unidad de ${producto.nombre}`}
               >
                 <Minus className="h-3.5 w-3.5" />
               </button>
-              <span className="min-w-[1.25rem] text-center text-sm font-extrabold text-slate-900">
+              <span className="min-w-[1.25rem] text-center text-sm font-extrabold text-primary">
                 {cantidadEnCarrito}
               </span>
               <button
                 type="button"
                 onClick={() => onAgregar(producto)}
-                className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-700 text-white transition hover:bg-sky-800 active:scale-95"
+                className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-on-primary transition hover:bg-primary-container active:scale-95"
                 aria-label={`Agregar otra unidad de ${producto.nombre}`}
               >
                 <Plus className="h-3.5 w-3.5" />
@@ -93,7 +93,7 @@ export default function ProductCard({
       </div>
 
       {/* Imagen del producto */}
-      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-slate-100 sm:h-32 sm:w-32">
+      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-surface-container sm:h-32 sm:w-32">
         <img
           src={producto.imagen}
           alt={producto.nombre}
