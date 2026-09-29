@@ -26,6 +26,7 @@ interface MenuClientProps {
 
 export default function MenuClient({ local }: MenuClientProps) {
   const storageKey = `pidetirua_cart_${local.slug}`;
+  const esLasTranqueras = local.slug === "las-tranqueras";
 
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
   const [hidratado, setHidratado] = useState(false);
@@ -143,12 +144,20 @@ export default function MenuClient({ local }: MenuClientProps) {
   };
 
   return (
-    <div className="min-h-screen bg-surface pb-28">
+    <div
+      className={`min-h-screen pb-28 ${
+        esLasTranqueras ? "bg-[#FFFDF2]" : "bg-surface"
+      }`}
+    >
       {/* Contenedor Mobile-First (optimizado para lectura QR en celular) */}
       <div className="mx-auto max-w-xl bg-surface-container-lowest shadow-md min-h-screen">
         {/* Portada e Identidad del Local */}
         <header className="relative">
-          <div className="relative h-52 w-full overflow-hidden bg-primary sm:h-60">
+          <div
+            className={`relative h-52 w-full overflow-hidden sm:h-60 ${
+              esLasTranqueras ? "bg-[#171614]" : "bg-primary"
+            }`}
+          >
             {local.videoPortada ? (
               <video
                 src={local.videoPortada}
@@ -166,13 +175,23 @@ export default function MenuClient({ local }: MenuClientProps) {
                 className="h-full w-full object-cover"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/45 to-primary/30" />
+            <div
+              className={`absolute inset-0 bg-gradient-to-t ${
+                esLasTranqueras
+                  ? "from-[#171614]/95 via-[#171614]/45 to-black/25"
+                  : "from-primary/95 via-primary/45 to-primary/30"
+              }`}
+            />
 
             {/* Barra superior de navegación */}
             <div className="absolute left-3 right-3 top-3 flex items-center justify-between">
               <Link
                 href="/"
-                className="inline-flex items-center gap-2 rounded-full bg-primary/85 pl-2 pr-3.5 py-1.5 text-xs font-bold text-on-primary backdrop-blur-md transition hover:bg-primary"
+                className={`inline-flex items-center gap-2 rounded-full pl-2 pr-3.5 py-1.5 text-xs font-bold backdrop-blur-md transition ${
+                  esLasTranqueras
+                    ? "bg-[#171614]/90 text-[#F8DC4B] ring-1 ring-[#F8DC4B]/50 hover:bg-[#171614]"
+                    : "bg-primary/85 text-on-primary hover:bg-primary"
+                }`}
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <img
@@ -187,10 +206,18 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <button
                   type="button"
                   onClick={() => setMostrarQr(true)}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-surface-container-lowest/95 px-3 py-2 text-xs font-bold text-primary shadow backdrop-blur-md transition hover:bg-white"
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold shadow backdrop-blur-md transition ${
+                    esLasTranqueras
+                      ? "bg-[#F8DC4B] text-[#171614] hover:bg-[#f6d52b]"
+                      : "bg-surface-container-lowest/95 text-primary hover:bg-white"
+                  }`}
                   aria-label="Mostrar código QR del local"
                 >
-                  <QrCode className="h-3.5 w-3.5 text-secondary" />
+                  <QrCode
+                    className={`h-3.5 w-3.5 ${
+                      esLasTranqueras ? "text-[#171614]" : "text-secondary"
+                    }`}
+                  />
                   <span>QR Mesa</span>
                 </button>
               </div>
@@ -198,7 +225,13 @@ export default function MenuClient({ local }: MenuClientProps) {
 
             {/* Logo y título sobre la portada */}
             <div className="absolute bottom-4 left-4 right-4 flex items-end gap-3.5">
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-white bg-white shadow-lg sm:h-20 sm:w-20">
+              <div
+                className={`h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 shadow-lg sm:h-20 sm:w-20 ${
+                  esLasTranqueras
+                    ? "border-[#F8DC4B] bg-[#F8DC4B]"
+                    : "border-white bg-white"
+                }`}
+              >
                 <img
                   src={local.logo}
                   alt={`Logo ${local.nombre}`}
@@ -207,18 +240,30 @@ export default function MenuClient({ local }: MenuClientProps) {
               </div>
               <div className="min-w-0 flex-1 text-on-primary">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="rounded-full bg-green-600 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white">
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider ${
+                      esLasTranqueras
+                        ? "bg-[#F8DC4B] text-[#171614]"
+                        : "bg-green-600 text-white"
+                    }`}
+                  >
                     {local.abierto ? "Abierto" : "Cerrado"}
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-xs font-bold text-amber-300">
-                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                  <span className="inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-xs font-bold text-[#F8DC4B]">
+                    <Star className="h-3 w-3 fill-[#F8DC4B] text-[#F8DC4B]" />
                     {local.calificacion.toFixed(1)}
                   </span>
                 </div>
                 <h1 className="mt-1 truncate text-xl font-extrabold leading-tight sm:text-2xl">
                   {local.nombre}
                 </h1>
-                <p className="truncate text-xs font-medium text-secondary-fixed">
+                <p
+                  className={`truncate text-xs font-bold ${
+                    esLasTranqueras
+                      ? "text-[#F8DC4B]"
+                      : "text-secondary-fixed"
+                  }`}
+                >
                   {local.rubro}
                 </p>
               </div>
@@ -226,16 +271,36 @@ export default function MenuClient({ local }: MenuClientProps) {
           </div>
 
           {/* Ficha informativa del Local + Botón de Llamada Directa */}
-          <div className="border-b border-outline-variant/40 bg-surface-container-lowest px-4 py-4">
+          <div
+            className={`border-b bg-surface-container-lowest px-4 py-4 ${
+              esLasTranqueras
+                ? "border-[#F8DC4B]/40"
+                : "border-outline-variant/40"
+            }`}
+          >
             <p className="text-xs leading-relaxed text-on-surface-variant sm:text-sm">
               {local.descripcionCorta}
             </p>
 
-            <div className="mt-3.5 grid grid-cols-1 gap-2 rounded-2xl bg-surface-container-low p-3 text-xs text-on-surface sm:grid-cols-2">
+            <div
+              className={`mt-3.5 grid grid-cols-1 gap-2 rounded-2xl p-3 text-xs sm:grid-cols-2 ${
+                esLasTranqueras
+                  ? "border border-[#F8DC4B]/50 bg-[#FFFDF2] text-[#171614]"
+                  : "bg-surface-container-low text-on-surface"
+              }`}
+            >
               <div className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-secondary" />
+                <MapPin
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${
+                    esLasTranqueras ? "text-[#171614]" : "text-secondary"
+                  }`}
+                />
                 <div>
-                  <span className="font-bold text-primary">
+                  <span
+                    className={`font-bold ${
+                      esLasTranqueras ? "text-[#171614]" : "text-primary"
+                    }`}
+                  >
                     {local.ubicacion}
                   </span>
                   <p className="text-[11px] text-on-surface-variant">
@@ -245,9 +310,17 @@ export default function MenuClient({ local }: MenuClientProps) {
               </div>
 
               <div className="flex items-start gap-2">
-                <Clock className="mt-0.5 h-4 w-4 shrink-0 text-tertiary" />
+                <Clock
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${
+                    esLasTranqueras ? "text-[#171614]" : "text-tertiary"
+                  }`}
+                />
                 <div>
-                  <span className="font-bold text-primary">
+                  <span
+                    className={`font-bold ${
+                      esLasTranqueras ? "text-[#171614]" : "text-primary"
+                    }`}
+                  >
                     Preparación est.: {local.tiempoEstimado}
                   </span>
                   <p className="text-[11px] text-on-surface-variant">
@@ -259,16 +332,36 @@ export default function MenuClient({ local }: MenuClientProps) {
 
             {/* Acciones rápidas: Modalidades de atención y llamada directa */}
             <div className="mt-3.5 flex items-center justify-between gap-3">
-              <div className="inline-flex items-center gap-1.5 rounded-xl bg-surface-container px-3 py-2 text-xs font-semibold text-primary">
-                <Store className="h-4 w-4 text-secondary" />
+              <div
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold ${
+                  esLasTranqueras
+                    ? "bg-[#F8DC4B]/35 text-[#171614] border border-[#F8DC4B]"
+                    : "bg-surface-container text-primary"
+                }`}
+              >
+                <Store
+                  className={`h-4 w-4 ${
+                    esLasTranqueras ? "text-[#171614]" : "text-secondary"
+                  }`}
+                />
                 <span>Retiro en local y Consumo en mesa</span>
               </div>
 
               <a
                 href={`tel:+${local.telefonoWhatsapp}`}
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-xs font-bold text-on-primary shadow-sm transition hover:bg-primary-container active:scale-95"
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition active:scale-95 ${
+                  esLasTranqueras
+                    ? "bg-[#171614] text-[#F8DC4B] hover:bg-neutral-800"
+                    : "bg-primary text-on-primary hover:bg-primary-container"
+                }`}
               >
-                <Phone className="h-3.5 w-3.5 text-secondary-fixed" />
+                <Phone
+                  className={`h-3.5 w-3.5 ${
+                    esLasTranqueras
+                      ? "text-[#F8DC4B]"
+                      : "text-secondary-fixed"
+                  }`}
+                />
                 <span>Llamar al local</span>
               </a>
             </div>
@@ -276,7 +369,13 @@ export default function MenuClient({ local }: MenuClientProps) {
         </header>
 
         {/* Pestañas Sticky de Categorías + Buscador de Platos */}
-        <div className="sticky top-0 z-30 border-b border-outline-variant/40 bg-surface-container-lowest/95 backdrop-blur-md">
+        <div
+          className={`sticky top-0 z-30 border-b bg-surface-container-lowest/95 backdrop-blur-md ${
+            esLasTranqueras
+              ? "border-[#F8DC4B]/50"
+              : "border-outline-variant/40"
+          }`}
+        >
           {/* Pestañas de categorías */}
           <nav
             aria-label="Categorías del menú"
@@ -290,7 +389,11 @@ export default function MenuClient({ local }: MenuClientProps) {
                   type="button"
                   onClick={() => irACategoria(categoria.id)}
                   className={`filter-chip shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                    activa
+                    esLasTranqueras
+                      ? activa
+                        ? "bg-[#171614] text-[#F8DC4B] ring-2 ring-[#F8DC4B] shadow-sm"
+                        : "bg-[#FFFBEB] text-[#171614] border border-[#F8DC4B]/50 hover:bg-[#FEF08A]/60"
+                      : activa
                       ? "bg-primary text-on-primary shadow-sm"
                       : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"
                   }`}
@@ -310,7 +413,11 @@ export default function MenuClient({ local }: MenuClientProps) {
                 value={busquedaPlato}
                 onChange={(e) => setBusquedaPlato(e.target.value)}
                 placeholder={`Buscar en la carta de ${local.nombre}...`}
-                className="w-full rounded-xl border border-outline-variant/40 bg-surface-container-low py-2 pl-9 pr-8 text-xs text-on-surface placeholder:text-outline focus:border-secondary focus:bg-surface-container-lowest focus:outline-none"
+                className={`w-full rounded-xl border py-2 pl-9 pr-8 text-xs text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none ${
+                  esLasTranqueras
+                    ? "border-[#F8DC4B]/60 bg-[#FFFDF2] focus:border-[#171614]"
+                    : "border-outline-variant/40 bg-surface-container-low focus:border-secondary"
+                }`}
               />
               {busquedaPlato && (
                 <button
@@ -336,10 +443,20 @@ export default function MenuClient({ local }: MenuClientProps) {
                 className="scroll-mt-32"
               >
                 <div className="mb-3 flex items-center justify-between">
-                  <h2 className="text-lg font-extrabold tracking-tight text-primary">
+                  <h2
+                    className={`text-lg font-extrabold tracking-tight ${
+                      esLasTranqueras ? "text-[#171614]" : "text-primary"
+                    }`}
+                  >
                     {categoria.nombre}
                   </h2>
-                  <span className="rounded-full bg-surface-container px-2.5 py-0.5 text-xs font-semibold text-on-surface-variant">
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                      esLasTranqueras
+                        ? "bg-[#F8DC4B]/40 text-[#171614]"
+                        : "bg-surface-container text-on-surface-variant"
+                    }`}
+                  >
                     {categoria.productos.length}{" "}
                     {categoria.productos.length === 1 ? "opción" : "opciones"}
                   </span>
@@ -355,6 +472,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                       }
                       onAgregar={handleAgregarProducto}
                       onDisminuir={handleDisminuirProducto}
+                      esLasTranqueras={esLasTranqueras}
                     />
                   ))}
                 </div>
@@ -363,13 +481,19 @@ export default function MenuClient({ local }: MenuClientProps) {
           ) : (
             <div className="rounded-2xl border border-dashed border-outline-variant p-8 text-center">
               <UtensilsCrossed className="mx-auto h-8 w-8 text-outline" />
-              <p className="mt-2 text-sm font-bold text-primary">
+              <p
+                className={`mt-2 text-sm font-bold ${
+                  esLasTranqueras ? "text-[#171614]" : "text-primary"
+                }`}
+              >
                 No encontramos platos con &ldquo;{busquedaPlato}&rdquo;
               </p>
               <button
                 type="button"
                 onClick={() => setBusquedaPlato("")}
-                className="mt-3 text-xs font-bold text-secondary underline"
+                className={`mt-3 text-xs font-bold underline ${
+                  esLasTranqueras ? "text-[#171614]" : "text-secondary"
+                }`}
               >
                 Mostrar toda la carta
               </button>
@@ -378,8 +502,20 @@ export default function MenuClient({ local }: MenuClientProps) {
         </main>
 
         {/* Pie del menú exclusivo */}
-        <footer className="border-t border-outline-variant/40 bg-surface-container-low px-4 py-6 text-center text-xs text-on-surface-variant">
-          <p className="font-bold text-primary">{local.nombre}</p>
+        <footer
+          className={`border-t px-4 py-6 text-center text-xs text-on-surface-variant ${
+            esLasTranqueras
+              ? "border-[#F8DC4B]/40 bg-[#FFFDF2]"
+              : "border-outline-variant/40 bg-surface-container-low"
+          }`}
+        >
+          <p
+            className={`font-bold ${
+              esLasTranqueras ? "text-[#171614]" : "text-primary"
+            }`}
+          >
+            {local.nombre}
+          </p>
           <p className="mt-0.5">
             {local.direccionDetalle} · WhatsApp{" "}
             {formatPhoneDisplay(local.telefonoWhatsapp)}
@@ -392,7 +528,12 @@ export default function MenuClient({ local }: MenuClientProps) {
             />
             <span>
               Menú digital interactivo impulsado por{" "}
-              <Link href="/" className="font-bold text-secondary hover:underline">
+              <Link
+                href="/"
+                className={`font-bold hover:underline ${
+                  esLasTranqueras ? "text-[#171614]" : "text-secondary"
+                }`}
+              >
                 PideTirúa
               </Link>
             </span>
@@ -405,6 +546,7 @@ export default function MenuClient({ local }: MenuClientProps) {
         totalUnidades={totalUnidades}
         subtotal={subtotal}
         onOpenDrawer={() => setDrawerAbierto(true)}
+        esLasTranqueras={esLasTranqueras}
       />
 
       {/* Drawer lateral de Checkout a WhatsApp */}
@@ -429,7 +571,11 @@ export default function MenuClient({ local }: MenuClientProps) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-secondary">
+              <span
+                className={`text-xs font-bold uppercase tracking-wider ${
+                  esLasTranqueras ? "text-[#171614]" : "text-secondary"
+                }`}
+              >
                 Código QR de Carta
               </span>
               <button
@@ -440,7 +586,11 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <h3 className="mt-1 text-base font-extrabold text-primary">
+            <h3
+              className={`mt-1 text-base font-extrabold ${
+                esLasTranqueras ? "text-[#171614]" : "text-primary"
+              }`}
+            >
               {local.nombre}
             </h3>
             <div className="my-4 flex justify-center">
