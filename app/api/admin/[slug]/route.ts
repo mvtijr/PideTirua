@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import {
+  createProductoInSupabase,
+  deleteProductoInSupabase,
   fetchLocalBySlug,
   updateLocalAbiertoInSupabase,
   updateProductoInSupabase,
+  uploadPlatoFotoInSupabase,
   verifyLocalPinInSupabase,
 } from "@/lib/locales";
 
@@ -67,13 +70,99 @@ export async function POST(
       return NextResponse.json(result);
     }
 
+    if (action === "upload-foto") {
+      const { dataUrl, fileName } = body;
+      if (!dataUrl || typeof dataUrl !== "string") {
+        return NextResponse.json(
+          { ok: false, error: "No se recibió la imagen" },
+          { status: 400 }
+        );
+      }
+      const uploadRes = await uploadPlatoFotoInSupabase(
+        slug,
+        dataUrl,
+        typeof fileName === "string" ? fileName : "plato.jpg"
+      );
+      if (!uploadRes.ok) {
+        return NextResponse.json(uploadRes, { status: 500 });
+      }
+      return NextResponse.json(uploadRes);
+    }
+
+    if (action === "create-producto") {
+      const {
+        categoriaId,
+        nuevaCategoriaNombre,
+        nombre,
+        descripcion,
+        precio,
+        imagen_url,
+        etiqueta,
+        disponible,
+      } = body;
+
+      if (!nombre || typeof nombre !== "string" || !nombre.trim()) {
+        return NextResponse.json(
+          { ok: false, error: "Ingresa el nombre del plato" },
+          { status: 400 }
+        );
+      }
+
+      const precioNum = Number(precio);
+      if (Number.isNaN(precioNum) || precioNum <= 0) {
+        return NextResponse.json(
+          { ok: false, error: "Ingresa un precio válido" },
+          { status: 400 }
+        );
+      }
+
+      const result = await createProductoInSupabase(slug, {
+        categoriaId: typeof categoriaId === "string" ? categoriaId : undefined,
+        nuevaCategoriaNombre:
+          typeof nuevaCategoriaNombre === "string"
+            ? nuevaCategoriaNombre
+            : undefined,
+        nombre,
+        descripcion: typeof descripcion === "string" ? descripcion : "",
+        precio: precioNum,
+        imagen_url: typeof imagen_url === "string" ? imagen_url : "",
+        etiqueta: typeof etiqueta === "string" ? etiqueta : undefined,
+        disponible: disponible !== false,
+      });
+
+      revalidatePath("/");
+      revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      return NextResponse.json(result);
+    }
+
     if (action === "update-producto") {
-      const { productoId, nombre, precio, disponible } = body;
+      const {
+        productoId,
+        nombre,
+        descripcion,
+        precio,
+        disponible,
+        imagen_url,
+        etiqueta,
+      } = body;
       const result = await updateProductoInSupabase(slug, String(productoId), {
         ...(typeof nombre === "string" ? { nombre } : {}),
+        ...(typeof descripcion === "string" ? { descripcion } : {}),
         ...(typeof precio === "number" ? { precio } : {}),
         ...(typeof disponible === "boolean" ? { disponible } : {}),
+        ...(typeof imagen_url === "string" ? { imagen_url } : {}),
+        ...(typeof etiqueta === "string" ? { etiqueta } : {}),
       });
+      revalidatePath("/");
+      revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      return NextResponse.json(result);
+    }
+
+    if (action === "delete-producto") {
+      const { productoId } = body;
+      const result = await deleteProductoInSupabase(slug, String(productoId));
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);

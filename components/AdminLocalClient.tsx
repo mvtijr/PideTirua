@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Lock,
@@ -11,16 +11,150 @@ import {
   Delete,
   Check,
   Loader2,
-  Sparkles,
   ArrowLeft,
   DollarSign,
+  PlusCircle,
+  Camera,
+  ImagePlus,
+  Trash2,
+  X,
+  Sparkles,
 } from "lucide-react";
 import { Local, Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
+import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
 
 interface AdminLocalClientProps {
   initialLocal: Local;
   initialAuthenticated?: boolean;
+}
+
+interface AdminBrandPalette {
+  bgBase: string;
+  headerBg: string;
+  panelCardBg: string;
+  accentBg: string;
+  accentText: string;
+  accentBorder: string;
+  accentRing: string;
+  pinActiveBox: string;
+  pinBtn: string;
+  subtitleText: string;
+  badgeBg: string;
+}
+
+function getAdminBrandPalette(slug: string): AdminBrandPalette {
+  switch (slug) {
+    case "las-tranqueras":
+      return {
+        bgBase: "bg-[#171614]",
+        headerBg: "border-[#F8DC4B]/35 bg-[#171614]/90 text-[#FFFDF2]",
+        panelCardBg:
+          "border-[#F8DC4B]/35 bg-[#171614]/85 text-[#FFFDF2] backdrop-blur-md",
+        accentBg: "bg-[#F8DC4B] text-[#171614] hover:bg-[#f6d52b]",
+        accentText: "text-[#F8DC4B]",
+        accentBorder: "border-[#F8DC4B]/45",
+        accentRing: "focus:border-[#F8DC4B] focus:ring-[#F8DC4B]/30",
+        pinActiveBox:
+          "border-[#F8DC4B] bg-[#F8DC4B]/20 text-[#F8DC4B] shadow-lg shadow-[#F8DC4B]/15",
+        pinBtn:
+          "border-[#F8DC4B]/25 bg-[#171614]/90 text-[#FFFDF2] hover:border-[#F8DC4B] hover:bg-[#F8DC4B]/15",
+        subtitleText: "text-[#FFFDF2]/80",
+        badgeBg: "bg-[#F8DC4B]/20 text-[#F8DC4B] border border-[#F8DC4B]/45",
+      };
+    case "sushi-burger":
+      return {
+        bgBase: "bg-[#141414]",
+        headerBg: "border-[#E85D3F]/35 bg-[#141414]/90 text-white",
+        panelCardBg:
+          "border-[#E85D3F]/35 bg-[#141414]/85 text-white backdrop-blur-md",
+        accentBg: "bg-[#E85D3F] text-white hover:bg-[#d44d30]",
+        accentText: "text-[#FF8A70]",
+        accentBorder: "border-[#E85D3F]/45",
+        accentRing: "focus:border-[#E85D3F] focus:ring-[#E85D3F]/30",
+        pinActiveBox:
+          "border-[#E85D3F] bg-[#E85D3F]/20 text-[#FF8A70] shadow-lg shadow-[#E85D3F]/15",
+        pinBtn:
+          "border-[#E85D3F]/25 bg-[#141414]/90 text-white hover:border-[#E85D3F] hover:bg-[#E85D3F]/15",
+        subtitleText: "text-white/80",
+        badgeBg: "bg-[#E85D3F]/20 text-[#FF8A70] border border-[#E85D3F]/45",
+      };
+    case "rio-mar":
+      return {
+        bgBase: "bg-[#0A0A0A]",
+        headerBg: "border-[#D4A843]/35 bg-[#0A0A0A]/90 text-white",
+        panelCardBg:
+          "border-[#D4A843]/35 bg-[#0A0A0A]/85 text-white backdrop-blur-md",
+        accentBg: "bg-[#D4A843] text-[#0A0A0A] hover:bg-[#e0b654]",
+        accentText: "text-[#D4A843]",
+        accentBorder: "border-[#D4A843]/45",
+        accentRing: "focus:border-[#D4A843] focus:ring-[#D4A843]/30",
+        pinActiveBox:
+          "border-[#D4A843] bg-[#D4A843]/20 text-[#D4A843] shadow-lg shadow-[#D4A843]/15",
+        pinBtn:
+          "border-[#D4A843]/25 bg-[#0A0A0A]/90 text-white hover:border-[#D4A843] hover:bg-[#D4A843]/15",
+        subtitleText: "text-white/80",
+        badgeBg: "bg-[#D4A843]/20 text-[#F3D078] border border-[#D4A843]/45",
+      };
+    case "gran-pacifico":
+    default:
+      return {
+        bgBase: "bg-[#0F314A]",
+        headerBg: "border-[#38BDF8]/35 bg-[#0F314A]/90 text-white",
+        panelCardBg:
+          "border-[#38BDF8]/35 bg-[#0F314A]/85 text-white backdrop-blur-md",
+        accentBg: "bg-[#F06A59] text-white hover:bg-[#e05644]",
+        accentText: "text-[#7DD3FC]",
+        accentBorder: "border-[#38BDF8]/45",
+        accentRing: "focus:border-[#38BDF8] focus:ring-[#38BDF8]/30",
+        pinActiveBox:
+          "border-[#38BDF8] bg-[#38BDF8]/20 text-[#7DD3FC] shadow-lg shadow-[#38BDF8]/15",
+        pinBtn:
+          "border-[#38BDF8]/25 bg-[#0F314A]/90 text-white hover:border-[#38BDF8] hover:bg-[#38BDF8]/15",
+        subtitleText: "text-white/85",
+        badgeBg: "bg-[#38BDF8]/20 text-[#7DD3FC] border border-[#38BDF8]/45",
+      };
+  }
+}
+
+/**
+ * Redimensiona y comprime una imagen en el navegador (máx 1000px, JPEG 82%)
+ * para que las fotos tomadas directamente con la cámara del celular suban en < 1 segundo.
+ */
+async function compressImageFileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("Archivo de imagen inválido"));
+      img.onload = () => {
+        const maxDim = 1000;
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          resolve(String(reader.result));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
+      };
+      img.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
 }
 
 export default function AdminLocalClient({
@@ -28,6 +162,8 @@ export default function AdminLocalClient({
   initialAuthenticated = false,
 }: AdminLocalClientProps) {
   const sessionKey = `pidetirua_admin_session_${initialLocal.slug}`;
+  const theme = getLocalTheme(initialLocal.slug);
+  const brand = getAdminBrandPalette(initialLocal.slug);
 
   const [local, setLocal] = useState<Local>(initialLocal);
   const [autenticado, setAutenticado] = useState<boolean>(initialAuthenticated);
@@ -44,37 +180,60 @@ export default function AdminLocalClient({
   const [guardandoId, setGuardandoId] = useState<string | null>(null);
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
 
-  // Estado local de edición rápida de nombre y precio por producto
+  // Estado del formulario "Subir Nuevo Plato"
+  const [mostrarFormNuevo, setMostrarFormNuevo] = useState<boolean>(false);
+  const [nuevoCategoriaId, setNuevoCategoriaId] = useState<string>(
+    initialLocal.categorias[0]?.id ?? "__nueva__"
+  );
+  const [nuevaCategoriaNombre, setNuevaCategoriaNombre] = useState<string>("");
+  const [nuevoNombre, setNuevoNombre] = useState<string>("");
+  const [nuevoPrecio, setNuevoPrecio] = useState<string>("");
+  const [nuevaDescripcion, setNuevaDescripcion] = useState<string>("");
+  const [nuevaEtiqueta, setNuevaEtiqueta] = useState<string>("");
+  const [nuevaFotoUrl, setNuevaFotoUrl] = useState<string>("");
+  const [subiendoFotoNueva, setSubiendoFotoNueva] = useState<boolean>(false);
+  const [creandoPlato, setCreandoPlato] = useState<boolean>(false);
+  const [errorNuevoPlato, setErrorNuevoPlato] = useState<string | null>(null);
+
+  const inputFotoNuevoRef = useRef<HTMLInputElement | null>(null);
+
+  // Estado local de edición rápida de nombre, precio y descripción por producto
   const [ediciones, setEdiciones] = useState<
-    Record<string, { nombre: string; precio: string }>
+    Record<string, { nombre: string; precio: string; descripcion: string }>
   >(() => {
-    const map: Record<string, { nombre: string; precio: string }> = {};
+    const map: Record<
+      string,
+      { nombre: string; precio: string; descripcion: string }
+    > = {};
     for (const cat of initialLocal.categorias) {
       for (const prod of cat.productos) {
         map[prod.id] = {
           nombre: prod.nombre,
           precio: String(prod.precio),
+          descripcion: prod.descripcion,
         };
       }
     }
     return map;
   });
 
-  // Sincronizar mapa de ediciones cuando cambia `local`
   useEffect(() => {
-    const map: Record<string, { nombre: string; precio: string }> = {};
+    const map: Record<
+      string,
+      { nombre: string; precio: string; descripcion: string }
+    > = {};
     for (const cat of local.categorias) {
       for (const prod of cat.productos) {
         map[prod.id] = {
           nombre: prod.nombre,
           precio: String(prod.precio),
+          descripcion: prod.descripcion,
         };
       }
     }
     setEdiciones(map);
   }, [local]);
 
-  // Revisar sesión guardada en navegador o cookie al montar
   useEffect(() => {
     if (initialAuthenticated) {
       setAutenticado(true);
@@ -101,7 +260,7 @@ export default function AdminLocalClient({
     if (!toastMensaje) return;
     const timer = setTimeout(() => {
       setToastMensaje(null);
-    }, 2600);
+    }, 2800);
     return () => clearTimeout(timer);
   }, [toastMensaje]);
 
@@ -178,7 +337,6 @@ export default function AdminLocalClient({
     const nuevoEstado = !local.abierto;
     const estadoAnterior = local.abierto;
 
-    // Actualización optimista inmediata
     setLocal((prev) => ({ ...prev, abierto: nuevoEstado }));
     setGuardandoId("local-abierto");
 
@@ -211,12 +369,170 @@ export default function AdminLocalClient({
     }
   };
 
+  // Subir archivo de imagen a Supabase Storage y obtener su URL pública
+  const subirArchivoImagen = async (file: File): Promise<string | null> => {
+    const dataUrl = await compressImageFileToDataUrl(file);
+    const res = await fetch(`/api/admin/${local.slug}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "upload-foto",
+        dataUrl,
+        fileName: file.name,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.ok || !data.url) {
+      throw new Error(data.error || "Error al subir la foto");
+    }
+    return String(data.url);
+  };
+
+  // Seleccionar foto para un plato nuevo
+  const handleSeleccionarFotoNuevoPlato = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSubiendoFotoNueva(true);
+    setErrorNuevoPlato(null);
+    try {
+      const publicUrl = await subirArchivoImagen(file);
+      if (publicUrl) {
+        setNuevaFotoUrl(publicUrl);
+        mostrarToast("Foto cargada correctamente");
+      }
+    } catch (err) {
+      setErrorNuevoPlato(
+        err instanceof Error ? err.message : "No se pudo subir la foto"
+      );
+    } finally {
+      setSubiendoFotoNueva(false);
+      e.target.value = "";
+    }
+  };
+
+  // Cambiar la foto de un plato existente directamente
+  const handleCambiarFotoProductoExistente = async (
+    producto: Producto,
+    file: File
+  ) => {
+    setGuardandoId(`foto-${producto.id}`);
+    try {
+      const publicUrl = await subirArchivoImagen(file);
+      if (!publicUrl) return;
+
+      // Actualización optimista
+      setLocal((prev) => ({
+        ...prev,
+        categorias: prev.categorias.map((cat) => ({
+          ...cat,
+          productos: cat.productos.map((p) =>
+            p.id === producto.id
+              ? { ...p, imagen: publicUrl, imagen_url: publicUrl }
+              : p
+          ),
+        })),
+      }));
+
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-producto",
+          productoId: producto.id,
+          imagen_url: publicUrl,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+      }
+      mostrarToast(`Foto actualizada en "${producto.nombre}"`);
+    } catch {
+      mostrarToast("No se pudo actualizar la foto");
+    } finally {
+      setGuardandoId(null);
+    }
+  };
+
+  // Crear un nuevo plato en la carta del negocio
+  const handleCrearNuevoPlato = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (creandoPlato) return;
+
+    const nombreLimpio = nuevoNombre.trim();
+    const precioNum = Number(String(nuevoPrecio).replace(/[^0-9]/g, ""));
+
+    if (!nombreLimpio) {
+      setErrorNuevoPlato("Por favor escribe el nombre del plato.");
+      return;
+    }
+    if (Number.isNaN(precioNum) || precioNum <= 0) {
+      setErrorNuevoPlato("Por favor ingresa un precio válido en pesos (ej: 8500).");
+      return;
+    }
+    if (nuevoCategoriaId === "__nueva__" && !nuevaCategoriaNombre.trim()) {
+      setErrorNuevoPlato("Escribe el nombre de la nueva categoría.");
+      return;
+    }
+
+    setCreandoPlato(true);
+    setErrorNuevoPlato(null);
+
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create-producto",
+          categoriaId:
+            nuevoCategoriaId === "__nueva__" ? undefined : nuevoCategoriaId,
+          nuevaCategoriaNombre:
+            nuevoCategoriaId === "__nueva__"
+              ? nuevaCategoriaNombre.trim()
+              : undefined,
+          nombre: nombreLimpio,
+          descripcion: nuevaDescripcion.trim(),
+          precio: precioNum,
+          imagen_url: nuevaFotoUrl.trim(),
+          etiqueta: nuevaEtiqueta.trim() || undefined,
+          disponible: true,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setErrorNuevoPlato(data.error || "No se pudo guardar el plato.");
+        return;
+      }
+
+      if (data.local) {
+        setLocal(data.local);
+      }
+
+      // Limpiar formulario
+      setNuevoNombre("");
+      setNuevoPrecio("");
+      setNuevaDescripcion("");
+      setNuevaEtiqueta("");
+      setNuevaFotoUrl("");
+      setNuevaCategoriaNombre("");
+      setMostrarFormNuevo(false);
+      mostrarToast(`Plato "${nombreLimpio}" publicado en la carta`);
+    } catch {
+      setErrorNuevoPlato("Error de conexión al guardar el plato.");
+    } finally {
+      setCreandoPlato(false);
+    }
+  };
+
   // Cambiar switch Disponible / Agotado de un producto en tiempo real
   const handleToggleDisponible = async (producto: Producto) => {
     const disponibleActual = producto.disponible !== false;
     const nuevoDisponible = !disponibleActual;
 
-    // Actualización optimista inmediata
     setLocal((prev) => ({
       ...prev,
       categorias: prev.categorias.map((cat) => ({
@@ -252,12 +568,13 @@ export default function AdminLocalClient({
     }
   };
 
-  // Guardar edición rápida de Nombre y Precio de un producto
-  const handleGuardarNombrePrecio = async (producto: Producto) => {
+  // Guardar edición rápida de Nombre, Precio y Descripción de un producto
+  const handleGuardarEdicionProducto = async (producto: Producto) => {
     const edicion = ediciones[producto.id];
     if (!edicion) return;
 
     const nombreLimpio = edicion.nombre.trim();
+    const descripcionLimpia = edicion.descripcion.trim();
     const precioNumero = Number(
       String(edicion.precio).replace(/[^0-9]/g, "")
     );
@@ -268,19 +585,24 @@ export default function AdminLocalClient({
 
     if (
       nombreLimpio === producto.nombre &&
-      precioNumero === producto.precio
+      precioNumero === producto.precio &&
+      descripcionLimpia === producto.descripcion
     ) {
       return;
     }
 
-    // Actualización optimista
     setLocal((prev) => ({
       ...prev,
       categorias: prev.categorias.map((cat) => ({
         ...cat,
         productos: cat.productos.map((p) =>
           p.id === producto.id
-            ? { ...p, nombre: nombreLimpio, precio: precioNumero }
+            ? {
+                ...p,
+                nombre: nombreLimpio,
+                precio: precioNumero,
+                descripcion: descripcionLimpia,
+              }
             : p
         ),
       })),
@@ -296,6 +618,7 @@ export default function AdminLocalClient({
           productoId: producto.id,
           nombre: nombreLimpio,
           precio: precioNumero,
+          descripcion: descripcionLimpia,
         }),
       });
       const data = await res.json();
@@ -308,55 +631,110 @@ export default function AdminLocalClient({
     }
   };
 
+  // Eliminar un plato
+  const handleEliminarProducto = async (producto: Producto) => {
+    setGuardandoId(`del-${producto.id}`);
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete-producto",
+          productoId: producto.id,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+        mostrarToast(`Plato "${producto.nombre}" eliminado`);
+      }
+    } finally {
+      setGuardandoId(null);
+    }
+  };
+
+  const videoDeFondo = local.videoFondo || local.videoPortada;
+  const posterFondo = getVideoPoster(videoDeFondo, local.fotoPortada);
+
   if (verificandoSesion) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+      <div
+        className={`flex min-h-screen items-center justify-center ${brand.bgBase} text-white`}
+      >
+        <Loader2 className={`h-8 w-8 animate-spin ${brand.accentText}`} />
       </div>
     );
   }
 
   // ============================================================================
-  // 1. PANTALLA DE BLOQUEO POR PIN (4 DÍGITOS)
+  // 1. PANTALLA DE BLOQUEO POR PIN CON LA PALETA DE COLORES DEL NEGOCIO
   // ============================================================================
   if (!autenticado) {
     return (
-      <div className="flex min-h-screen flex-col justify-between bg-slate-950 px-4 py-6 text-white">
+      <div
+        className={`relative flex min-h-screen flex-col justify-between px-4 py-6 text-white ${brand.bgBase}`}
+      >
+        {/* Fondo ambiental con la estética y video/poster del negocio */}
+        {posterFondo && (
+          <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+            <img
+              src={posterFondo}
+              alt=""
+              aria-hidden="true"
+              className="h-full w-full object-cover blur-xl opacity-35"
+            />
+            <div
+              className={`absolute inset-0 bg-gradient-to-b ${theme.videoOverlayGradient}`}
+            />
+          </div>
+        )}
+
         {/* Barra superior */}
-        <div className="mx-auto flex w-full max-w-sm items-center justify-between">
+        <div className="relative z-10 mx-auto flex w-full max-w-sm items-center justify-between">
           <Link
             href={`/${local.slug}`}
-            className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-bold text-slate-200 transition hover:bg-white/20"
+            className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold backdrop-blur-md transition ${theme.backBtn}`}
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Volver a la carta</span>
           </Link>
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-3 py-1 text-[11px] font-bold text-emerald-400 border border-emerald-500/30">
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-bold ${brand.badgeBg}`}
+          >
             <Lock className="h-3 w-3" />
             Admin Móvil
           </span>
         </div>
 
-        {/* Tarjeta central de PIN */}
-        <div className="mx-auto my-auto w-full max-w-sm py-4">
+        {/* Tarjeta central de PIN con identidad del local */}
+        <div
+          className={`relative z-10 mx-auto my-auto w-full max-w-sm rounded-3xl border p-6 shadow-2xl ${brand.panelCardBg}`}
+        >
           <div className="text-center">
-            <div className="mx-auto mb-3 h-20 w-20 overflow-hidden rounded-2xl border-2 border-white/20 bg-white p-1 shadow-xl">
+            <div
+              className={`mx-auto mb-3 h-20 w-20 overflow-hidden rounded-2xl border-2 p-1 shadow-xl ${theme.logoBox}`}
+            >
               <img
                 src={local.logo}
                 alt={local.nombre}
                 className="h-full w-full rounded-xl object-contain"
               />
             </div>
-            <h1 className="text-xl font-extrabold tracking-tight text-white">
+            <span
+              className={`text-[11px] font-extrabold uppercase tracking-wider ${brand.accentText}`}
+            >
+              {local.rubro}
+            </span>
+            <h1 className="mt-0.5 text-xl font-extrabold tracking-tight text-white">
               {local.nombre}
             </h1>
-            <p className="mt-1 text-xs text-slate-400">
-              Ingresa el PIN de 4 dígitos para administrar tu local
+            <p className={`mt-1 text-xs ${brand.subtitleText}`}>
+              Ingresa el PIN de 4 dígitos para administrar tu carta digital
             </p>
           </div>
 
-          {/* Indicadores visuales de los 4 dígitos + Input oculto accesible */}
-          <div className="mt-6 flex flex-col items-center">
+          {/* Indicadores visuales de los 4 dígitos + Input directo */}
+          <div className="mt-5 flex flex-col items-center">
             <div className="flex items-center justify-center gap-3">
               {[0, 1, 2, 3].map((idx) => {
                 const digito = pin[idx];
@@ -366,10 +744,10 @@ export default function AdminLocalClient({
                     key={idx}
                     className={`flex h-14 w-14 items-center justify-center rounded-2xl border-2 text-2xl font-black transition-all ${
                       digito
-                        ? "border-emerald-400 bg-emerald-500/20 text-white shadow-lg shadow-emerald-500/10"
+                        ? brand.pinActiveBox
                         : activo
-                        ? "border-sky-400 bg-slate-900 text-white"
-                        : "border-slate-800 bg-slate-900/70 text-slate-600"
+                        ? `${brand.accentBorder} bg-black/40 text-white`
+                        : "border-white/15 bg-black/25 text-white/40"
                     }`}
                   >
                     {digito ? "●" : ""}
@@ -378,7 +756,6 @@ export default function AdminLocalClient({
               })}
             </div>
 
-            {/* Input numérico directo para teclado físico o móvil */}
             <input
               type="password"
               inputMode="numeric"
@@ -395,27 +772,27 @@ export default function AdminLocalClient({
                   void validarPin(soloNumeros);
                 }
               }}
-              placeholder="Ingresa tu PIN de 4 dígitos"
+              placeholder="Escribe tu PIN de 4 dígitos"
               aria-label="PIN de 4 dígitos"
-              className="mt-3 w-48 rounded-xl border border-slate-800 bg-slate-900/90 px-3 py-1.5 text-center text-xs text-slate-300 placeholder:text-slate-500 focus:border-emerald-500 focus:outline-none"
+              className={`mt-3 w-52 rounded-xl border border-white/20 bg-black/35 px-3 py-1.5 text-center text-xs text-white placeholder:text-white/50 focus:outline-none ${brand.accentRing}`}
             />
 
             {errorPin && (
-              <p className="mt-3 rounded-xl border border-rose-500/40 bg-rose-500/15 px-3.5 py-2 text-center text-xs font-bold text-rose-300">
+              <p className="mt-3 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3.5 py-2 text-center text-xs font-bold text-rose-200">
                 {errorPin}
               </p>
             )}
           </div>
 
-          {/* Teclado Numérico Táctil Mobile-First */}
-          <div className="mt-6 grid grid-cols-3 gap-2.5">
+          {/* Teclado Numérico Táctil con los colores del negocio */}
+          <div className="mt-5 grid grid-cols-3 gap-2.5">
             {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((num) => (
               <button
                 key={num}
                 type="button"
                 disabled={validandoPin}
                 onClick={() => handleDigitoPin(num)}
-                className="flex h-14 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-xl font-extrabold text-white shadow-sm transition hover:bg-slate-800 active:scale-95 disabled:opacity-50"
+                className={`flex h-13 items-center justify-center rounded-2xl border py-3 text-xl font-extrabold shadow-sm transition active:scale-95 disabled:opacity-50 ${brand.pinBtn}`}
               >
                 {num}
               </button>
@@ -428,7 +805,7 @@ export default function AdminLocalClient({
                 setPin("");
                 setErrorPin(null);
               }}
-              className="flex h-14 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/60 text-xs font-bold text-slate-400 transition hover:bg-slate-800 active:scale-95 disabled:opacity-40"
+              className="flex items-center justify-center rounded-2xl border border-white/15 bg-black/30 py-3 text-xs font-bold text-white/75 transition hover:bg-black/50 active:scale-95 disabled:opacity-40"
             >
               Limpiar
             </button>
@@ -437,7 +814,7 @@ export default function AdminLocalClient({
               type="button"
               disabled={validandoPin}
               onClick={() => handleDigitoPin("0")}
-              className="flex h-14 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 text-xl font-extrabold text-white shadow-sm transition hover:bg-slate-800 active:scale-95 disabled:opacity-50"
+              className={`flex items-center justify-center rounded-2xl border py-3 text-xl font-extrabold shadow-sm transition active:scale-95 disabled:opacity-50 ${brand.pinBtn}`}
             >
               0
             </button>
@@ -447,7 +824,7 @@ export default function AdminLocalClient({
               disabled={validandoPin || pin.length === 0}
               onClick={handleBorrarDigito}
               aria-label="Borrar último dígito"
-              className="flex h-14 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/60 text-slate-300 transition hover:bg-slate-800 active:scale-95 disabled:opacity-40"
+              className="flex items-center justify-center rounded-2xl border border-white/15 bg-black/30 py-3 text-white/80 transition hover:bg-black/50 active:scale-95 disabled:opacity-40"
             >
               <Delete className="h-5 w-5" />
             </button>
@@ -457,7 +834,7 @@ export default function AdminLocalClient({
             type="button"
             disabled={pin.length !== 4 || validandoPin}
             onClick={() => void validarPin(pin)}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-500 py-3.5 text-sm font-extrabold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-800 disabled:text-slate-500 disabled:shadow-none"
+            className={`mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-extrabold shadow-lg transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 ${brand.accentBg}`}
           >
             {validandoPin ? (
               <>
@@ -467,21 +844,23 @@ export default function AdminLocalClient({
             ) : (
               <>
                 <Lock className="h-4 w-4" />
-                <span>Desbloquear Panel</span>
+                <span>Entrar al Panel de {local.nombre}</span>
               </>
             )}
           </button>
         </div>
 
-        <p className="text-center text-[11px] text-slate-500">
-          PideTirúa Admin · Gestión conectada a Supabase en tiempo real
+        <p
+          className={`relative z-10 text-center text-[11px] ${brand.subtitleText}`}
+        >
+          PideTirúa Admin · Conectado a Supabase en tiempo real
         </p>
       </div>
     );
   }
 
   // ============================================================================
-  // 2. PANEL PRINCIPAL DE ADMINISTRACIÓN MÓVIL (UNA VEZ AUTENTICADO)
+  // 2. PANEL PRINCIPAL DE ADMINISTRACIÓN CON PALETA DEL NEGOCIO + SUBIDA DE PLATOS Y FOTOS
   // ============================================================================
   const totalProductos = local.categorias.reduce(
     (acc, cat) => acc + cat.productos.length,
@@ -494,33 +873,68 @@ export default function AdminLocalClient({
   );
 
   return (
-    <div className="min-h-screen bg-slate-100 pb-20 text-slate-900">
+    <div className={`relative min-h-screen pb-24 ${brand.bgBase}`}>
+      {/* Fondo ambiental del negocio */}
+      {posterFondo && (
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+          <img
+            src={posterFondo}
+            alt=""
+            aria-hidden="true"
+            className="h-full w-full object-cover blur-xl opacity-35"
+          />
+          {videoDeFondo && (
+            <video
+              src={videoDeFondo}
+              poster={posterFondo}
+              preload="metadata"
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="absolute inset-0 h-full w-full object-contain blur-[3px] opacity-45"
+            />
+          )}
+          <div
+            className={`absolute inset-0 bg-gradient-to-b ${theme.videoOverlayGradient}`}
+          />
+        </div>
+      )}
+
       {/* Toast flotante de confirmación inmediata ("Cambio guardado") */}
       {toastMensaje && (
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-xl transition-all"
+          className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-emerald-300/50 bg-emerald-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-2xl transition-all"
         >
           <CheckCircle2 className="h-4 w-4 shrink-0 text-white" />
           <span>{toastMensaje}</span>
         </div>
       )}
 
-      {/* Cabecera Fija Mobile-First */}
-      <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
+      {/* Cabecera Fija Mobile-First con la paleta del local */}
+      <header
+        className={`sticky top-0 z-30 border-b backdrop-blur-xl shadow-md ${brand.headerBg}`}
+      >
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
-            <img
-              src={local.logo}
-              alt={local.nombre}
-              className="h-11 w-11 shrink-0 rounded-xl border border-slate-200 bg-white object-contain p-0.5 shadow-2xs"
-            />
+            <div
+              className={`h-11 w-11 shrink-0 overflow-hidden rounded-xl border-2 p-0.5 shadow-sm ${theme.logoBox}`}
+            >
+              <img
+                src={local.logo}
+                alt={local.nombre}
+                className="h-full w-full rounded-lg object-contain"
+              />
+            </div>
             <div className="min-w-0">
-              <span className="block text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">
-                Panel de Administración
+              <span
+                className={`block text-[10px] font-extrabold uppercase tracking-wider ${brand.accentText}`}
+              >
+                Administración · {local.rubro}
               </span>
-              <h1 className="truncate text-base font-extrabold text-slate-900 sm:text-lg">
+              <h1 className="truncate text-base font-extrabold text-white sm:text-lg">
                 {local.nombre}
               </h1>
             </div>
@@ -529,7 +943,7 @@ export default function AdminLocalClient({
           <div className="flex shrink-0 items-center gap-2">
             <Link
               href={`/${local.slug}`}
-              className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-100"
+              className={`inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold shadow-xs transition ${brand.accentBg}`}
               title="Ver carta pública"
             >
               <ExternalLink className="h-3.5 w-3.5" />
@@ -539,7 +953,7 @@ export default function AdminLocalClient({
             <button
               type="button"
               onClick={handleCerrarSesion}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100 active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-rose-600 hover:border-rose-500 active:scale-95"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span>Cerrar Sesión</span>
@@ -548,32 +962,36 @@ export default function AdminLocalClient({
         </div>
       </header>
 
-      <main className="mx-auto max-w-xl space-y-6 px-4 pt-5">
-        {/* CONTROL MAESTRO: Switch grande para estado Abierto / Cerrado */}
-        <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+      <main className="relative z-10 mx-auto max-w-xl space-y-6 px-4 pt-5">
+        {/* 1. CONTROL MAESTRO: Switch grande para estado Abierto / Cerrado */}
+        <section
+          className={`rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
+        >
           <div className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-slate-500">
-              <Store className="h-4 w-4 text-slate-700" />
+            <span
+              className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+            >
+              <Store className="h-4 w-4" />
               Control Maestro del Local
             </span>
-            <span className="text-xs font-semibold text-slate-500">
+            <span className={`text-xs font-semibold ${brand.subtitleText}`}>
               Horario: {local.horario}
             </span>
           </div>
 
-          <p className="mt-1 text-xs text-slate-600">
-            Toca el botón para abrir o cerrar la recepción de pedidos por
-            WhatsApp al instante:
+          <p className={`mt-1 text-xs ${brand.subtitleText}`}>
+            Toca el interruptor para abrir o cerrar la recepción de pedidos en
+            tu carta digital al instante:
           </p>
 
           <button
             type="button"
             disabled={guardandoId === "local-abierto"}
             onClick={handleToggleAbierto}
-            className={`mt-4 flex w-full items-center justify-between rounded-2xl border-2 px-5 py-4 text-left shadow-md transition-all active:scale-[0.99] ${
+            className={`mt-4 flex w-full items-center justify-between rounded-2xl border-2 px-5 py-4 text-left shadow-lg transition-all active:scale-[0.99] ${
               local.abierto
-                ? "border-emerald-500 bg-emerald-600 text-white shadow-emerald-600/20 hover:bg-emerald-500"
-                : "border-rose-500 bg-rose-600 text-white shadow-rose-600/20 hover:bg-rose-500"
+                ? "border-emerald-400 bg-emerald-600 text-white shadow-emerald-900/30 hover:bg-emerald-500"
+                : "border-rose-400 bg-rose-600 text-white shadow-rose-900/30 hover:bg-rose-500"
             }`}
           >
             <div>
@@ -585,16 +1003,15 @@ export default function AdminLocalClient({
               </span>
               <span className="mt-0.5 block text-xs font-medium text-white/90">
                 {local.abierto
-                  ? "Recibiendo pedidos en la carta digital"
+                  ? "Recibiendo pedidos por WhatsApp"
                   : "Carrito bloqueado · Solo lectura de carta"}
               </span>
             </div>
 
-            {/* Switch visual grande */}
             <div className="flex flex-col items-end gap-1">
               <div
                 className={`relative flex h-9 w-16 items-center rounded-full p-1 transition-colors ${
-                  local.abierto ? "bg-emerald-900/40" : "bg-rose-900/40"
+                  local.abierto ? "bg-emerald-950/45" : "bg-rose-950/45"
                 }`}
               >
                 <div
@@ -611,41 +1028,286 @@ export default function AdminLocalClient({
             </div>
           </button>
 
-          {/* Resumen rápido de carta */}
+          {/* Resumen rápido de platos y botón para subir un nuevo plato */}
           <div className="mt-4 grid grid-cols-2 gap-2.5 text-center">
-            <div className="rounded-2xl bg-emerald-50 p-2.5 border border-emerald-100">
-              <span className="block text-lg font-black text-emerald-700">
+            <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/15 p-2.5">
+              <span className="block text-lg font-black text-emerald-300">
                 {productosDisponibles}
               </span>
-              <span className="text-[11px] font-bold text-emerald-800">
+              <span className="text-[11px] font-bold text-emerald-100">
                 Platos Disponibles
               </span>
             </div>
-            <div className="rounded-2xl bg-slate-100 p-2.5 border border-slate-200">
-              <span className="block text-lg font-black text-slate-700">
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-2.5">
+              <span className="block text-lg font-black text-white">
                 {totalProductos - productosDisponibles}
               </span>
-              <span className="text-[11px] font-bold text-slate-600">
+              <span className={`text-[11px] font-bold ${brand.subtitleText}`}>
                 Platos Agotados
               </span>
             </div>
           </div>
         </section>
 
-        {/* LISTADO DE PRODUCTOS AGRUPADOS POR CATEGORÍA */}
+        {/* 2. SECCIÓN PARA SUBIR NUEVOS PLATOS Y FOTOS DE COMIDA */}
+        <section
+          className={`rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <span
+                className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+              >
+                <Sparkles className="h-4 w-4" />
+                Agregar Platos a tu Carta
+              </span>
+              <h2 className="mt-0.5 text-base font-extrabold text-white sm:text-lg">
+                Subir Nuevo Plato con Foto
+              </h2>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setMostrarFormNuevo((prev) => !prev);
+                setErrorNuevoPlato(null);
+              }}
+              className={`inline-flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-md transition active:scale-95 ${
+                mostrarFormNuevo
+                  ? "border border-white/25 bg-white/10 text-white hover:bg-white/20"
+                  : brand.accentBg
+              }`}
+            >
+              {mostrarFormNuevo ? (
+                <>
+                  <X className="h-4 w-4" />
+                  <span>Cerrar</span>
+                </>
+              ) : (
+                <>
+                  <PlusCircle className="h-4 w-4" />
+                  <span>Nuevo Plato</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {!mostrarFormNuevo ? (
+            <p className={`mt-2 text-xs ${brand.subtitleText}`}>
+              Sube platos nuevos con foto tomada desde tu celular o galería,
+              define su precio y publícalos al instante en la carta de{" "}
+              <strong>{local.nombre}</strong>.
+            </p>
+          ) : (
+            <form
+              onSubmit={handleCrearNuevoPlato}
+              className="mt-4 space-y-4 border-t border-white/15 pt-4"
+            >
+              {/* Cargador de Foto de la Comida */}
+              <div>
+                <label className="mb-1.5 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  1. Foto del plato (Cámara o Galería)
+                </label>
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  <div className="relative flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-white/30 bg-black/40">
+                    {nuevaFotoUrl ? (
+                      <img
+                        src={nuevaFotoUrl}
+                        alt="Vista previa del plato"
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center text-center p-2 text-white/60">
+                        <Camera className="h-7 w-7 mb-1" />
+                        <span className="text-[10px] font-bold">Sin foto</span>
+                      </div>
+                    )}
+                    {subiendoFotoNueva && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+                        <Loader2
+                          className={`h-6 w-6 animate-spin ${brand.accentText}`}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-2">
+                    <input
+                      ref={inputFotoNuevoRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleSeleccionarFotoNuevoPlato}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      disabled={subiendoFotoNueva}
+                      onClick={() => inputFotoNuevoRef.current?.click()}
+                      className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-extrabold shadow-md transition active:scale-95 sm:w-auto ${brand.accentBg}`}
+                    >
+                      <ImagePlus className="h-4 w-4" />
+                      <span>
+                        {subiendoFotoNueva
+                          ? "Subiendo foto..."
+                          : nuevaFotoUrl
+                          ? "Cambiar foto del plato"
+                          : "Subir foto desde mi celular"}
+                      </span>
+                    </button>
+
+                    <input
+                      type="url"
+                      value={nuevaFotoUrl}
+                      onChange={(e) => setNuevaFotoUrl(e.target.value)}
+                      placeholder="O pega el enlace URL de una foto (opcional)..."
+                      className="w-full rounded-xl border border-white/20 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Selector de Categoría */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                    2. Categoría del menú *
+                  </label>
+                  <select
+                    value={nuevoCategoriaId}
+                    onChange={(e) => setNuevoCategoriaId(e.target.value)}
+                    className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none"
+                  >
+                    {local.categorias.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.nombre}
+                      </option>
+                    ))}
+                    <option value="__nueva__">
+                      + Crear nueva categoría...
+                    </option>
+                  </select>
+                </div>
+
+                {nuevoCategoriaId === "__nueva__" ? (
+                  <div>
+                    <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                      Nombre de la nueva categoría *
+                    </label>
+                    <input
+                      type="text"
+                      value={nuevaCategoriaNombre}
+                      onChange={(e) => setNuevaCategoriaNombre(e.target.value)}
+                      placeholder="Ej: Postres Caseros, Promociones..."
+                      className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                      Etiqueta destacada (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={nuevaEtiqueta}
+                      onChange={(e) => setNuevaEtiqueta(e.target.value)}
+                      placeholder="Ej: Nuevo, Más pedido, Especialidad"
+                      className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Nombre y Precio */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
+                <div className="sm:col-span-8">
+                  <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                    3. Nombre del plato *
+                  </label>
+                  <input
+                    type="text"
+                    value={nuevoNombre}
+                    onChange={(e) => setNuevoNombre(e.target.value)}
+                    placeholder="Ej: Churrasco Italiano Gigante + Papas"
+                    className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-4">
+                  <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                    4. Precio (CLP) *
+                  </label>
+                  <div className="relative">
+                    <DollarSign className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      value={nuevoPrecio}
+                      onChange={(e) => setNuevoPrecio(e.target.value)}
+                      placeholder="Ej: 7500"
+                      className="w-full rounded-xl border border-white/20 bg-white py-2.5 pl-7 pr-3 text-xs font-extrabold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Descripción del plato */}
+              <div>
+                <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  5. Descripción de los ingredientes
+                </label>
+                <textarea
+                  rows={2}
+                  value={nuevaDescripcion}
+                  onChange={(e) => setNuevaDescripcion(e.target.value)}
+                  placeholder="Describe los ingredientes o acompañamientos del plato..."
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+
+              {errorNuevoPlato && (
+                <p className="rounded-xl border border-rose-400/50 bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-200">
+                  {errorNuevoPlato}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={creandoPlato || subiendoFotoNueva}
+                className={`flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-extrabold shadow-lg transition active:scale-[0.99] disabled:opacity-50 ${brand.accentBg}`}
+              >
+                {creandoPlato ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Publicando plato en la carta...</span>
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="h-4 w-4" />
+                    <span>Publicar Plato en la Carta</span>
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+        </section>
+
+        {/* 3. LISTADO DE PRODUCTOS AGRUPADOS POR CATEGORÍA */}
         <div className="space-y-6">
           {local.categorias.map((categoria) => (
             <section
               key={categoria.id}
-              className="rounded-3xl border border-slate-200 bg-white p-4 shadow-xs sm:p-5"
+              className={`rounded-3xl border p-4 shadow-xl sm:p-5 ${brand.panelCardBg}`}
             >
-              <div className="mb-3.5 flex items-center justify-between border-b border-slate-100 pb-2.5">
-                <h2 className="text-base font-extrabold text-slate-900 sm:text-lg">
+              <div className="mb-3.5 flex items-center justify-between border-b border-white/15 pb-2.5">
+                <h2
+                  className={`text-base font-extrabold sm:text-lg ${brand.accentText}`}
+                >
                   {categoria.nombre}
                 </h2>
-                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600">
+                <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${theme.categoryCount}`}>
                   {categoria.productos.length}{" "}
-                  {categoria.productos.length === 1 ? "producto" : "productos"}
+                  {categoria.productos.length === 1 ? "plato" : "platos"}
                 </span>
               </div>
 
@@ -655,76 +1317,150 @@ export default function AdminLocalClient({
                   const editState = ediciones[producto.id] ?? {
                     nombre: producto.nombre,
                     precio: String(producto.precio),
+                    descripcion: producto.descripcion,
                   };
                   const precioNumerico = Number(
                     String(editState.precio).replace(/[^0-9]/g, "")
                   );
                   const hayCambiosSinGuardar =
                     editState.nombre.trim() !== producto.nombre ||
-                    precioNumerico !== producto.precio;
+                    precioNumerico !== producto.precio ||
+                    editState.descripcion.trim() !== producto.descripcion;
 
                   return (
                     <div
                       key={producto.id}
                       className={`rounded-2xl border p-3.5 transition-all ${
                         disponible
-                          ? "border-slate-200 bg-white"
-                          : "border-slate-200 bg-slate-50 opacity-85"
+                          ? "border-slate-200 bg-white text-slate-900 shadow-md"
+                          : "border-slate-300 bg-slate-100 text-slate-600 opacity-85"
                       }`}
                     >
-                      {/* Fila superior: miniatura + switch directo Disponible / Agotado */}
-                      <div className="flex items-center justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <img
-                            src={producto.imagen_url || producto.imagen}
-                            alt={producto.nombre}
-                            className={`h-11 w-11 shrink-0 rounded-xl object-cover border border-slate-200 ${
-                              !disponible ? "grayscale opacity-60" : ""
-                            }`}
-                          />
-                          <div className="min-w-0">
-                            <span
-                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold ${
-                                disponible
-                                  ? "bg-emerald-100 text-emerald-800"
-                                  : "bg-slate-200 text-slate-700"
+                      {/* Fila superior: Miniatura con botón para cambiar foto + Switch [Disponible / Agotado] */}
+                      <div className="mb-3 flex items-center justify-between gap-2.5">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <label
+                            className="group relative h-14 w-14 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-xs"
+                            title="Toca para subir o cambiar la foto de este plato"
+                          >
+                            <img
+                              src={producto.imagen_url || producto.imagen}
+                              alt={producto.nombre}
+                              className={`h-full w-full object-cover ${
+                                !disponible ? "grayscale opacity-60" : ""
                               }`}
-                            >
-                              {disponible ? "🟢 Disponible" : "⚪ Agotado"}
-                            </span>
-                            <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
-                              Precio actual: {formatCLP(producto.precio)}
+                            />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/55 text-[9px] font-extrabold text-white opacity-0 transition-opacity group-hover:opacity-100">
+                              <Camera className="h-3.5 w-3.5 mb-0.5" />
+                              <span>Foto</span>
+                            </div>
+                            {guardandoId === `foto-${producto.id}` && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+                                <Loader2 className="h-4 w-4 animate-spin text-white" />
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  void handleCambiarFotoProductoExistente(
+                                    producto,
+                                    file
+                                  );
+                                }
+                                e.target.value = "";
+                              }}
+                            />
+                          </label>
+
+                          <div className="min-w-0">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span
+                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold ${
+                                  disponible
+                                    ? "bg-emerald-100 text-emerald-800"
+                                    : "bg-slate-200 text-slate-700"
+                                }`}
+                              >
+                                {disponible ? "🟢 Disponible" : "⚪ Agotado"}
+                              </span>
+
+                              <label className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-100">
+                                <Camera className="h-3 w-3" />
+                                <span>Cambiar foto</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      void handleCambiarFotoProductoExistente(
+                                        producto,
+                                        file
+                                      );
+                                    }
+                                    e.target.value = "";
+                                  }}
+                                />
+                              </label>
+                            </div>
+
+                            <p className="mt-1 text-xs font-extrabold text-slate-700">
+                              {formatCLP(producto.precio)}
                             </p>
                           </div>
                         </div>
 
-                        {/* Switch directo: [Disponible / Agotado] */}
-                        <button
-                          type="button"
-                          disabled={guardandoId === `disp-${producto.id}`}
-                          onClick={() => handleToggleDisponible(producto)}
-                          className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-xs font-extrabold transition active:scale-95 ${
-                            disponible
-                              ? "border-emerald-300 bg-emerald-600 text-white shadow-xs hover:bg-emerald-500"
-                              : "border-slate-300 bg-slate-200 text-slate-700 hover:bg-slate-300"
-                          }`}
-                        >
-                          <div
-                            className={`relative flex h-5 w-9 items-center rounded-full p-0.5 transition-colors ${
-                              disponible ? "bg-emerald-900/40" : "bg-slate-400"
+                        <div className="flex shrink-0 items-center gap-1.5">
+                          {/* Switch directo: [Disponible / Agotado] */}
+                          <button
+                            type="button"
+                            disabled={guardandoId === `disp-${producto.id}`}
+                            onClick={() => handleToggleDisponible(producto)}
+                            className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-xs font-extrabold transition active:scale-95 ${
+                              disponible
+                                ? "border-emerald-300 bg-emerald-600 text-white shadow-xs hover:bg-emerald-500"
+                                : "border-slate-300 bg-slate-200 text-slate-700 hover:bg-slate-300"
                             }`}
                           >
                             <div
-                              className={`h-4 w-4 rounded-full bg-white shadow transition-transform ${
-                                disponible ? "translate-x-4" : "translate-x-0"
+                              className={`relative flex h-5 w-9 items-center rounded-full p-0.5 transition-colors ${
+                                disponible
+                                  ? "bg-emerald-900/40"
+                                  : "bg-slate-400"
                               }`}
-                            />
-                          </div>
-                          <span>{disponible ? "Disponible" : "Agotado"}</span>
-                        </button>
+                            >
+                              <div
+                                className={`h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                                  disponible ? "translate-x-4" : "translate-x-0"
+                                }`}
+                              />
+                            </div>
+                            <span>{disponible ? "Disponible" : "Agotado"}</span>
+                          </button>
+
+                          {/* Botón eliminar plato */}
+                          <button
+                            type="button"
+                            disabled={guardandoId === `del-${producto.id}`}
+                            onClick={() => void handleEliminarProducto(producto)}
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition hover:bg-rose-100 active:scale-95"
+                            title="Eliminar plato de la carta"
+                          >
+                            {guardandoId === `del-${producto.id}` ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-3.5 w-3.5" />
+                            )}
+                          </button>
+                        </div>
                       </div>
 
-                      {/* Fila inferior: Edición rápida de Nombre y Precio */}
+                      {/* Fila inferior: Edición rápida de Nombre, Precio y Descripción */}
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-12">
                         <div className="sm:col-span-7">
                           <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -744,7 +1480,7 @@ export default function AdminLocalClient({
                             }
                             onBlur={() => {
                               if (hayCambiosSinGuardar) {
-                                void handleGuardarNombrePrecio(producto);
+                                void handleGuardarEdicionProducto(producto);
                               }
                             }}
                             onKeyDown={(e) => {
@@ -752,7 +1488,7 @@ export default function AdminLocalClient({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-900 focus:border-emerald-500 focus:bg-white focus:outline-none"
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-900 focus:border-slate-900 focus:bg-white focus:outline-none"
                           />
                         </div>
 
@@ -778,7 +1514,7 @@ export default function AdminLocalClient({
                                 }
                                 onBlur={() => {
                                   if (hayCambiosSinGuardar) {
-                                    void handleGuardarNombrePrecio(producto);
+                                    void handleGuardarEdicionProducto(producto);
                                   }
                                 }}
                                 onKeyDown={(e) => {
@@ -786,7 +1522,7 @@ export default function AdminLocalClient({
                                     e.currentTarget.blur();
                                   }
                                 }}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-7 pr-2.5 text-xs font-extrabold text-slate-900 focus:border-emerald-500 focus:bg-white focus:outline-none"
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-7 pr-2.5 text-xs font-extrabold text-slate-900 focus:border-slate-900 focus:bg-white focus:outline-none"
                               />
                             </div>
                           </div>
@@ -798,14 +1534,14 @@ export default function AdminLocalClient({
                               guardandoId === `edit-${producto.id}`
                             }
                             onClick={() =>
-                              void handleGuardarNombrePrecio(producto)
+                              void handleGuardarEdicionProducto(producto)
                             }
                             className={`inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-xl px-3 text-xs font-extrabold transition ${
                               hayCambiosSinGuardar
-                                ? "bg-emerald-600 text-white shadow-xs hover:bg-emerald-500 active:scale-95"
+                                ? `${brand.accentBg} shadow-xs active:scale-95`
                                 : "border border-slate-200 bg-slate-100 text-slate-400"
                             }`}
-                            title="Guardar cambios de nombre y precio"
+                            title="Guardar cambios"
                           >
                             {guardandoId === `edit-${producto.id}` ? (
                               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -814,6 +1550,36 @@ export default function AdminLocalClient({
                             )}
                             <span>Guardar</span>
                           </button>
+                        </div>
+
+                        <div className="sm:col-span-12">
+                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                            Descripción
+                          </label>
+                          <input
+                            type="text"
+                            value={editState.descripcion}
+                            onChange={(e) =>
+                              setEdiciones((prev) => ({
+                                ...prev,
+                                [producto.id]: {
+                                  ...editState,
+                                  descripcion: e.target.value,
+                                },
+                              }))
+                            }
+                            onBlur={() => {
+                              if (hayCambiosSinGuardar) {
+                                void handleGuardarEdicionProducto(producto);
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700 focus:border-slate-900 focus:bg-white focus:outline-none"
+                          />
                         </div>
                       </div>
                     </div>

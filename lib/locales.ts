@@ -12,6 +12,7 @@ export const CATEGORIAS_DIRECTORIO: CategoriaFiltro[] = [
 
 const STORAGE_BUCKET = "pidetirua-db";
 const STORAGE_STATE_FILE = "locales-state.json";
+const PLATOS_IMAGES_BUCKET = "platos";
 
 interface SupabaseProductoRow {
   id: string;
@@ -70,6 +71,7 @@ function normalizeStaticLocal(raw: Local): Local {
       productos: cat.productos.map((prod) => ({
         ...prod,
         categoria_id: cat.id,
+        imagen: prod.imagen_url || prod.imagen,
         imagen_url: prod.imagen_url || prod.imagen,
         disponible: prod.disponible !== false,
       })),
@@ -328,6 +330,73 @@ async function writeSupabaseCloudState(locales: Local[]): Promise<void> {
 }
 
 /**
+ * Sube una imagen de plato (en formato Data URL base64) al bucket público `platos`
+ * en Supabase Storage y devuelve su URL pública lista para usar en la carta digital.
+ */
+export async function uploadPlatoFotoInSupabase(
+  slug: string,
+  dataUrl: string,
+  fileName = "plato.jpg"
+): Promise<{ ok: boolean; url?: string; error?: string }> {
+  try {
+    const supabase = getSupabaseClient();
+
+    // Asegurar que exista el bucket público `platos`
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const exists = buckets?.some((b) => b.name === PLATOS_IMAGES_BUCKET);
+    if (!exists) {
+      await supabase.storage.createBucket(PLATOS_IMAGES_BUCKET, {
+        public: true,
+      });
+    }
+
+    // Extraer mimeType y bytes desde el Data URL base64
+    const matches = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+    if (!matches) {
+      return { ok: false, error: "Formato de imagen no válido" };
+    }
+
+    const contentType = matches[1] || "image/jpeg";
+    const base64Data = matches[2];
+    const buffer = Buffer.from(base64Data, "base64");
+
+    const ext = contentType.includes("png")
+      ? "png"
+      : contentType.includes("webp")
+      ? "webp"
+      : "jpg";
+    const cleanName = fileName
+      .toLowerCase()
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[^a-z0-9-_]/g, "-")
+      .slice(0, 40);
+
+    const filePath = `${slug}/${Date.now()}-${cleanName || "plato"}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(PLATOS_IMAGES_BUCKET)
+      .upload(filePath, buffer, {
+        contentType,
+        upsert: true,
+        cacheControl: "31536000",
+      });
+
+    if (uploadError) {
+      return { ok: false, error: uploadError.message };
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(PLATOS_IMAGES_BUCKET)
+      .getPublicUrl(filePath);
+
+    return { ok: true, url: publicUrlData.publicUrl };
+  } catch (err) {
+    console.error("Error subiendo foto a Supabase Storage:", err);
+    return { ok: false, error: "No se pudo subir la imagen a Supabase" };
+  }
+}
+
+/**
  * Obtiene todos los locales con sus categorías y productos desde Supabase.
  */
 export async function fetchAllLocales(): Promise<Local[]> {
@@ -414,15 +483,18 @@ export async function updateLocalAbiertoInSupabase(
 }
 
 /**
- * Actualiza un producto (`nombre`, `precio`, `disponible`) en Supabase en tiempo real.
+ * Actualiza un producto (`nombre`, `descripcion`, `precio`, `disponible`, `imagen_url`, `etiqueta`) en Supabase.
  */
 export async function updateProductoInSupabase(
   slug: string,
   productoId: string,
   cambios: {
     nombre?: string;
+    descripcion?: string;
     precio?: number;
     disponible?: boolean;
+    imagen_url?: string;
+    etiqueta?: string;
   }
 ): Promise<{ ok: boolean; local?: Local }> {
   const supabase = getSupabaseClient();
@@ -432,11 +504,20 @@ export async function updateProductoInSupabase(
   if (typeof cambios.nombre === "string") {
     updatePayload.nombre = cambios.nombre;
   }
+  if (typeof cambios.descripcion === "string") {
+    updatePayload.descripcion = cambios.descripcion;
+  }
   if (typeof cambios.precio === "number" && !Number.isNaN(cambios.precio)) {
     updatePayload.precio = cambios.precio;
   }
   if (typeof cambios.disponible === "boolean") {
     updatePayload.disponible = cambios.disponible;
+  }
+  if (typeof cambios.imagen_url === "string" && cambios.imagen_url.trim()) {
+    updatePayload.imagen_url = cambios.imagen_url.trim();
+  }
+  if (typeof cambios.etiqueta === "string") {
+    updatePayload.etiqueta = cambios.etiqueta.trim() || null;
   }
 
   if (Object.keys(updatePayload).length > 0) {
@@ -456,10 +537,17 @@ export async function updateProductoInSupabase(
         ...cat,
         productos: cat.productos.map((prod) => {
           if (prod.id !== productoId) return prod;
+          const nuevaImagen =
+            typeof cambios.imagen_url === "string" && cambios.imagen_url.trim()
+              ? cambios.imagen_url.trim()
+              : prod.imagen;
           return {
             ...prod,
             ...(typeof cambios.nombre === "string"
               ? { nombre: cambios.nombre }
+              : {}),
+            ...(typeof cambios.descripcion === "string"
+              ? { descripcion: cambios.descripcion }
               : {}),
             ...(typeof cambios.precio === "number" &&
             !Number.isNaN(cambios.precio)
@@ -468,8 +556,158 @@ export async function updateProductoInSupabase(
             ...(typeof cambios.disponible === "boolean"
               ? { disponible: cambios.disponible }
               : {}),
+            ...(typeof cambios.etiqueta === "string"
+              ? { etiqueta: cambios.etiqueta.trim() || undefined }
+              : {}),
+            imagen: nuevaImagen,
+            imagen_url: nuevaImagen,
           };
         }),
+      })),
+    };
+  });
+
+  await writeSupabaseCloudState(actualizados);
+
+  const localActualizado = actualizados.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
+
+  return { ok: true, local: localActualizado };
+}
+
+/**
+ * Crea un nuevo plato (y opcionalmente una nueva categoría) para el local en Supabase.
+ */
+export async function createProductoInSupabase(
+  slug: string,
+  datos: {
+    categoriaId?: string;
+    nuevaCategoriaNombre?: string;
+    nombre: string;
+    descripcion: string;
+    precio: number;
+    imagen_url: string;
+    etiqueta?: string;
+    disponible?: boolean;
+  }
+): Promise<{ ok: boolean; local?: Local; error?: string }> {
+  const supabase = getSupabaseClient();
+  const locales = await fetchAllLocales();
+  const localObj = locales.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
+
+  if (!localObj) {
+    return { ok: false, error: "Local no encontrado" };
+  }
+
+  let targetCategoriaId = datos.categoriaId || localObj.categorias[0]?.id || "";
+  const nombreNuevaCat = datos.nuevaCategoriaNombre?.trim();
+
+  // Si el dueño escribió una categoría nueva, crearla primero
+  if (nombreNuevaCat) {
+    targetCategoriaId = `cat-${slug}-${Date.now()}`;
+    const nuevoOrdenCat = localObj.categorias.length + 1;
+    await supabase.from("categorias").insert({
+      id: targetCategoriaId,
+      local_id: localObj.id,
+      nombre: nombreNuevaCat,
+      orden: nuevoOrdenCat,
+    });
+  }
+
+  const nuevoProductoId = `prod-${slug}-${Date.now()}`;
+  const imagenFinal =
+    datos.imagen_url.trim() ||
+    "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1000&q=90";
+
+  const nuevoProducto: Producto = {
+    id: nuevoProductoId,
+    categoria_id: targetCategoriaId,
+    nombre: datos.nombre.trim(),
+    descripcion:
+      datos.descripcion.trim() ||
+      `Preparación especial de ${localObj.nombre}.`,
+    precio: Number(datos.precio),
+    imagen: imagenFinal,
+    imagen_url: imagenFinal,
+    disponible: datos.disponible !== false,
+    destacado: Boolean(datos.etiqueta?.trim()),
+    ...(datos.etiqueta?.trim() ? { etiqueta: datos.etiqueta.trim() } : {}),
+  };
+
+  // 1. Insertar en tabla `productos` de Supabase PostgreSQL
+  await supabase.from("productos").insert({
+    id: nuevoProducto.id,
+    categoria_id: targetCategoriaId,
+    nombre: nuevoProducto.nombre,
+    descripcion: nuevoProducto.descripcion,
+    precio: nuevoProducto.precio,
+    imagen_url: imagenFinal,
+    disponible: nuevoProducto.disponible,
+    destacado: Boolean(nuevoProducto.destacado),
+    etiqueta: nuevoProducto.etiqueta ?? null,
+    orden: 99,
+  });
+
+  // 2. Sincronizar estado en Supabase Cloud Storage
+  const actualizados = locales.map((loc) => {
+    if (loc.slug.toLowerCase() !== slug.toLowerCase()) return loc;
+
+    let categoriasActualizadas = [...loc.categorias];
+    if (nombreNuevaCat) {
+      categoriasActualizadas.push({
+        id: targetCategoriaId,
+        local_id: loc.id,
+        nombre: nombreNuevaCat,
+        orden: categoriasActualizadas.length + 1,
+        productos: [nuevoProducto],
+      });
+    } else {
+      categoriasActualizadas = categoriasActualizadas.map((cat) =>
+        cat.id === targetCategoriaId
+          ? { ...cat, productos: [nuevoProducto, ...cat.productos] }
+          : cat
+      );
+    }
+
+    return {
+      ...loc,
+      categorias: categoriasActualizadas,
+    };
+  });
+
+  await writeSupabaseCloudState(actualizados);
+
+  const localActualizado = actualizados.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
+
+  return { ok: true, local: localActualizado };
+}
+
+/**
+ * Elimina un producto del local en Supabase.
+ */
+export async function deleteProductoInSupabase(
+  slug: string,
+  productoId: string
+): Promise<{ ok: boolean; local?: Local }> {
+  const supabase = getSupabaseClient();
+
+  // 1. Eliminar de tabla `productos` en Supabase PostgreSQL
+  await supabase.from("productos").delete().eq("id", productoId);
+
+  // 2. Sincronizar en Supabase Cloud Storage
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) => {
+    if (loc.slug.toLowerCase() !== slug.toLowerCase()) return loc;
+    return {
+      ...loc,
+      categorias: loc.categorias.map((cat) => ({
+        ...cat,
+        productos: cat.productos.filter((p) => p.id !== productoId),
       })),
     };
   });
