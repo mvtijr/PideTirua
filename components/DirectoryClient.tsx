@@ -589,19 +589,30 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           {/* SECCIÓN COVERFLOW 3D PERSPECTIVE CON LOS LOGOS DE LOS NEGOCIOS */}
           <section
             id="coverflow-locales"
-            className="relative w-full bg-gradient-to-b from-surface-container-low via-surface to-surface-container-lowest py-space-xl overflow-hidden border-b border-outline-variant/30"
+            className="relative w-full py-space-xl overflow-hidden border-b border-outline-variant/30"
           >
-            <div className="max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop mb-6 text-center space-y-2">
-              <div className="inline-flex items-center gap-2 bg-secondary-container/20 text-secondary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            {/* Imagen de mar de fondo suavemente difuminada */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <img
+                src="/bg-mar-tirua.jpg"
+                alt=""
+                aria-hidden="true"
+                className="h-full w-full object-cover blur-[4px] scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-primary/65 via-primary/45 to-primary/75" />
+            </div>
+
+            <div className="relative z-10 max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop mb-6 text-center space-y-2">
+              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md text-secondary-fixed border border-white/25 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                 <span className="material-symbols-outlined text-sm">
                   view_carousel
                 </span>
                 <span>Experiencia 3D • Tirúa Centro &amp; Quidico</span>
               </div>
-              <h2 className="font-headline-lg text-headline-lg text-primary font-extrabold tracking-tight">
+              <h2 className="font-headline-lg text-headline-lg text-white font-extrabold tracking-tight drop-shadow-sm">
                 Cartas Digitales de Nuestra Comuna
               </h2>
-              <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl mx-auto">
+              <p className="font-body-md text-body-md text-secondary-fixed max-w-2xl mx-auto drop-shadow-xs">
                 Selecciona un local para abrir su carta digital y pedir directo
                 por WhatsApp
               </p>
@@ -780,7 +791,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               </div>
 
               {/* Indicadores de Navegación Puntos */}
-              <div className="flex items-center justify-center gap-2 mt-4">
+              <div className="relative z-10 flex items-center justify-center gap-2 mt-4">
                 {locales.map((loc, idx) => (
                   <button
                     key={loc.id}
@@ -789,8 +800,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     onClick={() => setIndiceCoverflow(idx)}
                     className={`w-2.5 h-2.5 rounded-full transition-all ${
                       idx === indiceCoverflow
-                        ? "bg-primary scale-125"
-                        : "bg-outline-variant hover:bg-primary"
+                        ? "bg-white scale-125 shadow"
+                        : "bg-white/45 hover:bg-white/80"
                     }`}
                   />
                 ))}
