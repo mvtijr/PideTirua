@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { ItemCarrito, Local, Producto } from "@/types/local";
 import { formatPhoneDisplay } from "@/lib/formatters";
-import { getLocalTheme } from "@/lib/localTheme";
+import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
 import ProductCard from "@/components/ProductCard";
 import FloatingCartBar from "@/components/FloatingCartBar";
 import CartDrawer from "@/components/CartDrawer";
@@ -29,6 +29,8 @@ export default function MenuClient({ local }: MenuClientProps) {
   const storageKey = `pidetirua_cart_${local.slug}`;
   const theme = getLocalTheme(local.slug);
   const videoDeFondo = local.videoFondo || local.videoPortada;
+  const posterFondo = getVideoPoster(videoDeFondo, local.fotoPortada);
+  const posterPortada = getVideoPoster(local.videoPortada, local.fotoPortada);
 
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
   const [hidratado, setHidratado] = useState(false);
@@ -152,20 +154,19 @@ export default function MenuClient({ local }: MenuClientProps) {
         <div
           className={`pointer-events-none fixed inset-0 z-0 overflow-hidden ${theme.pageBg}`}
         >
-          {/* Capa ambiental difuminada para rellenar bordes en pantallas verticales o ultra-anchas */}
-          <video
-            src={videoDeFondo}
-            poster={local.fotoPortada}
-            autoPlay
-            loop
-            muted
-            playsInline
+          {/* Capa ambiental difuminada con imagen ultraligera para rellenar bordes sin duplicar el video */}
+          <img
+            src={posterFondo}
+            alt=""
+            aria-hidden="true"
+            decoding="async"
             className="h-full w-full object-cover blur-xl opacity-45"
           />
           {/* Video principal alejado (object-contain) para que se vea completo de extremo a extremo */}
           <video
             src={videoDeFondo}
-            poster={local.fotoPortada}
+            poster={posterFondo}
+            preload="auto"
             autoPlay
             loop
             muted
@@ -192,7 +193,8 @@ export default function MenuClient({ local }: MenuClientProps) {
             {local.videoPortada ? (
               <video
                 src={local.videoPortada}
-                poster={local.fotoPortada}
+                poster={posterPortada}
+                preload="auto"
                 autoPlay
                 loop
                 muted

@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Local } from "@/types/local";
+import { getVideoPoster } from "@/lib/localTheme";
 
 interface LocalCardProps {
   local: Local;
@@ -9,38 +11,75 @@ interface LocalCardProps {
 }
 
 export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
+  const cardRef = useRef<HTMLElement | null>(null);
+  const [enPantalla, setEnPantalla] = useState(false);
+
   const totalProductos = local.categorias.reduce(
     (acc, cat) => acc + cat.productos.length,
     0
   );
 
+  const videoSrc = local.videoFondo || local.videoPortada;
+  const posterSrc = getVideoPoster(videoSrc, local.fotoPortada);
+
+  // Cargar el video de las tarjetas inferiores solo cuando el usuario se acerca haciendo scroll,
+  // liberando todo el ancho de banda inicial para el carrusel 3D superior.
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || !videoSrc) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setEnPantalla(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "300px" }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [videoSrc]);
+
   return (
     <article
+      ref={cardRef}
       id={`local-${local.slug}`}
       className="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group"
     >
       {/* Imagen o Video & Badges Flotantes */}
       <div className="relative aspect-video w-full overflow-hidden bg-[#171614]">
-        {local.videoFondo || local.videoPortada ? (
+        {videoSrc ? (
           <>
-            <video
-              src={local.videoFondo || local.videoPortada}
-              poster={local.fotoPortada}
-              autoPlay
-              loop
-              muted
-              playsInline
+            <img
+              src={posterSrc}
+              alt=""
+              aria-hidden="true"
+              decoding="async"
+              loading="lazy"
               className="pointer-events-none absolute inset-0 h-full w-full object-cover blur-md opacity-50"
             />
-            <video
-              src={local.videoFondo || local.videoPortada}
-              poster={local.fotoPortada}
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="relative z-10 w-full h-full object-contain"
-            />
+            {enPantalla ? (
+              <video
+                src={videoSrc}
+                poster={posterSrc}
+                preload="metadata"
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="relative z-10 w-full h-full object-contain"
+              />
+            ) : (
+              <img
+                src={posterSrc}
+                alt={`Portada de ${local.nombre}`}
+                loading="lazy"
+                decoding="async"
+                className="relative z-10 w-full h-full object-contain"
+              />
+            )}
           </>
         ) : (
           <img

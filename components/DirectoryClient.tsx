@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CategoriaFiltro, Local, SectorComuna } from "@/types/local";
 import { CATEGORIAS_DIRECTORIO } from "@/lib/locales";
 import { formatCLP } from "@/lib/formatters";
+import { getVideoPoster } from "@/lib/localTheme";
 import LocalCard from "@/components/LocalCard";
 
 interface DirectoryClientProps {
@@ -688,24 +689,29 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                       style={estilo}
                       className="coverflow-card absolute w-[280px] sm:w-[310px] md:w-[340px] h-[450px] md:h-[490px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl bg-surface-container-lowest border border-white/70"
                     >
-                      {/* Contenedor central con video de fondo completo (sin zoom excesivo) y el LOGO del negocio */}
+                      {/* Contenedor central con video de fondo optimizado (1 solo decodificador por tarjeta + poster instantáneo) y el LOGO del negocio */}
                       <div className="absolute inset-0 bg-[#171614] flex items-center justify-center p-8 pb-36">
                         {(local.videoFondo || local.videoPortada) && (
                           <>
-                            {/* Fondo ambiental difuminado para cubrir alto de la tarjeta vertical */}
-                            <video
-                              src={local.videoFondo || local.videoPortada}
-                              poster={local.fotoPortada}
-                              autoPlay
-                              loop
-                              muted
-                              playsInline
+                            {/* Fondo ambiental ligero con imagen estática del primer fotograma (ahorra 50% de decodificadores de video) */}
+                            <img
+                              src={getVideoPoster(
+                                local.videoFondo || local.videoPortada,
+                                local.fotoPortada
+                              )}
+                              alt=""
+                              aria-hidden="true"
+                              decoding="async"
                               className="pointer-events-none absolute inset-0 h-full w-full object-cover blur-md opacity-55"
                             />
-                            {/* Video principal alejado (object-contain) en la mitad superior/central para que se vea completo */}
+                            {/* Video principal optimizado (faststart) con poster instantáneo del primer fotograma */}
                             <video
                               src={local.videoFondo || local.videoPortada}
-                              poster={local.fotoPortada}
+                              poster={getVideoPoster(
+                                local.videoFondo || local.videoPortada,
+                                local.fotoPortada
+                              )}
+                              preload="auto"
                               autoPlay
                               loop
                               muted
