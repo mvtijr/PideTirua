@@ -149,11 +149,23 @@ export default function MenuClient({ local }: MenuClientProps) {
         {/* Portada e Identidad del Local */}
         <header className="relative">
           <div className="relative h-52 w-full overflow-hidden bg-primary sm:h-60">
-            <img
-              src={local.fotoPortada}
-              alt={local.nombre}
-              className="h-full w-full object-cover"
-            />
+            {local.videoPortada ? (
+              <video
+                src={local.videoPortada}
+                poster={local.fotoPortada}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <img
+                src={local.fotoPortada}
+                alt={local.nombre}
+                className="h-full w-full object-cover"
+              />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/45 to-primary/30" />
 
             {/* Barra superior de navegación */}

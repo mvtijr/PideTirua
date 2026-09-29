@@ -43,6 +43,7 @@ export interface Local {
   calificacion: number;
   descripcionCorta: string;
   fotoPortada: string;
+  videoPortada?: string;
   logo: string;
   abierto: boolean;
   categorias: CategoriaMenu[];
