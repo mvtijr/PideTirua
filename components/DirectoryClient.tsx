@@ -6,6 +6,7 @@ import { CategoriaFiltro, Local, SectorComuna } from "@/types/local";
 import { CATEGORIAS_DIRECTORIO } from "@/lib/locales";
 import { formatCLP } from "@/lib/formatters";
 import { getVideoPoster } from "@/lib/localTheme";
+import { GradientWave } from "@/components/ui/gradient-wave";
 import LocalCard from "@/components/LocalCard";
 
 interface DirectoryClientProps {
@@ -219,9 +220,12 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
   };
 
   return (
-    <>
+    <div className="relative min-h-screen w-full">
+      {/* Fondo animado WebGL GradientWave en toda la página principal */}
+      <GradientWave className="fixed inset-0 pointer-events-none z-0" />
+
       {/* HEADER FIJO SUPERIOR */}
-      <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_4px_16px_-2px_rgba(12,74,110,0.08)]">
+      <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_4px_16px_-2px_rgba(12,74,110,0.08)]">
         <div className="h-20 max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md">
           <div className="flex items-center gap-space-md flex-shrink-0">
             <Link href="/" className="flex items-center gap-space-xs">
@@ -304,10 +308,10 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </div>
       </header>
 
-      <main className="w-full pt-20 bg-surface min-h-[calc(100vh-20rem)]">
+      <main className="relative z-10 w-full pt-20 min-h-[calc(100vh-20rem)]">
         <div className="flex flex-col w-full">
           {/* HERO CON ESPÍRITU LAFKENCHE Y COSTA DEL PACÍFICO */}
-          <section className="relative w-full bg-primary overflow-hidden text-on-primary">
+          <section className="relative w-full bg-primary/70 backdrop-blur-[1px] overflow-hidden text-on-primary">
             {/* Patrón geométrico sutil estilo textil Lafkenche de fondo */}
             <div className="absolute inset-0 opacity-10 pointer-events-none">
               <svg
@@ -335,8 +339,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               </svg>
             </div>
 
-            {/* Gradiente oceánico profundo con bruma costera */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary-container/80 to-transparent" />
+            {/* Gradiente oceánico profundo con bruma costera permitiendo ver las olas WebGL */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/85 via-primary-container/65 to-primary/35" />
 
             <div className="relative max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl lg:py-24 grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-center">
               <div className="lg:col-span-7 space-y-space-md z-10">
@@ -844,7 +848,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </section>
 
           {/* CHIPS DE FILTRO RÁPIDO STICKY */}
-          <section className="w-full bg-surface-container-lowest shadow-sm sticky top-20 z-40">
+          <section className="w-full bg-white/85 backdrop-blur-md shadow-sm sticky top-20 z-40">
             <div className="max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-sm overflow-x-auto no-scrollbar">
               <div className="flex items-center gap-space-xs min-w-max">
                 <span className="font-label-md text-label-md text-outline mr-2 hidden sm:inline">
@@ -922,7 +926,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             id="directorio-locales"
             className="max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl w-full space-y-space-xl scroll-mt-32"
           >
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-sm pb-space-xs">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-sm rounded-2xl bg-white/80 backdrop-blur-md border border-white/70 p-5 shadow-sm">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-tertiary text-2xl">
@@ -995,7 +999,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       </main>
 
       {/* FOOTER COMUNAL */}
-      <footer className="w-full bg-surface-container-low mt-space-xl border-t border-outline-variant/30">
+      <footer className="relative z-10 w-full bg-white/85 backdrop-blur-md mt-space-xl border-t border-outline-variant/30">
         <div className="max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl">
           <div className="flex flex-col md:flex-row items-center justify-between gap-space-md text-center md:text-left">
             <div className="flex items-center gap-2.5">
@@ -1080,6 +1084,6 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
