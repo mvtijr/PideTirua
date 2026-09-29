@@ -102,9 +102,14 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
             >
               {local.ubicacion}
             </span>
-            <span className="bg-green-600 text-white font-label-sm text-label-sm px-space-sm py-0.5 rounded-full font-bold flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-              {local.abierto ? "Abierto ahora" : "Cerrado"}
+            <span
+              className={`font-label-sm text-label-sm px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-sm backdrop-blur-md ${
+                local.abierto
+                  ? "bg-emerald-600/95 text-white border border-emerald-400/40"
+                  : "bg-rose-600/95 text-white border border-rose-400/40"
+              }`}
+            >
+              <span>{local.abierto ? "🟢 Abierto" : "🔴 Cerrado"}</span>
             </span>
           </div>
 
@@ -165,14 +170,25 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
                 {local.rubro}
               </span>
               <span className="text-[11px] text-outline block">
-                {local.horarioEntrega}
+                Horario: {local.horario || local.horarioEntrega}
               </span>
             </div>
           </div>
 
-          <h3 className="font-headline-sm text-headline-sm text-primary font-bold mt-1 group-hover:text-secondary transition-colors">
-            {local.nombre}
-          </h3>
+          <div className="flex items-center justify-between gap-2 mt-1">
+            <h3 className="font-headline-sm text-headline-sm text-primary font-bold group-hover:text-secondary transition-colors truncate">
+              {local.nombre}
+            </h3>
+            <span
+              className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold border ${
+                local.abierto
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : "bg-rose-50 text-rose-700 border-rose-200"
+              }`}
+            >
+              {local.abierto ? "🟢 Abierto" : "🔴 Cerrado"}
+            </span>
+          </div>
           <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-1">
             {local.descripcionCorta}
           </p>

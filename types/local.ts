@@ -37,6 +37,8 @@ export interface Local {
   ubicacion: string;
   direccionDetalle: string;
   telefonoWhatsapp: string;
+  telefono_whatsapp?: string;
+  horario: string;
   horarioEntrega: string;
   tiempoEstimado: string;
   costoDelivery?: number;

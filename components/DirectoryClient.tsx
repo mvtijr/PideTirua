@@ -742,10 +742,18 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
                       {/* Badge de Estado */}
                       <div className="absolute top-16 left-4 z-10 pointer-events-none">
-                        <span className="inline-flex items-center gap-1.5 bg-green-600 text-white px-3 py-1 rounded-full text-[11px] font-bold shadow-md">
-                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
-                          {local.abierto ? "Abierto ahora" : "Cerrado"} ·{" "}
-                          {local.tiempoEstimado}
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold shadow-md backdrop-blur-md border ${
+                            local.abierto
+                              ? "bg-emerald-600/95 text-white border-emerald-400/40"
+                              : "bg-rose-600/95 text-white border-rose-400/40"
+                          }`}
+                        >
+                          <span>
+                            {local.abierto ? "🟢 Abierto" : "🔴 Cerrado"}
+                          </span>
+                          <span>•</span>
+                          <span>{local.horario || local.tiempoEstimado}</span>
                         </span>
                       </div>
 

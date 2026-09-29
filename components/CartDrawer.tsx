@@ -111,6 +111,13 @@ export default function CartDrawer({
   const handleEnviarWhatsApp = (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!local.abierto) {
+      setErrorValidacion(
+        "En este momento el local se encuentra cerrado y no está recibiendo pedidos."
+      );
+      return;
+    }
+
     if (items.length === 0) {
       setErrorValidacion("Agrega al menos un producto a tu pedido.");
       return;
@@ -190,6 +197,24 @@ export default function CartDrawer({
           className="flex flex-1 flex-col overflow-hidden"
         >
           <div className="flex-1 space-y-6 overflow-y-auto px-4 py-5 sm:px-6">
+            {/* Banner de advertencia si el local está cerrado */}
+            {!local.abierto && (
+              <div
+                role="alert"
+                className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs sm:text-sm font-semibold leading-relaxed text-amber-950 shadow-sm"
+              >
+                <p>
+                  ⚠️ En este momento el local se encuentra cerrado. Puedes
+                  revisar la carta, pero no se están recibiendo pedidos.
+                </p>
+                {local.horario && (
+                  <p className="mt-1 text-xs font-bold text-rose-700">
+                    🔴 Horario de atención: {local.horario}
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* 1. Lista de ítems seleccionados */}
             <div>
               <div className="mb-3 flex items-center justify-between">
@@ -460,11 +485,15 @@ export default function CartDrawer({
 
             <button
               type="submit"
-              disabled={items.length === 0}
-              className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[#25D366] px-5 py-4 text-base font-extrabold text-white shadow-lg shadow-[#25D366]/25 transition hover:bg-[#20bd5a] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-outline-variant disabled:shadow-none"
+              disabled={!local.abierto || items.length === 0}
+              className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[#25D366] px-5 py-4 text-base font-extrabold text-white shadow-lg shadow-[#25D366]/25 transition hover:bg-[#20bd5a] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:opacity-65 disabled:shadow-none"
             >
               <MessageCircle className="h-5 w-5 fill-white" />
-              <span>Enviar pedido a WhatsApp</span>
+              <span>
+                {local.abierto
+                  ? "Enviar pedido a WhatsApp"
+                  : "Local Cerrado por ahora"}
+              </span>
             </button>
           </div>
         </form>

@@ -31,6 +31,11 @@ export default function MenuClient({ local }: MenuClientProps) {
   const videoDeFondo = local.videoFondo || local.videoPortada;
   const posterFondo = getVideoPoster(videoDeFondo, local.fotoPortada);
   const posterPortada = getVideoPoster(local.videoPortada, local.fotoPortada);
+  const telefonoDirecto = local.telefono_whatsapp || local.telefonoWhatsapp;
+  const horaApertura = (local.horario || local.horarioEntrega)
+    .split(" a ")[0]
+    ?.replace(/^.*·\s*/, "")
+    .trim();
 
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
   const [hidratado, setHidratado] = useState(false);
@@ -254,9 +259,15 @@ export default function MenuClient({ local }: MenuClientProps) {
               <div className="min-w-0 flex-1 text-on-primary">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider ${theme.statusBadge}`}
+                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold shadow-sm backdrop-blur-md border ${
+                      local.abierto
+                        ? "bg-emerald-600/95 text-white border-emerald-400/40"
+                        : "bg-rose-600/95 text-white border-rose-400/40"
+                    }`}
                   >
-                    {local.abierto ? "Abierto" : "Cerrado"}
+                    {local.abierto
+                      ? `🟢 Abierto • ${local.horario}`
+                      : `🔴 Cerrado • Abre hoy a las ${horaApertura} hrs`}
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-xs font-bold text-[#F8DC4B]">
                     <Star className="h-3 w-3 fill-[#F8DC4B] text-[#F8DC4B]" />
@@ -275,6 +286,37 @@ export default function MenuClient({ local }: MenuClientProps) {
 
           {/* Ficha informativa del Local + Botón de Llamada Directa */}
           <div className={`border-b px-4 py-4 ${theme.infoSectionBg}`}>
+            {/* Cabecera compacta con Nombre, Dirección, Horario y Botón de Llamada Rápida */}
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${
+                      local.abierto
+                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/35"
+                        : "bg-rose-500/15 text-rose-400 border-rose-500/35"
+                    }`}
+                  >
+                    {local.abierto
+                      ? `🟢 Abierto • ${local.horario}`
+                      : `🔴 Cerrado • Abre hoy a las ${horaApertura} hrs`}
+                  </span>
+                </div>
+                <p className={`mt-1.5 flex items-center gap-1.5 text-xs ${theme.infoSub}`}>
+                  <MapPin className={`h-3.5 w-3.5 shrink-0 ${theme.infoIcon}`} />
+                  <span className="truncate">{local.direccionDetalle}</span>
+                </p>
+              </div>
+
+              <a
+                href={`tel:+${telefonoDirecto}`}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-3.5 py-2 text-xs font-bold text-emerald-300 shadow-sm backdrop-blur-sm transition hover:bg-emerald-500/25 active:scale-95"
+              >
+                <Phone className="h-3.5 w-3.5 text-emerald-400" />
+                <span>Llamar al local</span>
+              </a>
+            </div>
+
             <p
               className={`text-xs leading-relaxed sm:text-sm ${theme.infoDescText}`}
             >
@@ -304,10 +346,10 @@ export default function MenuClient({ local }: MenuClientProps) {
                 />
                 <div>
                   <span className={`font-bold ${theme.infoTitle}`}>
-                    Preparación est.: {local.tiempoEstimado}
+                    Horario: {local.horario}
                   </span>
                   <p className={`text-[11px] ${theme.infoSub}`}>
-                    {local.horarioEntrega}
+                    Preparación est.: {local.tiempoEstimado}
                   </p>
                 </div>
               </div>
@@ -323,7 +365,7 @@ export default function MenuClient({ local }: MenuClientProps) {
               </div>
 
               <a
-                href={`tel:+${local.telefonoWhatsapp}`}
+                href={`tel:+${telefonoDirecto}`}
                 className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition active:scale-95 ${theme.callBtn}`}
               >
                 <Phone className={`h-3.5 w-3.5 ${theme.callIcon}`} />
