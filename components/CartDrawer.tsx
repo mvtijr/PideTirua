@@ -32,6 +32,7 @@ import {
   formatPhoneDisplay,
   formatWhatsAppMessage,
 } from "@/lib/formatters";
+import { getLocalTheme } from "@/lib/localTheme";
 
 interface CartDrawerProps {
   abierto: boolean;
@@ -85,7 +86,7 @@ export default function CartDrawer({
 
   if (!abierto) return null;
 
-  const esLasTranqueras = local.slug === "las-tranqueras";
+  const theme = getLocalTheme(local.slug);
 
   const datosCheckout: DatosCheckout = {
     nombreCliente,
@@ -161,17 +162,11 @@ export default function CartDrawer({
       >
         {/* Cabecera del Drawer */}
         <div
-          className={`flex items-center justify-between border-b px-4 py-4 sm:px-6 ${
-            esLasTranqueras
-              ? "border-[#F8DC4B]/30 bg-[#171614] text-white"
-              : "border-outline-variant/30 bg-primary text-on-primary"
-          }`}
+          className={`flex items-center justify-between border-b px-4 py-4 sm:px-6 ${theme.drawerHeader}`}
         >
           <div>
             <span
-              className={`text-[11px] font-semibold uppercase tracking-wider ${
-                esLasTranqueras ? "text-[#F8DC4B]" : "text-secondary-fixed"
-              }`}
+              className={`text-[11px] font-semibold uppercase tracking-wider ${theme.drawerHeaderSub}`}
             >
               Pedido directo a WhatsApp
             </span>
@@ -182,11 +177,7 @@ export default function CartDrawer({
           <button
             type="button"
             onClick={onClose}
-            className={`rounded-full p-2 transition ${
-              esLasTranqueras
-                ? "bg-neutral-800 text-[#F8DC4B] hover:bg-[#F8DC4B] hover:text-[#171614]"
-                : "bg-primary-container text-secondary-fixed hover:bg-secondary hover:text-white"
-            }`}
+            className={`rounded-full p-2 transition ${theme.drawerCloseBtn}`}
             aria-label="Cerrar carrito"
           >
             <X className="h-5 w-5" />
@@ -224,11 +215,7 @@ export default function CartDrawer({
                 </div>
               ) : (
                 <div
-                  className={`divide-y rounded-2xl border ${
-                    esLasTranqueras
-                      ? "divide-[#F8DC4B]/30 border-[#F8DC4B]/50 bg-[#FFFDF2]"
-                      : "divide-outline-variant/30 border-outline-variant/40 bg-surface-container-low/60"
-                  }`}
+                  className={`divide-y rounded-2xl border ${theme.drawerItemsBox}`}
                 >
                   {items.map(({ producto, cantidad }) => (
                     <div
@@ -237,60 +224,38 @@ export default function CartDrawer({
                     >
                       <div className="min-w-0 flex-1">
                         <p
-                          className={`truncate text-sm font-bold ${
-                            esLasTranqueras ? "text-[#171614]" : "text-primary"
-                          }`}
+                          className={`truncate text-sm font-bold ${theme.drawerItemTitle}`}
                         >
                           {producto.nombre}
                         </p>
                         <p className="text-xs font-medium text-on-surface-variant">
                           {formatCLP(producto.precio)} c/u ·{" "}
-                          <strong
-                            className={
-                              esLasTranqueras
-                                ? "text-[#171614]"
-                                : "text-tertiary"
-                            }
-                          >
+                          <strong className={theme.drawerItemTotal}>
                             {formatCLP(producto.precio * cantidad)}
                           </strong>
                         </p>
                       </div>
 
                       <div
-                        className={`flex items-center gap-2 rounded-xl border bg-white p-1 shadow-2xs ${
-                          esLasTranqueras
-                            ? "border-[#F8DC4B]"
-                            : "border-outline-variant/50"
-                        }`}
+                        className={`flex items-center gap-2 rounded-xl border bg-white p-1 shadow-2xs ${theme.cardCounterBox}`}
                       >
                         <button
                           type="button"
                           onClick={() => onDisminuir(producto.id)}
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg active:scale-95 ${
-                            esLasTranqueras
-                              ? "bg-[#FEF9C3] text-[#171614] hover:bg-[#F8DC4B]"
-                              : "bg-surface-container text-primary hover:bg-surface-container-high"
-                          }`}
+                          className={`flex h-7 w-7 items-center justify-center rounded-lg active:scale-95 ${theme.cardMinusBtn}`}
                           aria-label="Disminuir cantidad"
                         >
                           <Minus className="h-3.5 w-3.5" />
                         </button>
                         <span
-                          className={`min-w-[1.25rem] text-center text-sm font-extrabold ${
-                            esLasTranqueras ? "text-[#171614]" : "text-primary"
-                          }`}
+                          className={`min-w-[1.25rem] text-center text-sm font-extrabold ${theme.cardQtyText}`}
                         >
                           {cantidad}
                         </span>
                         <button
                           type="button"
                           onClick={() => onAgregar(producto)}
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg active:scale-95 ${
-                            esLasTranqueras
-                              ? "bg-[#171614] text-[#F8DC4B] hover:bg-neutral-800"
-                              : "bg-primary text-on-primary hover:bg-primary-container"
-                          }`}
+                          className={`flex h-7 w-7 items-center justify-center rounded-lg active:scale-95 ${theme.cardPlusBtn}`}
                           aria-label="Aumentar cantidad"
                         >
                           <Plus className="h-3.5 w-3.5" />
@@ -320,18 +285,14 @@ export default function CartDrawer({
                       }}
                       className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border p-3 text-center text-xs font-bold transition ${
                         seleccionado
-                          ? esLasTranqueras
-                            ? "border-[#171614] bg-[#FEF9C3]/60 text-[#171614] ring-2 ring-[#F8DC4B]"
-                            : "border-primary bg-surface-container text-primary ring-2 ring-primary/20"
+                          ? theme.drawerOptionActive
                           : "border-outline-variant/50 bg-white text-on-surface-variant hover:border-secondary"
                       }`}
                     >
                       <Icon
                         className={`h-5 w-5 ${
                           seleccionado
-                            ? esLasTranqueras
-                              ? "text-[#171614]"
-                              : "text-secondary"
+                            ? theme.drawerOptionIconActive
                             : "text-outline"
                         }`}
                       />
@@ -342,13 +303,7 @@ export default function CartDrawer({
               </div>
               <p className="mt-1.5 text-xs text-on-surface-variant">
                 Modalidad seleccionada:{" "}
-                <strong
-                  className={
-                    esLasTranqueras ? "text-[#171614]" : "text-primary"
-                  }
-                >
-                  {tipoEntrega}
-                </strong>
+                <strong className={theme.drawerLabel}>{tipoEntrega}</strong>
               </p>
             </div>
 
@@ -362,15 +317,9 @@ export default function CartDrawer({
               <div>
                 <label
                   htmlFor="nombreCliente"
-                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${
-                    esLasTranqueras ? "text-[#171614]" : "text-primary"
-                  }`}
+                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
                 >
-                  <User
-                    className={`h-3.5 w-3.5 ${
-                      esLasTranqueras ? "text-[#171614]" : "text-secondary"
-                    }`}
-                  />
+                  <User className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
                   Nombre del cliente *
                 </label>
                 <input
@@ -390,15 +339,9 @@ export default function CartDrawer({
               <div>
                 <label
                   htmlFor="direccionOMesa"
-                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${
-                    esLasTranqueras ? "text-[#171614]" : "text-primary"
-                  }`}
+                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
                 >
-                  <MapPin
-                    className={`h-3.5 w-3.5 ${
-                      esLasTranqueras ? "text-[#171614]" : "text-secondary"
-                    }`}
-                  />
+                  <MapPin className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
                   {labelUbicacion}
                 </label>
                 <input
@@ -417,9 +360,7 @@ export default function CartDrawer({
               {/* Método de pago */}
               <div>
                 <span
-                  className={`mb-1.5 block text-xs font-bold ${
-                    esLasTranqueras ? "text-[#171614]" : "text-primary"
-                  }`}
+                  className={`mb-1.5 block text-xs font-bold ${theme.drawerLabel}`}
                 >
                   Método de pago
                 </span>
@@ -433,18 +374,14 @@ export default function CartDrawer({
                         onClick={() => setMetodoPago(valor)}
                         className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition ${
                           activo
-                            ? esLasTranqueras
-                              ? "border-[#171614] bg-[#FEF9C3]/60 text-[#171614] ring-2 ring-[#F8DC4B]"
-                              : "border-primary bg-surface-container text-primary ring-2 ring-primary/20"
+                            ? theme.drawerOptionActive
                             : "border-outline-variant/50 bg-white text-on-surface-variant hover:border-secondary"
                         }`}
                       >
                         <Icon
                           className={`h-4 w-4 shrink-0 ${
                             activo
-                              ? esLasTranqueras
-                                ? "text-[#171614]"
-                                : "text-secondary"
+                              ? theme.drawerOptionIconActive
                               : "text-outline"
                           }`}
                         />
@@ -459,14 +396,10 @@ export default function CartDrawer({
               <div>
                 <label
                   htmlFor="notasAdicionales"
-                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${
-                    esLasTranqueras ? "text-[#171614]" : "text-primary"
-                  }`}
+                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
                 >
                   <FileText
-                    className={`h-3.5 w-3.5 ${
-                      esLasTranqueras ? "text-[#171614]" : "text-secondary"
-                    }`}
+                    className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`}
                   />
                   Notas adicionales (opcional)
                 </label>
@@ -486,9 +419,7 @@ export default function CartDrawer({
               <button
                 type="button"
                 onClick={() => setMostrarVistaPrevia((prev) => !prev)}
-                className={`flex w-full items-center justify-between text-xs font-bold ${
-                  esLasTranqueras ? "text-[#171614]" : "text-primary"
-                }`}
+                className={`flex w-full items-center justify-between text-xs font-bold ${theme.drawerLabel}`}
               >
                 <span className="inline-flex items-center gap-1.5">
                   <Eye className="h-3.5 w-3.5 text-[#25D366]" />
@@ -501,11 +432,7 @@ export default function CartDrawer({
               </button>
               {mostrarVistaPrevia && (
                 <pre
-                  className={`mt-2.5 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg p-3 font-mono text-[11px] leading-relaxed ${
-                    esLasTranqueras
-                      ? "bg-[#171614] text-[#F8DC4B]"
-                      : "bg-primary text-secondary-fixed"
-                  }`}
+                  className={`mt-2.5 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg p-3 font-mono text-[11px] leading-relaxed ${theme.drawerPreviewBox}`}
                 >
                   {mensajePrevia}
                 </pre>
@@ -523,16 +450,10 @@ export default function CartDrawer({
           {/* Resumen de Total y Botón de Checkout a WhatsApp */}
           <div className="border-t border-outline-variant/40 bg-surface-container-low p-4 sm:px-6">
             <div
-              className={`mb-3 flex items-center justify-between text-base font-extrabold ${
-                esLasTranqueras ? "text-[#171614]" : "text-primary"
-              }`}
+              className={`mb-3 flex items-center justify-between text-base font-extrabold ${theme.drawerLabel}`}
             >
               <span>Total a pagar</span>
-              <span
-                className={`text-lg ${
-                  esLasTranqueras ? "text-[#171614]" : "text-tertiary"
-                }`}
-              >
+              <span className={`text-lg ${theme.drawerItemTotal}`}>
                 {formatCLP(total)}
               </span>
             </div>

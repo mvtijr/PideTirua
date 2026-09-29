@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { ItemCarrito, Local, Producto } from "@/types/local";
 import { formatPhoneDisplay } from "@/lib/formatters";
+import { getLocalTheme } from "@/lib/localTheme";
 import ProductCard from "@/components/ProductCard";
 import FloatingCartBar from "@/components/FloatingCartBar";
 import CartDrawer from "@/components/CartDrawer";
@@ -26,7 +27,8 @@ interface MenuClientProps {
 
 export default function MenuClient({ local }: MenuClientProps) {
   const storageKey = `pidetirua_cart_${local.slug}`;
-  const esLasTranqueras = local.slug === "las-tranqueras";
+  const theme = getLocalTheme(local.slug);
+  const videoDeFondo = local.videoFondo || local.videoPortada;
 
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
   const [hidratado, setHidratado] = useState(false);
@@ -144,17 +146,15 @@ export default function MenuClient({ local }: MenuClientProps) {
   };
 
   return (
-    <div
-      className={`relative min-h-screen pb-28 ${
-        esLasTranqueras ? "bg-[#171614]" : "bg-surface"
-      }`}
-    >
-      {/* Video de fondo fijo a pantalla completa para la carta digital de Las Tranqueras (vista completa sin recorte) */}
-      {esLasTranqueras && (local.videoFondo || local.videoPortada) && (
-        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#171614]">
+    <div className={`relative min-h-screen pb-28 ${theme.pageBg}`}>
+      {/* Video de fondo fijo a pantalla completa detrás de toda la carta digital (encuadre alejado y completo) */}
+      {videoDeFondo && (
+        <div
+          className={`pointer-events-none fixed inset-0 z-0 overflow-hidden ${theme.pageBg}`}
+        >
           {/* Capa ambiental difuminada para rellenar bordes en pantallas verticales o ultra-anchas */}
           <video
-            src={local.videoFondo || local.videoPortada}
+            src={videoDeFondo}
             poster={local.fotoPortada}
             autoPlay
             loop
@@ -164,7 +164,7 @@ export default function MenuClient({ local }: MenuClientProps) {
           />
           {/* Video principal alejado (object-contain) para que se vea completo de extremo a extremo */}
           <video
-            src={local.videoFondo || local.videoPortada}
+            src={videoDeFondo}
             poster={local.fotoPortada}
             autoPlay
             loop
@@ -172,26 +172,22 @@ export default function MenuClient({ local }: MenuClientProps) {
             playsInline
             className="absolute inset-0 h-full w-full object-contain blur-[2px]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#171614]/60 via-[#171614]/50 to-[#171614]/75" />
+          <div
+            className={`absolute inset-0 bg-gradient-to-b ${theme.videoOverlayGradient}`}
+          />
         </div>
       )}
 
-      {/* Contenedor Mobile-First (optimizado para lectura QR en celular) */}
+      {/* Contenedor Mobile-First (optimizado para lectura QR en celular) con acabado translúcido */}
       <div
-        className={`relative z-10 mx-auto max-w-xl min-h-screen ${
-          esLasTranqueras
-            ? "bg-[#171614]/40 backdrop-blur-[2px] shadow-2xl sm:border-x sm:border-[#F8DC4B]/25"
-            : "bg-surface-container-lowest shadow-md"
-        }`}
+        className={`relative z-10 mx-auto max-w-xl min-h-screen ${theme.containerBg}`}
       >
         {/* Portada e Identidad del Local */}
         <header className="relative">
           <div
             className={`relative w-full overflow-hidden ${
-              local.videoPortada
-                ? "aspect-video"
-                : "h-52 sm:h-60"
-            } ${esLasTranqueras ? "bg-[#171614]" : "bg-primary"}`}
+              local.videoPortada ? "aspect-video" : "h-52 sm:h-60"
+            } ${theme.headerBg}`}
           >
             {local.videoPortada ? (
               <video
@@ -201,7 +197,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 loop
                 muted
                 playsInline
-                className="h-full w-full object-contain bg-[#171614]"
+                className={`h-full w-full object-contain ${theme.headerBg}`}
               />
             ) : (
               <img
@@ -211,22 +207,14 @@ export default function MenuClient({ local }: MenuClientProps) {
               />
             )}
             <div
-              className={`absolute inset-0 bg-gradient-to-t ${
-                esLasTranqueras
-                  ? "from-[#171614]/95 via-[#171614]/45 to-black/25"
-                  : "from-primary/95 via-primary/45 to-primary/30"
-              }`}
+              className={`absolute inset-0 bg-gradient-to-t ${theme.headerGradient}`}
             />
 
             {/* Barra superior de navegación */}
             <div className="absolute left-3 right-3 top-3 flex items-center justify-between">
               <Link
                 href="/"
-                className={`inline-flex items-center gap-2 rounded-full pl-2 pr-3.5 py-1.5 text-xs font-bold backdrop-blur-md transition ${
-                  esLasTranqueras
-                    ? "bg-[#171614]/90 text-[#F8DC4B] ring-1 ring-[#F8DC4B]/50 hover:bg-[#171614]"
-                    : "bg-primary/85 text-on-primary hover:bg-primary"
-                }`}
+                className={`inline-flex items-center gap-2 rounded-full pl-2 pr-3.5 py-1.5 text-xs font-bold backdrop-blur-md transition ${theme.backBtn}`}
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <img
@@ -241,18 +229,10 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <button
                   type="button"
                   onClick={() => setMostrarQr(true)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold shadow backdrop-blur-md transition ${
-                    esLasTranqueras
-                      ? "bg-[#F8DC4B] text-[#171614] hover:bg-[#f6d52b]"
-                      : "bg-surface-container-lowest/95 text-primary hover:bg-white"
-                  }`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold shadow backdrop-blur-md transition ${theme.qrBtn}`}
                   aria-label="Mostrar código QR del local"
                 >
-                  <QrCode
-                    className={`h-3.5 w-3.5 ${
-                      esLasTranqueras ? "text-[#171614]" : "text-secondary"
-                    }`}
-                  />
+                  <QrCode className={`h-3.5 w-3.5 ${theme.qrIcon}`} />
                   <span>QR Mesa</span>
                 </button>
               </div>
@@ -261,11 +241,7 @@ export default function MenuClient({ local }: MenuClientProps) {
             {/* Logo y título sobre la portada */}
             <div className="absolute bottom-4 left-4 right-4 flex items-end gap-3.5">
               <div
-                className={`h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 shadow-lg sm:h-20 sm:w-20 ${
-                  esLasTranqueras
-                    ? "border-[#F8DC4B] bg-[#F8DC4B]"
-                    : "border-white bg-white"
-                }`}
+                className={`h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 shadow-lg sm:h-20 sm:w-20 ${theme.logoBox}`}
               >
                 <img
                   src={local.logo}
@@ -276,11 +252,7 @@ export default function MenuClient({ local }: MenuClientProps) {
               <div className="min-w-0 flex-1 text-on-primary">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider ${
-                      esLasTranqueras
-                        ? "bg-[#F8DC4B] text-[#171614]"
-                        : "bg-green-600 text-white"
-                    }`}
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider ${theme.statusBadge}`}
                   >
                     {local.abierto ? "Abierto" : "Cerrado"}
                   </span>
@@ -292,13 +264,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <h1 className="mt-1 truncate text-xl font-extrabold leading-tight sm:text-2xl">
                   {local.nombre}
                 </h1>
-                <p
-                  className={`truncate text-xs font-bold ${
-                    esLasTranqueras
-                      ? "text-[#F8DC4B]"
-                      : "text-secondary-fixed"
-                  }`}
-                >
+                <p className={`truncate text-xs font-bold ${theme.rubroText}`}>
                   {local.rubro}
                 </p>
               </div>
@@ -306,51 +272,25 @@ export default function MenuClient({ local }: MenuClientProps) {
           </div>
 
           {/* Ficha informativa del Local + Botón de Llamada Directa */}
-          <div
-            className={`border-b px-4 py-4 ${
-              esLasTranqueras
-                ? "border-[#F8DC4B]/30 bg-[#171614]/80 backdrop-blur-md"
-                : "border-outline-variant/40 bg-surface-container-lowest"
-            }`}
-          >
+          <div className={`border-b px-4 py-4 ${theme.infoSectionBg}`}>
             <p
-              className={`text-xs leading-relaxed sm:text-sm ${
-                esLasTranqueras
-                  ? "text-[#FFFDF2]/90"
-                  : "text-on-surface-variant"
-              }`}
+              className={`text-xs leading-relaxed sm:text-sm ${theme.infoDescText}`}
             >
               {local.descripcionCorta}
             </p>
 
             <div
-              className={`mt-3.5 grid grid-cols-1 gap-2 rounded-2xl p-3 text-xs sm:grid-cols-2 ${
-                esLasTranqueras
-                  ? "border border-[#F8DC4B]/45 bg-[#171614]/75 text-[#FFFDF2]"
-                  : "bg-surface-container-low text-on-surface"
-              }`}
+              className={`mt-3.5 grid grid-cols-1 gap-2 rounded-2xl p-3 text-xs sm:grid-cols-2 ${theme.infoGridBox}`}
             >
               <div className="flex items-start gap-2">
                 <MapPin
-                  className={`mt-0.5 h-4 w-4 shrink-0 ${
-                    esLasTranqueras ? "text-[#F8DC4B]" : "text-secondary"
-                  }`}
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${theme.infoIcon}`}
                 />
                 <div>
-                  <span
-                    className={`font-bold ${
-                      esLasTranqueras ? "text-[#F8DC4B]" : "text-primary"
-                    }`}
-                  >
+                  <span className={`font-bold ${theme.infoTitle}`}>
                     {local.ubicacion}
                   </span>
-                  <p
-                    className={`text-[11px] ${
-                      esLasTranqueras
-                        ? "text-[#FFFDF2]/80"
-                        : "text-on-surface-variant"
-                    }`}
-                  >
+                  <p className={`text-[11px] ${theme.infoSub}`}>
                     {local.direccionDetalle}
                   </p>
                 </div>
@@ -358,25 +298,13 @@ export default function MenuClient({ local }: MenuClientProps) {
 
               <div className="flex items-start gap-2">
                 <Clock
-                  className={`mt-0.5 h-4 w-4 shrink-0 ${
-                    esLasTranqueras ? "text-[#F8DC4B]" : "text-tertiary"
-                  }`}
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${theme.infoIcon}`}
                 />
                 <div>
-                  <span
-                    className={`font-bold ${
-                      esLasTranqueras ? "text-[#F8DC4B]" : "text-primary"
-                    }`}
-                  >
+                  <span className={`font-bold ${theme.infoTitle}`}>
                     Preparación est.: {local.tiempoEstimado}
                   </span>
-                  <p
-                    className={`text-[11px] ${
-                      esLasTranqueras
-                        ? "text-[#FFFDF2]/80"
-                        : "text-on-surface-variant"
-                    }`}
-                  >
+                  <p className={`text-[11px] ${theme.infoSub}`}>
                     {local.horarioEntrega}
                   </p>
                 </div>
@@ -386,35 +314,17 @@ export default function MenuClient({ local }: MenuClientProps) {
             {/* Acciones rápidas: Modalidades de atención y llamada directa */}
             <div className="mt-3.5 flex items-center justify-between gap-3">
               <div
-                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold ${
-                  esLasTranqueras
-                    ? "bg-[#F8DC4B]/20 text-[#F8DC4B] border border-[#F8DC4B]/55"
-                    : "bg-surface-container text-primary"
-                }`}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold ${theme.modalityBadge}`}
               >
-                <Store
-                  className={`h-4 w-4 ${
-                    esLasTranqueras ? "text-[#F8DC4B]" : "text-secondary"
-                  }`}
-                />
+                <Store className={`h-4 w-4 ${theme.modalityIcon}`} />
                 <span>Retiro en local y Consumo en mesa</span>
               </div>
 
               <a
                 href={`tel:+${local.telefonoWhatsapp}`}
-                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition active:scale-95 ${
-                  esLasTranqueras
-                    ? "bg-[#F8DC4B] text-[#171614] hover:bg-[#f6d52b]"
-                    : "bg-primary text-on-primary hover:bg-primary-container"
-                }`}
+                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition active:scale-95 ${theme.callBtn}`}
               >
-                <Phone
-                  className={`h-3.5 w-3.5 ${
-                    esLasTranqueras
-                      ? "text-[#171614]"
-                      : "text-secondary-fixed"
-                  }`}
-                />
+                <Phone className={`h-3.5 w-3.5 ${theme.callIcon}`} />
                 <span>Llamar al local</span>
               </a>
             </div>
@@ -423,11 +333,7 @@ export default function MenuClient({ local }: MenuClientProps) {
 
         {/* Pestañas Sticky de Categorías + Buscador de Platos */}
         <div
-          className={`sticky top-0 z-30 border-b backdrop-blur-md ${
-            esLasTranqueras
-              ? "border-[#F8DC4B]/35 bg-[#171614]/85"
-              : "border-outline-variant/40 bg-surface-container-lowest/95"
-          }`}
+          className={`sticky top-0 z-30 border-b backdrop-blur-md ${theme.stickyBar}`}
         >
           {/* Pestañas de categorías */}
           <nav
@@ -442,13 +348,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                   type="button"
                   onClick={() => irACategoria(categoria.id)}
                   className={`filter-chip shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
-                    esLasTranqueras
-                      ? activa
-                        ? "bg-[#F8DC4B] text-[#171614] ring-2 ring-[#F8DC4B] shadow-sm"
-                        : "bg-white/10 text-[#FFFDF2] border border-[#F8DC4B]/40 hover:bg-[#F8DC4B]/20"
-                      : activa
-                      ? "bg-primary text-on-primary shadow-sm"
-                      : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"
+                    activa ? theme.tabActive : theme.tabInactive
                   }`}
                 >
                   {categoria.nombre}
@@ -466,11 +366,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 value={busquedaPlato}
                 onChange={(e) => setBusquedaPlato(e.target.value)}
                 placeholder={`Buscar en la carta de ${local.nombre}...`}
-                className={`w-full rounded-xl border py-2 pl-9 pr-8 text-xs text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none ${
-                  esLasTranqueras
-                    ? "border-[#F8DC4B]/60 bg-[#FFFDF2]/95 focus:border-[#F8DC4B]"
-                    : "border-outline-variant/40 bg-surface-container-low focus:border-secondary"
-                }`}
+                className={`w-full rounded-xl border py-2 pl-9 pr-8 text-xs text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none ${theme.searchInput}`}
               />
               {busquedaPlato && (
                 <button
@@ -497,20 +393,12 @@ export default function MenuClient({ local }: MenuClientProps) {
               >
                 <div className="mb-3 flex items-center justify-between">
                   <h2
-                    className={`text-lg font-extrabold tracking-tight ${
-                      esLasTranqueras
-                        ? "text-[#F8DC4B] drop-shadow-sm"
-                        : "text-primary"
-                    }`}
+                    className={`text-lg font-extrabold tracking-tight ${theme.categoryTitle}`}
                   >
                     {categoria.nombre}
                   </h2>
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                      esLasTranqueras
-                        ? "bg-[#F8DC4B] text-[#171614] font-bold shadow-sm"
-                        : "bg-surface-container text-on-surface-variant"
-                    }`}
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${theme.categoryCount}`}
                   >
                     {categoria.productos.length}{" "}
                     {categoria.productos.length === 1 ? "opción" : "opciones"}
@@ -527,7 +415,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                       }
                       onAgregar={handleAgregarProducto}
                       onDisminuir={handleDisminuirProducto}
-                      esLasTranqueras={esLasTranqueras}
+                      localSlug={local.slug}
                     />
                   ))}
                 </div>
@@ -535,30 +423,18 @@ export default function MenuClient({ local }: MenuClientProps) {
             ))
           ) : (
             <div
-              className={`rounded-2xl border border-dashed p-8 text-center ${
-                esLasTranqueras
-                  ? "border-[#F8DC4B]/50 bg-[#171614]/80 backdrop-blur-md"
-                  : "border-outline-variant"
-              }`}
+              className={`rounded-2xl border border-dashed p-8 text-center ${theme.emptyStateBox}`}
             >
               <UtensilsCrossed
-                className={`mx-auto h-8 w-8 ${
-                  esLasTranqueras ? "text-[#F8DC4B]" : "text-outline"
-                }`}
+                className={`mx-auto h-8 w-8 ${theme.emptyStateIcon}`}
               />
-              <p
-                className={`mt-2 text-sm font-bold ${
-                  esLasTranqueras ? "text-[#FFFDF2]" : "text-primary"
-                }`}
-              >
+              <p className={`mt-2 text-sm font-bold ${theme.emptyStateText}`}>
                 No encontramos platos con &ldquo;{busquedaPlato}&rdquo;
               </p>
               <button
                 type="button"
                 onClick={() => setBusquedaPlato("")}
-                className={`mt-3 text-xs font-bold underline ${
-                  esLasTranqueras ? "text-[#F8DC4B]" : "text-secondary"
-                }`}
+                className={`mt-3 text-xs font-bold underline ${theme.emptyStateBtn}`}
               >
                 Mostrar toda la carta
               </button>
@@ -568,27 +444,15 @@ export default function MenuClient({ local }: MenuClientProps) {
 
         {/* Pie del menú exclusivo */}
         <footer
-          className={`border-t px-4 py-6 text-center text-xs ${
-            esLasTranqueras
-              ? "border-[#F8DC4B]/35 bg-[#171614]/85 text-[#FFFDF2]/85 backdrop-blur-md"
-              : "border-outline-variant/40 bg-surface-container-low text-on-surface-variant"
-          }`}
+          className={`border-t px-4 py-6 text-center text-xs ${theme.footerBg}`}
         >
-          <p
-            className={`font-bold ${
-              esLasTranqueras ? "text-[#F8DC4B]" : "text-primary"
-            }`}
-          >
-            {local.nombre}
-          </p>
+          <p className={`font-bold ${theme.footerTitle}`}>{local.nombre}</p>
           <p className="mt-0.5">
             {local.direccionDetalle} · WhatsApp{" "}
             {formatPhoneDisplay(local.telefonoWhatsapp)}
           </p>
           <div
-            className={`mt-3 flex items-center justify-center gap-2 text-[11px] ${
-              esLasTranqueras ? "text-[#FFFDF2]/75" : "text-outline"
-            }`}
+            className={`mt-3 flex items-center justify-center gap-2 text-[11px] ${theme.footerSub}`}
           >
             <img
               src="/logo-pidetirua.jpg"
@@ -599,9 +463,7 @@ export default function MenuClient({ local }: MenuClientProps) {
               Menú digital interactivo impulsado por{" "}
               <Link
                 href="/"
-                className={`font-bold hover:underline ${
-                  esLasTranqueras ? "text-[#F8DC4B]" : "text-secondary"
-                }`}
+                className={`font-bold hover:underline ${theme.footerLink}`}
               >
                 PideTirúa
               </Link>
@@ -615,7 +477,7 @@ export default function MenuClient({ local }: MenuClientProps) {
         totalUnidades={totalUnidades}
         subtotal={subtotal}
         onOpenDrawer={() => setDrawerAbierto(true)}
-        esLasTranqueras={esLasTranqueras}
+        localSlug={local.slug}
       />
 
       {/* Drawer lateral de Checkout a WhatsApp */}
@@ -641,9 +503,7 @@ export default function MenuClient({ local }: MenuClientProps) {
           >
             <div className="flex items-center justify-between">
               <span
-                className={`text-xs font-bold uppercase tracking-wider ${
-                  esLasTranqueras ? "text-[#171614]" : "text-secondary"
-                }`}
+                className={`text-xs font-bold uppercase tracking-wider ${theme.qrModalAccent}`}
               >
                 Código QR de Carta
               </span>
@@ -655,11 +515,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <h3
-              className={`mt-1 text-base font-extrabold ${
-                esLasTranqueras ? "text-[#171614]" : "text-primary"
-              }`}
-            >
+            <h3 className={`mt-1 text-base font-extrabold ${theme.qrModalTitle}`}>
               {local.nombre}
             </h3>
             <div className="my-4 flex justify-center">
