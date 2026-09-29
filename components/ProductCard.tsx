@@ -24,7 +24,7 @@ export default function ProductCard({
 
   return (
     <div
-      className={`group relative flex gap-3.5 rounded-2xl border p-3.5 transition-all sm:gap-4 sm:p-4 ${
+      className={`group relative flex gap-3.5 rounded-2xl border bg-white p-3.5 transition-all sm:gap-4 sm:p-4 ${
         cantidadEnCarrito > 0 ? theme.cardActive : theme.cardInactive
       }`}
     >

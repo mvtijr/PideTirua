@@ -106,7 +106,7 @@ export function getLocalTheme(slug: string): LocalTheme {
         tabInactive:
           "bg-white/10 text-[#FFFDF2] border border-[#F8DC4B]/40 hover:bg-[#F8DC4B]/20",
         searchInput:
-          "border-[#F8DC4B]/60 bg-[#FFFDF2]/95 focus:border-[#F8DC4B]",
+          "border-[#F8DC4B]/60 bg-white focus:border-[#F8DC4B]",
         categoryTitle: "text-[#F8DC4B] drop-shadow-sm",
         categoryCount: "bg-[#F8DC4B] text-[#171614] font-bold shadow-sm",
         emptyStateBox: "border-[#F8DC4B]/50 bg-[#171614]/80 backdrop-blur-md",
@@ -121,9 +121,9 @@ export function getLocalTheme(slug: string): LocalTheme {
         qrModalAccent: "text-[#171614]",
         qrModalTitle: "text-[#171614]",
         cardActive:
-          "border-[#F8DC4B] bg-[#FFFDF0]/95 backdrop-blur-sm shadow-md ring-2 ring-[#F8DC4B]",
+          "border-[#F8DC4B] bg-white shadow-md ring-2 ring-[#F8DC4B]",
         cardInactive:
-          "border-[#F8DC4B]/50 bg-white/92 backdrop-blur-sm shadow-sm hover:border-[#F8DC4B] hover:bg-white hover:shadow-md",
+          "border-[#F8DC4B]/60 bg-white shadow-md hover:border-[#F8DC4B] hover:shadow-lg",
         cardTag: "bg-[#F8DC4B] text-[#171614]",
         cardTagIcon: "text-[#171614]",
         cardInCartBadge: "bg-[#171614] text-[#F8DC4B]",
@@ -162,9 +162,9 @@ export function getLocalTheme(slug: string): LocalTheme {
       return {
         pageBg: "bg-[#141414]",
         videoOverlayGradient:
-          "from-[#141414]/60 via-[#141414]/50 to-[#141414]/78",
+          "from-[#141414]/60 via-[#141414]/50 to-[#141414]/80",
         containerBg:
-          "bg-[#141414]/42 backdrop-blur-[2px] shadow-2xl sm:border-x sm:border-[#E85D3F]/30",
+          "bg-[#141414]/40 backdrop-blur-[2px] shadow-2xl sm:border-x sm:border-[#E85D3F]/30",
         headerBg: "bg-[#141414]",
         headerGradient: "from-[#141414]/95 via-[#141414]/45 to-black/25",
         backBtn:
@@ -174,7 +174,7 @@ export function getLocalTheme(slug: string): LocalTheme {
         logoBox: "border-[#141414] bg-white ring-2 ring-[#E85D3F]",
         statusBadge: "bg-[#1E7A46] text-white",
         rubroText: "text-[#FF8A70]",
-        infoSectionBg: "border-[#E85D3F]/30 bg-[#141414]/82 backdrop-blur-md",
+        infoSectionBg: "border-[#E85D3F]/30 bg-[#141414]/80 backdrop-blur-md",
         infoDescText: "text-white/90",
         infoGridBox:
           "border border-[#E85D3F]/45 bg-[#141414]/75 text-white",
@@ -186,13 +186,13 @@ export function getLocalTheme(slug: string): LocalTheme {
         modalityIcon: "text-[#6EE7B7]",
         callBtn: "bg-[#E85D3F] text-white hover:bg-[#d44d30]",
         callIcon: "text-white",
-        stickyBar: "border-[#E85D3F]/35 bg-[#141414]/88",
+        stickyBar: "border-[#E85D3F]/35 bg-[#141414]/85",
         tabActive:
           "bg-[#E85D3F] text-white ring-2 ring-[#FF8A70] shadow-sm",
         tabInactive:
           "bg-white/10 text-white border border-[#E85D3F]/40 hover:bg-[#E85D3F]/25",
         searchInput:
-          "border-[#E85D3F]/60 bg-white/95 focus:border-[#E85D3F]",
+          "border-[#E85D3F]/60 bg-white focus:border-[#E85D3F]",
         categoryTitle: "text-white drop-shadow-sm",
         categoryCount: "bg-[#E85D3F] text-white font-bold shadow-sm",
         emptyStateBox: "border-[#E85D3F]/50 bg-[#141414]/80 backdrop-blur-md",
@@ -200,16 +200,16 @@ export function getLocalTheme(slug: string): LocalTheme {
         emptyStateText: "text-white",
         emptyStateBtn: "text-[#FF8A70]",
         footerBg:
-          "border-[#E85D3F]/35 bg-[#141414]/88 text-white/85 backdrop-blur-md",
+          "border-[#E85D3F]/35 bg-[#141414]/85 text-white/85 backdrop-blur-md",
         footerTitle: "text-[#FF8A70]",
         footerSub: "text-white/75",
         footerLink: "text-[#E85D3F]",
         qrModalAccent: "text-[#E85D3F]",
         qrModalTitle: "text-[#141414]",
         cardActive:
-          "border-[#E85D3F] bg-[#FFF8F6]/95 backdrop-blur-sm shadow-md ring-2 ring-[#E85D3F]",
+          "border-[#E85D3F] bg-white shadow-md ring-2 ring-[#E85D3F]",
         cardInactive:
-          "border-[#E85D3F]/40 bg-white/92 backdrop-blur-sm shadow-sm hover:border-[#E85D3F] hover:bg-white hover:shadow-md",
+          "border-[#E85D3F]/50 bg-white shadow-md hover:border-[#E85D3F] hover:shadow-lg",
         cardTag: "bg-[#E85D3F] text-white",
         cardTagIcon: "text-white",
         cardInCartBadge: "bg-[#1E7A46] text-white",
@@ -217,7 +217,8 @@ export function getLocalTheme(slug: string): LocalTheme {
         cardPrice: "text-[#E85D3F]",
         cardAddBtn: "bg-[#141414] text-white hover:bg-[#E85D3F]",
         cardCounterBox: "border-[#E85D3F]",
-        cardMinusBtn: "bg-[#FEE2E2] text-[#141414] hover:bg-[#E85D3F] hover:text-white",
+        cardMinusBtn:
+          "bg-[#FEE2E2] text-[#141414] hover:bg-[#E85D3F] hover:text-white",
         cardQtyText: "text-[#141414]",
         cardPlusBtn: "bg-[#E85D3F] text-white hover:bg-[#d44d30]",
         floatingGradient: "from-[#141414]/50 via-[#141414]/15 to-transparent",
@@ -248,7 +249,7 @@ export function getLocalTheme(slug: string): LocalTheme {
       return {
         pageBg: "bg-[#0A0A0A]",
         videoOverlayGradient:
-          "from-[#0A0A0A]/65 via-[#0A0A0A]/52 to-[#0A0A0A]/82",
+          "from-[#0A0A0A]/65 via-[#0A0A0A]/50 to-[#0A0A0A]/80",
         containerBg:
           "bg-[#0A0A0A]/45 backdrop-blur-[2px] shadow-2xl sm:border-x sm:border-[#D4A843]/30",
         headerBg: "bg-[#0A0A0A]",
@@ -260,10 +261,10 @@ export function getLocalTheme(slug: string): LocalTheme {
         logoBox: "border-[#D4A843] bg-black",
         statusBadge: "bg-[#D4A843] text-[#0A0A0A]",
         rubroText: "text-[#D4A843]",
-        infoSectionBg: "border-[#D4A843]/35 bg-[#0A0A0A]/82 backdrop-blur-md",
+        infoSectionBg: "border-[#D4A843]/35 bg-[#0A0A0A]/80 backdrop-blur-md",
         infoDescText: "text-white/90",
         infoGridBox:
-          "border border-[#D4A843]/45 bg-[#0A0A0A]/78 text-white",
+          "border border-[#D4A843]/45 bg-[#0A0A0A]/75 text-white",
         infoIcon: "text-[#D4A843]",
         infoTitle: "text-[#D4A843]",
         infoSub: "text-white/80",
@@ -272,13 +273,13 @@ export function getLocalTheme(slug: string): LocalTheme {
         modalityIcon: "text-[#D4A843]",
         callBtn: "bg-[#D4A843] text-[#0A0A0A] hover:bg-[#e0b654]",
         callIcon: "text-[#0A0A0A]",
-        stickyBar: "border-[#D4A843]/35 bg-[#0A0A0A]/88",
+        stickyBar: "border-[#D4A843]/35 bg-[#0A0A0A]/85",
         tabActive:
           "bg-[#D4A843] text-[#0A0A0A] ring-2 ring-[#F3D078] shadow-sm",
         tabInactive:
           "bg-white/10 text-white border border-[#D4A843]/40 hover:bg-[#D4A843]/20",
         searchInput:
-          "border-[#D4A843]/60 bg-white/95 focus:border-[#D4A843]",
+          "border-[#D4A843]/60 bg-white focus:border-[#D4A843]",
         categoryTitle: "text-[#D4A843] drop-shadow-sm",
         categoryCount: "bg-[#D4A843] text-[#0A0A0A] font-bold shadow-sm",
         emptyStateBox: "border-[#D4A843]/50 bg-[#0A0A0A]/80 backdrop-blur-md",
@@ -286,16 +287,16 @@ export function getLocalTheme(slug: string): LocalTheme {
         emptyStateText: "text-white",
         emptyStateBtn: "text-[#D4A843]",
         footerBg:
-          "border-[#D4A843]/35 bg-[#0A0A0A]/88 text-white/85 backdrop-blur-md",
+          "border-[#D4A843]/35 bg-[#0A0A0A]/85 text-white/85 backdrop-blur-md",
         footerTitle: "text-[#D4A843]",
         footerSub: "text-white/75",
         footerLink: "text-[#D4A843]",
         qrModalAccent: "text-[#D4A843]",
         qrModalTitle: "text-[#0A0A0A]",
         cardActive:
-          "border-[#D4A843] bg-[#FFFCF5]/95 backdrop-blur-sm shadow-md ring-2 ring-[#D4A843]",
+          "border-[#D4A843] bg-white shadow-md ring-2 ring-[#D4A843]",
         cardInactive:
-          "border-[#D4A843]/45 bg-white/92 backdrop-blur-sm shadow-sm hover:border-[#D4A843] hover:bg-white hover:shadow-md",
+          "border-[#D4A843]/55 bg-white shadow-md hover:border-[#D4A843] hover:shadow-lg",
         cardTag: "bg-[#D4A843] text-[#0A0A0A]",
         cardTagIcon: "text-[#0A0A0A]",
         cardInCartBadge: "bg-[#0A0A0A] text-[#D4A843]",
@@ -337,7 +338,7 @@ export function getLocalTheme(slug: string): LocalTheme {
         videoOverlayGradient:
           "from-[#0F314A]/65 via-[#194A6E]/50 to-[#0F314A]/80",
         containerBg:
-          "bg-[#0F314A]/42 backdrop-blur-[2px] shadow-2xl sm:border-x sm:border-[#38BDF8]/30",
+          "bg-[#0F314A]/40 backdrop-blur-[2px] shadow-2xl sm:border-x sm:border-[#38BDF8]/30",
         headerBg: "bg-[#0F314A]",
         headerGradient: "from-[#0F314A]/95 via-[#194A6E]/45 to-black/25",
         backBtn:
@@ -347,7 +348,7 @@ export function getLocalTheme(slug: string): LocalTheme {
         logoBox: "border-[#38BDF8] bg-[#194A6E]",
         statusBadge: "bg-[#F06A59] text-white",
         rubroText: "text-[#7DD3FC]",
-        infoSectionBg: "border-[#38BDF8]/30 bg-[#0F314A]/82 backdrop-blur-md",
+        infoSectionBg: "border-[#38BDF8]/30 bg-[#0F314A]/80 backdrop-blur-md",
         infoDescText: "text-white/90",
         infoGridBox:
           "border border-[#38BDF8]/40 bg-[#194A6E]/75 text-white",
@@ -359,13 +360,13 @@ export function getLocalTheme(slug: string): LocalTheme {
         modalityIcon: "text-[#38BDF8]",
         callBtn: "bg-[#F06A59] text-white hover:bg-[#e05644]",
         callIcon: "text-white",
-        stickyBar: "border-[#38BDF8]/35 bg-[#0F314A]/88",
+        stickyBar: "border-[#38BDF8]/35 bg-[#0F314A]/85",
         tabActive:
           "bg-[#F06A59] text-white ring-2 ring-[#38BDF8] shadow-sm",
         tabInactive:
           "bg-white/10 text-white border border-[#38BDF8]/40 hover:bg-[#38BDF8]/25",
         searchInput:
-          "border-[#38BDF8]/60 bg-white/95 focus:border-[#F06A59]",
+          "border-[#38BDF8]/60 bg-white focus:border-[#F06A59]",
         categoryTitle: "text-white drop-shadow-sm",
         categoryCount: "bg-[#F06A59] text-white font-bold shadow-sm",
         emptyStateBox: "border-[#38BDF8]/50 bg-[#0F314A]/80 backdrop-blur-md",
@@ -373,16 +374,16 @@ export function getLocalTheme(slug: string): LocalTheme {
         emptyStateText: "text-white",
         emptyStateBtn: "text-[#7DD3FC]",
         footerBg:
-          "border-[#38BDF8]/35 bg-[#0F314A]/88 text-white/85 backdrop-blur-md",
+          "border-[#38BDF8]/35 bg-[#0F314A]/85 text-white/85 backdrop-blur-md",
         footerTitle: "text-[#7DD3FC]",
         footerSub: "text-white/75",
         footerLink: "text-[#F06A59]",
         qrModalAccent: "text-[#F06A59]",
         qrModalTitle: "text-[#194A6E]",
         cardActive:
-          "border-[#F06A59] bg-[#F0F9FF]/95 backdrop-blur-sm shadow-md ring-2 ring-[#F06A59]",
+          "border-[#F06A59] bg-white shadow-md ring-2 ring-[#F06A59]",
         cardInactive:
-          "border-[#38BDF8]/45 bg-white/92 backdrop-blur-sm shadow-sm hover:border-[#38BDF8] hover:bg-white hover:shadow-md",
+          "border-[#38BDF8]/55 bg-white shadow-md hover:border-[#38BDF8] hover:shadow-lg",
         cardTag: "bg-[#F06A59] text-white",
         cardTagIcon: "text-white",
         cardInCartBadge: "bg-[#194A6E] text-[#7DD3FC]",
@@ -390,7 +391,8 @@ export function getLocalTheme(slug: string): LocalTheme {
         cardPrice: "text-[#F06A59]",
         cardAddBtn: "bg-[#194A6E] text-white hover:bg-[#F06A59]",
         cardCounterBox: "border-[#38BDF8]",
-        cardMinusBtn: "bg-[#E0F2FE] text-[#0F314A] hover:bg-[#38BDF8] hover:text-white",
+        cardMinusBtn:
+          "bg-[#E0F2FE] text-[#0F314A] hover:bg-[#38BDF8] hover:text-white",
         cardQtyText: "text-[#0F314A]",
         cardPlusBtn: "bg-[#F06A59] text-white hover:bg-[#e05644]",
         floatingGradient: "from-[#0F314A]/50 via-[#0F314A]/15 to-transparent",
