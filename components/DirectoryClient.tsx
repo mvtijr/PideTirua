@@ -225,7 +225,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       <GradientWave className="fixed inset-0 pointer-events-none z-0" />
 
       {/* HEADER FIJO SUPERIOR */}
-      <header className="fixed top-0 w-full z-50 bg-surface-container-lowest/85 backdrop-blur-xl shadow-[0_4px_16px_-2px_rgba(12,74,110,0.08)]">
+      <header className="fixed top-0 w-full z-50 bg-white/65 backdrop-blur-xl border-b border-white/50 shadow-[0_4px_16px_-2px_rgba(12,74,110,0.08)]">
         <div className="h-20 max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop flex items-center justify-between gap-space-md">
           <div className="flex items-center gap-space-md flex-shrink-0">
             <Link href="/" className="flex items-center gap-space-xs">
@@ -244,7 +244,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               </div>
             </Link>
 
-            <div className="hidden sm:flex items-center gap-space-xs bg-surface-container-low px-space-sm py-space-xs rounded-full text-on-surface-variant">
+            <div className="hidden sm:flex items-center gap-space-xs bg-white/80 backdrop-blur-md border border-white/60 px-space-sm py-space-xs rounded-full text-on-surface-variant">
               <span className="material-symbols-outlined text-sm text-secondary">
                 location_on
               </span>
@@ -256,7 +256,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
           {/* Buscador rápido en Header */}
           <div className="hidden lg:flex items-center flex-1 max-w-xs xl:max-w-md mx-space-md">
-            <div className="relative w-full flex items-center bg-surface-container-low rounded-lg px-space-sm py-space-xs">
+            <div className="relative w-full flex items-center bg-white/85 backdrop-blur-md border border-white/60 rounded-lg px-space-sm py-space-xs">
               <span className="material-symbols-outlined text-outline text-lg mr-space-xs">
                 search
               </span>
@@ -285,20 +285,20 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           <nav className="hidden xl:flex items-center gap-space-lg">
             <a
               href="#directorio-locales"
-              className="transition-colors bg-primary-container text-on-primary font-bold rounded-lg px-space-sm py-space-xs font-label-md text-label-md"
+              className="transition-colors bg-primary text-on-primary font-bold rounded-lg px-space-sm py-space-xs font-label-md text-label-md shadow-sm"
             >
               Locales en Tirúa y Quidico
             </a>
             <a
               href="#coverflow-locales"
-              className="font-label-lg text-label-lg text-on-surface-variant hover:text-on-surface transition-colors"
+              className="font-label-lg text-label-lg text-primary font-bold hover:text-secondary transition-colors"
             >
               Cartas Digitales 3D
             </a>
           </nav>
 
           <div className="flex items-center gap-space-sm flex-shrink-0">
-            <span className="hidden md:inline-flex items-center gap-1 bg-surface-container text-on-surface px-space-sm py-space-xs rounded-lg font-label-md text-label-md font-semibold">
+            <span className="hidden md:inline-flex items-center gap-1 bg-white/80 backdrop-blur-md border border-white/60 text-primary px-space-sm py-space-xs rounded-lg font-label-md text-label-md font-semibold">
               <span className="material-symbols-outlined text-base text-secondary">
                 map
               </span>
@@ -310,67 +310,37 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
       <main className="relative z-10 w-full pt-20 min-h-[calc(100vh-20rem)]">
         <div className="flex flex-col w-full">
-          {/* HERO CON ESPÍRITU LAFKENCHE Y COSTA DEL PACÍFICO */}
-          <section className="relative w-full bg-primary/70 backdrop-blur-[1px] overflow-hidden text-on-primary">
-            {/* Patrón geométrico sutil estilo textil Lafkenche de fondo */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none">
-              <svg
-                className="w-full h-full"
-                fill="none"
-                preserveAspectRatio="none"
-                viewBox="0 0 800 400"
-              >
-                <path
-                  d="M0,50 L400,250 L800,50 L800,200 L400,400 L0,200 Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M50,0 L100,50 L50,100 L0,50 Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M750,0 L800,50 L750,100 L700,50 Z"
-                  fill="currentColor"
-                />
-                <path
-                  d="M400,0 L450,50 L400,100 L350,50 Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </div>
-
-            {/* Gradiente oceánico profundo con bruma costera permitiendo ver las olas WebGL */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/85 via-primary-container/65 to-primary/35" />
-
+          {/* HERO SOBRE EL FONDO ANIMADO GRADIENT WAVE */}
+          <section className="relative w-full overflow-hidden text-primary">
             <div className="relative max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-xl lg:py-24 grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop items-center">
               <div className="lg:col-span-7 space-y-space-md z-10">
                 {/* Badge de Identidad Comunal */}
-                <div className="inline-flex items-center gap-space-xs bg-surface-container-lowest/15 backdrop-blur-md px-space-md py-space-xs rounded-full">
-                  <span className="material-symbols-outlined text-secondary-fixed text-sm">
+                <div className="inline-flex items-center gap-space-xs bg-white/80 backdrop-blur-md border border-white/80 shadow-sm px-space-md py-space-xs rounded-full">
+                  <span className="material-symbols-outlined text-secondary text-sm">
                     explore
                   </span>
-                  <span className="font-label-md text-label-md uppercase tracking-wider text-secondary-fixed">
+                  <span className="font-label-md text-label-md uppercase tracking-wider text-primary font-bold">
                     Directorio Gastronómico &amp; Menú Digital QR
                   </span>
                 </div>
 
-                <h1 className="font-headline-xl text-headline-xl-mobile sm:text-headline-xl text-on-primary font-extrabold tracking-tight leading-none">
-                  PideTirúa <span className="text-secondary-fixed">-</span>{" "}
+                <h1 className="font-headline-xl text-headline-xl-mobile sm:text-headline-xl text-primary font-extrabold tracking-tight leading-none drop-shadow-xs">
+                  PideTirúa <span className="text-secondary">-</span>{" "}
                   Sabores de nuestra tierra
                 </h1>
 
-                <p className="font-body-lg text-body-lg text-primary-fixed-dim max-w-xl">
+                <p className="font-body-lg text-body-lg text-slate-800 font-medium max-w-xl bg-white/55 backdrop-blur-xs rounded-xl p-3 border border-white/60">
                   Descubre la gastronomía costera de <strong>Tirúa</strong> y{" "}
                   <strong>Quidico</strong>. Revisa la carta actualizada de cada
                   local, arma tu pedido desde tu celular y envíalo directo al{" "}
-                  <strong className="text-secondary-fixed">
+                  <strong className="text-secondary">
                     WhatsApp (+569)
                   </strong>{" "}
                   sin comisiones ni intermediarios.
                 </p>
 
                 {/* Barra de Búsqueda Interactiva y Selector de Sector */}
-                <div className="bg-surface-container-lowest p-space-sm rounded-xl shadow-xl flex flex-col md:flex-row gap-space-sm max-w-2xl text-on-surface">
+                <div className="bg-white/90 backdrop-blur-md border border-white p-space-sm rounded-xl shadow-xl flex flex-col md:flex-row gap-space-sm max-w-2xl text-on-surface">
                   {/* Selector Comunal */}
                   <div className="relative md:w-1/3 flex items-center bg-surface-container-low rounded-lg px-space-sm py-space-xs">
                     <span className="material-symbols-outlined text-secondary text-xl mr-1">
@@ -433,24 +403,18 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
                 {/* Indicadores de beneficios */}
                 <div className="flex flex-wrap items-center gap-space-md pt-space-xs">
-                  <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-surface-variant">
-                    <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+                  <div className="flex items-center gap-1.5 font-label-sm text-label-sm text-primary font-bold bg-white/75 backdrop-blur-xs px-3 py-1 rounded-full border border-white/70">
+                    <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
                     Carta QR exclusiva por local
                   </div>
-                  <span className="text-surface-variant/40 font-label-sm">
-                    •
-                  </span>
-                  <div className="flex items-center gap-1 font-label-sm text-label-sm text-surface-variant">
-                    <span className="material-symbols-outlined text-sm text-tertiary-fixed-dim">
+                  <div className="flex items-center gap-1 font-label-sm text-label-sm text-primary font-bold bg-white/75 backdrop-blur-xs px-3 py-1 rounded-full border border-white/70">
+                    <span className="material-symbols-outlined text-sm text-tertiary">
                       chat
                     </span>
                     Pedido directo a WhatsApp (+569)
                   </div>
-                  <span className="text-surface-variant/40 font-label-sm">
-                    •
-                  </span>
-                  <div className="flex items-center gap-1 font-label-sm text-label-sm text-surface-variant">
-                    <span className="material-symbols-outlined text-sm text-secondary-fixed">
+                  <div className="flex items-center gap-1 font-label-sm text-label-sm text-primary font-bold bg-white/75 backdrop-blur-xs px-3 py-1 rounded-full border border-white/70">
+                    <span className="material-symbols-outlined text-sm text-secondary">
                       verified
                     </span>
                     Retiro en local o Consumo en mesa
@@ -462,9 +426,6 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               {platoActualHero && (
                 <div className="lg:col-span-5 relative mt-space-lg lg:mt-0">
                   <div className="relative mx-auto max-w-md lg:max-w-none">
-                    <div className="absolute -top-4 -left-4 w-28 h-28 bg-secondary-container/20 rounded-full blur-2xl" />
-                    <div className="absolute -bottom-6 -right-6 w-36 h-36 bg-tertiary-container/30 rounded-full blur-2xl" />
-
                     <div
                       className="relative bg-surface-container-lowest p-2 rounded-2xl shadow-2xl overflow-hidden transform lg:rotate-1 hover:rotate-0 transition-transform duration-300 hero-image-card"
                       onMouseEnter={() => setPausaHero(true)}
@@ -591,33 +552,22 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             </div>
           </section>
 
-          {/* SECCIÓN COVERFLOW 3D PERSPECTIVE CON LOS LOGOS DE LOS NEGOCIOS */}
+          {/* SECCIÓN COVERFLOW 3D PERSPECTIVE SOBRE EL FONDO GRADIENT WAVE */}
           <section
             id="coverflow-locales"
-            className="relative w-full py-space-xl overflow-hidden border-b border-outline-variant/30"
+            className="relative w-full py-space-xl overflow-hidden"
           >
-            {/* Imagen de mar de fondo suavemente difuminada */}
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <img
-                src="/bg-mar-tirua.jpg"
-                alt=""
-                aria-hidden="true"
-                className="h-full w-full object-cover blur-[4px] scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-primary/65 via-primary/45 to-primary/75" />
-            </div>
-
             <div className="relative z-10 max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop mb-6 text-center space-y-2">
-              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md text-secondary-fixed border border-white/25 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-                <span className="material-symbols-outlined text-sm">
+              <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-md text-primary border border-white shadow-sm px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+                <span className="material-symbols-outlined text-sm text-secondary">
                   view_carousel
                 </span>
                 <span>Experiencia 3D • Tirúa Centro &amp; Quidico</span>
               </div>
-              <h2 className="font-headline-lg text-headline-lg text-white font-extrabold tracking-tight drop-shadow-sm">
+              <h2 className="font-headline-lg text-headline-lg text-primary font-extrabold tracking-tight drop-shadow-xs">
                 Cartas Digitales de Nuestra Comuna
               </h2>
-              <p className="font-body-md text-body-md text-secondary-fixed max-w-2xl mx-auto drop-shadow-xs">
+              <p className="font-body-md text-body-md text-slate-800 font-semibold max-w-2xl mx-auto">
                 Selecciona un local para abrir su carta digital y pedir directo
                 por WhatsApp
               </p>
@@ -838,8 +788,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     onClick={() => setIndiceCoverflow(idx)}
                     className={`w-2.5 h-2.5 rounded-full transition-all ${
                       idx === indiceCoverflow
-                        ? "bg-white scale-125 shadow"
-                        : "bg-white/45 hover:bg-white/80"
+                        ? "bg-primary scale-125 shadow"
+                        : "bg-primary/35 hover:bg-primary/70"
                     }`}
                   />
                 ))}
@@ -848,7 +798,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </section>
 
           {/* CHIPS DE FILTRO RÁPIDO STICKY */}
-          <section className="w-full bg-white/85 backdrop-blur-md shadow-sm sticky top-20 z-40">
+          <section className="w-full bg-white/65 backdrop-blur-md shadow-sm sticky top-20 z-40">
             <div className="max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop py-space-sm overflow-x-auto no-scrollbar">
               <div className="flex items-center gap-space-xs min-w-max">
                 <span className="font-label-md text-label-md text-outline mr-2 hidden sm:inline">
