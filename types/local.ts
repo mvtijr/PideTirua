@@ -13,17 +13,22 @@ export type MetodoPago = "Efectivo" | "Transferencia Bancaria";
 
 export interface Producto {
   id: string;
+  categoria_id?: string;
   nombre: string;
   descripcion: string;
   precio: number; // En pesos chilenos (CLP), ej: 12500
   imagen: string;
+  imagen_url?: string;
+  disponible?: boolean;
   destacado?: boolean;
   etiqueta?: string;
 }
 
 export interface CategoriaMenu {
   id: string;
+  local_id?: string;
   nombre: string;
+  orden?: number;
   productos: Producto[];
 }
 
@@ -35,6 +40,7 @@ export interface Local {
   categoriaFiltro: Exclude<CategoriaFiltro, "Todos">[];
   sector: SectorComuna;
   ubicacion: string;
+  direccion?: string;
   direccionDetalle: string;
   telefonoWhatsapp: string;
   telefono_whatsapp?: string;
@@ -49,6 +55,7 @@ export interface Local {
   videoFondo?: string;
   logo: string;
   abierto: boolean;
+  pin?: string;
   categorias: CategoriaMenu[];
 }
 

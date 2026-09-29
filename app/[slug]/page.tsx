@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllLocales, getLocalBySlug } from "@/lib/locales";
+import { fetchLocalBySlug, getAllLocales } from "@/lib/locales";
 import MenuClient from "@/components/MenuClient";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface LocalMenuPageProps {
   params: Promise<{ slug: string }>;
@@ -18,7 +21,7 @@ export async function generateMetadata({
   params,
 }: LocalMenuPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const local = getLocalBySlug(slug);
+  const local = await fetchLocalBySlug(slug);
 
   if (!local) {
     return {
@@ -34,7 +37,7 @@ export async function generateMetadata({
 
 export default async function LocalMenuPage({ params }: LocalMenuPageProps) {
   const { slug } = await params;
-  const local = getLocalBySlug(slug);
+  const local = await fetchLocalBySlug(slug);
 
   if (!local) {
     notFound();

@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Minus, Sparkles } from "lucide-react";
+import { Plus, Minus, Sparkles, Ban } from "lucide-react";
 import { Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import { getLocalTheme } from "@/lib/localTheme";
@@ -21,18 +21,30 @@ export default function ProductCard({
   localSlug,
 }: ProductCardProps) {
   const theme = getLocalTheme(localSlug);
+  const disponible = producto.disponible !== false;
+  const imagenSrc = producto.imagen_url || producto.imagen;
 
   return (
     <div
-      className={`group relative flex gap-3.5 rounded-2xl border bg-white p-3.5 transition-all sm:gap-4 sm:p-4 ${
-        cantidadEnCarrito > 0 ? theme.cardActive : theme.cardInactive
+      className={`group relative flex gap-3.5 rounded-2xl border p-3.5 transition-all sm:gap-4 sm:p-4 ${
+        !disponible
+          ? "border-slate-200 bg-slate-100 opacity-75"
+          : cantidadEnCarrito > 0
+          ? `bg-white ${theme.cardActive}`
+          : `bg-white ${theme.cardInactive}`
       }`}
     >
       {/* Información del producto */}
       <div className="flex min-w-0 flex-1 flex-col justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-1.5">
-            {producto.etiqueta && (
+            {!disponible && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-slate-300 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wide text-slate-700">
+                <Ban className="h-3 w-3 text-slate-600" />
+                Agotado
+              </span>
+            )}
+            {disponible && producto.etiqueta && (
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold ${theme.cardTag}`}
               >
@@ -40,7 +52,7 @@ export default function ProductCard({
                 {producto.etiqueta}
               </span>
             )}
-            {cantidadEnCarrito > 0 && (
+            {disponible && cantidadEnCarrito > 0 && (
               <span
                 className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${theme.cardInCartBadge}`}
               >
@@ -50,25 +62,44 @@ export default function ProductCard({
           </div>
 
           <h4
-            className={`mt-1 font-headline-sm text-base font-bold leading-snug ${theme.cardTitle}`}
+            className={`mt-1 font-headline-sm text-base font-bold leading-snug ${
+              !disponible
+                ? "text-slate-500 line-through decoration-slate-400"
+                : theme.cardTitle
+            }`}
           >
             {producto.nombre}
           </h4>
 
-          <p className="mt-1 line-clamp-2 font-body-sm text-xs leading-relaxed text-on-surface-variant sm:text-sm">
+          <p
+            className={`mt-1 line-clamp-2 font-body-sm text-xs leading-relaxed sm:text-sm ${
+              !disponible ? "text-slate-400" : "text-on-surface-variant"
+            }`}
+          >
             {producto.descripcion}
           </p>
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-2">
           <span
-            className={`text-base font-extrabold tracking-tight sm:text-lg ${theme.cardPrice}`}
+            className={`text-base font-extrabold tracking-tight sm:text-lg ${
+              !disponible ? "text-slate-400" : theme.cardPrice
+            }`}
           >
             {formatCLP(producto.precio)}
           </span>
 
           {/* Controles de agregar o modificar cantidad */}
-          {cantidadEnCarrito === 0 ? (
+          {!disponible ? (
+            <button
+              type="button"
+              disabled
+              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-xl border border-slate-300 bg-slate-200 px-3.5 py-2 text-xs font-bold text-slate-500"
+            >
+              <Ban className="h-3.5 w-3.5" />
+              <span>Agotado</span>
+            </button>
+          ) : cantidadEnCarrito === 0 ? (
             <button
               type="button"
               onClick={() => onAgregar(producto)}
@@ -110,11 +141,22 @@ export default function ProductCard({
       {/* Imagen del producto */}
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-surface-container sm:h-32 sm:w-32">
         <img
-          src={producto.imagen}
+          src={imagenSrc}
           alt={producto.nombre}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className={`h-full w-full object-cover transition-transform duration-300 ${
+            !disponible
+              ? "grayscale opacity-60"
+              : "group-hover:scale-105"
+          }`}
           loading="lazy"
         />
+        {!disponible && (
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-900/45 backdrop-blur-[1px]">
+            <span className="rounded-full bg-slate-900/90 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow">
+              Agotado
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@
     "categoriaFiltro": ["Comida Rápida"],
     "sector": "Tirúa Centro",
     "ubicacion": "Tirúa Centro",
+    "direccion": "Av. Costanera esq. Galvarino, Tirúa Centro",
     "direccionDetalle": "Av. Costanera esq. Galvarino, Tirúa Centro",
     "telefonoWhatsapp": "56912345678",
     "telefono_whatsapp": "56912345678",
@@ -20,6 +21,7 @@
     "videoFondo": "/videos/las-tranqueras.mp4",
     "logo": "/logos/las-tranqueras.png.jpg",
     "abierto": true,
+    "pin": "1234",
     "categorias": [
       {
         "id": "cat-pollos",
@@ -109,7 +111,8 @@
             "nombre": "Bebida Lata 350cc",
             "descripcion": "Lata individual helada Coca-Cola, Sprite o Fanta.",
             "precio": 1500,
-            "imagen": "https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=1000&q=90"
+            "imagen": "https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=1000&q=90",
+            "disponible": false
           }
         ]
       }
@@ -123,6 +126,7 @@
     "categoriaFiltro": ["Sushi", "Comida Rápida"],
     "sector": "Tirúa Centro",
     "ubicacion": "Calle Arturo Prat, Tirúa",
+    "direccion": "Arturo Prat #420, frente a Plaza de Armas de Tirúa",
     "direccionDetalle": "Arturo Prat #420, frente a Plaza de Armas de Tirúa",
     "telefonoWhatsapp": "56987654321",
     "telefono_whatsapp": "56987654321",
@@ -136,6 +140,7 @@
     "videoFondo": "/videos/benditosushi.mp4",
     "logo": "/logos/sushi-burger.png.jpg",
     "abierto": false,
+    "pin": "1234",
     "categorias": [
       {
         "id": "cat-tablas",
@@ -233,6 +238,7 @@
     "categoriaFiltro": ["Cafetería", "Pescados y Mariscos"],
     "sector": "Tirúa Centro",
     "ubicacion": "Costanera Tirúa",
+    "direccion": "Paseo Costanera Río Tirúa s/n, frente a la desembocadura",
     "direccionDetalle": "Paseo Costanera Río Tirúa s/n, frente a la desembocadura",
     "telefonoWhatsapp": "56911223344",
     "telefono_whatsapp": "56911223344",
@@ -246,6 +252,7 @@
     "videoFondo": "/videos/riomar.mp4",
     "logo": "/logos/rio-mar.png.jpg",
     "abierto": true,
+    "pin": "1234",
     "categorias": [
       {
         "id": "cat-almuerzos",
@@ -330,6 +337,7 @@
     "categoriaFiltro": ["Pescados y Mariscos"],
     "sector": "Quidico",
     "ubicacion": "Quidico",
+    "direccion": "Av. Costanera Playa Quidico #185, Balneario de Quidico",
     "direccionDetalle": "Av. Costanera Playa Quidico #185, Balneario de Quidico",
     "telefonoWhatsapp": "56999887766",
     "telefono_whatsapp": "56999887766",
@@ -343,6 +351,7 @@
     "videoFondo": "/videos/granpacifico.mp4",
     "logo": "/logos/gran-pacifico.png.jpg",
     "abierto": true,
+    "pin": "1234",
     "categorias": [
       {
         "id": "cat-empanadas",

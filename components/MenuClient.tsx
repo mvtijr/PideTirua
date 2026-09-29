@@ -74,6 +74,7 @@ export default function MenuClient({ local }: MenuClientProps) {
   }, [carrito, hidratado, storageKey]);
 
   const handleAgregarProducto = (producto: Producto) => {
+    if (producto.disponible === false) return;
     setCarrito((prev) => {
       const existe = prev.find((item) => item.producto.id === producto.id);
       if (existe) {
@@ -496,7 +497,7 @@ export default function MenuClient({ local }: MenuClientProps) {
             {formatPhoneDisplay(local.telefonoWhatsapp)}
           </p>
           <div
-            className={`mt-3 flex items-center justify-center gap-2 text-[11px] ${theme.footerSub}`}
+            className={`mt-3 flex flex-wrap items-center justify-center gap-2 text-[11px] ${theme.footerSub}`}
           >
             <img
               src="/logo-pidetirua.jpg"
@@ -512,6 +513,13 @@ export default function MenuClient({ local }: MenuClientProps) {
                 PideTirúa
               </Link>
             </span>
+            <span>·</span>
+            <Link
+              href={`/admin/${local.slug}`}
+              className={`font-semibold opacity-80 hover:opacity-100 hover:underline ${theme.footerLink}`}
+            >
+              Panel Admin Local
+            </Link>
           </div>
         </footer>
       </div>
