@@ -688,21 +688,38 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                       style={estilo}
                       className="coverflow-card absolute w-[280px] sm:w-[310px] md:w-[340px] h-[450px] md:h-[490px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl bg-surface-container-lowest border border-white/70"
                     >
-                      {/* Contenedor central con video de fondo (si existe) y el LOGO del negocio */}
-                      <div className="absolute inset-0 bg-surface-container-low flex items-center justify-center p-8 pb-36">
+                      {/* Contenedor central con video de fondo completo (sin zoom excesivo) y el LOGO del negocio */}
+                      <div className="absolute inset-0 bg-[#171614] flex items-center justify-center p-8 pb-36">
                         {(local.videoFondo || local.videoPortada) && (
-                          <video
-                            src={local.videoFondo || local.videoPortada}
-                            poster={local.fotoPortada}
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
-                          />
+                          <>
+                            {/* Fondo ambiental difuminado para cubrir alto de la tarjeta vertical */}
+                            <video
+                              src={local.videoFondo || local.videoPortada}
+                              poster={local.fotoPortada}
+                              autoPlay
+                              loop
+                              muted
+                              playsInline
+                              className="pointer-events-none absolute inset-0 h-full w-full object-cover blur-md opacity-55"
+                            />
+                            {/* Video principal alejado (object-contain) en la mitad superior/central para que se vea completo */}
+                            <video
+                              src={local.videoFondo || local.videoPortada}
+                              poster={local.fotoPortada}
+                              autoPlay
+                              loop
+                              muted
+                              playsInline
+                              className="pointer-events-none absolute inset-x-0 top-10 w-full h-56 object-contain"
+                            />
+                          </>
                         )}
                         <div
-                          className="relative z-10 w-44 h-44 md:w-52 md:h-52 rounded-full shadow-xl border-4 border-white overflow-hidden flex items-center justify-center"
+                          className={`relative z-10 ${
+                            local.videoFondo || local.videoPortada
+                              ? "w-32 h-32 md:w-36 md:h-36 mt-12"
+                              : "w-44 h-44 md:w-52 md:h-52"
+                          } rounded-full shadow-xl border-4 border-white overflow-hidden flex items-center justify-center`}
                           style={{
                             backgroundColor:
                               local.slug === "las-tranqueras"

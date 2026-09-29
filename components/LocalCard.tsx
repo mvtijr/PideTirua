@@ -20,17 +20,28 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
       className="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group"
     >
       {/* Imagen o Video & Badges Flotantes */}
-      <div className="relative h-48 w-full overflow-hidden">
+      <div className="relative aspect-video w-full overflow-hidden bg-[#171614]">
         {local.videoFondo || local.videoPortada ? (
-          <video
-            src={local.videoFondo || local.videoPortada}
-            poster={local.fotoPortada}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          <>
+            <video
+              src={local.videoFondo || local.videoPortada}
+              poster={local.fotoPortada}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="pointer-events-none absolute inset-0 h-full w-full object-cover blur-md opacity-50"
+            />
+            <video
+              src={local.videoFondo || local.videoPortada}
+              poster={local.fotoPortada}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="relative z-10 w-full h-full object-contain"
+            />
+          </>
         ) : (
           <img
             src={local.fotoPortada}
@@ -39,9 +50,9 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
             loading="lazy"
           />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-transparent to-transparent" />
+        <div className="absolute inset-0 z-20 bg-gradient-to-t from-primary/70 via-transparent to-transparent pointer-events-none" />
 
-        <div className="absolute top-space-sm left-space-sm right-space-sm flex items-center justify-between gap-1">
+        <div className="absolute top-space-sm left-space-sm right-space-sm z-30 flex items-center justify-between gap-1">
           <div className="flex flex-wrap items-center gap-1">
             <span
               className={`${
@@ -83,7 +94,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
           </div>
         </div>
 
-        <div className="absolute bottom-space-sm left-space-sm right-space-sm flex items-center justify-between text-white">
+        <div className="absolute bottom-space-sm left-space-sm right-space-sm z-30 flex items-center justify-between text-white">
           <span className="font-label-sm text-label-sm bg-black/40 backdrop-blur-md px-space-sm py-0.5 rounded-md flex items-center gap-1">
             <span className="material-symbols-outlined text-xs">schedule</span>
             {local.tiempoEstimado}

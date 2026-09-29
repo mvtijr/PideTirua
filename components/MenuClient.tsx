@@ -149,9 +149,10 @@ export default function MenuClient({ local }: MenuClientProps) {
         esLasTranqueras ? "bg-[#171614]" : "bg-surface"
       }`}
     >
-      {/* Video de fondo fijo a pantalla completa para la carta digital de Las Tranqueras */}
+      {/* Video de fondo fijo a pantalla completa para la carta digital de Las Tranqueras (vista completa sin recorte) */}
       {esLasTranqueras && (local.videoFondo || local.videoPortada) && (
-        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#171614]">
+          {/* Capa ambiental difuminada para rellenar bordes en pantallas verticales o ultra-anchas */}
           <video
             src={local.videoFondo || local.videoPortada}
             poster={local.fotoPortada}
@@ -159,9 +160,19 @@ export default function MenuClient({ local }: MenuClientProps) {
             loop
             muted
             playsInline
-            className="h-full w-full object-cover blur-[4px] scale-105"
+            className="h-full w-full object-cover blur-xl opacity-45"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#171614]/65 via-[#171614]/55 to-[#171614]/80" />
+          {/* Video principal alejado (object-contain) para que se vea completo de extremo a extremo */}
+          <video
+            src={local.videoFondo || local.videoPortada}
+            poster={local.fotoPortada}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 h-full w-full object-contain blur-[2px]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#171614]/60 via-[#171614]/50 to-[#171614]/75" />
         </div>
       )}
 
@@ -169,16 +180,18 @@ export default function MenuClient({ local }: MenuClientProps) {
       <div
         className={`relative z-10 mx-auto max-w-xl min-h-screen ${
           esLasTranqueras
-            ? "bg-[#171614]/45 backdrop-blur-[2px] shadow-2xl sm:border-x sm:border-[#F8DC4B]/25"
+            ? "bg-[#171614]/40 backdrop-blur-[2px] shadow-2xl sm:border-x sm:border-[#F8DC4B]/25"
             : "bg-surface-container-lowest shadow-md"
         }`}
       >
         {/* Portada e Identidad del Local */}
         <header className="relative">
           <div
-            className={`relative h-52 w-full overflow-hidden sm:h-60 ${
-              esLasTranqueras ? "bg-[#171614]" : "bg-primary"
-            }`}
+            className={`relative w-full overflow-hidden ${
+              local.videoPortada
+                ? "aspect-video"
+                : "h-52 sm:h-60"
+            } ${esLasTranqueras ? "bg-[#171614]" : "bg-primary"}`}
           >
             {local.videoPortada ? (
               <video
@@ -188,7 +201,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 loop
                 muted
                 playsInline
-                className="h-full w-full object-cover"
+                className="h-full w-full object-contain bg-[#171614]"
               />
             ) : (
               <img
