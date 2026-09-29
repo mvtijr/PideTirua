@@ -24,8 +24,8 @@ export default function ProductCard({
       className={`group relative flex gap-3.5 rounded-2xl border p-3.5 transition-all sm:gap-4 sm:p-4 ${
         esLasTranqueras
           ? cantidadEnCarrito > 0
-            ? "border-[#F8DC4B] bg-[#FFFDF0] shadow-sm ring-1 ring-[#F8DC4B]"
-            : "border-[#F8DC4B]/40 bg-white hover:border-[#171614]/40 hover:shadow-md"
+            ? "border-[#F8DC4B] bg-[#FFFDF0]/95 backdrop-blur-sm shadow-md ring-2 ring-[#F8DC4B]"
+            : "border-[#F8DC4B]/50 bg-white/92 backdrop-blur-sm shadow-sm hover:border-[#F8DC4B] hover:bg-white hover:shadow-md"
           : cantidadEnCarrito > 0
           ? "border-secondary bg-surface-container-low shadow-sm"
           : "border-outline-variant/40 bg-surface-container-lowest hover:border-secondary/50 hover:shadow-md"

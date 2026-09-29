@@ -19,14 +19,26 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
       id={`local-${local.slug}`}
       className="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group"
     >
-      {/* Imagen & Badges Flotantes */}
+      {/* Imagen o Video & Badges Flotantes */}
       <div className="relative h-48 w-full overflow-hidden">
-        <img
-          src={local.fotoPortada}
-          alt={`Portada de ${local.nombre}`}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
-        />
+        {local.videoPortada ? (
+          <video
+            src={local.videoPortada}
+            poster={local.fotoPortada}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        ) : (
+          <img
+            src={local.fotoPortada}
+            alt={`Portada de ${local.nombre}`}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-transparent to-transparent" />
 
         <div className="absolute top-space-sm left-space-sm right-space-sm flex items-center justify-between gap-1">

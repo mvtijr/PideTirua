@@ -688,10 +688,21 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                       style={estilo}
                       className="coverflow-card absolute w-[280px] sm:w-[310px] md:w-[340px] h-[450px] md:h-[490px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl bg-surface-container-lowest border border-white/70"
                     >
-                      {/* Contenedor central con el LOGO del negocio sin recortar bordes */}
+                      {/* Contenedor central con video de fondo (si existe) y el LOGO del negocio */}
                       <div className="absolute inset-0 bg-surface-container-low flex items-center justify-center p-8 pb-36">
+                        {local.videoPortada && (
+                          <video
+                            src={local.videoPortada}
+                            poster={local.fotoPortada}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+                          />
+                        )}
                         <div
-                          className="w-44 h-44 md:w-52 md:h-52 rounded-full shadow-xl border-4 border-white overflow-hidden flex items-center justify-center"
+                          className="relative z-10 w-44 h-44 md:w-52 md:h-52 rounded-full shadow-xl border-4 border-white overflow-hidden flex items-center justify-center"
                           style={{
                             backgroundColor:
                               local.slug === "las-tranqueras"
@@ -714,7 +725,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                       </div>
 
                       {/* Gradiente editorial de contraste nítido */}
-                      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-transparent to-black/90" />
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/15 to-black/90" />
 
                       {/* Capa de atenuación para tarjetas laterales */}
                       <div

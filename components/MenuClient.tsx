@@ -145,12 +145,34 @@ export default function MenuClient({ local }: MenuClientProps) {
 
   return (
     <div
-      className={`min-h-screen pb-28 ${
-        esLasTranqueras ? "bg-[#FFFDF2]" : "bg-surface"
+      className={`relative min-h-screen pb-28 ${
+        esLasTranqueras ? "bg-[#171614]" : "bg-surface"
       }`}
     >
+      {/* Video de fondo fijo a pantalla completa para la carta digital de Las Tranqueras */}
+      {esLasTranqueras && local.videoPortada && (
+        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+          <video
+            src={local.videoPortada}
+            poster={local.fotoPortada}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="h-full w-full object-cover blur-[4px] scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#171614]/65 via-[#171614]/55 to-[#171614]/80" />
+        </div>
+      )}
+
       {/* Contenedor Mobile-First (optimizado para lectura QR en celular) */}
-      <div className="mx-auto max-w-xl bg-surface-container-lowest shadow-md min-h-screen">
+      <div
+        className={`relative z-10 mx-auto max-w-xl min-h-screen ${
+          esLasTranqueras
+            ? "bg-[#171614]/45 backdrop-blur-[2px] shadow-2xl sm:border-x sm:border-[#F8DC4B]/25"
+            : "bg-surface-container-lowest shadow-md"
+        }`}
+      >
         {/* Portada e Identidad del Local */}
         <header className="relative">
           <div
@@ -272,38 +294,50 @@ export default function MenuClient({ local }: MenuClientProps) {
 
           {/* Ficha informativa del Local + Botón de Llamada Directa */}
           <div
-            className={`border-b bg-surface-container-lowest px-4 py-4 ${
+            className={`border-b px-4 py-4 ${
               esLasTranqueras
-                ? "border-[#F8DC4B]/40"
-                : "border-outline-variant/40"
+                ? "border-[#F8DC4B]/30 bg-[#171614]/80 backdrop-blur-md"
+                : "border-outline-variant/40 bg-surface-container-lowest"
             }`}
           >
-            <p className="text-xs leading-relaxed text-on-surface-variant sm:text-sm">
+            <p
+              className={`text-xs leading-relaxed sm:text-sm ${
+                esLasTranqueras
+                  ? "text-[#FFFDF2]/90"
+                  : "text-on-surface-variant"
+              }`}
+            >
               {local.descripcionCorta}
             </p>
 
             <div
               className={`mt-3.5 grid grid-cols-1 gap-2 rounded-2xl p-3 text-xs sm:grid-cols-2 ${
                 esLasTranqueras
-                  ? "border border-[#F8DC4B]/50 bg-[#FFFDF2] text-[#171614]"
+                  ? "border border-[#F8DC4B]/45 bg-[#171614]/75 text-[#FFFDF2]"
                   : "bg-surface-container-low text-on-surface"
               }`}
             >
               <div className="flex items-start gap-2">
                 <MapPin
                   className={`mt-0.5 h-4 w-4 shrink-0 ${
-                    esLasTranqueras ? "text-[#171614]" : "text-secondary"
+                    esLasTranqueras ? "text-[#F8DC4B]" : "text-secondary"
                   }`}
                 />
                 <div>
                   <span
                     className={`font-bold ${
-                      esLasTranqueras ? "text-[#171614]" : "text-primary"
+                      esLasTranqueras ? "text-[#F8DC4B]" : "text-primary"
                     }`}
                   >
                     {local.ubicacion}
                   </span>
-                  <p className="text-[11px] text-on-surface-variant">
+                  <p
+                    className={`text-[11px] ${
+                      esLasTranqueras
+                        ? "text-[#FFFDF2]/80"
+                        : "text-on-surface-variant"
+                    }`}
+                  >
                     {local.direccionDetalle}
                   </p>
                 </div>
@@ -312,18 +346,24 @@ export default function MenuClient({ local }: MenuClientProps) {
               <div className="flex items-start gap-2">
                 <Clock
                   className={`mt-0.5 h-4 w-4 shrink-0 ${
-                    esLasTranqueras ? "text-[#171614]" : "text-tertiary"
+                    esLasTranqueras ? "text-[#F8DC4B]" : "text-tertiary"
                   }`}
                 />
                 <div>
                   <span
                     className={`font-bold ${
-                      esLasTranqueras ? "text-[#171614]" : "text-primary"
+                      esLasTranqueras ? "text-[#F8DC4B]" : "text-primary"
                     }`}
                   >
                     Preparación est.: {local.tiempoEstimado}
                   </span>
-                  <p className="text-[11px] text-on-surface-variant">
+                  <p
+                    className={`text-[11px] ${
+                      esLasTranqueras
+                        ? "text-[#FFFDF2]/80"
+                        : "text-on-surface-variant"
+                    }`}
+                  >
                     {local.horarioEntrega}
                   </p>
                 </div>
@@ -335,13 +375,13 @@ export default function MenuClient({ local }: MenuClientProps) {
               <div
                 className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold ${
                   esLasTranqueras
-                    ? "bg-[#F8DC4B]/35 text-[#171614] border border-[#F8DC4B]"
+                    ? "bg-[#F8DC4B]/20 text-[#F8DC4B] border border-[#F8DC4B]/55"
                     : "bg-surface-container text-primary"
                 }`}
               >
                 <Store
                   className={`h-4 w-4 ${
-                    esLasTranqueras ? "text-[#171614]" : "text-secondary"
+                    esLasTranqueras ? "text-[#F8DC4B]" : "text-secondary"
                   }`}
                 />
                 <span>Retiro en local y Consumo en mesa</span>
@@ -351,14 +391,14 @@ export default function MenuClient({ local }: MenuClientProps) {
                 href={`tel:+${local.telefonoWhatsapp}`}
                 className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition active:scale-95 ${
                   esLasTranqueras
-                    ? "bg-[#171614] text-[#F8DC4B] hover:bg-neutral-800"
+                    ? "bg-[#F8DC4B] text-[#171614] hover:bg-[#f6d52b]"
                     : "bg-primary text-on-primary hover:bg-primary-container"
                 }`}
               >
                 <Phone
                   className={`h-3.5 w-3.5 ${
                     esLasTranqueras
-                      ? "text-[#F8DC4B]"
+                      ? "text-[#171614]"
                       : "text-secondary-fixed"
                   }`}
                 />
@@ -370,10 +410,10 @@ export default function MenuClient({ local }: MenuClientProps) {
 
         {/* Pestañas Sticky de Categorías + Buscador de Platos */}
         <div
-          className={`sticky top-0 z-30 border-b bg-surface-container-lowest/95 backdrop-blur-md ${
+          className={`sticky top-0 z-30 border-b backdrop-blur-md ${
             esLasTranqueras
-              ? "border-[#F8DC4B]/50"
-              : "border-outline-variant/40"
+              ? "border-[#F8DC4B]/35 bg-[#171614]/85"
+              : "border-outline-variant/40 bg-surface-container-lowest/95"
           }`}
         >
           {/* Pestañas de categorías */}
@@ -391,8 +431,8 @@ export default function MenuClient({ local }: MenuClientProps) {
                   className={`filter-chip shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
                     esLasTranqueras
                       ? activa
-                        ? "bg-[#171614] text-[#F8DC4B] ring-2 ring-[#F8DC4B] shadow-sm"
-                        : "bg-[#FFFBEB] text-[#171614] border border-[#F8DC4B]/50 hover:bg-[#FEF08A]/60"
+                        ? "bg-[#F8DC4B] text-[#171614] ring-2 ring-[#F8DC4B] shadow-sm"
+                        : "bg-white/10 text-[#FFFDF2] border border-[#F8DC4B]/40 hover:bg-[#F8DC4B]/20"
                       : activa
                       ? "bg-primary text-on-primary shadow-sm"
                       : "bg-surface-container-low text-on-surface-variant hover:bg-surface-container"
@@ -415,7 +455,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 placeholder={`Buscar en la carta de ${local.nombre}...`}
                 className={`w-full rounded-xl border py-2 pl-9 pr-8 text-xs text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none ${
                   esLasTranqueras
-                    ? "border-[#F8DC4B]/60 bg-[#FFFDF2] focus:border-[#171614]"
+                    ? "border-[#F8DC4B]/60 bg-[#FFFDF2]/95 focus:border-[#F8DC4B]"
                     : "border-outline-variant/40 bg-surface-container-low focus:border-secondary"
                 }`}
               />
@@ -445,7 +485,9 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <div className="mb-3 flex items-center justify-between">
                   <h2
                     className={`text-lg font-extrabold tracking-tight ${
-                      esLasTranqueras ? "text-[#171614]" : "text-primary"
+                      esLasTranqueras
+                        ? "text-[#F8DC4B] drop-shadow-sm"
+                        : "text-primary"
                     }`}
                   >
                     {categoria.nombre}
@@ -453,7 +495,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                   <span
                     className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                       esLasTranqueras
-                        ? "bg-[#F8DC4B]/40 text-[#171614]"
+                        ? "bg-[#F8DC4B] text-[#171614] font-bold shadow-sm"
                         : "bg-surface-container text-on-surface-variant"
                     }`}
                   >
@@ -479,11 +521,21 @@ export default function MenuClient({ local }: MenuClientProps) {
               </section>
             ))
           ) : (
-            <div className="rounded-2xl border border-dashed border-outline-variant p-8 text-center">
-              <UtensilsCrossed className="mx-auto h-8 w-8 text-outline" />
+            <div
+              className={`rounded-2xl border border-dashed p-8 text-center ${
+                esLasTranqueras
+                  ? "border-[#F8DC4B]/50 bg-[#171614]/80 backdrop-blur-md"
+                  : "border-outline-variant"
+              }`}
+            >
+              <UtensilsCrossed
+                className={`mx-auto h-8 w-8 ${
+                  esLasTranqueras ? "text-[#F8DC4B]" : "text-outline"
+                }`}
+              />
               <p
                 className={`mt-2 text-sm font-bold ${
-                  esLasTranqueras ? "text-[#171614]" : "text-primary"
+                  esLasTranqueras ? "text-[#FFFDF2]" : "text-primary"
                 }`}
               >
                 No encontramos platos con &ldquo;{busquedaPlato}&rdquo;
@@ -492,7 +544,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 type="button"
                 onClick={() => setBusquedaPlato("")}
                 className={`mt-3 text-xs font-bold underline ${
-                  esLasTranqueras ? "text-[#171614]" : "text-secondary"
+                  esLasTranqueras ? "text-[#F8DC4B]" : "text-secondary"
                 }`}
               >
                 Mostrar toda la carta
@@ -503,15 +555,15 @@ export default function MenuClient({ local }: MenuClientProps) {
 
         {/* Pie del menú exclusivo */}
         <footer
-          className={`border-t px-4 py-6 text-center text-xs text-on-surface-variant ${
+          className={`border-t px-4 py-6 text-center text-xs ${
             esLasTranqueras
-              ? "border-[#F8DC4B]/40 bg-[#FFFDF2]"
-              : "border-outline-variant/40 bg-surface-container-low"
+              ? "border-[#F8DC4B]/35 bg-[#171614]/85 text-[#FFFDF2]/85 backdrop-blur-md"
+              : "border-outline-variant/40 bg-surface-container-low text-on-surface-variant"
           }`}
         >
           <p
             className={`font-bold ${
-              esLasTranqueras ? "text-[#171614]" : "text-primary"
+              esLasTranqueras ? "text-[#F8DC4B]" : "text-primary"
             }`}
           >
             {local.nombre}
@@ -520,7 +572,11 @@ export default function MenuClient({ local }: MenuClientProps) {
             {local.direccionDetalle} · WhatsApp{" "}
             {formatPhoneDisplay(local.telefonoWhatsapp)}
           </p>
-          <div className="mt-3 flex items-center justify-center gap-2 text-[11px] text-outline">
+          <div
+            className={`mt-3 flex items-center justify-center gap-2 text-[11px] ${
+              esLasTranqueras ? "text-[#FFFDF2]/75" : "text-outline"
+            }`}
+          >
             <img
               src="/logo-pidetirua.jpg"
               alt="Logo PideTirúa"
@@ -531,7 +587,7 @@ export default function MenuClient({ local }: MenuClientProps) {
               <Link
                 href="/"
                 className={`font-bold hover:underline ${
-                  esLasTranqueras ? "text-[#171614]" : "text-secondary"
+                  esLasTranqueras ? "text-[#F8DC4B]" : "text-secondary"
                 }`}
               >
                 PideTirúa
