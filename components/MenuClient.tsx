@@ -150,10 +150,10 @@ export default function MenuClient({ local }: MenuClientProps) {
       }`}
     >
       {/* Video de fondo fijo a pantalla completa para la carta digital de Las Tranqueras */}
-      {esLasTranqueras && local.videoPortada && (
+      {esLasTranqueras && (local.videoFondo || local.videoPortada) && (
         <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
           <video
-            src={local.videoPortada}
+            src={local.videoFondo || local.videoPortada}
             poster={local.fotoPortada}
             autoPlay
             loop

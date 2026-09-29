@@ -21,9 +21,9 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
     >
       {/* Imagen o Video & Badges Flotantes */}
       <div className="relative h-48 w-full overflow-hidden">
-        {local.videoPortada ? (
+        {local.videoFondo || local.videoPortada ? (
           <video
-            src={local.videoPortada}
+            src={local.videoFondo || local.videoPortada}
             poster={local.fotoPortada}
             autoPlay
             loop

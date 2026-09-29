@@ -44,6 +44,7 @@ export interface Local {
   descripcionCorta: string;
   fotoPortada: string;
   videoPortada?: string;
+  videoFondo?: string;
   logo: string;
   abierto: boolean;
   categorias: CategoriaMenu[];

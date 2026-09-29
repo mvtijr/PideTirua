@@ -690,9 +690,9 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     >
                       {/* Contenedor central con video de fondo (si existe) y el LOGO del negocio */}
                       <div className="absolute inset-0 bg-surface-container-low flex items-center justify-center p-8 pb-36">
-                        {local.videoPortada && (
+                        {(local.videoFondo || local.videoPortada) && (
                           <video
-                            src={local.videoPortada}
+                            src={local.videoFondo || local.videoPortada}
                             poster={local.fotoPortada}
                             autoPlay
                             loop
