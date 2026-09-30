@@ -72,6 +72,8 @@ interface SupabaseLocalRow {
   plan?: string | null;
   precio_mensual?: number | null;
   activo?: boolean | null;
+  dia_cobro?: number | null;
+  fecha_ultimo_pago?: string | null;
   sector?: string | null;
   ubicacion?: string | null;
   tiempo_estimado?: string | null;
@@ -83,6 +85,14 @@ interface SupabaseLocalRow {
   logo?: string | null;
   categoria_filtro?: string[] | null;
   categorias?: SupabaseCategoriaRow[];
+}
+
+function getTodayDateISO(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 function normalizeStaticLocal(raw: Local): Local {
@@ -100,6 +110,16 @@ function normalizeStaticLocal(raw: Local): Local {
       : plan === "llave_en_mano"
       ? 28000
       : 15000;
+  const diaCobro =
+    typeof raw.dia_cobro === "number" &&
+    raw.dia_cobro >= 1 &&
+    raw.dia_cobro <= 31
+      ? Math.round(raw.dia_cobro)
+      : 5;
+  const fechaUltimoPago =
+    typeof raw.fecha_ultimo_pago === "string" && raw.fecha_ultimo_pago.trim()
+      ? raw.fecha_ultimo_pago.slice(0, 10)
+      : getTodayDateISO();
   const logoFinal = raw.logo_url || raw.logo || "/logo-pidetirua.jpg";
   const bannerFinal =
     raw.banner_url ||
@@ -116,6 +136,8 @@ function normalizeStaticLocal(raw: Local): Local {
     activo: raw.activo !== false,
     plan,
     precio_mensual: precioMensual,
+    dia_cobro: diaCobro,
+    fecha_ultimo_pago: fechaUltimoPago,
     logo: logoFinal,
     logo_url: logoFinal,
     fotoPortada: bannerFinal,
@@ -288,6 +310,18 @@ function mapSupabaseRowToLocal(
         base.videoPortada ||
         undefined;
 
+  const diaCobroFinal =
+    typeof row.dia_cobro === "number" &&
+    row.dia_cobro >= 1 &&
+    row.dia_cobro <= 31
+      ? Math.round(row.dia_cobro)
+      : base.dia_cobro || 5;
+
+  const fechaUltimoPagoFinal =
+    typeof row.fecha_ultimo_pago === "string" && row.fecha_ultimo_pago.trim()
+      ? row.fecha_ultimo_pago.slice(0, 10)
+      : base.fecha_ultimo_pago || getTodayDateISO();
+
   return {
     ...base,
     id: row.id,
@@ -306,6 +340,8 @@ function mapSupabaseRowToLocal(
     activo,
     plan,
     precio_mensual: precioMensual,
+    dia_cobro: diaCobroFinal,
+    fecha_ultimo_pago: fechaUltimoPagoFinal,
     pin: row.pin || base.pin || "1234",
     banco: row.banco ?? base.banco ?? "",
     tipo_cuenta: row.tipo_cuenta ?? base.tipo_cuenta ?? "",
@@ -367,6 +403,8 @@ async function seedRelationalTablesIfEmpty(): Promise<void> {
     plan: loc.plan || "autogestionado",
     precio_mensual: loc.precio_mensual || 15000,
     activo: loc.activo !== false,
+    dia_cobro: loc.dia_cobro || 5,
+    fecha_ultimo_pago: loc.fecha_ultimo_pago || getTodayDateISO(),
     sector: loc.sector,
     ubicacion: loc.ubicacion,
     tiempo_estimado: loc.tiempoEstimado,
@@ -1237,6 +1275,8 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
   banner_url?: string;
   banner_video_url?: string | null;
   activo?: boolean;
+  dia_cobro?: number;
+  fecha_ultimo_pago?: string;
 }): Promise<{ ok: boolean; locales?: Local[]; local?: Local; error?: string }> {
   const supabase = getSupabaseClient();
   const todos = await fetchAllLocales();
@@ -1299,6 +1339,19 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
       ? input.activo
       : existing?.activo !== false;
 
+  const diaCobroFinal =
+    typeof input.dia_cobro === "number" &&
+    input.dia_cobro >= 1 &&
+    input.dia_cobro <= 31
+      ? Math.round(input.dia_cobro)
+      : existing?.dia_cobro || 5;
+
+  const fechaUltimoPagoFinal =
+    typeof input.fecha_ultimo_pago === "string" &&
+    input.fecha_ultimo_pago.trim()
+      ? input.fecha_ultimo_pago.slice(0, 10)
+      : existing?.fecha_ultimo_pago || getTodayDateISO();
+
   const rowToUpsert = {
     id: localId,
     slug: slugLimpio,
@@ -1312,6 +1365,8 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
     plan,
     precio_mensual: precioMensual,
     activo: activoFinal,
+    dia_cobro: diaCobroFinal,
+    fecha_ultimo_pago: fechaUltimoPagoFinal,
     logo: logoFinal,
     logo_url: logoFinal,
     foto_portada: bannerFinal,
@@ -1368,3 +1423,38 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
     local: localGuardado,
   };
 }
+
+/**
+ * SuperAdmin: Registra el pago mensual de un local actualizando `fecha_ultimo_pago` a la fecha de hoy en Supabase.
+ */
+export async function registerLocalPagoBySuperAdminInSupabase(
+  slug: string,
+  fechaPago?: string
+): Promise<{ ok: boolean; locales?: Local[]; error?: string }> {
+  const fechaFinal =
+    typeof fechaPago === "string" && /^\d{4}-\d{2}-\d{2}$/.test(fechaPago.trim())
+      ? fechaPago.trim()
+      : getTodayDateISO();
+
+  const supabase = getSupabaseClient();
+  const { error } = await supabase
+    .from("locales")
+    .update({ fecha_ultimo_pago: fechaFinal })
+    .eq("slug", slug);
+
+  if (error) {
+    console.error("Error actualizando fecha_ultimo_pago en locales:", error);
+    return { ok: false, error: error.message };
+  }
+
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) =>
+    loc.slug.toLowerCase() === slug.toLowerCase()
+      ? { ...loc, fecha_ultimo_pago: fechaFinal }
+      : loc
+  );
+  await writeSupabaseCloudState(actualizados);
+
+  return { ok: true, locales: actualizados };
+}
+

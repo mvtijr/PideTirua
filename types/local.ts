@@ -63,6 +63,8 @@ export interface Local {
   activo?: boolean;
   plan?: PlanComercial;
   precio_mensual?: number;
+  dia_cobro?: number;
+  fecha_ultimo_pago?: string;
   pin?: string;
   banco?: string;
   tipo_cuenta?: string;
@@ -80,6 +82,7 @@ export interface ItemCarrito {
 
 export interface DatosCheckout {
   nombreCliente: string;
+  telefonoCliente?: string;
   tipoEntrega: TipoEntrega;
   direccionOMesa: string;
   metodoPago: MetodoPago;

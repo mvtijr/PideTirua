@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import {
   ensurePlatosBucketVideoSupport,
   fetchAllLocales,
+  registerLocalPagoBySuperAdminInSupabase,
   toggleLocalActivoBySuperAdminInSupabase,
   updateLocalPinBySuperAdminInSupabase,
   uploadPlatoFotoInSupabase,
@@ -114,6 +115,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(res);
     }
 
+    if (action === "registrar-pago") {
+      const { slug, fecha_ultimo_pago } = body;
+      if (!slug || typeof slug !== "string") {
+        return NextResponse.json(
+          { ok: false, error: "Slug requerido" },
+          { status: 400 }
+        );
+      }
+      const res = await registerLocalPagoBySuperAdminInSupabase(
+        slug,
+        typeof fecha_ultimo_pago === "string" ? fecha_ultimo_pago : undefined
+      );
+      if (!res.ok) {
+        return NextResponse.json(res, { status: 400 });
+      }
+      revalidatePath("/superadmin");
+      return NextResponse.json(res);
+    }
+
     if (action === "upsert-local") {
       const {
         id,
@@ -132,6 +152,8 @@ export async function POST(req: NextRequest) {
         banner_url,
         banner_video_url,
         activo,
+        dia_cobro,
+        fecha_ultimo_pago,
       } = body;
 
       if (!nombre || typeof nombre !== "string" || !nombre.trim()) {
@@ -177,6 +199,9 @@ export async function POST(req: NextRequest) {
             ? null
             : undefined,
         activo: typeof activo === "boolean" ? activo : true,
+        dia_cobro: typeof dia_cobro === "number" ? dia_cobro : undefined,
+        fecha_ultimo_pago:
+          typeof fecha_ultimo_pago === "string" ? fecha_ultimo_pago : undefined,
       });
 
       revalidatePath("/");

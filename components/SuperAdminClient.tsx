@@ -30,6 +30,10 @@ import {
   Check,
   Video,
   Trash2,
+  CreditCard,
+  MessageCircle,
+  Calendar,
+  AlertTriangle,
 } from "lucide-react";
 import { Local, PlanComercial, SectorComuna } from "@/types/local";
 import { formatCLP, formatPhoneDisplay } from "@/lib/formatters";
@@ -40,7 +44,106 @@ interface SuperAdminClientProps {
   initialAuthenticated?: boolean;
 }
 
+interface DatosCobroSuperAdmin {
+  nombre: string;
+  rut: string;
+  banco: string;
+  cuenta: string;
+  correo: string;
+}
+
 const SESSION_KEY = "pidetirua_superadmin_session";
+const DATOS_COBRO_KEY = "pidetirua_superadmin_datos_cobro";
+
+const DEFAULT_DATOS_COBRO: DatosCobroSuperAdmin = {
+  nombre: "",
+  rut: "",
+  banco: "BancoEstado",
+  cuenta: "",
+  correo: "",
+};
+
+function getTodayDateStr(): string {
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function calcularEstadoCobranza(loc: Local): {
+  alDia: boolean;
+  diaCobro: number;
+  fechaUltimoPago: string;
+} {
+  const diaCobro =
+    typeof loc.dia_cobro === "number" &&
+    loc.dia_cobro >= 1 &&
+    loc.dia_cobro <= 31
+      ? Math.round(loc.dia_cobro)
+      : 5;
+
+  const fechaUltimoPago = (loc.fecha_ultimo_pago || "").slice(0, 10);
+  const now = new Date();
+  const hoyAnio = now.getFullYear();
+  const hoyMes = now.getMonth() + 1;
+  const hoyDia = now.getDate();
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaUltimoPago)) {
+    return {
+      alDia: hoyDia <= diaCobro,
+      diaCobro,
+      fechaUltimoPago: getTodayDateStr(),
+    };
+  }
+
+  const [pagoAnio, pagoMes] = fechaUltimoPago.split("-").map(Number);
+  const mesesDiferencia = (hoyAnio - pagoAnio) * 12 + (hoyMes - pagoMes);
+
+  // Si ya pagó en el mes en curso (o posterior), está al día.
+  if (mesesDiferencia <= 0) {
+    return { alDia: true, diaCobro, fechaUltimoPago };
+  }
+
+  // Si su último pago fue el mes pasado y aún no pasa el día de cobro de este mes, sigue al día.
+  if (mesesDiferencia === 1 && hoyDia <= diaCobro) {
+    return { alDia: true, diaCobro, fechaUltimoPago };
+  }
+
+  // En cualquier otro caso, el pago está vencido.
+  return { alDia: false, diaCobro, fechaUltimoPago };
+}
+
+function buildWhatsAppCobroUrl(
+  loc: Local,
+  precioPlan: number,
+  datosCobro: DatosCobroSuperAdmin
+): string {
+  const telefonoLimpio = (
+    loc.telefono_whatsapp ||
+    loc.telefonoWhatsapp ||
+    ""
+  ).replace(/\D/g, "");
+  const precioTexto = `${formatCLP(precioPlan)} CLP`;
+  const tuBanco = datosCobro.banco.trim() || "BancoEstado";
+  const tuRut = datosCobro.rut.trim() || "Por confirmar";
+  const tuCuenta = datosCobro.cuenta.trim() || "Por confirmar";
+  const tuNombre = datosCobro.nombre.trim() || "Administración PideTirúa";
+  const tuCorreo = datosCobro.correo.trim();
+
+  const lineasDatos = [
+    `- Banco: ${tuBanco}`,
+    `- Tipo: CuentaRUT`,
+    `- RUT: ${tuRut}`,
+    `- N°: ${tuCuenta}`,
+    `- Nombre: ${tuNombre}`,
+    ...(tuCorreo ? [`- Correo: ${tuCorreo}`] : []),
+  ].join("\n");
+
+  const mensaje = `Hola ${loc.nombre}, un gusto saludarte desde PideTirúa. Te escribo para recordarte la renovación mensual de tu menú digital y sistema de pedidos (${precioTexto}).\n\nTe comparto los datos para la transferencia:\n${lineasDatos}\n\nQuedo atento a la captura de tu comprobante para mantener tu servicio al día. ¡Muchas gracias y que sigan las buenas ventas!`;
+
+  return `https://wa.me/${telefonoLimpio}?text=${encodeURIComponent(mensaje)}`;
+}
 
 async function compressImageFileToDataUrl(
   file: File,
@@ -107,6 +210,14 @@ export default function SuperAdminClient({
   // Toast de feedback
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
   const [guardandoSlug, setGuardandoSlug] = useState<string | null>(null);
+  const [registrandoPagoSlug, setRegistrandoPagoSlug] = useState<string | null>(
+    null
+  );
+
+  // Estado de "💳 Mis Datos de Cobro (SuperAdmin)"
+  const [datosCobro, setDatosCobro] =
+    useState<DatosCobroSuperAdmin>(DEFAULT_DATOS_COBRO);
+  const [mostrarDatosCobro, setMostrarDatosCobro] = useState<boolean>(false);
 
   // Estado para revelar/ocultar y editar de forma inmediata el PIN de Acceso por tarjeta
   const [pinVisiblePorSlug, setPinVisiblePorSlug] = useState<
@@ -136,6 +247,10 @@ export default function SuperAdminClient({
   const [formPin, setFormPin] = useState<string>("1234");
   const [formPlan, setFormPlan] = useState<PlanComercial>("autogestionado");
   const [formPrecioMensual, setFormPrecioMensual] = useState<number>(15000);
+  const [formDiaCobro, setFormDiaCobro] = useState<number>(5);
+  const [formFechaUltimoPago, setFormFechaUltimoPago] = useState<string>(() =>
+    getTodayDateStr()
+  );
   const [formLogoUrl, setFormLogoUrl] = useState<string>("");
   const [formBannerUrl, setFormBannerUrl] = useState<string>("");
   const [formBannerVideoUrl, setFormBannerVideoUrl] = useState<string>("");
@@ -150,6 +265,24 @@ export default function SuperAdminClient({
   const inputLogoRef = useRef<HTMLInputElement | null>(null);
   const inputBannerRef = useRef<HTMLInputElement | null>(null);
   const inputVideoRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    try {
+      const guardadoCobro = localStorage.getItem(DATOS_COBRO_KEY);
+      if (guardadoCobro) {
+        const parsed = JSON.parse(guardadoCobro) as Partial<DatosCobroSuperAdmin>;
+        setDatosCobro({
+          nombre: parsed.nombre || "",
+          rut: parsed.rut || "",
+          banco: parsed.banco || "BancoEstado",
+          cuenta: parsed.cuenta || "",
+          correo: parsed.correo || "",
+        });
+      }
+    } catch {
+      // Ignorar errores de localStorage
+    }
+  }, []);
 
   useEffect(() => {
     if (initialAuthenticated) {
@@ -171,6 +304,17 @@ export default function SuperAdminClient({
 
   const mostrarToast = (msg: string) => {
     setToastMensaje(msg);
+  };
+
+  const handleGuardarDatosCobro = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      localStorage.setItem(DATOS_COBRO_KEY, JSON.stringify(datosCobro));
+      mostrarToast("💳 Mis Datos de Cobro guardados correctamente");
+      setMostrarDatosCobro(false);
+    } catch {
+      mostrarToast("No se pudieron guardar los datos en el navegador");
+    }
   };
 
   useEffect(() => {
@@ -249,6 +393,8 @@ export default function SuperAdminClient({
     setFormPin("1234");
     setFormPlan("autogestionado");
     setFormPrecioMensual(15000);
+    setFormDiaCobro(5);
+    setFormFechaUltimoPago(getTodayDateStr());
     setFormLogoUrl("");
     setFormBannerUrl("");
     setFormBannerVideoUrl("");
@@ -281,6 +427,16 @@ export default function SuperAdminClient({
     setFormPin(loc.pin || "1234");
     setFormPlan(planActual);
     setFormPrecioMensual(precioActual);
+    setFormDiaCobro(
+      typeof loc.dia_cobro === "number" &&
+        loc.dia_cobro >= 1 &&
+        loc.dia_cobro <= 31
+        ? loc.dia_cobro
+        : 5
+    );
+    setFormFechaUltimoPago(
+      loc.fecha_ultimo_pago?.slice(0, 10) || getTodayDateStr()
+    );
     setFormLogoUrl(loc.logo_url || loc.logo);
     setFormBannerUrl(loc.banner_url || loc.fotoPortada);
     setFormBannerVideoUrl(loc.banner_video_url || loc.videoPortada || "");
@@ -443,6 +599,8 @@ export default function SuperAdminClient({
           pin: formPin.trim() || "1234",
           plan: formPlan,
           precio_mensual: formPrecioMensual,
+          dia_cobro: formDiaCobro,
+          fecha_ultimo_pago: formFechaUltimoPago,
           logo_url: formLogoUrl.trim(),
           banner_url: formBannerUrl.trim(),
           banner_video_url: formBannerVideoUrl.trim() || null,
@@ -468,6 +626,39 @@ export default function SuperAdminClient({
       setErrorForm("Error de conexión al guardar en Supabase.");
     } finally {
       setGuardandoForm(false);
+    }
+  };
+
+  const handleRegistrarPago = async (loc: Local) => {
+    if (registrandoPagoSlug === loc.slug) return;
+    const fechaHoy = getTodayDateStr();
+    setRegistrandoPagoSlug(loc.slug);
+
+    setLocales((prev) =>
+      prev.map((l) =>
+        l.slug === loc.slug ? { ...l, fecha_ultimo_pago: fechaHoy } : l
+      )
+    );
+
+    try {
+      const res = await fetch("/api/superadmin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "registrar-pago",
+          slug: loc.slug,
+          fecha_ultimo_pago: fechaHoy,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && Array.isArray(data.locales)) {
+        setLocales(data.locales);
+      }
+      mostrarToast("Pago registrado con éxito");
+    } catch {
+      mostrarToast("No se pudo registrar el pago en Supabase");
+    } finally {
+      setRegistrandoPagoSlug(null);
     }
   };
 
@@ -697,6 +888,16 @@ export default function SuperAdminClient({
           </div>
 
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMostrarDatosCobro((prev) => !prev)}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/40 bg-amber-500/15 px-3 py-2 text-xs font-extrabold text-amber-300 transition hover:bg-amber-400/25"
+            >
+              <CreditCard className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">💳 Mis Datos de Cobro</span>
+              <span className="sm:hidden">💳 Cobro</span>
+            </button>
+
             <Link
               href="/"
               className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/20"
@@ -779,6 +980,148 @@ export default function SuperAdminClient({
               Llave en Mano]
             </p>
           </div>
+        </section>
+
+        {/* APARTADO: 💳 MIS DATOS DE COBRO (SUPERADMIN) */}
+        <section className="rounded-3xl border border-emerald-500/30 bg-slate-900/90 p-5 shadow-xl sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-emerald-300">
+                <CreditCard className="h-4 w-4" />
+                Facturación Mensual · 1 Clic
+              </span>
+              <h2 className="mt-0.5 text-base font-black text-white sm:text-lg">
+                💳 Mis Datos de Cobro (SuperAdmin)
+              </h2>
+              <p className="mt-0.5 text-xs text-slate-400">
+                {datosCobro.nombre && datosCobro.rut && datosCobro.cuenta
+                  ? `Configurado: ${datosCobro.banco} · CuentaRUT ${datosCobro.cuenta} · ${datosCobro.nombre} (${datosCobro.rut})`
+                  : "Configura tus datos bancarios para que el botón '💬 Cobrar por WhatsApp' envíe siempre tus datos reales."}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setMostrarDatosCobro((prev) => !prev)}
+              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-2.5 text-xs font-extrabold text-emerald-200 transition hover:bg-emerald-500/25 active:scale-95"
+            >
+              <CreditCard className="h-4 w-4 text-emerald-400" />
+              <span>
+                {mostrarDatosCobro
+                  ? "Ocultar Mis Datos de Cobro"
+                  : "Configurar Mis Datos de Cobro"}
+              </span>
+            </button>
+          </div>
+
+          {mostrarDatosCobro && (
+            <form
+              onSubmit={handleGuardarDatosCobro}
+              className="mt-5 space-y-4 border-t border-white/15 pt-5"
+            >
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-slate-300">
+                    Tu Nombre Completo *
+                  </label>
+                  <input
+                    type="text"
+                    value={datosCobro.nombre}
+                    onChange={(e) =>
+                      setDatosCobro((prev) => ({
+                        ...prev,
+                        nombre: e.target.value,
+                      }))
+                    }
+                    placeholder="Ej: Matías Rodríguez"
+                    className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-slate-300">
+                    Tu RUT *
+                  </label>
+                  <input
+                    type="text"
+                    value={datosCobro.rut}
+                    onChange={(e) =>
+                      setDatosCobro((prev) => ({
+                        ...prev,
+                        rut: e.target.value,
+                      }))
+                    }
+                    placeholder="Ej: 19.876.543-2"
+                    className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 font-mono text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-slate-300">
+                    Tu Banco *
+                  </label>
+                  <input
+                    type="text"
+                    value={datosCobro.banco}
+                    onChange={(e) =>
+                      setDatosCobro((prev) => ({
+                        ...prev,
+                        banco: e.target.value,
+                      }))
+                    }
+                    placeholder="Ej: BancoEstado"
+                    className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-bold text-slate-300">
+                    Tu N° de CuentaRUT *
+                  </label>
+                  <input
+                    type="text"
+                    value={datosCobro.cuenta}
+                    onChange={(e) =>
+                      setDatosCobro((prev) => ({
+                        ...prev,
+                        cuenta: e.target.value,
+                      }))
+                    }
+                    placeholder="Ej: 19876543"
+                    className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 font-mono text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-bold text-slate-300">
+                    Correo para comprobantes (opcional)
+                  </label>
+                  <input
+                    type="email"
+                    value={datosCobro.correo}
+                    onChange={(e) =>
+                      setDatosCobro((prev) => ({
+                        ...prev,
+                        correo: e.target.value,
+                      }))
+                    }
+                    placeholder="Ej: pagos@pidetirua.cl"
+                    className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  type="submit"
+                  className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-2.5 text-xs font-black text-slate-950 shadow-lg transition hover:bg-emerald-400 active:scale-95"
+                >
+                  <CheckCircle2 className="h-4 w-4" />
+                  <span>Guardar Mis Datos de Cobro</span>
+                </button>
+              </div>
+            </form>
+          )}
         </section>
 
         {/* B) FORMULARIO "+ REGISTRAR NUEVO LOCAL" Y "EDITAR LOCAL" */}
@@ -1011,6 +1354,44 @@ export default function SuperAdminClient({
                       </p>
                     </div>
                   </button>
+                </div>
+
+                {/* Día de cobro y Fecha del último pago */}
+                <div className="mt-3.5 grid grid-cols-1 gap-3.5 rounded-2xl border border-white/15 bg-black/30 p-4 sm:grid-cols-2">
+                  <div>
+                    <label className="mb-1 flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                      <Calendar className="h-3.5 w-3.5 text-amber-400" />
+                      Día de cobro mensual (1 al 31)
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={31}
+                      value={formDiaCobro}
+                      onChange={(e) => {
+                        const val = Number(e.target.value);
+                        setFormDiaCobro(
+                          Number.isFinite(val)
+                            ? Math.min(31, Math.max(1, val))
+                            : 5
+                        );
+                      }}
+                      className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1 flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                      <Calendar className="h-3.5 w-3.5 text-emerald-400" />
+                      Fecha del último pago registrado
+                    </label>
+                    <input
+                      type="date"
+                      value={formFechaUltimoPago}
+                      onChange={(e) => setFormFechaUltimoPago(e.target.value)}
+                      className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1307,6 +1688,12 @@ export default function SuperAdminClient({
                   : 15000;
               const logoMostrar = loc.logo_url || loc.logo;
               const bannerMostrar = loc.banner_url || loc.fotoPortada;
+              const estadoCobro = calcularEstadoCobranza(loc);
+              const urlCobroWhatsApp = buildWhatsAppCobroUrl(
+                loc,
+                precioPlan,
+                datosCobro
+              );
 
               return (
                 <article
@@ -1381,8 +1768,63 @@ export default function SuperAdminClient({
                       </div>
                     </div>
 
+                    {/* Estado de Facturación y Botones de Acción de Cobro en 1 Clic */}
+                    <div
+                      className={`mt-3.5 rounded-2xl border p-3 ${
+                        estadoCobro.alDia
+                          ? "border-emerald-500/35 bg-emerald-950/25"
+                          : "border-rose-500/50 bg-rose-950/35"
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        {estadoCobro.alDia ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/20 px-3 py-1 text-xs font-extrabold text-emerald-200">
+                            🟢 Al día (Vence el {estadoCobro.diaCobro} de este
+                            mes)
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/50 bg-rose-600 px-3 py-1 text-xs font-black text-white shadow-sm">
+                            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                            <span>
+                              ⚠️ Pago Vencido ({formatCLP(precioPlan)} CLP)
+                            </span>
+                          </span>
+                        )}
+
+                        <span className="text-[11px] font-semibold text-slate-400">
+                          Últ. pago: {estadoCobro.fechaUltimoPago}
+                        </span>
+                      </div>
+
+                      <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <a
+                          href={urlCobroWhatsApp}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#25D366] px-3 py-2 text-xs font-black text-white shadow-md transition hover:bg-[#20bd5a] active:scale-95"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5 fill-white" />
+                          <span>💬 Cobrar por WhatsApp</span>
+                        </a>
+
+                        <button
+                          type="button"
+                          disabled={registrandoPagoSlug === loc.slug}
+                          onClick={() => void handleRegistrarPago(loc)}
+                          className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-400/40 bg-emerald-500/20 px-3 py-2 text-xs font-black text-emerald-200 transition hover:bg-emerald-500 hover:text-slate-950 active:scale-95 disabled:opacity-50"
+                        >
+                          {registrandoPagoSlug === loc.slug ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                          )}
+                          <span>✅ Registrar Pago</span>
+                        </button>
+                      </div>
+                    </div>
+
                     {/* Datos rápidos: Teléfono, Dirección y PIN de Acceso con botón 👁️ y edición inmediata */}
-                    <div className="mt-3.5 space-y-2.5 rounded-2xl border border-white/10 bg-black/30 p-3 text-xs">
+                    <div className="mt-3 space-y-2.5 rounded-2xl border border-white/10 bg-black/30 p-3 text-xs">
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                         <div className="flex items-center gap-1.5 text-slate-300">
                           <Phone className="h-3.5 w-3.5 shrink-0 text-emerald-400" />

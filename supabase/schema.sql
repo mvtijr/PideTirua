@@ -37,11 +37,13 @@ CREATE TABLE IF NOT EXISTS public.locales (
     CHECK (plan IN ('autogestionado', 'llave_en_mano')),
   precio_mensual INTEGER NOT NULL DEFAULT 15000,
   activo BOOLEAN NOT NULL DEFAULT true,
+  dia_cobro INTEGER NOT NULL DEFAULT 5,
+  fecha_ultimo_pago DATE NOT NULL DEFAULT CURRENT_DATE,
   categoria_filtro TEXT[] DEFAULT '{}'::TEXT[],
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Asegurar que las columnas de datos bancarios, identidad visual, video de portada y planes existan en `public.locales`
+-- Asegurar que las columnas de datos bancarios, identidad visual, video de portada, planes y cobranza existan en `public.locales`
 ALTER TABLE public.locales
   ADD COLUMN IF NOT EXISTS banco TEXT NULL,
   ADD COLUMN IF NOT EXISTS tipo_cuenta TEXT NULL,
@@ -54,7 +56,9 @@ ALTER TABLE public.locales
   ADD COLUMN IF NOT EXISTS banner_video_url TEXT NULL,
   ADD COLUMN IF NOT EXISTS plan TEXT NOT NULL DEFAULT 'autogestionado',
   ADD COLUMN IF NOT EXISTS precio_mensual INTEGER NOT NULL DEFAULT 15000,
-  ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT true;
+  ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT true,
+  ADD COLUMN IF NOT EXISTS dia_cobro INTEGER DEFAULT 5,
+  ADD COLUMN IF NOT EXISTS fecha_ultimo_pago DATE DEFAULT CURRENT_DATE;
 
 UPDATE public.locales
 SET banner_video_url = NULLIF(video_portada, '')

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   X,
   Plus,
@@ -9,6 +9,7 @@ import {
   Store,
   Utensils,
   User,
+  Phone,
   MapPin,
   CreditCard,
   Banknote,
@@ -69,6 +70,10 @@ const METODOS_PAGO: {
   },
 ];
 
+const LS_KEY_NOMBRE = "pidetirua_nombre";
+const LS_KEY_DIRECCION = "pidetirua_direccion";
+const LS_KEY_TELEFONO = "pidetirua_telefono";
+
 export default function CartDrawer({
   abierto,
   onClose,
@@ -79,6 +84,7 @@ export default function CartDrawer({
   onVaciar,
 }: CartDrawerProps) {
   const [nombreCliente, setNombreCliente] = useState("");
+  const [telefonoCliente, setTelefonoCliente] = useState("");
   const [tipoEntrega, setTipoEntrega] =
     useState<TipoEntrega>("Retiro en local");
   const [direccionOMesa, setDireccionOMesa] = useState("");
@@ -87,6 +93,21 @@ export default function CartDrawer({
   const [mostrarVistaPrevia, setMostrarVistaPrevia] = useState(false);
   const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
   const [datosCopiados, setDatosCopiados] = useState(false);
+
+  // Cargar datos previamente guardados del cliente desde localStorage
+  useEffect(() => {
+    try {
+      const nombreGuardado = localStorage.getItem(LS_KEY_NOMBRE);
+      const direccionGuardada = localStorage.getItem(LS_KEY_DIRECCION);
+      const telefonoGuardado = localStorage.getItem(LS_KEY_TELEFONO);
+
+      if (nombreGuardado) setNombreCliente(nombreGuardado);
+      if (direccionGuardada) setDireccionOMesa(direccionGuardada);
+      if (telefonoGuardado) setTelefonoCliente(telefonoGuardado);
+    } catch {
+      // Ignorar errores de localStorage en modo privado
+    }
+  }, []);
 
   if (!abierto) return null;
 
@@ -136,6 +157,7 @@ export default function CartDrawer({
 
   const datosCheckout: DatosCheckout = {
     nombreCliente,
+    telefonoCliente,
     tipoEntrega,
     direccionOMesa,
     metodoPago,
@@ -147,12 +169,12 @@ export default function CartDrawer({
   const placeholderUbicacion =
     tipoEntrega === "Consumo en mesa"
       ? "Ej: Mesa 4 (Terraza interior)"
-      : `Retiro en ${local.direccionDetalle} (opcional: indicar hora)`;
+      : `Dirección o referencia en ${local.sector} / hora de retiro (opcional)`;
 
   const labelUbicacion =
     tipoEntrega === "Consumo en mesa"
       ? "Número de mesa *"
-      : "Referencia u hora de retiro en local (opcional)";
+      : "Dirección o referencia de entrega / retiro (opcional)";
 
   const handleEnviarWhatsApp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,6 +210,24 @@ export default function CartDrawer({
 
     setErrorValidacion(null);
 
+    // Guardar datos ingresados en localStorage para próximos pedidos
+    try {
+      localStorage.setItem(LS_KEY_NOMBRE, nombreCliente.trim());
+      if (direccionOMesa.trim()) {
+        localStorage.setItem(LS_KEY_DIRECCION, direccionOMesa.trim());
+      }
+      localStorage.setItem(LS_KEY_TELEFONO, telefonoCliente.trim());
+    } catch {
+      // Ignorar errores de escritura en localStorage
+    }
+
+    const notasCompletas = [
+      telefonoCliente.trim() ? `Tel: ${telefonoCliente.trim()}` : "",
+      notasAdicionales.trim(),
+    ]
+      .filter(Boolean)
+      .join(" | ");
+
     const payloadPedido = {
       local_slug: local.slug,
       cliente_nombre: nombreCliente.trim(),
@@ -199,7 +239,7 @@ export default function CartDrawer({
           : `${local.nombre} (${local.ubicacion})`),
       metodo_pago:
         metodoPago === "Transferencia Bancaria" ? "Transferencia" : "Efectivo",
-      notas: notasAdicionales.trim(),
+      notas: notasCompletas,
       items: items.map(({ producto, cantidad }) => ({
         nombre: producto.nombre,
         cantidad,
@@ -447,7 +487,7 @@ export default function CartDrawer({
                 />
               </div>
 
-              {/* Mesa o Referencia de Retiro */}
+              {/* Mesa o Dirección / Referencia de Entrega */}
               <div>
                 <label
                   htmlFor="direccionOMesa"
@@ -467,6 +507,28 @@ export default function CartDrawer({
                   placeholder={placeholderUbicacion}
                   className="w-full rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/20"
                 />
+              </div>
+
+              {/* Teléfono de contacto (opcional) */}
+              <div>
+                <label
+                  htmlFor="telefonoCliente"
+                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
+                >
+                  <Phone className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
+                  Teléfono de contacto (opcional)
+                </label>
+                <input
+                  id="telefonoCliente"
+                  type="tel"
+                  value={telefonoCliente}
+                  onChange={(e) => setTelefonoCliente(e.target.value)}
+                  placeholder="Ej: +56 9 8765 4321"
+                  className="w-full rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/20"
+                />
+                <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
+                  <span>✓ Tus datos quedan guardados para tus próximos pedidos</span>
+                </p>
               </div>
 
               {/* Método de pago */}

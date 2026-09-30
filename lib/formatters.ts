@@ -90,6 +90,9 @@ export function formatWhatsAppMessage({
     `💰 *TOTAL A PAGAR: ${formatCLP(total)}*`,
     `━━━━━━━━━━━━━━━━━━━━`,
     `👤 *Cliente:* ${datos.nombreCliente.trim()}`,
+    ...(datos.telefonoCliente?.trim()
+      ? [`📞 *Teléfono:* ${datos.telefonoCliente.trim()}`]
+      : []),
     `${emojiModalidad} *Modalidad:* ${datos.tipoEntrega}`,
     `${etiquetaUbicacion} ${valorUbicacion}`,
     `💳 *Método de pago:* ${datos.metodoPago}`,
