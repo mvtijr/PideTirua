@@ -154,7 +154,7 @@ export default function CartDrawer({
       ? "Número de mesa *"
       : "Referencia u hora de retiro en local (opcional)";
 
-  const handleEnviarWhatsApp = (e: React.FormEvent) => {
+  const handleEnviarWhatsApp = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!local.abierto) {
@@ -180,13 +180,47 @@ export default function CartDrawer({
     }
 
     setErrorValidacion(null);
+
+    const payloadPedido = {
+      local_slug: local.slug,
+      cliente_nombre: nombreCliente.trim(),
+      tipo_entrega: tipoEntrega === "Consumo en mesa" ? "Mesa" : "Retiro",
+      direccion_mesa:
+        direccionOMesa.trim() ||
+        (tipoEntrega === "Consumo en mesa"
+          ? "Mesa en salón"
+          : `${local.nombre} (${local.ubicacion})`),
+      metodo_pago:
+        metodoPago === "Transferencia Bancaria" ? "Transferencia" : "Efectivo",
+      notas: notasAdicionales.trim(),
+      items: items.map(({ producto, cantidad }) => ({
+        nombre: producto.nombre,
+        cantidad,
+        precio: producto.precio,
+        subtotal: producto.precio * cantidad,
+      })),
+      total,
+    };
+
     const url = buildWhatsAppCheckoutUrl({
       local,
       items,
       datos: datosCheckout,
     });
 
+    // Mutación asíncrona con keepalive para registrar el pedido en Supabase (estado: 'pendiente')
+    // mientras se abre WhatsApp sin bloquear el navegador móvil.
+    const guardarPedidoPromise = fetch("/api/pedidos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify(payloadPedido),
+    }).catch((err) => {
+      console.error("Error registrando pedido en KDS:", err);
+    });
+
     window.open(url, "_blank", "noopener,noreferrer");
+    await guardarPedidoPromise;
   };
 
   const mensajePrevia = formatWhatsAppMessage({

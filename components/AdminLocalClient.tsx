@@ -29,6 +29,7 @@ import {
 import { Local, Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
+import KitchenMonitor from "@/components/KitchenMonitor";
 
 interface AdminLocalClientProps {
   initialLocal: Local;
@@ -1187,6 +1188,17 @@ export default function AdminLocalClient({
             <span>📱 Mi Cartel QR para Mesas</span>
           </button>
         </section>
+
+        {/* 1.5 MONITOR DE COCINA EN TIEMPO REAL CON ALERTA SONORA (KDS) */}
+        <KitchenMonitor
+          localSlug={local.slug}
+          localNombre={local.nombre}
+          accentBg={brand.accentBg}
+          accentText={brand.accentText}
+          panelCardBg={brand.panelCardBg}
+          subtitleText={brand.subtitleText}
+          onNotify={mostrarToast}
+        />
 
         {/* 2. GENERADOR DE CARTEL QR LISTO PARA IMPRIMIR */}
         <section

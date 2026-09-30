@@ -77,3 +77,27 @@ export interface DatosCheckout {
   metodoPago: MetodoPago;
   notasAdicionales: string;
 }
+
+export type EstadoPedido = "pendiente" | "preparando" | "listo" | "entregado";
+
+export interface ItemPedidoGuardado {
+  nombre: string;
+  cantidad: number;
+  precio: number;
+  subtotal: number;
+}
+
+export interface Pedido {
+  id: string;
+  created_at: string;
+  local_slug: string;
+  cliente_nombre: string;
+  tipo_entrega: string;
+  direccion_mesa: string;
+  metodo_pago: string;
+  notas: string;
+  items: ItemPedidoGuardado[];
+  total: number;
+  estado: EstadoPedido;
+}
+

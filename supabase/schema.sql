@@ -126,3 +126,48 @@ DROP POLICY IF EXISTS "Permitir DELETE en bucket platos" ON storage.objects;
 CREATE POLICY "Permitir DELETE en bucket platos"
   ON storage.objects FOR DELETE
   USING (bucket_id = 'platos');
+
+-- ============================================================================
+-- 5. Tabla: pedidos (Monitor de Cocina en Tiempo Real / KDS)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.pedidos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  local_slug TEXT NOT NULL,
+  cliente_nombre TEXT NOT NULL,
+  tipo_entrega TEXT NOT NULL,
+  direccion_mesa TEXT NOT NULL DEFAULT '',
+  metodo_pago TEXT NOT NULL,
+  notas TEXT NOT NULL DEFAULT '',
+  items JSONB NOT NULL DEFAULT '[]'::jsonb,
+  total INTEGER NOT NULL DEFAULT 0,
+  estado TEXT NOT NULL DEFAULT 'pendiente'
+    CHECK (estado IN ('pendiente', 'preparando', 'listo', 'entregado'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_pedidos_local_slug_created
+  ON public.pedidos(local_slug, created_at DESC);
+
+ALTER TABLE public.pedidos ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Permitir acceso total pedidos" ON public.pedidos;
+CREATE POLICY "Permitir acceso total pedidos"
+  ON public.pedidos FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+ALTER TABLE public.pedidos REPLICA IDENTITY FULL;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1
+    FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime'
+      AND schemaname = 'public'
+      AND tablename = 'pedidos'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.pedidos;
+  END IF;
+END $$;
+
