@@ -358,13 +358,30 @@ export default function SuperAdminClient({
         .replace(/-+/g, "-");
       const storagePath = `${slugRef}/banner-video-${Date.now()}-${safeName}`;
 
-      const { error: uploadErr } = await supabase.storage
+      let { error: uploadErr } = await supabase.storage
         .from("platos")
         .upload(storagePath, file, {
           contentType,
           upsert: true,
           cacheControl: "3600",
         });
+
+      if (uploadErr) {
+        await fetch("/api/superadmin", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "ensure-video-bucket" }),
+        }).catch(() => {});
+
+        const retry = await supabase.storage
+          .from("platos")
+          .upload(storagePath, file, {
+            contentType,
+            upsert: true,
+            cacheControl: "3600",
+          });
+        uploadErr = retry.error;
+      }
 
       if (uploadErr) {
         throw new Error(uploadErr.message);

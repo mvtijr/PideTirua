@@ -455,6 +455,50 @@ async function readSupabaseCloudState(): Promise<Local[] | null> {
   }
 }
 
+const PLATOS_ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+  "image/svg+xml",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+  "video/ogg",
+];
+
+export async function ensurePlatosBucketVideoSupport(): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
+  try {
+    const supabase = getSupabaseClient();
+    const { data: buckets } = await supabase.storage.listBuckets();
+    const existsPlatos = buckets?.some((b) => b.name === PLATOS_IMAGES_BUCKET);
+    if (!existsPlatos) {
+      await supabase.storage.createBucket(PLATOS_IMAGES_BUCKET, {
+        public: true,
+        fileSizeLimit: 52428800,
+        allowedMimeTypes: PLATOS_ALLOWED_MIME_TYPES,
+      });
+    } else {
+      await supabase.storage.updateBucket(PLATOS_IMAGES_BUCKET, {
+        public: true,
+        fileSizeLimit: 52428800,
+        allowedMimeTypes: PLATOS_ALLOWED_MIME_TYPES,
+      });
+    }
+    return { ok: true };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Error configurando bucket",
+    };
+  }
+}
+
 async function writeSupabaseCloudState(locales: Local[]): Promise<void> {
   try {
     const supabase = getSupabaseClient();
@@ -467,6 +511,8 @@ async function writeSupabaseCloudState(locales: Local[]): Promise<void> {
     if (!existsPlatos) {
       await supabase.storage.createBucket(PLATOS_IMAGES_BUCKET, {
         public: true,
+        fileSizeLimit: 52428800,
+        allowedMimeTypes: PLATOS_ALLOWED_MIME_TYPES,
       });
     }
 
@@ -497,13 +543,7 @@ export async function uploadPlatoFotoInSupabase(
   try {
     const supabase = getSupabaseClient();
 
-    const { data: buckets } = await supabase.storage.listBuckets();
-    const exists = buckets?.some((b) => b.name === PLATOS_IMAGES_BUCKET);
-    if (!exists) {
-      await supabase.storage.createBucket(PLATOS_IMAGES_BUCKET, {
-        public: true,
-      });
-    }
+    await ensurePlatosBucketVideoSupport();
 
     const matches = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
     if (!matches) {

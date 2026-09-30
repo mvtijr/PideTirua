@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import {
+  ensurePlatosBucketVideoSupport,
   fetchAllLocales,
   toggleLocalActivoBySuperAdminInSupabase,
   updateLocalPinBySuperAdminInSupabase,
@@ -48,6 +49,11 @@ export async function POST(req: NextRequest) {
       const response = NextResponse.json({ ok: true });
       response.cookies.delete("pidetirua_superadmin");
       return response;
+    }
+
+    if (action === "ensure-video-bucket") {
+      const res = await ensurePlatosBucketVideoSupport();
+      return NextResponse.json(res);
     }
 
     if (action === "upload-imagen") {

@@ -121,9 +121,30 @@ CREATE POLICY "Permitir acceso total productos"
 -- ============================================================================
 -- 4. Bucket `platos` y Políticas de Storage (SELECT, INSERT, UPDATE)
 -- ============================================================================
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('platos', 'platos', true)
-ON CONFLICT (id) DO UPDATE SET public = true;
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'platos',
+  'platos',
+  true,
+  52428800,
+  ARRAY[
+    'image/jpeg',
+    'image/jpg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/avif',
+    'image/svg+xml',
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',
+    'video/ogg'
+  ]
+)
+ON CONFLICT (id) DO UPDATE SET
+  public = true,
+  file_size_limit = 52428800,
+  allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 DROP POLICY IF EXISTS "Permitir SELECT en bucket platos" ON storage.objects;
 CREATE POLICY "Permitir SELECT en bucket platos"
