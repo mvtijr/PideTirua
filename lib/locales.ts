@@ -309,9 +309,15 @@ async function writeSupabaseCloudState(locales: Local[]): Promise<void> {
   try {
     const supabase = getSupabaseClient();
     const { data: buckets } = await supabase.storage.listBuckets();
-    const exists = buckets?.some((b) => b.name === STORAGE_BUCKET);
-    if (!exists) {
+    const existsDb = buckets?.some((b) => b.name === STORAGE_BUCKET);
+    if (!existsDb) {
       await supabase.storage.createBucket(STORAGE_BUCKET, { public: false });
+    }
+    const existsPlatos = buckets?.some((b) => b.name === PLATOS_IMAGES_BUCKET);
+    if (!existsPlatos) {
+      await supabase.storage.createBucket(PLATOS_IMAGES_BUCKET, {
+        public: true,
+      });
     }
 
     const payload = JSON.stringify(locales, null, 2);
