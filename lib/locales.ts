@@ -1122,6 +1122,42 @@ export async function toggleLocalActivoBySuperAdminInSupabase(
 }
 
 /**
+ * SuperAdmin: Actualiza de forma inmediata el PIN de 4 dígitos de un local en Supabase.
+ */
+export async function updateLocalPinBySuperAdminInSupabase(
+  slug: string,
+  nuevoPin: string
+): Promise<{ ok: boolean; locales?: Local[]; error?: string }> {
+  const pinLimpio = nuevoPin.replace(/\D/g, "").slice(0, 4);
+  if (pinLimpio.length !== 4) {
+    return {
+      ok: false,
+      error: "El PIN debe contener exactamente 4 dígitos numéricos.",
+    };
+  }
+
+  const supabase = getSupabaseClient();
+  const { error } = await supabase
+    .from("locales")
+    .update({ pin: pinLimpio })
+    .eq("slug", slug);
+
+  if (error) {
+    console.error("Error actualizando PIN en locales:", error);
+  }
+
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) =>
+    loc.slug.toLowerCase() === slug.toLowerCase()
+      ? { ...loc, pin: pinLimpio }
+      : loc
+  );
+  await writeSupabaseCloudState(actualizados);
+
+  return { ok: true, locales: actualizados };
+}
+
+/**
  * SuperAdmin: Registra un nuevo local o actualiza uno existente (incluyendo Logo, Banner y Plan).
  */
 export async function upsertLocalBySuperAdminInSupabase(input: {

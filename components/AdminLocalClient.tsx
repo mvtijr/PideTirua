@@ -949,6 +949,12 @@ export default function AdminLocalClient({
     );
   }
 
+  const soporteWhatsapp =
+    process.env.NEXT_PUBLIC_SOPORTE_WHATSAPP || "56994761692";
+  const urlRecuperarPinWhatsapp = `https://wa.me/${soporteWhatsapp}?text=${encodeURIComponent(
+    `Hola, soy del local ${local.nombre} en Tirúa y olvidé el PIN de mi panel.`
+  )}`;
+
   // ============================================================================
   // 1. PANTALLA DE BLOQUEO POR PIN CON LA PALETA DE COLORES DEL NEGOCIO
   // ============================================================================
@@ -1131,6 +1137,19 @@ export default function AdminLocalClient({
               </>
             )}
           </button>
+
+          {/* Enlace de Recuperación de PIN por WhatsApp */}
+          <div className="mt-4 border-t border-white/15 pt-3.5 text-center">
+            <a
+              href={urlRecuperarPinWhatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-400/35 bg-emerald-500/15 px-3.5 py-2 text-xs font-bold text-emerald-300 transition hover:bg-emerald-500/25 hover:text-emerald-200 active:scale-95"
+            >
+              <MessageCircle className="h-3.5 w-3.5 shrink-0 text-[#25D366]" />
+              <span>¿Olvidaste tu PIN de acceso? Contáctanos por WhatsApp</span>
+            </a>
+          </div>
         </div>
 
         <p

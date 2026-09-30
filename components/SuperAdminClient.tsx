@@ -25,6 +25,9 @@ import {
   ArrowLeft,
   Camera,
   Sparkles,
+  Eye,
+  EyeOff,
+  Check,
 } from "lucide-react";
 import { Local, PlanComercial, SectorComuna } from "@/types/local";
 import { formatCLP, formatPhoneDisplay } from "@/lib/formatters";
@@ -101,6 +104,18 @@ export default function SuperAdminClient({
   // Toast de feedback
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
   const [guardandoSlug, setGuardandoSlug] = useState<string | null>(null);
+
+  // Estado para revelar/ocultar y editar de forma inmediata el PIN de Acceso por tarjeta
+  const [pinVisiblePorSlug, setPinVisiblePorSlug] = useState<
+    Record<string, boolean>
+  >({});
+  const [pinEditandoPorSlug, setPinEditandoPorSlug] = useState<
+    Record<string, boolean>
+  >({});
+  const [pinDraftPorSlug, setPinDraftPorSlug] = useState<
+    Record<string, string>
+  >({});
+  const [guardandoPinSlug, setGuardandoPinSlug] = useState<string | null>(null);
 
   // Estado del Formulario "+ Registrar Nuevo Local" / "Editar Local"
   const [mostrarFormulario, setMostrarFormulario] = useState<boolean>(false);
@@ -404,6 +419,45 @@ export default function SuperAdminClient({
       );
     } finally {
       setGuardandoSlug(null);
+    }
+  };
+
+  const handleGuardarPinRapido = async (loc: Local) => {
+    const pinNuevo = (pinDraftPorSlug[loc.slug] ?? loc.pin ?? "1234")
+      .replace(/\D/g, "")
+      .slice(0, 4);
+
+    if (pinNuevo.length !== 4) {
+      mostrarToast("El PIN debe tener exactamente 4 dígitos numéricos");
+      return;
+    }
+
+    setGuardandoPinSlug(loc.slug);
+    setLocales((prev) =>
+      prev.map((l) => (l.slug === loc.slug ? { ...l, pin: pinNuevo } : l))
+    );
+
+    try {
+      const res = await fetch("/api/superadmin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-pin",
+          slug: loc.slug,
+          pin: pinNuevo,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && Array.isArray(data.locales)) {
+        setLocales(data.locales);
+      }
+      setPinEditandoPorSlug((prev) => ({ ...prev, [loc.slug]: false }));
+      setPinVisiblePorSlug((prev) => ({ ...prev, [loc.slug]: true }));
+      mostrarToast(`🔑 Nuevo PIN (${pinNuevo}) guardado para "${loc.nombre}"`);
+    } catch {
+      mostrarToast("No se pudo guardar el nuevo PIN");
+    } finally {
+      setGuardandoPinSlug(null);
     }
   };
 
@@ -1142,32 +1196,134 @@ export default function SuperAdminClient({
                       </div>
                     </div>
 
-                    {/* Datos rápidos: Teléfono, Dirección, PIN */}
-                    <div className="mt-3.5 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-black/30 p-3 text-xs">
-                      <div className="flex items-center gap-1.5 text-slate-300">
-                        <Phone className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
-                        <span className="truncate font-semibold">
-                          {formatPhoneDisplay(
-                            loc.telefono_whatsapp || loc.telefonoWhatsapp
-                          )}
-                        </span>
+                    {/* Datos rápidos: Teléfono, Dirección y PIN de Acceso con botón 👁️ y edición inmediata */}
+                    <div className="mt-3.5 space-y-2.5 rounded-2xl border border-white/10 bg-black/30 p-3 text-xs">
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <div className="flex items-center gap-1.5 text-slate-300">
+                          <Phone className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                          <span className="truncate font-semibold">
+                            {formatPhoneDisplay(
+                              loc.telefono_whatsapp || loc.telefonoWhatsapp
+                            )}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 text-slate-400">
+                          <MapPin className="h-3.5 w-3.5 shrink-0 text-sky-400" />
+                          <span className="truncate">
+                            {loc.direccion || loc.direccionDetalle}
+                          </span>
+                        </div>
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-slate-300">
-                        <KeyRound className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-                        <span>
-                          PIN Dueño:{" "}
-                          <strong className="font-mono text-white">
-                            {loc.pin || "1234"}
-                          </strong>
-                        </span>
-                      </div>
+                      {/* Campo PIN de Acceso: Enmascarado (••••) con botón de ojo (👁️) y edición inmediata */}
+                      <div className="rounded-xl border border-amber-400/25 bg-slate-950/80 p-2.5">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <KeyRound className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                            <span className="font-bold text-slate-300">
+                              PIN de Acceso:
+                            </span>
+                            <strong className="rounded-lg border border-white/15 bg-white/10 px-2.5 py-0.5 font-mono text-sm tracking-widest text-amber-300">
+                              {pinVisiblePorSlug[loc.slug]
+                                ? loc.pin || "1234"
+                                : "••••"}
+                            </strong>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPinVisiblePorSlug((prev) => ({
+                                  ...prev,
+                                  [loc.slug]: !prev[loc.slug],
+                                }))
+                              }
+                              title={
+                                pinVisiblePorSlug[loc.slug]
+                                  ? "Ocultar PIN"
+                                  : "Revelar PIN"
+                              }
+                              aria-label={
+                                pinVisiblePorSlug[loc.slug]
+                                  ? "Ocultar PIN"
+                                  : "Revelar PIN"
+                              }
+                              className="inline-flex items-center gap-1 rounded-lg border border-white/15 bg-white/10 px-2 py-1 text-[11px] font-bold text-slate-200 transition hover:bg-white/20 active:scale-95"
+                            >
+                              {pinVisiblePorSlug[loc.slug] ? (
+                                <>
+                                  <EyeOff className="h-3.5 w-3.5 text-amber-300" />
+                                  <span>Ocultar</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Eye className="h-3.5 w-3.5 text-amber-300" />
+                                  <span>👁️ Ver</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
 
-                      <div className="col-span-2 flex items-center gap-1.5 text-slate-400">
-                        <MapPin className="h-3.5 w-3.5 shrink-0 text-sky-400" />
-                        <span className="truncate">
-                          {loc.direccion || loc.direccionDetalle}
-                        </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const abriendo = !pinEditandoPorSlug[loc.slug];
+                              setPinEditandoPorSlug((prev) => ({
+                                ...prev,
+                                [loc.slug]: abriendo,
+                              }));
+                              if (abriendo) {
+                                setPinDraftPorSlug((prev) => ({
+                                  ...prev,
+                                  [loc.slug]: loc.pin || "1234",
+                                }));
+                              }
+                            }}
+                            className="inline-flex items-center gap-1 rounded-lg border border-amber-400/40 bg-amber-400/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-300 transition hover:bg-amber-400/25 active:scale-95"
+                          >
+                            <Edit3 className="h-3 w-3" />
+                            <span>
+                              {pinEditandoPorSlug[loc.slug]
+                                ? "Cancelar"
+                                : "Cambiar PIN"}
+                            </span>
+                          </button>
+                        </div>
+
+                        {pinEditandoPorSlug[loc.slug] && (
+                          <div className="mt-2.5 flex items-center gap-2 border-t border-white/10 pt-2.5">
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={4}
+                              value={
+                                pinDraftPorSlug[loc.slug] ?? loc.pin ?? "1234"
+                              }
+                              onChange={(e) =>
+                                setPinDraftPorSlug((prev) => ({
+                                  ...prev,
+                                  [loc.slug]: e.target.value
+                                    .replace(/\D/g, "")
+                                    .slice(0, 4),
+                                }))
+                              }
+                              placeholder="Nuevo PIN (4 dígitos)"
+                              className="w-36 rounded-lg border border-white/20 bg-white px-2.5 py-1.5 font-mono text-xs font-black tracking-widest text-slate-900 focus:outline-none"
+                            />
+                            <button
+                              type="button"
+                              disabled={guardandoPinSlug === loc.slug}
+                              onClick={() => void handleGuardarPinRapido(loc)}
+                              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-slate-950 shadow transition hover:bg-emerald-400 active:scale-95 disabled:opacity-50"
+                            >
+                              {guardandoPinSlug === loc.slug ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Check className="h-3.5 w-3.5" />
+                              )}
+                              <span>Guardar nuevo PIN</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
 
