@@ -197,13 +197,16 @@ export default function AdminLocalClient({
 
   const inputFotoNuevoRef = useRef<HTMLInputElement | null>(null);
 
-  // Estado local de edición rápida de nombre, precio y descripción por producto
+  // Estado local de edición rápida de nombre, precio, descripción y etiqueta por producto
   const [ediciones, setEdiciones] = useState<
-    Record<string, { nombre: string; precio: string; descripcion: string }>
+    Record<
+      string,
+      { nombre: string; precio: string; descripcion: string; etiqueta: string }
+    >
   >(() => {
     const map: Record<
       string,
-      { nombre: string; precio: string; descripcion: string }
+      { nombre: string; precio: string; descripcion: string; etiqueta: string }
     > = {};
     for (const cat of initialLocal.categorias) {
       for (const prod of cat.productos) {
@@ -211,6 +214,7 @@ export default function AdminLocalClient({
           nombre: prod.nombre,
           precio: String(prod.precio),
           descripcion: prod.descripcion,
+          etiqueta: prod.etiqueta || "",
         };
       }
     }
@@ -220,7 +224,7 @@ export default function AdminLocalClient({
   useEffect(() => {
     const map: Record<
       string,
-      { nombre: string; precio: string; descripcion: string }
+      { nombre: string; precio: string; descripcion: string; etiqueta: string }
     > = {};
     for (const cat of local.categorias) {
       for (const prod of cat.productos) {
@@ -228,6 +232,7 @@ export default function AdminLocalClient({
           nombre: prod.nombre,
           precio: String(prod.precio),
           descripcion: prod.descripcion,
+          etiqueta: prod.etiqueta || "",
         };
       }
     }
@@ -568,13 +573,14 @@ export default function AdminLocalClient({
     }
   };
 
-  // Guardar edición rápida de Nombre, Precio y Descripción de un producto
+  // Guardar edición rápida de Nombre, Precio, Descripción y Etiqueta de un producto
   const handleGuardarEdicionProducto = async (producto: Producto) => {
     const edicion = ediciones[producto.id];
     if (!edicion) return;
 
     const nombreLimpio = edicion.nombre.trim();
     const descripcionLimpia = edicion.descripcion.trim();
+    const etiquetaLimpia = edicion.etiqueta.trim();
     const precioNumero = Number(
       String(edicion.precio).replace(/[^0-9]/g, "")
     );
@@ -586,7 +592,8 @@ export default function AdminLocalClient({
     if (
       nombreLimpio === producto.nombre &&
       precioNumero === producto.precio &&
-      descripcionLimpia === producto.descripcion
+      descripcionLimpia === producto.descripcion &&
+      etiquetaLimpia === (producto.etiqueta || "")
     ) {
       return;
     }
@@ -602,6 +609,7 @@ export default function AdminLocalClient({
                 nombre: nombreLimpio,
                 precio: precioNumero,
                 descripcion: descripcionLimpia,
+                etiqueta: etiquetaLimpia || undefined,
               }
             : p
         ),
@@ -619,6 +627,7 @@ export default function AdminLocalClient({
           nombre: nombreLimpio,
           precio: precioNumero,
           descripcion: descripcionLimpia,
+          etiqueta: etiquetaLimpia,
         }),
       });
       const data = await res.json();
@@ -1318,6 +1327,7 @@ export default function AdminLocalClient({
                     nombre: producto.nombre,
                     precio: String(producto.precio),
                     descripcion: producto.descripcion,
+                    etiqueta: producto.etiqueta || "",
                   };
                   const precioNumerico = Number(
                     String(editState.precio).replace(/[^0-9]/g, "")
@@ -1325,7 +1335,8 @@ export default function AdminLocalClient({
                   const hayCambiosSinGuardar =
                     editState.nombre.trim() !== producto.nombre ||
                     precioNumerico !== producto.precio ||
-                    editState.descripcion.trim() !== producto.descripcion;
+                    editState.descripcion.trim() !== producto.descripcion ||
+                    editState.etiqueta.trim() !== (producto.etiqueta || "");
 
                   return (
                     <div
@@ -1460,7 +1471,7 @@ export default function AdminLocalClient({
                         </div>
                       </div>
 
-                      {/* Fila inferior: Edición rápida de Nombre, Precio y Descripción */}
+                      {/* Fila inferior: Edición rápida de Nombre, Precio, Descripción y Etiqueta */}
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-12">
                         <div className="sm:col-span-7">
                           <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -1552,7 +1563,7 @@ export default function AdminLocalClient({
                           </button>
                         </div>
 
-                        <div className="sm:col-span-12">
+                        <div className="sm:col-span-8">
                           <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
                             Descripción
                           </label>
@@ -1579,6 +1590,37 @@ export default function AdminLocalClient({
                               }
                             }}
                             className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700 focus:border-slate-900 focus:bg-white focus:outline-none"
+                          />
+                        </div>
+
+                        <div className="sm:col-span-4">
+                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                            Etiqueta (opcional)
+                          </label>
+                          <input
+                            type="text"
+                            value={editState.etiqueta}
+                            placeholder="Ej: Nuevo, Más pedido"
+                            onChange={(e) =>
+                              setEdiciones((prev) => ({
+                                ...prev,
+                                [producto.id]: {
+                                  ...editState,
+                                  etiqueta: e.target.value,
+                                },
+                              }))
+                            }
+                            onBlur={() => {
+                              if (hayCambiosSinGuardar) {
+                                void handleGuardarEdicionProducto(producto);
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none"
                           />
                         </div>
                       </div>

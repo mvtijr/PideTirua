@@ -1,6 +1,7 @@
 -- ============================================================================
--- PideTirúa — Esquema de Base de Datos en Supabase (PostgreSQL)
--- Tablas: locales, categorias, productos
+-- PideTirúa — Esquema de Base de Datos y Storage en Supabase (PostgreSQL)
+-- Tablas: locales, categorias, productos (con columna etiqueta)
+-- Storage: Bucket público `platos` con políticas SELECT, INSERT y UPDATE
 -- ============================================================================
 
 -- 1. Tabla de Locales
@@ -14,7 +15,6 @@ CREATE TABLE IF NOT EXISTS public.locales (
   horario TEXT NOT NULL,
   abierto BOOLEAN NOT NULL DEFAULT true,
   pin VARCHAR(4) NOT NULL DEFAULT '1234',
-  -- Metadatos visuales para el directorio y carta digital
   sector TEXT DEFAULT 'Tirúa Centro',
   ubicacion TEXT DEFAULT 'Tirúa Centro',
   tiempo_estimado TEXT DEFAULT '25 - 35 min',
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS public.categorias (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 3. Tabla de Productos
+-- 3. Tabla de Productos (incluyendo columna `etiqueta` nullable)
 CREATE TABLE IF NOT EXISTS public.productos (
   id TEXT PRIMARY KEY,
   categoria_id TEXT NOT NULL REFERENCES public.categorias(id) ON DELETE CASCADE,
@@ -47,10 +47,14 @@ CREATE TABLE IF NOT EXISTS public.productos (
   imagen_url TEXT NOT NULL DEFAULT '',
   disponible BOOLEAN NOT NULL DEFAULT true,
   destacado BOOLEAN NOT NULL DEFAULT false,
-  etiqueta TEXT,
+  etiqueta TEXT NULL,
   orden INTEGER NOT NULL DEFAULT 1,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Asegurar que la columna `etiqueta` exista en `public.productos` (nullable)
+ALTER TABLE public.productos
+  ADD COLUMN IF NOT EXISTS etiqueta TEXT NULL;
 
 -- Índices para consultas rápidas por slug y relaciones
 CREATE INDEX IF NOT EXISTS idx_locales_slug ON public.locales(slug);
@@ -79,3 +83,31 @@ CREATE POLICY "Permitir acceso total productos"
   ON public.productos FOR ALL
   USING (true)
   WITH CHECK (true);
+
+-- ============================================================================
+-- 4. Bucket `platos` y Políticas de Storage (SELECT, INSERT, UPDATE)
+-- ============================================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('platos', 'platos', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+DROP POLICY IF EXISTS "Permitir SELECT en bucket platos" ON storage.objects;
+CREATE POLICY "Permitir SELECT en bucket platos"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'platos');
+
+DROP POLICY IF EXISTS "Permitir INSERT en bucket platos" ON storage.objects;
+CREATE POLICY "Permitir INSERT en bucket platos"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'platos');
+
+DROP POLICY IF EXISTS "Permitir UPDATE en bucket platos" ON storage.objects;
+CREATE POLICY "Permitir UPDATE en bucket platos"
+  ON storage.objects FOR UPDATE
+  USING (bucket_id = 'platos')
+  WITH CHECK (bucket_id = 'platos');
+
+DROP POLICY IF EXISTS "Permitir DELETE en bucket platos" ON storage.objects;
+CREATE POLICY "Permitir DELETE en bucket platos"
+  ON storage.objects FOR DELETE
+  USING (bucket_id = 'platos');
