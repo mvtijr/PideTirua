@@ -56,6 +56,12 @@ export interface Local {
   logo: string;
   abierto: boolean;
   pin?: string;
+  banco?: string;
+  tipo_cuenta?: string;
+  numero_cuenta?: string;
+  rut_titular?: string;
+  nombre_titular?: string;
+  email_transferencia?: string;
   categorias: CategoriaMenu[];
 }
 

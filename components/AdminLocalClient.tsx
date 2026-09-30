@@ -19,6 +19,12 @@ import {
   Trash2,
   X,
   Sparkles,
+  CreditCard,
+  QrCode,
+  Printer,
+  Download,
+  Smartphone,
+  MessageCircle,
 } from "lucide-react";
 import { Local, Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
@@ -179,6 +185,32 @@ export default function AdminLocalClient({
   // Estado de guardado y Toast de feedback inmediato
   const [guardandoId, setGuardandoId] = useState<string | null>(null);
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
+
+  // Estado de Datos Bancarios para Transferencia
+  const [banco, setBanco] = useState<string>(initialLocal.banco || "");
+  const [tipoCuenta, setTipoCuenta] = useState<string>(
+    initialLocal.tipo_cuenta || ""
+  );
+  const [numeroCuenta, setNumeroCuenta] = useState<string>(
+    initialLocal.numero_cuenta || ""
+  );
+  const [rutTitular, setRutTitular] = useState<string>(
+    initialLocal.rut_titular || ""
+  );
+  const [nombreTitular, setNombreTitular] = useState<string>(
+    initialLocal.nombre_titular || ""
+  );
+  const [emailTransferencia, setEmailTransferencia] = useState<string>(
+    initialLocal.email_transferencia || ""
+  );
+  const [guardandoBancos, setGuardandoBancos] = useState<boolean>(false);
+
+  // Estado del Generador de Cartel QR para Mesas
+  const [mostrarCartelQr, setMostrarCartelQr] = useState<boolean>(false);
+  const [publicOrigin, setPublicOrigin] = useState<string>(
+    "https://pidetirua.vercel.app"
+  );
+  const [descargandoQr, setDescargandoQr] = useState<boolean>(false);
 
   // Estado del formulario "Subir Nuevo Plato"
   const [mostrarFormNuevo, setMostrarFormNuevo] = useState<boolean>(false);
@@ -662,6 +694,94 @@ export default function AdminLocalClient({
     }
   };
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location?.origin) {
+      setPublicOrigin(window.location.origin);
+    }
+  }, []);
+
+  // Guardar Datos Bancarios para Transferencia en Supabase
+  const handleGuardarDatosBancarios = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (guardandoBancos) return;
+    setGuardandoBancos(true);
+    setGuardandoId("datos-bancarios");
+
+    const payloadBancario = {
+      banco: banco.trim(),
+      tipo_cuenta: tipoCuenta.trim(),
+      numero_cuenta: numeroCuenta.trim(),
+      rut_titular: rutTitular.trim(),
+      nombre_titular: nombreTitular.trim(),
+      email_transferencia: emailTransferencia.trim(),
+    };
+
+    // Actualización optimista
+    setLocal((prev) => ({
+      ...prev,
+      ...payloadBancario,
+    }));
+
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-datos-bancarios",
+          ...payloadBancario,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+      }
+      mostrarToast("Datos bancarios actualizados");
+    } catch {
+      mostrarToast("Error al guardar datos bancarios");
+    } finally {
+      setGuardandoBancos(false);
+      setGuardandoId(null);
+    }
+  };
+
+  const urlPublicaLocal = `${publicOrigin}/${local.slug}`;
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=700x700&margin=20&format=png&data=${encodeURIComponent(
+    urlPublicaLocal
+  )}`;
+
+  const handleImprimirCartel = () => {
+    if (!mostrarCartelQr) {
+      setMostrarCartelQr(true);
+      setTimeout(() => {
+        window.print();
+      }, 250);
+    } else {
+      window.print();
+    }
+  };
+
+  const handleDescargarQrPng = async () => {
+    if (descargandoQr) return;
+    setDescargandoQr(true);
+    try {
+      const res = await fetch(qrImageUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `qr-mesa-${local.slug}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+      mostrarToast("Código QR (PNG) descargado");
+    } catch {
+      window.open(qrImageUrl, "_blank", "noopener,noreferrer");
+    } finally {
+      setDescargandoQr(false);
+    }
+  };
+
   const videoDeFondo = local.videoFondo || local.videoPortada;
   const posterFondo = getVideoPoster(videoDeFondo, local.fotoPortada);
 
@@ -882,10 +1002,10 @@ export default function AdminLocalClient({
   );
 
   return (
-    <div className={`relative min-h-screen pb-24 ${brand.bgBase}`}>
+    <div className={`relative min-h-screen pb-24 print:min-h-0 print:bg-white print:pb-0 ${brand.bgBase}`}>
       {/* Fondo ambiental del negocio */}
       {posterFondo && (
-        <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+        <div className="no-print pointer-events-none fixed inset-0 z-0 overflow-hidden">
           <img
             src={posterFondo}
             alt=""
@@ -915,7 +1035,7 @@ export default function AdminLocalClient({
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-emerald-300/50 bg-emerald-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-2xl transition-all"
+          className="no-print fixed bottom-5 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-emerald-300/50 bg-emerald-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-2xl transition-all"
         >
           <CheckCircle2 className="h-4 w-4 shrink-0 text-white" />
           <span>{toastMensaje}</span>
@@ -924,7 +1044,7 @@ export default function AdminLocalClient({
 
       {/* Cabecera Fija Mobile-First con la paleta del local */}
       <header
-        className={`sticky top-0 z-30 border-b backdrop-blur-xl shadow-md ${brand.headerBg}`}
+        className={`no-print sticky top-0 z-30 border-b backdrop-blur-xl shadow-md ${brand.headerBg}`}
       >
         <div className="mx-auto flex max-w-xl items-center justify-between gap-3 px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
@@ -971,10 +1091,10 @@ export default function AdminLocalClient({
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-xl space-y-6 px-4 pt-5">
+      <main className="relative z-10 mx-auto max-w-xl space-y-6 px-4 pt-5 print:max-w-none print:space-y-0 print:p-0">
         {/* 1. CONTROL MAESTRO: Switch grande para estado Abierto / Cerrado */}
         <section
-          className={`rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
+          className={`no-print rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
         >
           <div className="flex items-center justify-between gap-2">
             <span
@@ -1037,7 +1157,7 @@ export default function AdminLocalClient({
             </div>
           </button>
 
-          {/* Resumen rápido de platos y botón para subir un nuevo plato */}
+          {/* Resumen rápido de platos y botón rápido para Cartel QR */}
           <div className="mt-4 grid grid-cols-2 gap-2.5 text-center">
             <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/15 p-2.5">
               <span className="block text-lg font-black text-emerald-300">
@@ -1056,11 +1176,311 @@ export default function AdminLocalClient({
               </span>
             </div>
           </div>
+
+          {/* Botón destacado rápido para abrir el Cartel QR para Mesas */}
+          <button
+            type="button"
+            onClick={() => setMostrarCartelQr((prev) => !prev)}
+            className={`mt-3.5 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-xs font-extrabold shadow-md transition active:scale-[0.99] sm:text-sm ${brand.accentBg}`}
+          >
+            <QrCode className="h-4 w-4 shrink-0" />
+            <span>📱 Mi Cartel QR para Mesas</span>
+          </button>
         </section>
 
-        {/* 2. SECCIÓN PARA SUBIR NUEVOS PLATOS Y FOTOS DE COMIDA */}
+        {/* 2. GENERADOR DE CARTEL QR LISTO PARA IMPRIMIR */}
         <section
-          className={`rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
+          className={`rounded-3xl border p-5 shadow-xl print:border-none print:bg-transparent print:p-0 print:shadow-none ${brand.panelCardBg}`}
+        >
+          <div className="no-print flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span
+                className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+              >
+                <QrCode className="h-4 w-4" />
+                Código QR de Carta Digital
+              </span>
+              <h2 className="mt-0.5 text-base font-extrabold text-white sm:text-lg">
+                📱 Mi Cartel QR para Mesas
+              </h2>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setMostrarCartelQr((prev) => !prev)}
+              className={`inline-flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-xs font-extrabold shadow-md transition active:scale-95 ${
+                mostrarCartelQr
+                  ? "border border-white/25 bg-white/10 text-white hover:bg-white/20"
+                  : brand.accentBg
+              }`}
+            >
+              {mostrarCartelQr ? (
+                <>
+                  <X className="h-4 w-4" />
+                  <span>Ocultar Cartel</span>
+                </>
+              ) : (
+                <>
+                  <QrCode className="h-4 w-4" />
+                  <span>📱 Mi Cartel QR para Mesas</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {!mostrarCartelQr && (
+            <p className={`no-print mt-2 text-xs ${brand.subtitleText}`}>
+              Genera e imprime el cartel con código QR oficial de{" "}
+              <strong>{local.nombre}</strong> para poner en tus mesas o mostrador.
+            </p>
+          )}
+
+          {/* Contenedor del Cartel QR (siempre disponible para @media print) */}
+          <div
+            id="printable-qr-flyer-wrapper"
+            className={`${
+              mostrarCartelQr ? "mt-5 flex flex-col items-center" : "hidden"
+            }`}
+          >
+            {/* Botones de Acción (No se imprimen) */}
+            <div className="no-print mb-5 grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={handleImprimirCartel}
+                className={`flex items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-xs font-extrabold shadow-lg transition active:scale-95 sm:text-sm ${brand.accentBg}`}
+              >
+                <Printer className="h-4 w-4 shrink-0" />
+                <span>🖨️ Imprimir Cartel</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={descargandoQr}
+                onClick={() => void handleDescargarQrPng()}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-white/25 bg-white/10 px-4 py-3.5 text-xs font-extrabold text-white shadow-md transition hover:bg-white/20 active:scale-95 disabled:opacity-50 sm:text-sm"
+              >
+                {descargandoQr ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 shrink-0" />
+                )}
+                <span>⬇️ Descargar solo QR (PNG)</span>
+              </button>
+            </div>
+
+            {/* Vista Previa Visual del Flyer / Cartel de Mesa Listo para Imprimir */}
+            <div
+              id="printable-qr-flyer"
+              className="w-full max-w-md overflow-hidden rounded-3xl border-4 border-slate-900 bg-white p-6 text-center text-slate-900 shadow-2xl sm:p-8"
+            >
+              {/* Cinta / Título Superior */}
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-4 py-1.5 text-xs font-extrabold uppercase tracking-wider text-white">
+                <Smartphone className="h-3.5 w-3.5 text-emerald-400" />
+                <span>¡Pide directo desde tu celular!</span>
+              </div>
+
+              {/* Logo, Nombre del Local Grande y su Rubro */}
+              <div className="mt-4 flex flex-col items-center">
+                <div className="h-20 w-20 overflow-hidden rounded-2xl border-2 border-slate-200 bg-slate-900 p-1.5 shadow-md">
+                  <img
+                    src={local.logo}
+                    alt={local.nombre}
+                    className="h-full w-full rounded-xl object-contain"
+                  />
+                </div>
+                <h3 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+                  {local.nombre}
+                </h3>
+                <span className="mt-1 inline-block rounded-full bg-slate-100 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                  {local.rubro}
+                </span>
+              </div>
+
+              {/* Código QR en Alta Resolución */}
+              <div className="my-5 inline-flex flex-col items-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 shadow-inner">
+                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+                  <img
+                    src={qrImageUrl}
+                    alt={`Código QR de ${local.nombre}`}
+                    className="h-56 w-56 object-contain sm:h-64 sm:w-64"
+                  />
+                </div>
+                <span className="mt-2.5 font-mono text-[11px] font-bold text-slate-600">
+                  {urlPublicaLocal}
+                </span>
+              </div>
+
+              {/* Instrucciones al pie del QR en 3 pasos con iconos */}
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left">
+                <p className="mb-3 text-center text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                  ¿Cómo hacer tu pedido en 3 pasos?
+                </p>
+                <ol className="space-y-2.5 text-xs font-bold text-slate-800 sm:text-sm">
+                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
+                      <Camera className="h-4 w-4" />
+                    </span>
+                    <span>
+                      <strong>1.</strong> Abre la cámara de tu celular.
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
+                      <QrCode className="h-4 w-4" />
+                    </span>
+                    <span>
+                      <strong>2.</strong> Escanea este código QR.
+                    </span>
+                  </li>
+                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#25D366] text-white">
+                      <MessageCircle className="h-4 w-4" />
+                    </span>
+                    <span>
+                      <strong>3.</strong> Revisa la carta y envía tu pedido a
+                      WhatsApp.
+                    </span>
+                  </li>
+                </ol>
+              </div>
+
+              <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                PideTirúa · Carta Digital &amp; Pedidos Directos
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. DATOS PARA TRANSFERENCIA BANCARIA */}
+        <section
+          className={`no-print rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <span
+                className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+              >
+                <CreditCard className="h-4 w-4" />
+                Pagos del Cliente en Checkout
+              </span>
+              <h2 className="mt-0.5 text-base font-extrabold text-white sm:text-lg">
+                💳 Datos para Transferencia Bancaria
+              </h2>
+            </div>
+          </div>
+
+          <p className={`mt-1 text-xs ${brand.subtitleText}`}>
+            Estos datos se mostrarán automáticamente cuando un cliente elija
+            pagar con <strong>Transferencia Bancaria</strong> en el carrito:
+          </p>
+
+          <form
+            onSubmit={handleGuardarDatosBancarios}
+            className="mt-4 space-y-3 border-t border-white/15 pt-4"
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  Banco
+                </label>
+                <input
+                  type="text"
+                  value={banco}
+                  onChange={(e) => setBanco(e.target.value)}
+                  placeholder="Ej: BancoEstado, Banco de Chile..."
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  Tipo de cuenta
+                </label>
+                <input
+                  type="text"
+                  value={tipoCuenta}
+                  onChange={(e) => setTipoCuenta(e.target.value)}
+                  placeholder="Ej: CuentaRUT / Cuenta Vista / Corriente"
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  N° de cuenta
+                </label>
+                <input
+                  type="text"
+                  value={numeroCuenta}
+                  onChange={(e) => setNumeroCuenta(e.target.value)}
+                  placeholder="Ej: 18234567"
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  RUT del titular
+                </label>
+                <input
+                  type="text"
+                  value={rutTitular}
+                  onChange={(e) => setRutTitular(e.target.value)}
+                  placeholder="Ej: 18.234.567-8"
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  Nombre del titular
+                </label>
+                <input
+                  type="text"
+                  value={nombreTitular}
+                  onChange={(e) => setNombreTitular(e.target.value)}
+                  placeholder="Ej: Juan Pérez"
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  Correo de confirmación
+                </label>
+                <input
+                  type="email"
+                  value={emailTransferencia}
+                  onChange={(e) => setEmailTransferencia(e.target.value)}
+                  placeholder="Ej: contacto@local.cl"
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={guardandoBancos}
+              className={`mt-2 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-xs font-extrabold shadow-lg transition active:scale-[0.99] disabled:opacity-50 sm:text-sm ${brand.accentBg}`}
+            >
+              {guardandoBancos ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Guardando datos bancarios...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                  <span>Guardar datos bancarios</span>
+                </>
+              )}
+            </button>
+          </form>
+        </section>
+
+        {/* 4. SECCIÓN PARA SUBIR NUEVOS PLATOS Y FOTOS DE COMIDA */}
+        <section
+          className={`no-print rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
         >
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -1301,8 +1721,8 @@ export default function AdminLocalClient({
           )}
         </section>
 
-        {/* 3. LISTADO DE PRODUCTOS AGRUPADOS POR CATEGORÍA */}
-        <div className="space-y-6">
+        {/* 5. LISTADO DE PRODUCTOS AGRUPADOS POR CATEGORÍA */}
+        <div className="no-print space-y-6">
           {local.categorias.map((categoria) => (
             <section
               key={categoria.id}

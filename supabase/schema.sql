@@ -1,6 +1,6 @@
 -- ============================================================================
 -- PideTirúa — Esquema de Base de Datos y Storage en Supabase (PostgreSQL)
--- Tablas: locales, categorias, productos (con columna etiqueta)
+-- Tablas: locales (con datos bancarios), categorias, productos (con etiqueta)
 -- Storage: Bucket público `platos` con políticas SELECT, INSERT y UPDATE
 -- ============================================================================
 
@@ -15,6 +15,12 @@ CREATE TABLE IF NOT EXISTS public.locales (
   horario TEXT NOT NULL,
   abierto BOOLEAN NOT NULL DEFAULT true,
   pin VARCHAR(4) NOT NULL DEFAULT '1234',
+  banco TEXT NULL,
+  tipo_cuenta TEXT NULL,
+  numero_cuenta TEXT NULL,
+  rut_titular TEXT NULL,
+  nombre_titular TEXT NULL,
+  email_transferencia TEXT NULL,
   sector TEXT DEFAULT 'Tirúa Centro',
   ubicacion TEXT DEFAULT 'Tirúa Centro',
   tiempo_estimado TEXT DEFAULT '25 - 35 min',
@@ -27,6 +33,15 @@ CREATE TABLE IF NOT EXISTS public.locales (
   categoria_filtro TEXT[] DEFAULT '{}'::TEXT[],
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Asegurar que las columnas de datos bancarios existan en `public.locales`
+ALTER TABLE public.locales
+  ADD COLUMN IF NOT EXISTS banco TEXT NULL,
+  ADD COLUMN IF NOT EXISTS tipo_cuenta TEXT NULL,
+  ADD COLUMN IF NOT EXISTS numero_cuenta TEXT NULL,
+  ADD COLUMN IF NOT EXISTS rut_titular TEXT NULL,
+  ADD COLUMN IF NOT EXISTS nombre_titular TEXT NULL,
+  ADD COLUMN IF NOT EXISTS email_transferencia TEXT NULL;
 
 -- 2. Tabla de Categorías
 CREATE TABLE IF NOT EXISTS public.categorias (

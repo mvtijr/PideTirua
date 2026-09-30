@@ -16,6 +16,9 @@ import {
   MessageCircle,
   Eye,
   AlertCircle,
+  Copy,
+  CheckCircle2,
+  Landmark,
 } from "lucide-react";
 import {
   DatosCheckout,
@@ -83,10 +86,53 @@ export default function CartDrawer({
   const [notasAdicionales, setNotasAdicionales] = useState("");
   const [mostrarVistaPrevia, setMostrarVistaPrevia] = useState(false);
   const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
+  const [datosCopiados, setDatosCopiados] = useState(false);
 
   if (!abierto) return null;
 
   const theme = getLocalTheme(local.slug);
+
+  const tieneDatosBancarios = Boolean(
+    local.banco?.trim() ||
+      local.tipo_cuenta?.trim() ||
+      local.numero_cuenta?.trim() ||
+      local.rut_titular?.trim() ||
+      local.nombre_titular?.trim()
+  );
+
+  const handleCopiarDatosBancarios = async () => {
+    const lineas = [
+      `Datos de Transferencia - ${local.nombre}`,
+      local.banco ? `Banco: ${local.banco}` : "",
+      local.tipo_cuenta ? `Tipo de cuenta: ${local.tipo_cuenta}` : "",
+      local.numero_cuenta ? `N° de cuenta: ${local.numero_cuenta}` : "",
+      local.rut_titular ? `RUT: ${local.rut_titular}` : "",
+      local.nombre_titular ? `Titular: ${local.nombre_titular}` : "",
+      local.email_transferencia ? `Correo: ${local.email_transferencia}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(lineas);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = lineas;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setDatosCopiados(true);
+      setTimeout(() => setDatosCopiados(false), 3000);
+    } catch {
+      // Ignorar si falla
+    }
+  };
 
   const datosCheckout: DatosCheckout = {
     nombreCliente,
@@ -415,6 +461,117 @@ export default function CartDrawer({
                     );
                   })}
                 </div>
+
+                {/* Tarjeta visual destacada con Datos Bancarios si selecciona Transferencia Bancaria */}
+                {metodoPago === "Transferencia Bancaria" && (
+                  <div className="mt-3 space-y-2.5">
+                    {tieneDatosBancarios && (
+                      <div className="rounded-2xl border border-emerald-300/80 bg-emerald-50/70 p-3.5 text-slate-900 shadow-xs">
+                        <div className="mb-2.5 flex items-center justify-between gap-2 border-b border-emerald-200/80 pb-2">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-emerald-900">
+                            <Landmark className="h-4 w-4 text-emerald-700" />
+                            Datos para Transferencia
+                          </span>
+                          <span className="rounded-full bg-emerald-200/80 px-2 py-0.5 text-[10px] font-extrabold text-emerald-900">
+                            {local.nombre}
+                          </span>
+                        </div>
+
+                        <dl className="grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2">
+                          {local.banco && (
+                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:block">
+                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                Banco
+                              </dt>
+                              <dd className="font-extrabold text-slate-900">
+                                {local.banco}
+                              </dd>
+                            </div>
+                          )}
+                          {local.tipo_cuenta && (
+                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:block">
+                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                Tipo de cuenta
+                              </dt>
+                              <dd className="font-extrabold text-slate-900">
+                                {local.tipo_cuenta}
+                              </dd>
+                            </div>
+                          )}
+                          {local.numero_cuenta && (
+                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:block">
+                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                N° de cuenta
+                              </dt>
+                              <dd className="font-mono font-extrabold text-slate-900">
+                                {local.numero_cuenta}
+                              </dd>
+                            </div>
+                          )}
+                          {local.rut_titular && (
+                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:block">
+                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                RUT
+                              </dt>
+                              <dd className="font-mono font-extrabold text-slate-900">
+                                {local.rut_titular}
+                              </dd>
+                            </div>
+                          )}
+                          {local.nombre_titular && (
+                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:col-span-2 sm:block">
+                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                Titular
+                              </dt>
+                              <dd className="font-extrabold text-slate-900">
+                                {local.nombre_titular}
+                              </dd>
+                            </div>
+                          )}
+                          {local.email_transferencia && (
+                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:col-span-2 sm:block">
+                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                Correo
+                              </dt>
+                              <dd className="font-semibold text-slate-800">
+                                {local.email_transferencia}
+                              </dd>
+                            </div>
+                          )}
+                        </dl>
+
+                        <button
+                          type="button"
+                          onClick={handleCopiarDatosBancarios}
+                          className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-extrabold shadow-xs transition active:scale-[0.99] ${
+                            datosCopiados
+                              ? "border-emerald-600 bg-emerald-600 text-white"
+                              : "border-emerald-600/30 bg-white text-emerald-900 hover:bg-emerald-100/70"
+                          }`}
+                        >
+                          {datosCopiados ? (
+                            <>
+                              <CheckCircle2 className="h-4 w-4 shrink-0" />
+                              <span>¡Datos bancarios copiados!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="h-4 w-4 shrink-0" />
+                              <span>📋 Copiar datos de transferencia</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Texto recordatorio en color amigable */}
+                    <div className="rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2.5 text-xs font-semibold leading-relaxed text-sky-950">
+                      💡 Recuerda adjuntar el comprobante o captura de la
+                      transferencia en el chat de WhatsApp que se abrirá al
+                      confirmar el pedido.
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Notas adicionales */}

@@ -45,6 +45,12 @@ interface SupabaseLocalRow {
   horario: string;
   abierto: boolean;
   pin: string;
+  banco?: string | null;
+  tipo_cuenta?: string | null;
+  numero_cuenta?: string | null;
+  rut_titular?: string | null;
+  nombre_titular?: string | null;
+  email_transferencia?: string | null;
   sector?: string | null;
   ubicacion?: string | null;
   tiempo_estimado?: string | null;
@@ -178,6 +184,13 @@ function mapSupabaseRowToLocal(
       : base.horarioEntrega,
     abierto: Boolean(row.abierto),
     pin: row.pin || base.pin || "1234",
+    banco: row.banco ?? base.banco ?? "",
+    tipo_cuenta: row.tipo_cuenta ?? base.tipo_cuenta ?? "",
+    numero_cuenta: row.numero_cuenta ?? base.numero_cuenta ?? "",
+    rut_titular: row.rut_titular ?? base.rut_titular ?? "",
+    nombre_titular: row.nombre_titular ?? base.nombre_titular ?? "",
+    email_transferencia:
+      row.email_transferencia ?? base.email_transferencia ?? "",
     sector: (row.sector as Local["sector"]) || base.sector,
     ubicacion: row.ubicacion || base.ubicacion,
     tiempoEstimado: row.tiempo_estimado || base.tiempoEstimado,
@@ -213,6 +226,12 @@ async function seedRelationalTablesIfEmpty(): Promise<void> {
     horario: loc.horario,
     abierto: loc.abierto,
     pin: loc.pin || "1234",
+    banco: loc.banco || null,
+    tipo_cuenta: loc.tipo_cuenta || null,
+    numero_cuenta: loc.numero_cuenta || null,
+    rut_titular: loc.rut_titular || null,
+    nombre_titular: loc.nombre_titular || null,
+    email_transferencia: loc.email_transferencia || null,
     sector: loc.sector,
     ubicacion: loc.ubicacion,
     tiempo_estimado: loc.tiempoEstimado,
@@ -478,6 +497,50 @@ export async function updateLocalAbiertoInSupabase(
   const locales = await fetchAllLocales();
   const actualizados = locales.map((loc) =>
     loc.slug.toLowerCase() === slug.toLowerCase() ? { ...loc, abierto } : loc
+  );
+  await writeSupabaseCloudState(actualizados);
+
+  const localActualizado = actualizados.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
+
+  return { ok: true, local: localActualizado };
+}
+
+/**
+ * Actualiza los datos bancarios de transferencia de un local en Supabase.
+ */
+export async function updateLocalDatosBancariosInSupabase(
+  slug: string,
+  datos: {
+    banco: string;
+    tipo_cuenta: string;
+    numero_cuenta: string;
+    rut_titular: string;
+    nombre_titular: string;
+    email_transferencia: string;
+  }
+): Promise<{ ok: boolean; local?: Local }> {
+  const supabase = getSupabaseClient();
+
+  const payload = {
+    banco: datos.banco.trim(),
+    tipo_cuenta: datos.tipo_cuenta.trim(),
+    numero_cuenta: datos.numero_cuenta.trim(),
+    rut_titular: datos.rut_titular.trim(),
+    nombre_titular: datos.nombre_titular.trim(),
+    email_transferencia: datos.email_transferencia.trim(),
+  };
+
+  // 1. Actualizar tabla `locales` en Supabase PostgreSQL
+  await supabase.from("locales").update(payload).eq("slug", slug);
+
+  // 2. Sincronizar estado en Supabase Cloud Storage
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) =>
+    loc.slug.toLowerCase() === slug.toLowerCase()
+      ? { ...loc, ...payload }
+      : loc
   );
   await writeSupabaseCloudState(actualizados);
 

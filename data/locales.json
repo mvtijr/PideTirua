@@ -22,6 +22,12 @@
     "logo": "/logos/las-tranqueras.png.jpg",
     "abierto": true,
     "pin": "1234",
+    "banco": "BancoEstado",
+    "tipo_cuenta": "CuentaRUT / Cuenta Vista",
+    "numero_cuenta": "18234567",
+    "rut_titular": "18.234.567-8",
+    "nombre_titular": "Las Tranqueras Tirúa",
+    "email_transferencia": "pagos@lastranqueras.cl",
     "categorias": [
       {
         "id": "cat-pollos",
@@ -141,6 +147,12 @@
     "logo": "/logos/sushi-burger.png.jpg",
     "abierto": false,
     "pin": "1234",
+    "banco": "BancoEstado",
+    "tipo_cuenta": "CuentaRUT / Cuenta Vista",
+    "numero_cuenta": "19876543",
+    "rut_titular": "19.876.543-2",
+    "nombre_titular": "Bendito Sushi Tirúa",
+    "email_transferencia": "pagos@sushiburgertirua.cl",
     "categorias": [
       {
         "id": "cat-tablas",
@@ -253,6 +265,12 @@
     "logo": "/logos/rio-mar.png.jpg",
     "abierto": true,
     "pin": "1234",
+    "banco": "BancoEstado",
+    "tipo_cuenta": "CuentaRUT / Cuenta Vista",
+    "numero_cuenta": "17654321",
+    "rut_titular": "17.654.321-5",
+    "nombre_titular": "Restaurante Río Mar Tirúa",
+    "email_transferencia": "contacto@riomartirua.cl",
     "categorias": [
       {
         "id": "cat-almuerzos",
@@ -352,6 +370,12 @@
     "logo": "/logos/gran-pacifico.png.jpg",
     "abierto": true,
     "pin": "1234",
+    "banco": "Banco de Chile",
+    "tipo_cuenta": "Cuenta Corriente",
+    "numero_cuenta": "0018549201",
+    "rut_titular": "76.543.210-K",
+    "nombre_titular": "Restaurant Gran Pacífico Quidico",
+    "email_transferencia": "pagos@granpacifico.cl",
     "categorias": [
       {
         "id": "cat-empanadas",

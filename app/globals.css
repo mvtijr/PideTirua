@@ -129,3 +129,43 @@ a,
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
+
+/* Impresión limpia del Cartel QR para Mesas (oculta el panel de administración) */
+@media print {
+  @page {
+    size: letter portrait;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  #printable-qr-flyer-wrapper {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
+
+  #printable-qr-flyer {
+    width: 100% !important;
+    max-width: 140mm !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+

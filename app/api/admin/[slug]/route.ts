@@ -5,6 +5,7 @@ import {
   deleteProductoInSupabase,
   fetchLocalBySlug,
   updateLocalAbiertoInSupabase,
+  updateLocalDatosBancariosInSupabase,
   updateProductoInSupabase,
   uploadPlatoFotoInSupabase,
   verifyLocalPinInSupabase,
@@ -64,6 +65,31 @@ export async function POST(
     if (action === "toggle-abierto") {
       const { abierto } = body;
       const result = await updateLocalAbiertoInSupabase(slug, Boolean(abierto));
+      revalidatePath("/");
+      revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      return NextResponse.json(result);
+    }
+
+    if (action === "update-datos-bancarios") {
+      const {
+        banco,
+        tipo_cuenta,
+        numero_cuenta,
+        rut_titular,
+        nombre_titular,
+        email_transferencia,
+      } = body;
+      const result = await updateLocalDatosBancariosInSupabase(slug, {
+        banco: typeof banco === "string" ? banco : "",
+        tipo_cuenta: typeof tipo_cuenta === "string" ? tipo_cuenta : "",
+        numero_cuenta: typeof numero_cuenta === "string" ? numero_cuenta : "",
+        rut_titular: typeof rut_titular === "string" ? rut_titular : "",
+        nombre_titular:
+          typeof nombre_titular === "string" ? nombre_titular : "",
+        email_transferencia:
+          typeof email_transferencia === "string" ? email_transferencia : "",
+      });
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
