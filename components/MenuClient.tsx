@@ -28,9 +28,12 @@ interface MenuClientProps {
 export default function MenuClient({ local }: MenuClientProps) {
   const storageKey = `pidetirua_cart_${local.slug}`;
   const theme = getLocalTheme(local.slug);
+  const bannerPrincipal = local.banner_url || local.fotoPortada;
+  const logoPrincipal = local.logo_url || local.logo;
+  const localSuspendido = local.activo === false;
   const videoDeFondo = local.videoFondo || local.videoPortada;
-  const posterFondo = getVideoPoster(videoDeFondo, local.fotoPortada);
-  const posterPortada = getVideoPoster(local.videoPortada, local.fotoPortada);
+  const posterFondo = getVideoPoster(videoDeFondo, bannerPrincipal);
+  const posterPortada = getVideoPoster(local.videoPortada, bannerPrincipal);
   const telefonoDirecto = local.telefono_whatsapp || local.telefonoWhatsapp;
   const horaApertura = (local.horario || local.horarioEntrega)
     .split(" a ")[0]
@@ -74,7 +77,7 @@ export default function MenuClient({ local }: MenuClientProps) {
   }, [carrito, hidratado, storageKey]);
 
   const handleAgregarProducto = (producto: Producto) => {
-    if (producto.disponible === false) return;
+    if (producto.disponible === false || localSuspendido) return;
     setCarrito((prev) => {
       const existe = prev.find((item) => item.producto.id === producto.id);
       if (existe) {
@@ -196,7 +199,7 @@ export default function MenuClient({ local }: MenuClientProps) {
               local.videoPortada ? "aspect-video" : "h-52 sm:h-60"
             } ${theme.headerBg}`}
           >
-            {local.videoPortada ? (
+            {local.videoPortada && !local.banner_url ? (
               <video
                 src={local.videoPortada}
                 poster={posterPortada}
@@ -209,7 +212,7 @@ export default function MenuClient({ local }: MenuClientProps) {
               />
             ) : (
               <img
-                src={local.fotoPortada}
+                src={bannerPrincipal}
                 alt={local.nombre}
                 className="h-full w-full object-cover"
               />
@@ -252,7 +255,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 className={`h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 shadow-lg sm:h-20 sm:w-20 ${theme.logoBox}`}
               >
                 <img
-                  src={local.logo}
+                  src={logoPrincipal}
                   alt={`Logo ${local.nombre}`}
                   className="h-full w-full object-cover"
                 />
@@ -261,12 +264,16 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold shadow-sm backdrop-blur-md border ${
-                      local.abierto
+                      localSuspendido
+                        ? "bg-rose-700/95 text-white border-rose-400/50"
+                        : local.abierto
                         ? "bg-emerald-600/95 text-white border-emerald-400/40"
                         : "bg-rose-600/95 text-white border-rose-400/40"
                     }`}
                   >
-                    {local.abierto
+                    {localSuspendido
+                      ? "⛔ Servicio Temporalmente Suspendido"
+                      : local.abierto
                       ? `🟢 Abierto • ${local.horario}`
                       : `🔴 Cerrado • Abre hoy a las ${horaApertura} hrs`}
                   </span>
@@ -285,6 +292,13 @@ export default function MenuClient({ local }: MenuClientProps) {
             </div>
           </div>
 
+          {localSuspendido && (
+            <div className="border-b border-rose-500/40 bg-rose-950/90 px-4 py-3.5 text-xs font-bold text-rose-100">
+              ⛔ <strong>Servicio Temporalmente Suspendido:</strong> Este local
+              no se encuentra recibiendo pedidos digitales en este momento.
+            </div>
+          )}
+
           {/* Ficha informativa del Local + Botón de Llamada Directa */}
           <div className={`border-b px-4 py-4 ${theme.infoSectionBg}`}>
             {/* Cabecera compacta con Nombre, Dirección, Horario y Botón de Llamada Rápida */}
@@ -293,12 +307,16 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${
-                      local.abierto
+                      localSuspendido
+                        ? "bg-rose-500/20 text-rose-300 border-rose-500/45"
+                        : local.abierto
                         ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/35"
                         : "bg-rose-500/15 text-rose-400 border-rose-500/35"
                     }`}
                   >
-                    {local.abierto
+                    {localSuspendido
+                      ? "⛔ Servicio Temporalmente Suspendido"
+                      : local.abierto
                       ? `🟢 Abierto • ${local.horario}`
                       : `🔴 Cerrado • Abre hoy a las ${horaApertura} hrs`}
                   </span>

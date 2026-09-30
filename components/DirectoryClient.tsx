@@ -970,10 +970,18 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 PideTirúa — Sabores de nuestra tierra
               </span>
             </div>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Plataforma gastronómica para emprendedores y locales de Tirúa y
-              Quidico, Región del Biobío, Chile.
-            </p>
+            <div className="flex flex-col items-center md:items-end gap-1">
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                Plataforma gastronómica para emprendedores y locales de Tirúa y
+                Quidico, Región del Biobío, Chile.
+              </p>
+              <Link
+                href="/superadmin"
+                className="text-[11px] font-semibold text-outline hover:text-primary hover:underline"
+              >
+                Panel SuperAdmin SaaS
+              </Link>
+            </div>
           </div>
         </div>
       </footer>

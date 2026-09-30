@@ -9,6 +9,7 @@ export const revalidate = 0;
 
 interface AdminLocalPageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export async function generateMetadata({
@@ -29,8 +30,12 @@ export async function generateMetadata({
   };
 }
 
-export default async function AdminLocalPage({ params }: AdminLocalPageProps) {
+export default async function AdminLocalPage({
+  params,
+  searchParams,
+}: AdminLocalPageProps) {
   const { slug } = await params;
+  const resolvedSearch = searchParams ? await searchParams : {};
   const local = await fetchLocalBySlug(slug);
 
   if (!local) {
@@ -39,12 +44,19 @@ export default async function AdminLocalPage({ params }: AdminLocalPageProps) {
 
   const cookieStore = await cookies();
   const sesionCookie = cookieStore.get(`pidetirua_admin_${local.slug}`);
-  const initialAuthenticated = sesionCookie?.value === "authenticated";
+  const superAdminCookie = cookieStore.get("pidetirua_superadmin");
+  const isSuperAdmin =
+    superAdminCookie?.value === "authenticated" ||
+    resolvedSearch?.superadmin === "true";
+  const initialAuthenticated =
+    sesionCookie?.value === "authenticated" || isSuperAdmin;
 
   return (
     <AdminLocalClient
       initialLocal={local}
       initialAuthenticated={initialAuthenticated}
+      initialSuperAdmin={isSuperAdmin}
     />
   );
 }
+

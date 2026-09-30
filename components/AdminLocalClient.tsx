@@ -25,6 +25,15 @@ import {
   Download,
   Smartphone,
   MessageCircle,
+  Crown,
+  Settings,
+  FolderPlus,
+  Layers,
+  ShieldCheck,
+  Phone,
+  Clock,
+  MapPin,
+  KeyRound,
 } from "lucide-react";
 import { Local, Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
@@ -34,6 +43,7 @@ import KitchenMonitor from "@/components/KitchenMonitor";
 interface AdminLocalClientProps {
   initialLocal: Local;
   initialAuthenticated?: boolean;
+  initialSuperAdmin?: boolean;
 }
 
 interface AdminBrandPalette {
@@ -167,15 +177,19 @@ async function compressImageFileToDataUrl(file: File): Promise<string> {
 export default function AdminLocalClient({
   initialLocal,
   initialAuthenticated = false,
+  initialSuperAdmin = false,
 }: AdminLocalClientProps) {
   const sessionKey = `pidetirua_admin_session_${initialLocal.slug}`;
   const theme = getLocalTheme(initialLocal.slug);
   const brand = getAdminBrandPalette(initialLocal.slug);
 
   const [local, setLocal] = useState<Local>(initialLocal);
-  const [autenticado, setAutenticado] = useState<boolean>(initialAuthenticated);
+  const [esSuperAdmin, setEsSuperAdmin] = useState<boolean>(initialSuperAdmin);
+  const [autenticado, setAutenticado] = useState<boolean>(
+    initialAuthenticated || initialSuperAdmin
+  );
   const [verificandoSesion, setVerificandoSesion] = useState<boolean>(
-    !initialAuthenticated
+    !initialAuthenticated && !initialSuperAdmin
   );
 
   // Estado del bloqueo por PIN
@@ -186,6 +200,25 @@ export default function AdminLocalClient({
   // Estado de guardado y Toast de feedback inmediato
   const [guardandoId, setGuardandoId] = useState<string | null>(null);
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
+
+  // Estado de Ajustes Básicos del Dueño (WhatsApp, horario, dirección y PIN)
+  const [telefonoWhatsapp, setTelefonoWhatsapp] = useState<string>(
+    initialLocal.telefono_whatsapp || initialLocal.telefonoWhatsapp || ""
+  );
+  const [horarioAtencion, setHorarioAtencion] = useState<string>(
+    initialLocal.horario || initialLocal.horarioEntrega || ""
+  );
+  const [direccionLocal, setDireccionLocal] = useState<string>(
+    initialLocal.direccionDetalle || ""
+  );
+  const [nuevoPinSeguridad, setNuevoPinSeguridad] = useState<string>(
+    initialLocal.pin || ""
+  );
+  const [guardandoAjustes, setGuardandoAjustes] = useState<boolean>(false);
+
+  // Estado de Gestión de Categorías
+  const [nombreCategoriaCrear, setNombreCategoriaCrear] = useState<string>("");
+  const [creandoCategoria, setCreandoCategoria] = useState<boolean>(false);
 
   // Estado de Datos Bancarios para Transferencia
   const [banco, setBanco] = useState<string>(initialLocal.banco || "");
@@ -273,12 +306,27 @@ export default function AdminLocalClient({
   }, [local]);
 
   useEffect(() => {
-    if (initialAuthenticated) {
+    if (initialAuthenticated || initialSuperAdmin) {
       setAutenticado(true);
+      if (initialSuperAdmin) setEsSuperAdmin(true);
       setVerificandoSesion(false);
       return;
     }
     try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const querySuperAdmin = urlParams.get("superadmin") === "true";
+      const sesionSuperAdmin =
+        localStorage.getItem("pidetirua_superadmin_session") === "authenticated";
+
+      if (querySuperAdmin || sesionSuperAdmin) {
+        setEsSuperAdmin(true);
+        setAutenticado(true);
+        localStorage.setItem(sessionKey, "authenticated");
+        document.cookie = `pidetirua_admin_${initialLocal.slug}=authenticated; path=/; max-age=604800; SameSite=Lax`;
+        setVerificandoSesion(false);
+        return;
+      }
+
       const guardado = localStorage.getItem(sessionKey);
       if (guardado === "authenticated") {
         setAutenticado(true);
@@ -288,7 +336,7 @@ export default function AdminLocalClient({
     } finally {
       setVerificandoSesion(false);
     }
-  }, [initialAuthenticated, sessionKey]);
+  }, [initialAuthenticated, initialSuperAdmin, initialLocal.slug, sessionKey]);
 
   const mostrarToast = (mensaje = "Cambio guardado") => {
     setToastMensaje(mensaje);
@@ -367,6 +415,7 @@ export default function AdminLocalClient({
       // Ignorar
     }
     setPin("");
+    setEsSuperAdmin(false);
     setAutenticado(false);
   };
 
@@ -402,6 +451,106 @@ export default function AdminLocalClient({
       );
     } catch {
       setLocal((prev) => ({ ...prev, abierto: estadoAnterior }));
+    } finally {
+      setGuardandoId(null);
+    }
+  };
+
+  // Guardar Ajustes Básicos del Local (WhatsApp, horario, dirección y PIN)
+  const handleGuardarAjustesBasicos = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (guardandoAjustes) return;
+
+    const pinLimpio = nuevoPinSeguridad.replace(/\D/g, "").slice(0, 4);
+    if (pinLimpio && pinLimpio.length !== 4) {
+      mostrarToast("El PIN de seguridad debe tener exactamente 4 dígitos");
+      return;
+    }
+
+    setGuardandoAjustes(true);
+    setGuardandoId("ajustes-basicos");
+
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-ajustes-basicos",
+          telefono_whatsapp: telefonoWhatsapp.trim(),
+          horario: horarioAtencion.trim(),
+          direccion: direccionLocal.trim(),
+          pin: pinLimpio || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+        mostrarToast("Ajustes básicos y PIN actualizados");
+      } else {
+        mostrarToast(data.error || "No se pudieron guardar los ajustes");
+      }
+    } catch {
+      mostrarToast("Error de conexión al guardar ajustes");
+    } finally {
+      setGuardandoAjustes(false);
+      setGuardandoId(null);
+    }
+  };
+
+  // Crear nueva categoría para ordenar la carta
+  const handleCrearCategoria = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const nombreLimpio = nombreCategoriaCrear.trim();
+    if (!nombreLimpio || creandoCategoria) return;
+
+    setCreandoCategoria(true);
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create-categoria",
+          nombre: nombreLimpio,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+        setNombreCategoriaCrear("");
+        if (data.categoriaId) {
+          setNuevoCategoriaId(data.categoriaId);
+        }
+        mostrarToast(`Categoría "${nombreLimpio}" creada`);
+      } else {
+        mostrarToast(data.error || "No se pudo crear la categoría");
+      }
+    } catch {
+      mostrarToast("Error de conexión al crear la categoría");
+    } finally {
+      setCreandoCategoria(false);
+    }
+  };
+
+  // Eliminar una categoría de la carta
+  const handleEliminarCategoria = async (
+    categoriaId: string,
+    categoriaNombre: string
+  ) => {
+    setGuardandoId(`del-cat-${categoriaId}`);
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete-categoria",
+          categoriaId,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+        mostrarToast(`Categoría "${categoriaNombre}" eliminada`);
+      }
     } finally {
       setGuardandoId(null);
     }
@@ -508,7 +657,9 @@ export default function AdminLocalClient({
       return;
     }
     if (Number.isNaN(precioNum) || precioNum <= 0) {
-      setErrorNuevoPlato("Por favor ingresa un precio válido en pesos (ej: 8500).");
+      setErrorNuevoPlato(
+        "Por favor ingresa un precio válido en pesos (ej: 8500)."
+      );
       return;
     }
     if (nuevoCategoriaId === "__nueva__" && !nuevaCategoriaNombre.trim()) {
@@ -783,8 +934,10 @@ export default function AdminLocalClient({
     }
   };
 
+  const logoOficial = local.logo_url || local.logo;
+  const bannerOficial = local.banner_url || local.fotoPortada;
   const videoDeFondo = local.videoFondo || local.videoPortada;
-  const posterFondo = getVideoPoster(videoDeFondo, local.fotoPortada);
+  const posterFondo = getVideoPoster(videoDeFondo, bannerOficial);
 
   if (verificandoSesion) {
     return (
@@ -845,7 +998,7 @@ export default function AdminLocalClient({
               className={`mx-auto mb-3 h-20 w-20 overflow-hidden rounded-2xl border-2 p-1 shadow-xl ${theme.logoBox}`}
             >
               <img
-                src={local.logo}
+                src={logoOficial}
                 alt={local.nombre}
                 className="h-full w-full rounded-xl object-contain"
               />
@@ -990,7 +1143,7 @@ export default function AdminLocalClient({
   }
 
   // ============================================================================
-  // 2. PANEL PRINCIPAL DE ADMINISTRACIÓN CON PALETA DEL NEGOCIO + SUBIDA DE PLATOS Y FOTOS
+  // 2. PANEL PRINCIPAL DE ADMINISTRACIÓN CON PALETA DEL NEGOCIO
   // ============================================================================
   const totalProductos = local.categorias.reduce(
     (acc, cat) => acc + cat.productos.length,
@@ -1003,7 +1156,9 @@ export default function AdminLocalClient({
   );
 
   return (
-    <div className={`relative min-h-screen pb-24 print:min-h-0 print:bg-white print:pb-0 ${brand.bgBase}`}>
+    <div
+      className={`relative min-h-screen pb-24 print:min-h-0 print:bg-white print:pb-0 ${brand.bgBase}`}
+    >
       {/* Fondo ambiental del negocio */}
       {posterFondo && (
         <div className="no-print pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -1043,6 +1198,25 @@ export default function AdminLocalClient({
         </div>
       )}
 
+      {/* Barra superior especial si se accedió desde el Panel SuperAdmin */}
+      {esSuperAdmin && (
+        <div className="no-print relative z-40 border-b border-amber-400/35 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/20 px-4 py-2 text-amber-200 backdrop-blur-md">
+          <div className="mx-auto flex max-w-xl flex-wrap items-center justify-between gap-2 text-xs">
+            <span className="inline-flex items-center gap-1.5 font-extrabold text-amber-300">
+              <Crown className="h-4 w-4 shrink-0" />
+              Modo SuperAdmin · Gestionando Carta de {local.nombre}
+            </span>
+            <Link
+              href="/superadmin"
+              className="inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-400 px-3 py-1 text-[11px] font-black text-slate-950 shadow-xs transition hover:bg-amber-300"
+            >
+              <ArrowLeft className="h-3 w-3" />
+              <span>Volver a SuperAdmin</span>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Cabecera Fija Mobile-First con la paleta del local */}
       <header
         className={`no-print sticky top-0 z-30 border-b backdrop-blur-xl shadow-md ${brand.headerBg}`}
@@ -1053,17 +1227,29 @@ export default function AdminLocalClient({
               className={`h-11 w-11 shrink-0 overflow-hidden rounded-xl border-2 p-0.5 shadow-sm ${theme.logoBox}`}
             >
               <img
-                src={local.logo}
+                src={logoOficial}
                 alt={local.nombre}
                 className="h-full w-full rounded-lg object-contain"
               />
             </div>
             <div className="min-w-0">
-              <span
-                className={`block text-[10px] font-extrabold uppercase tracking-wider ${brand.accentText}`}
-              >
-                Administración · {local.rubro}
-              </span>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span
+                  className={`block text-[10px] font-extrabold uppercase tracking-wider ${brand.accentText}`}
+                >
+                  Administración · {local.rubro}
+                </span>
+                {local.plan === "llave_en_mano" ? (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/45 bg-amber-500/20 px-2 py-0.5 text-[9px] font-black uppercase text-amber-300">
+                    <Crown className="h-2.5 w-2.5" />
+                    VIP Llave en Mano
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-sky-400/45 bg-sky-500/20 px-2 py-0.5 text-[9px] font-black uppercase text-sky-200">
+                    Autogestionado
+                  </span>
+                )}
+              </div>
               <h1 className="truncate text-base font-extrabold text-white sm:text-lg">
                 {local.nombre}
               </h1>
@@ -1093,6 +1279,56 @@ export default function AdminLocalClient({
       </header>
 
       <main className="relative z-10 mx-auto max-w-xl space-y-6 px-4 pt-5 print:max-w-none print:space-y-0 print:p-0">
+        {/* PREVISUALIZACIÓN DE IDENTIDAD VISUAL (SOLO LECTURA PARA EL DUEÑO) */}
+        <section
+          className={`no-print overflow-hidden rounded-3xl border shadow-xl ${brand.panelCardBg}`}
+        >
+          <div className="relative h-28 w-full overflow-hidden bg-black/50 sm:h-32">
+            <img
+              src={bannerOficial}
+              alt={`Portada de ${local.nombre}`}
+              className="h-full w-full object-cover opacity-85"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+            <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div
+                  className={`h-14 w-14 shrink-0 overflow-hidden rounded-2xl border-2 bg-slate-900 p-1 shadow-lg ${theme.logoBox}`}
+                >
+                  <img
+                    src={logoOficial}
+                    alt={local.nombre}
+                    className="h-full w-full rounded-xl object-contain"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/55 px-2.5 py-0.5 text-[10px] font-bold text-white/90 backdrop-blur-xs">
+                    <ShieldCheck className="h-3 w-3 text-emerald-400" />
+                    Identidad Visual Oficial
+                  </span>
+                  <p className="mt-0.5 truncate text-sm font-black text-white">
+                    {local.nombre}
+                  </p>
+                </div>
+              </div>
+              {esSuperAdmin && (
+                <Link
+                  href="/superadmin"
+                  className="shrink-0 rounded-xl border border-amber-400/50 bg-amber-400/95 px-2.5 py-1.5 text-[10px] font-black text-slate-950 shadow transition hover:bg-amber-300"
+                >
+                  Cambiar Logo/Banner
+                </Link>
+              )}
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-2 px-4 py-2.5 text-[11px] text-white/80">
+            <span>
+              🎨 El Logo y la Foto de Portada son administrados por{" "}
+              <strong>PideTirúa</strong> para garantizar máxima calidad visual.
+            </span>
+          </div>
+        </section>
+
         {/* 1. CONTROL MAESTRO: Switch grande para estado Abierto / Cerrado */}
         <section
           className={`no-print rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
@@ -1295,7 +1531,7 @@ export default function AdminLocalClient({
               <div className="mt-4 flex flex-col items-center">
                 <div className="h-20 w-20 overflow-hidden rounded-2xl border-2 border-slate-200 bg-slate-900 p-1.5 shadow-md">
                   <img
-                    src={local.logo}
+                    src={logoOficial}
                     alt={local.nombre}
                     className="h-full w-full rounded-xl object-contain"
                   />
@@ -1361,6 +1597,115 @@ export default function AdminLocalClient({
               </p>
             </div>
           </div>
+        </section>
+
+        {/* 2.5 AJUSTES BÁSICOS Y SEGURIDAD DEL LOCAL (WhatsApp, Horario, Dirección y PIN) */}
+        <section
+          className={`no-print rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
+        >
+          <div>
+            <span
+              className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+            >
+              <Settings className="h-4 w-4" />
+              Configuración Operativa
+            </span>
+            <h2 className="mt-0.5 text-base font-extrabold text-white sm:text-lg">
+              ⚙️ Ajustes Básicos y PIN de Seguridad
+            </h2>
+          </div>
+
+          <p className={`mt-1 text-xs ${brand.subtitleText}`}>
+            Actualiza tu número de recepción de pedidos por WhatsApp, horario de
+            atención, dirección o tu clave PIN de 4 dígitos:
+          </p>
+
+          <form
+            onSubmit={handleGuardarAjustesBasicos}
+            className="mt-4 space-y-3 border-t border-white/15 pt-4"
+          >
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  <Phone className="h-3.5 w-3.5 text-emerald-400" />
+                  Teléfono WhatsApp (+569...)
+                </label>
+                <input
+                  type="text"
+                  value={telefonoWhatsapp}
+                  onChange={(e) => setTelefonoWhatsapp(e.target.value)}
+                  placeholder="Ej: 56987654321"
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  <Clock className="h-3.5 w-3.5 text-sky-400" />
+                  Horario de atención
+                </label>
+                <input
+                  type="text"
+                  value={horarioAtencion}
+                  onChange={(e) => setHorarioAtencion(e.target.value)}
+                  placeholder="Ej: 12:30 a 22:30 hrs"
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  <MapPin className="h-3.5 w-3.5 text-amber-400" />
+                  Dirección del local
+                </label>
+                <input
+                  type="text"
+                  value={direccionLocal}
+                  onChange={(e) => setDireccionLocal(e.target.value)}
+                  placeholder="Ej: Av. Costanera 240, Tirúa"
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-white/90">
+                  <KeyRound className="h-3.5 w-3.5 text-rose-400" />
+                  PIN de Seguridad (4 dígitos)
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={4}
+                  value={nuevoPinSeguridad}
+                  onChange={(e) =>
+                    setNuevoPinSeguridad(
+                      e.target.value.replace(/\D/g, "").slice(0, 4)
+                    )
+                  }
+                  placeholder="Ej: 1234"
+                  className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 font-mono text-xs font-extrabold tracking-widest text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={guardandoAjustes}
+              className={`mt-2 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-xs font-extrabold shadow-lg transition active:scale-[0.99] disabled:opacity-50 sm:text-sm ${brand.accentBg}`}
+            >
+              {guardandoAjustes ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Guardando ajustes...</span>
+                </>
+              ) : (
+                <>
+                  <Check className="h-4 w-4" />
+                  <span>Guardar ajustes básicos y PIN</span>
+                </>
+              )}
+            </button>
+          </form>
         </section>
 
         {/* 3. DATOS PARA TRANSFERENCIA BANCARIA */}
@@ -1488,6 +1833,81 @@ export default function AdminLocalClient({
               )}
             </button>
           </form>
+        </section>
+
+        {/* 3.5 GESTIÓN DE CATEGORÍAS DE LA CARTA */}
+        <section
+          className={`no-print rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
+        >
+          <div>
+            <span
+              className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+            >
+              <Layers className="h-4 w-4" />
+              Estructura del Menú
+            </span>
+            <h2 className="mt-0.5 text-base font-extrabold text-white sm:text-lg">
+              📂 Gestión de Categorías de la Carta
+            </h2>
+          </div>
+
+          <p className={`mt-1 text-xs ${brand.subtitleText}`}>
+            Crea nuevas categorías para organizar tus platos (ej: Promociones,
+            Sandwiches, Bebidas, Postres):
+          </p>
+
+          <form
+            onSubmit={handleCrearCategoria}
+            className="mt-3 flex flex-col gap-2.5 sm:flex-row"
+          >
+            <input
+              type="text"
+              value={nombreCategoriaCrear}
+              onChange={(e) => setNombreCategoriaCrear(e.target.value)}
+              placeholder="Nombre de la nueva categoría (ej: Bebidas y Jugos)"
+              className="flex-1 rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+            />
+            <button
+              type="submit"
+              disabled={creandoCategoria || !nombreCategoriaCrear.trim()}
+              className={`inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-extrabold shadow-md transition active:scale-95 disabled:opacity-50 ${brand.accentBg}`}
+            >
+              {creandoCategoria ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <FolderPlus className="h-4 w-4" />
+              )}
+              <span>Crear Categoría</span>
+            </button>
+          </form>
+
+          {local.categorias.length > 0 && (
+            <div className="mt-3.5 flex flex-wrap gap-2">
+              {local.categorias.map((cat) => (
+                <div
+                  key={cat.id}
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold text-white"
+                >
+                  <span>
+                    {cat.nombre} ({cat.productos.length})
+                  </span>
+                  {cat.productos.length === 0 && (
+                    <button
+                      type="button"
+                      disabled={guardandoId === `del-cat-${cat.id}`}
+                      onClick={() =>
+                        void handleEliminarCategoria(cat.id, cat.nombre)
+                      }
+                      className="rounded-full p-0.5 text-rose-300 hover:bg-rose-500/20 hover:text-rose-200"
+                      title="Eliminar categoría vacía"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* 4. SECCIÓN PARA SUBIR NUEVOS PLATOS Y FOTOS DE COMIDA */}
@@ -1746,7 +2166,9 @@ export default function AdminLocalClient({
                 >
                   {categoria.nombre}
                 </h2>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${theme.categoryCount}`}>
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${theme.categoryCount}`}
+                >
                   {categoria.productos.length}{" "}
                   {categoria.productos.length === 1 ? "plato" : "platos"}
                 </span>

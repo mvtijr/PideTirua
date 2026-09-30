@@ -11,6 +11,8 @@ export type TipoEntrega = "Retiro en local" | "Consumo en mesa";
 
 export type MetodoPago = "Efectivo" | "Transferencia Bancaria";
 
+export type PlanComercial = "autogestionado" | "llave_en_mano";
+
 export interface Producto {
   id: string;
   categoria_id?: string;
@@ -51,10 +53,15 @@ export interface Local {
   calificacion: number;
   descripcionCorta: string;
   fotoPortada: string;
+  banner_url?: string;
   videoPortada?: string;
   videoFondo?: string;
   logo: string;
+  logo_url?: string;
   abierto: boolean;
+  activo?: boolean;
+  plan?: PlanComercial;
+  precio_mensual?: number;
   pin?: string;
   banco?: string;
   tipo_cuenta?: string;

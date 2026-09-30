@@ -27,21 +27,32 @@ CREATE TABLE IF NOT EXISTS public.locales (
   calificacion NUMERIC(3,1) DEFAULT 4.9,
   descripcion_corta TEXT DEFAULT '',
   foto_portada TEXT DEFAULT '',
+  banner_url TEXT DEFAULT '',
   video_portada TEXT DEFAULT '',
   video_fondo TEXT DEFAULT '',
   logo TEXT DEFAULT '',
+  logo_url TEXT DEFAULT '',
+  plan TEXT NOT NULL DEFAULT 'autogestionado'
+    CHECK (plan IN ('autogestionado', 'llave_en_mano')),
+  precio_mensual INTEGER NOT NULL DEFAULT 15000,
+  activo BOOLEAN NOT NULL DEFAULT true,
   categoria_filtro TEXT[] DEFAULT '{}'::TEXT[],
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Asegurar que las columnas de datos bancarios existan en `public.locales`
+-- Asegurar que las columnas de datos bancarios, identidad visual y planes existan en `public.locales`
 ALTER TABLE public.locales
   ADD COLUMN IF NOT EXISTS banco TEXT NULL,
   ADD COLUMN IF NOT EXISTS tipo_cuenta TEXT NULL,
   ADD COLUMN IF NOT EXISTS numero_cuenta TEXT NULL,
   ADD COLUMN IF NOT EXISTS rut_titular TEXT NULL,
   ADD COLUMN IF NOT EXISTS nombre_titular TEXT NULL,
-  ADD COLUMN IF NOT EXISTS email_transferencia TEXT NULL;
+  ADD COLUMN IF NOT EXISTS email_transferencia TEXT NULL,
+  ADD COLUMN IF NOT EXISTS logo_url TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS banner_url TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS plan TEXT NOT NULL DEFAULT 'autogestionado',
+  ADD COLUMN IF NOT EXISTS precio_mensual INTEGER NOT NULL DEFAULT 15000,
+  ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT true;
 
 -- 2. Tabla de Categorías
 CREATE TABLE IF NOT EXISTS public.categorias (

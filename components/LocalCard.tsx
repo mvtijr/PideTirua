@@ -19,8 +19,10 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
     0
   );
 
+  const bannerSrc = local.banner_url || local.fotoPortada;
+  const logoSrc = local.logo_url || local.logo;
   const videoSrc = local.videoFondo || local.videoPortada;
-  const posterSrc = getVideoPoster(videoSrc, local.fotoPortada);
+  const posterSrc = getVideoPoster(videoSrc, bannerSrc);
 
   // Cargar el video de las tarjetas inferiores solo cuando el usuario se acerca haciendo scroll,
   // liberando todo el ancho de banda inicial para el carrusel 3D superior.
@@ -83,7 +85,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
           </>
         ) : (
           <img
-            src={local.fotoPortada}
+            src={bannerSrc}
             alt={`Portada de ${local.nombre}`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
@@ -160,7 +162,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <img
-              src={local.logo}
+              src={logoSrc}
               alt={`Logo ${local.nombre}`}
               className="w-10 h-10 rounded-full object-cover border border-outline-variant/30 shadow-sm bg-white p-0.5 flex-shrink-0"
               loading="lazy"

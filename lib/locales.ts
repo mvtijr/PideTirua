@@ -1,5 +1,12 @@
 import localesData from "@/data/locales.json";
-import { CategoriaFiltro, CategoriaMenu, Local, Producto } from "@/types/local";
+import {
+  CategoriaFiltro,
+  CategoriaMenu,
+  Local,
+  PlanComercial,
+  Producto,
+  SectorComuna,
+} from "@/types/local";
 import { getSupabaseClient } from "@/lib/supabase";
 
 export const CATEGORIAS_DIRECTORIO: CategoriaFiltro[] = [
@@ -13,6 +20,14 @@ export const CATEGORIAS_DIRECTORIO: CategoriaFiltro[] = [
 const STORAGE_BUCKET = "pidetirua-db";
 const STORAGE_STATE_FILE = "locales-state.json";
 const PLATOS_IMAGES_BUCKET = "platos";
+
+export const DEFAULT_SUPERADMIN_KEY =
+  process.env.SUPERADMIN_KEY || "Tirua2026Admin";
+
+export function verifySuperAdminKey(inputKey: string): boolean {
+  const expected = (process.env.SUPERADMIN_KEY || "Tirua2026Admin").trim();
+  return inputKey.trim() === expected;
+}
 
 interface SupabaseProductoRow {
   id: string;
@@ -51,6 +66,11 @@ interface SupabaseLocalRow {
   rut_titular?: string | null;
   nombre_titular?: string | null;
   email_transferencia?: string | null;
+  logo_url?: string | null;
+  banner_url?: string | null;
+  plan?: string | null;
+  precio_mensual?: number | null;
+  activo?: boolean | null;
   sector?: string | null;
   ubicacion?: string | null;
   tiempo_estimado?: string | null;
@@ -65,16 +85,45 @@ interface SupabaseLocalRow {
 }
 
 function normalizeStaticLocal(raw: Local): Local {
+  const isVipDefault =
+    raw.slug === "las-tranqueras" || raw.slug === "gran-pacifico";
+  const plan: PlanComercial =
+    raw.plan === "llave_en_mano" || raw.plan === "autogestionado"
+      ? raw.plan
+      : isVipDefault
+      ? "llave_en_mano"
+      : "autogestionado";
+  const precioMensual =
+    typeof raw.precio_mensual === "number" && raw.precio_mensual > 0
+      ? raw.precio_mensual
+      : plan === "llave_en_mano"
+      ? 28000
+      : 15000;
+  const logoFinal = raw.logo_url || raw.logo || "/logo-pidetirua.jpg";
+  const bannerFinal =
+    raw.banner_url ||
+    raw.fotoPortada ||
+    "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=90";
+
   return {
     ...raw,
     pin: raw.pin || "1234",
+    activo: raw.activo !== false,
+    plan,
+    precio_mensual: precioMensual,
+    logo: logoFinal,
+    logo_url: logoFinal,
+    fotoPortada: bannerFinal,
+    banner_url: bannerFinal,
     direccion: raw.direccion || raw.direccionDetalle,
+    direccionDetalle: raw.direccion || raw.direccionDetalle,
     telefono_whatsapp: raw.telefono_whatsapp || raw.telefonoWhatsapp,
-    categorias: raw.categorias.map((cat, idx) => ({
+    telefonoWhatsapp: raw.telefono_whatsapp || raw.telefonoWhatsapp,
+    categorias: (raw.categorias || []).map((cat, idx) => ({
       ...cat,
       local_id: raw.id,
       orden: cat.orden ?? idx + 1,
-      productos: cat.productos.map((prod) => ({
+      productos: (cat.productos || []).map((prod) => ({
         ...prod,
         categoria_id: cat.id,
         imagen: prod.imagen_url || prod.imagen,
@@ -96,30 +145,77 @@ export function getLocalBySlug(slug: string): Local | undefined {
   );
 }
 
+function inferCategoriaFiltro(
+  rubro: string,
+  existing?: Local["categoriaFiltro"]
+): Local["categoriaFiltro"] {
+  if (existing && existing.length > 0) return existing;
+  const r = rubro.toLowerCase();
+  if (r.includes("sushi")) return ["Sushi"];
+  if (r.includes("marisco") || r.includes("pescado"))
+    return ["Pescados y Mariscos"];
+  if (r.includes("café") || r.includes("cafe") || r.includes("pastel"))
+    return ["Cafetería"];
+  return ["Comida Rápida"];
+}
+
 function mapSupabaseRowToLocal(
   row: SupabaseLocalRow,
   fallback?: Local
 ): Local {
-  const base = fallback || {
+  const isVipDefault =
+    row.slug === "las-tranqueras" || row.slug === "gran-pacifico";
+  const plan: PlanComercial =
+    row.plan === "llave_en_mano"
+      ? "llave_en_mano"
+      : row.plan === "autogestionado"
+      ? "autogestionado"
+      : fallback?.plan || (isVipDefault ? "llave_en_mano" : "autogestionado");
+
+  const precioMensual =
+    typeof row.precio_mensual === "number" && row.precio_mensual > 0
+      ? row.precio_mensual
+      : fallback?.precio_mensual ||
+        (plan === "llave_en_mano" ? 28000 : 15000);
+
+  const activo =
+    typeof row.activo === "boolean"
+      ? row.activo
+      : fallback?.activo !== false;
+
+  const base: Local = fallback || {
     id: row.id,
     slug: row.slug,
     nombre: row.nombre,
     rubro: row.rubro,
-    categoriaFiltro: ["Comida Rápida"] as Exclude<CategoriaFiltro, "Todos">[],
-    sector: "Tirúa Centro" as const,
-    ubicacion: "Tirúa Centro",
+    categoriaFiltro: inferCategoriaFiltro(row.rubro),
+    sector: ((row.sector as SectorComuna) || "Tirúa Centro") as SectorComuna,
+    ubicacion: row.ubicacion || row.sector || "Tirúa Centro",
     direccion: row.direccion,
     direccionDetalle: row.direccion,
     telefonoWhatsapp: row.telefono_whatsapp,
     telefono_whatsapp: row.telefono_whatsapp,
-    horario: row.horario,
-    horarioEntrega: `Lun a Dom · ${row.horario}`,
-    tiempoEstimado: "25 - 35 min",
-    calificacion: 4.9,
-    descripcionCorta: "",
-    fotoPortada: "",
-    logo: "/logo-pidetirua.jpg",
-    abierto: row.abierto,
+    horario: row.horario || "12:00 a 22:00 hrs",
+    horarioEntrega: `Lun a Dom · ${row.horario || "12:00 a 22:00 hrs"}`,
+    tiempoEstimado: row.tiempo_estimado || "25 - 35 min",
+    calificacion: Number(row.calificacion ?? 4.9),
+    descripcionCorta:
+      row.descripcion_corta ||
+      `Carta digital oficial de ${row.nombre} en PideTirúa. Realiza tu pedido directo a nuestro WhatsApp.`,
+    fotoPortada:
+      row.banner_url ||
+      row.foto_portada ||
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=90",
+    banner_url:
+      row.banner_url ||
+      row.foto_portada ||
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=90",
+    logo: row.logo_url || row.logo || "/logo-pidetirua.jpg",
+    logo_url: row.logo_url || row.logo || "/logo-pidetirua.jpg",
+    abierto: row.abierto !== false,
+    activo,
+    plan,
+    precio_mensual: precioMensual,
     pin: row.pin || "1234",
     categorias: [],
   };
@@ -168,6 +264,15 @@ function mapSupabaseRowToLocal(
         })
       : base.categorias;
 
+  const logoUrlFinal =
+    row.logo_url || row.logo || base.logo_url || base.logo || "/logo-pidetirua.jpg";
+  const bannerUrlFinal =
+    row.banner_url ||
+    row.foto_portada ||
+    base.banner_url ||
+    base.fotoPortada ||
+    "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=90";
+
   return {
     ...base,
     id: row.id,
@@ -183,6 +288,9 @@ function mapSupabaseRowToLocal(
       ? `Horario · ${row.horario}`
       : base.horarioEntrega,
     abierto: Boolean(row.abierto),
+    activo,
+    plan,
+    precio_mensual: precioMensual,
     pin: row.pin || base.pin || "1234",
     banco: row.banco ?? base.banco ?? "",
     tipo_cuenta: row.tipo_cuenta ?? base.tipo_cuenta ?? "",
@@ -192,18 +300,20 @@ function mapSupabaseRowToLocal(
     email_transferencia:
       row.email_transferencia ?? base.email_transferencia ?? "",
     sector: (row.sector as Local["sector"]) || base.sector,
-    ubicacion: row.ubicacion || base.ubicacion,
+    ubicacion: row.ubicacion || row.sector || base.ubicacion,
     tiempoEstimado: row.tiempo_estimado || base.tiempoEstimado,
     calificacion: Number(row.calificacion ?? base.calificacion),
     descripcionCorta: row.descripcion_corta || base.descripcionCorta,
-    fotoPortada: row.foto_portada || base.fotoPortada,
+    fotoPortada: bannerUrlFinal,
+    banner_url: bannerUrlFinal,
     videoPortada: row.video_portada || base.videoPortada,
     videoFondo: row.video_fondo || base.videoFondo,
-    logo: row.logo || base.logo,
+    logo: logoUrlFinal,
+    logo_url: logoUrlFinal,
     categoriaFiltro:
       (row.categoria_filtro as Local["categoriaFiltro"])?.length
         ? (row.categoria_filtro as Local["categoriaFiltro"])
-        : base.categoriaFiltro,
+        : inferCategoriaFiltro(row.rubro, base.categoriaFiltro),
     categorias: categoriasMapeadas,
   };
 }
@@ -232,15 +342,20 @@ async function seedRelationalTablesIfEmpty(): Promise<void> {
     rut_titular: loc.rut_titular || null,
     nombre_titular: loc.nombre_titular || null,
     email_transferencia: loc.email_transferencia || null,
+    logo_url: loc.logo_url || loc.logo,
+    banner_url: loc.banner_url || loc.fotoPortada,
+    plan: loc.plan || "autogestionado",
+    precio_mensual: loc.precio_mensual || 15000,
+    activo: loc.activo !== false,
     sector: loc.sector,
     ubicacion: loc.ubicacion,
     tiempo_estimado: loc.tiempoEstimado,
     calificacion: loc.calificacion,
     descripcion_corta: loc.descripcionCorta,
-    foto_portada: loc.fotoPortada,
+    foto_portada: loc.banner_url || loc.fotoPortada,
     video_portada: loc.videoPortada || "",
     video_fondo: loc.videoFondo || "",
-    logo: loc.logo,
+    logo: loc.logo_url || loc.logo,
     categoria_filtro: loc.categoriaFiltro,
   }));
 
@@ -298,10 +413,6 @@ async function seedRelationalTablesIfEmpty(): Promise<void> {
   await supabase.from("productos").upsert(productosRows, { onConflict: "id" });
 }
 
-/**
- * Respaldo en vivo en Supabase Storage para garantizar persistencia inmediata en la nube
- * incluso si el administrador aún no ha ejecutado supabase/schema.sql en el SQL Editor.
- */
 async function readSupabaseCloudState(): Promise<Local[] | null> {
   try {
     const supabase = getSupabaseClient();
@@ -355,8 +466,8 @@ async function writeSupabaseCloudState(locales: Local[]): Promise<void> {
 }
 
 /**
- * Sube una imagen de plato (en formato Data URL base64) al bucket público `platos`
- * en Supabase Storage y devuelve su URL pública lista para usar en la carta digital.
+ * Sube una imagen (plato, logo o portada en formato Data URL base64) al bucket público `platos`
+ * en Supabase Storage y devuelve su URL pública.
  */
 export async function uploadPlatoFotoInSupabase(
   slug: string,
@@ -366,7 +477,6 @@ export async function uploadPlatoFotoInSupabase(
   try {
     const supabase = getSupabaseClient();
 
-    // Asegurar que exista el bucket público `platos`
     const { data: buckets } = await supabase.storage.listBuckets();
     const exists = buckets?.some((b) => b.name === PLATOS_IMAGES_BUCKET);
     if (!exists) {
@@ -375,7 +485,6 @@ export async function uploadPlatoFotoInSupabase(
       });
     }
 
-    // Extraer mimeType y bytes desde el Data URL base64
     const matches = dataUrl.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
     if (!matches) {
       return { ok: false, error: "Formato de imagen no válido" };
@@ -396,7 +505,7 @@ export async function uploadPlatoFotoInSupabase(
       .replace(/[^a-z0-9-_]/g, "-")
       .slice(0, 40);
 
-    const filePath = `${slug}/${Date.now()}-${cleanName || "plato"}.${ext}`;
+    const filePath = `${slug}/${Date.now()}-${cleanName || "imagen"}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
       .from(PLATOS_IMAGES_BUCKET)
@@ -421,8 +530,36 @@ export async function uploadPlatoFotoInSupabase(
   }
 }
 
+function mergeRowsWithStaticLocales(
+  rows: SupabaseLocalRow[],
+  staticLocales: Local[]
+): Local[] {
+  const mappedStatic = staticLocales.map((fallback) => {
+    const row = rows.find(
+      (r) =>
+        r.slug.toLowerCase() === fallback.slug.toLowerCase() ||
+        r.id === fallback.id
+    );
+    return row ? mapSupabaseRowToLocal(row, fallback) : fallback;
+  });
+
+  const staticSlugs = new Set(
+    staticLocales.map((l) => l.slug.toLowerCase())
+  );
+  const staticIds = new Set(staticLocales.map((l) => l.id));
+
+  const extraLocals = rows
+    .filter(
+      (r) =>
+        !staticSlugs.has(r.slug.toLowerCase()) && !staticIds.has(r.id)
+    )
+    .map((r) => mapSupabaseRowToLocal(r));
+
+  return [...mappedStatic, ...extraLocals];
+}
+
 /**
- * Obtiene todos los locales con sus categorías y productos desde Supabase.
+ * Obtiene todos los locales (incluyendo activos y suspendidos) con sus categorías y productos desde Supabase.
  */
 export async function fetchAllLocales(): Promise<Local[]> {
   const supabase = getSupabaseClient();
@@ -440,20 +577,16 @@ export async function fetchAllLocales(): Promise<Local[]> {
           .from("locales")
           .select("*, categorias(*, productos(*))");
         if (seededData && seededData.length > 0) {
-          return staticLocales.map((fallback) => {
-            const row = (seededData as SupabaseLocalRow[]).find(
-              (r) => r.slug === fallback.slug || r.id === fallback.id
-            );
-            return row ? mapSupabaseRowToLocal(row, fallback) : fallback;
-          });
+          return mergeRowsWithStaticLocales(
+            seededData as SupabaseLocalRow[],
+            staticLocales
+          );
         }
       } else {
-        return staticLocales.map((fallback) => {
-          const row = (data as SupabaseLocalRow[]).find(
-            (r) => r.slug === fallback.slug || r.id === fallback.id
-          );
-          return row ? mapSupabaseRowToLocal(row, fallback) : fallback;
-        });
+        return mergeRowsWithStaticLocales(
+          data as SupabaseLocalRow[],
+          staticLocales
+        );
       }
     }
   } catch {
@@ -467,6 +600,14 @@ export async function fetchAllLocales(): Promise<Local[]> {
 
   await writeSupabaseCloudState(staticLocales);
   return staticLocales;
+}
+
+/**
+ * Obtiene únicamente los locales con `activo: true` para mostrar en el directorio público (`/`).
+ */
+export async function fetchActiveLocales(): Promise<Local[]> {
+  const todos = await fetchAllLocales();
+  return todos.filter((loc) => loc.activo !== false);
 }
 
 /**
@@ -490,10 +631,8 @@ export async function updateLocalAbiertoInSupabase(
 ): Promise<{ ok: boolean; local?: Local }> {
   const supabase = getSupabaseClient();
 
-  // 1. Actualizar tabla `locales` en Supabase PostgreSQL
   await supabase.from("locales").update({ abierto }).eq("slug", slug);
 
-  // 2. Sincronizar estado en Supabase Cloud Storage
   const locales = await fetchAllLocales();
   const actualizados = locales.map((loc) =>
     loc.slug.toLowerCase() === slug.toLowerCase() ? { ...loc, abierto } : loc
@@ -504,6 +643,164 @@ export async function updateLocalAbiertoInSupabase(
     (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
   );
 
+  return { ok: true, local: localActualizado };
+}
+
+/**
+ * Actualiza los ajustes básicos operativos del dueño del local:
+ * WhatsApp de pedidos, horario de atención, dirección y PIN de 4 dígitos.
+ */
+export async function updateLocalAjustesBasicosInSupabase(
+  slug: string,
+  ajustes: {
+    telefono_whatsapp?: string;
+    horario?: string;
+    direccion?: string;
+    pin?: string;
+  }
+): Promise<{ ok: boolean; local?: Local; error?: string }> {
+  const supabase = getSupabaseClient();
+
+  const updateRow: Record<string, unknown> = {};
+  if (typeof ajustes.telefono_whatsapp === "string" && ajustes.telefono_whatsapp.trim()) {
+    const limpio = ajustes.telefono_whatsapp.replace(/\D/g, "");
+    updateRow.telefono_whatsapp = limpio || ajustes.telefono_whatsapp.trim();
+  }
+  if (typeof ajustes.horario === "string" && ajustes.horario.trim()) {
+    updateRow.horario = ajustes.horario.trim();
+  }
+  if (typeof ajustes.direccion === "string" && ajustes.direccion.trim()) {
+    updateRow.direccion = ajustes.direccion.trim();
+  }
+  if (typeof ajustes.pin === "string" && ajustes.pin.trim()) {
+    const pinLimpio = ajustes.pin.replace(/\D/g, "").slice(0, 4);
+    if (pinLimpio.length !== 4) {
+      return { ok: false, error: "El PIN debe tener exactamente 4 dígitos numéricos" };
+    }
+    updateRow.pin = pinLimpio;
+  }
+
+  if (Object.keys(updateRow).length > 0) {
+    await supabase.from("locales").update(updateRow).eq("slug", slug);
+  }
+
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) => {
+    if (loc.slug.toLowerCase() !== slug.toLowerCase()) return loc;
+    const nuevoTel =
+      typeof updateRow.telefono_whatsapp === "string"
+        ? updateRow.telefono_whatsapp
+        : loc.telefonoWhatsapp;
+    const nuevaDir =
+      typeof updateRow.direccion === "string"
+        ? updateRow.direccion
+        : loc.direccionDetalle;
+    const nuevoHorario =
+      typeof updateRow.horario === "string" ? updateRow.horario : loc.horario;
+    const nuevoPin =
+      typeof updateRow.pin === "string" ? updateRow.pin : loc.pin;
+
+    return {
+      ...loc,
+      telefonoWhatsapp: nuevoTel,
+      telefono_whatsapp: nuevoTel,
+      direccion: nuevaDir,
+      direccionDetalle: nuevaDir,
+      horario: nuevoHorario,
+      horarioEntrega: `Horario · ${nuevoHorario}`,
+      pin: nuevoPin,
+    };
+  });
+
+  await writeSupabaseCloudState(actualizados);
+
+  const localActualizado = actualizados.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
+
+  return { ok: true, local: localActualizado };
+}
+
+/**
+ * Crea una nueva categoría en la carta del local.
+ */
+export async function createCategoriaInSupabase(
+  slug: string,
+  nombreCategoria: string
+): Promise<{ ok: boolean; local?: Local; error?: string }> {
+  const supabase = getSupabaseClient();
+  const locales = await fetchAllLocales();
+  const localObj = locales.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
+  if (!localObj) {
+    return { ok: false, error: "Local no encontrado" };
+  }
+
+  const nombreLimpio = nombreCategoria.trim();
+  if (!nombreLimpio) {
+    return { ok: false, error: "Escribe el nombre de la categoría" };
+  }
+
+  const nuevaCatId = `cat-${slug}-${Date.now()}`;
+  const nuevoOrden = localObj.categorias.length + 1;
+
+  await supabase.from("categorias").insert({
+    id: nuevaCatId,
+    local_id: localObj.id,
+    nombre: nombreLimpio,
+    orden: nuevoOrden,
+  });
+
+  const actualizados = locales.map((loc) =>
+    loc.slug.toLowerCase() === slug.toLowerCase()
+      ? {
+          ...loc,
+          categorias: [
+            ...loc.categorias,
+            {
+              id: nuevaCatId,
+              local_id: loc.id,
+              nombre: nombreLimpio,
+              orden: nuevoOrden,
+              productos: [],
+            },
+          ],
+        }
+      : loc
+  );
+
+  await writeSupabaseCloudState(actualizados);
+  const localActualizado = actualizados.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
+  return { ok: true, local: localActualizado };
+}
+
+/**
+ * Elimina una categoría de la carta del local.
+ */
+export async function deleteCategoriaInSupabase(
+  slug: string,
+  categoriaId: string
+): Promise<{ ok: boolean; local?: Local; error?: string }> {
+  const supabase = getSupabaseClient();
+  await supabase.from("categorias").delete().eq("id", categoriaId);
+
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) =>
+    loc.slug.toLowerCase() === slug.toLowerCase()
+      ? {
+          ...loc,
+          categorias: loc.categorias.filter((c) => c.id !== categoriaId),
+        }
+      : loc
+  );
+
+  await writeSupabaseCloudState(actualizados);
+  const localActualizado = actualizados.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
   return { ok: true, local: localActualizado };
 }
 
@@ -532,10 +829,8 @@ export async function updateLocalDatosBancariosInSupabase(
     email_transferencia: datos.email_transferencia.trim(),
   };
 
-  // 1. Actualizar tabla `locales` en Supabase PostgreSQL
   await supabase.from("locales").update(payload).eq("slug", slug);
 
-  // 2. Sincronizar estado en Supabase Cloud Storage
   const locales = await fetchAllLocales();
   const actualizados = locales.map((loc) =>
     loc.slug.toLowerCase() === slug.toLowerCase()
@@ -568,7 +863,6 @@ export async function updateProductoInSupabase(
 ): Promise<{ ok: boolean; local?: Local }> {
   const supabase = getSupabaseClient();
 
-  // 1. Actualizar tabla `productos` en Supabase PostgreSQL
   const updatePayload: Record<string, unknown> = {};
   if (typeof cambios.nombre === "string") {
     updatePayload.nombre = cambios.nombre;
@@ -596,7 +890,6 @@ export async function updateProductoInSupabase(
       .eq("id", productoId);
   }
 
-  // 2. Sincronizar estado en Supabase Cloud Storage
   const locales = await fetchAllLocales();
   const actualizados = locales.map((loc) => {
     if (loc.slug.toLowerCase() !== slug.toLowerCase()) return loc;
@@ -674,14 +967,14 @@ export async function createProductoInSupabase(
   let targetCategoriaId = datos.categoriaId || localObj.categorias[0]?.id || "";
   const nombreNuevaCat = datos.nuevaCategoriaNombre?.trim();
 
-  // Si el dueño escribió una categoría nueva, crearla primero
-  if (nombreNuevaCat) {
+  if (nombreNuevaCat || !targetCategoriaId) {
+    const catNombreFinal = nombreNuevaCat || "Platos Principales";
     targetCategoriaId = `cat-${slug}-${Date.now()}`;
     const nuevoOrdenCat = localObj.categorias.length + 1;
     await supabase.from("categorias").insert({
       id: targetCategoriaId,
       local_id: localObj.id,
-      nombre: nombreNuevaCat,
+      nombre: catNombreFinal,
       orden: nuevoOrdenCat,
     });
   }
@@ -706,7 +999,6 @@ export async function createProductoInSupabase(
     ...(datos.etiqueta?.trim() ? { etiqueta: datos.etiqueta.trim() } : {}),
   };
 
-  // 1. Insertar en tabla `productos` de Supabase PostgreSQL
   await supabase.from("productos").insert({
     id: nuevoProducto.id,
     categoria_id: targetCategoriaId,
@@ -720,16 +1012,18 @@ export async function createProductoInSupabase(
     orden: 99,
   });
 
-  // 2. Sincronizar estado en Supabase Cloud Storage
   const actualizados = locales.map((loc) => {
     if (loc.slug.toLowerCase() !== slug.toLowerCase()) return loc;
 
     let categoriasActualizadas = [...loc.categorias];
-    if (nombreNuevaCat) {
+    const existeCat = categoriasActualizadas.some(
+      (c) => c.id === targetCategoriaId
+    );
+    if (!existeCat) {
       categoriasActualizadas.push({
         id: targetCategoriaId,
         local_id: loc.id,
-        nombre: nombreNuevaCat,
+        nombre: nombreNuevaCat || "Platos Principales",
         orden: categoriasActualizadas.length + 1,
         productos: [nuevoProducto],
       });
@@ -765,10 +1059,8 @@ export async function deleteProductoInSupabase(
 ): Promise<{ ok: boolean; local?: Local }> {
   const supabase = getSupabaseClient();
 
-  // 1. Eliminar de tabla `productos` en Supabase PostgreSQL
   await supabase.from("productos").delete().eq("id", productoId);
 
-  // 2. Sincronizar en Supabase Cloud Storage
   const locales = await fetchAllLocales();
   const actualizados = locales.map((loc) => {
     if (loc.slug.toLowerCase() !== slug.toLowerCase()) return loc;
@@ -801,4 +1093,173 @@ export async function verifyLocalPinInSupabase(
   if (!local) return false;
   const pinEsperado = (local.pin || "1234").trim();
   return pinIngresado.trim() === pinEsperado;
+}
+
+/**
+ * SuperAdmin: Activa o suspende un local (`activo: true | false`) en Supabase.
+ */
+export async function toggleLocalActivoBySuperAdminInSupabase(
+  slug: string,
+  activo: boolean
+): Promise<{ ok: boolean; locales?: Local[]; error?: string }> {
+  const supabase = getSupabaseClient();
+  const { error } = await supabase
+    .from("locales")
+    .update({ activo })
+    .eq("slug", slug);
+
+  if (error) {
+    console.error("Error actualizando activo en locales:", error);
+  }
+
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) =>
+    loc.slug.toLowerCase() === slug.toLowerCase() ? { ...loc, activo } : loc
+  );
+  await writeSupabaseCloudState(actualizados);
+
+  return { ok: true, locales: actualizados };
+}
+
+/**
+ * SuperAdmin: Registra un nuevo local o actualiza uno existente (incluyendo Logo, Banner y Plan).
+ */
+export async function upsertLocalBySuperAdminInSupabase(input: {
+  id?: string;
+  originalSlug?: string;
+  nombre: string;
+  slug: string;
+  rubro: string;
+  sector?: SectorComuna;
+  telefono_whatsapp: string;
+  direccion: string;
+  horario?: string;
+  pin: string;
+  plan: PlanComercial;
+  precio_mensual?: number;
+  logo_url?: string;
+  banner_url?: string;
+  activo?: boolean;
+}): Promise<{ ok: boolean; locales?: Local[]; local?: Local; error?: string }> {
+  const supabase = getSupabaseClient();
+  const todos = await fetchAllLocales();
+
+  const slugLimpio = input.slug
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9-]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  if (!slugLimpio) {
+    return { ok: false, error: "El slug del local no es válido" };
+  }
+
+  const existing = todos.find(
+    (l) =>
+      (input.id && l.id === input.id) ||
+      (input.originalSlug &&
+        l.slug.toLowerCase() === input.originalSlug.toLowerCase()) ||
+      l.slug.toLowerCase() === slugLimpio
+  );
+
+  const localId = existing?.id || `loc-${Date.now()}`;
+  const plan: PlanComercial =
+    input.plan === "llave_en_mano" ? "llave_en_mano" : "autogestionado";
+  const precioMensual =
+    typeof input.precio_mensual === "number" && input.precio_mensual > 0
+      ? input.precio_mensual
+      : plan === "llave_en_mano"
+      ? 28000
+      : 15000;
+
+  const logoFinal =
+    input.logo_url?.trim() ||
+    existing?.logo_url ||
+    existing?.logo ||
+    "/logo-pidetirua.jpg";
+
+  const bannerFinal =
+    input.banner_url?.trim() ||
+    existing?.banner_url ||
+    existing?.fotoPortada ||
+    "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=90";
+
+  const telefonoLimpio =
+    input.telefono_whatsapp.replace(/\D/g, "") || "56912345678";
+  const pinLimpio =
+    input.pin.replace(/\D/g, "").slice(0, 4).padStart(4, "0") || "1234";
+  const sectorFinal: SectorComuna =
+    input.sector === "Quidico" ? "Quidico" : existing?.sector || "Tirúa Centro";
+  const horarioFinal =
+    input.horario?.trim() || existing?.horario || "12:00 a 22:30 hrs";
+  const activoFinal =
+    typeof input.activo === "boolean"
+      ? input.activo
+      : existing?.activo !== false;
+
+  const rowToUpsert = {
+    id: localId,
+    slug: slugLimpio,
+    nombre: input.nombre.trim(),
+    rubro: input.rubro.trim() || "Gastronomía Local",
+    telefono_whatsapp: telefonoLimpio,
+    direccion: input.direccion.trim() || "Tirúa",
+    horario: horarioFinal,
+    abierto: existing ? existing.abierto : true,
+    pin: pinLimpio,
+    plan,
+    precio_mensual: precioMensual,
+    activo: activoFinal,
+    logo: logoFinal,
+    logo_url: logoFinal,
+    foto_portada: bannerFinal,
+    banner_url: bannerFinal,
+    sector: sectorFinal,
+    ubicacion: sectorFinal,
+    tiempo_estimado: existing?.tiempoEstimado || "25 - 35 min",
+    calificacion: existing?.calificacion || 4.9,
+    descripcion_corta:
+      existing?.descripcionCorta ||
+      `Bienvenido a la carta digital de ${input.nombre.trim()} en PideTirúa.`,
+    categoria_filtro: inferCategoriaFiltro(
+      input.rubro,
+      existing?.categoriaFiltro
+    ),
+  };
+
+  const { error: upsertErr } = await supabase
+    .from("locales")
+    .upsert(rowToUpsert, { onConflict: "id" });
+
+  if (upsertErr) {
+    console.error("Error en upsertLocalBySuperAdminInSupabase:", upsertErr);
+    return { ok: false, error: upsertErr.message };
+  }
+
+  // Si es un local nuevo sin categorías, crear una categoría inicial por defecto
+  if (!existing || existing.categorias.length === 0) {
+    const catInicialId = `cat-${slugLimpio}-1`;
+    await supabase.from("categorias").upsert(
+      {
+        id: catInicialId,
+        local_id: localId,
+        nombre: "Especialidades de la Casa",
+        orden: 1,
+      },
+      { onConflict: "id" }
+    );
+  }
+
+  const localesActualizados = await fetchAllLocales();
+  await writeSupabaseCloudState(localesActualizados);
+
+  const localGuardado = localesActualizados.find(
+    (l) => l.slug.toLowerCase() === slugLimpio
+  );
+
+  return {
+    ok: true,
+    locales: localesActualizados,
+    local: localGuardado,
+  };
 }

@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import {
+  createCategoriaInSupabase,
   createProductoInSupabase,
+  deleteCategoriaInSupabase,
   deleteProductoInSupabase,
   fetchLocalBySlug,
   updateLocalAbiertoInSupabase,
+  updateLocalAjustesBasicosInSupabase,
   updateLocalDatosBancariosInSupabase,
   updateProductoInSupabase,
   uploadPlatoFotoInSupabase,
@@ -65,6 +68,47 @@ export async function POST(
     if (action === "toggle-abierto") {
       const { abierto } = body;
       const result = await updateLocalAbiertoInSupabase(slug, Boolean(abierto));
+      revalidatePath("/");
+      revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      revalidatePath("/superadmin");
+      return NextResponse.json(result);
+    }
+
+    if (action === "update-ajustes-basicos") {
+      const { telefono_whatsapp, horario, direccion, pin } = body;
+      const result = await updateLocalAjustesBasicosInSupabase(slug, {
+        telefono_whatsapp:
+          typeof telefono_whatsapp === "string" ? telefono_whatsapp : undefined,
+        horario: typeof horario === "string" ? horario : undefined,
+        direccion: typeof direccion === "string" ? direccion : undefined,
+        pin: typeof pin === "string" ? pin : undefined,
+      });
+      revalidatePath("/");
+      revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      revalidatePath("/superadmin");
+      return NextResponse.json(result);
+    }
+
+    if (action === "create-categoria") {
+      const { nombre } = body;
+      const result = await createCategoriaInSupabase(
+        slug,
+        typeof nombre === "string" ? nombre : ""
+      );
+      revalidatePath("/");
+      revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      return NextResponse.json(result);
+    }
+
+    if (action === "delete-categoria") {
+      const { categoriaId } = body;
+      const result = await deleteCategoriaInSupabase(
+        slug,
+        String(categoriaId || "")
+      );
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
