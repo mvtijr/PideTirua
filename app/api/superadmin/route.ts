@@ -124,6 +124,7 @@ export async function POST(req: NextRequest) {
         precio_mensual,
         logo_url,
         banner_url,
+        banner_video_url,
         activo,
       } = body;
 
@@ -163,6 +164,12 @@ export async function POST(req: NextRequest) {
           typeof precio_mensual === "number" ? precio_mensual : undefined,
         logo_url: typeof logo_url === "string" ? logo_url : undefined,
         banner_url: typeof banner_url === "string" ? banner_url : undefined,
+        banner_video_url:
+          typeof banner_video_url === "string"
+            ? banner_video_url
+            : banner_video_url === null
+            ? null
+            : undefined,
         activo: typeof activo === "boolean" ? activo : true,
       });
 

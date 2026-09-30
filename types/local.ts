@@ -54,6 +54,7 @@ export interface Local {
   descripcionCorta: string;
   fotoPortada: string;
   banner_url?: string;
+  banner_video_url?: string;
   videoPortada?: string;
   videoFondo?: string;
   logo: string;

@@ -68,6 +68,7 @@ interface SupabaseLocalRow {
   email_transferencia?: string | null;
   logo_url?: string | null;
   banner_url?: string | null;
+  banner_video_url?: string | null;
   plan?: string | null;
   precio_mensual?: number | null;
   activo?: boolean | null;
@@ -104,6 +105,10 @@ function normalizeStaticLocal(raw: Local): Local {
     raw.banner_url ||
     raw.fotoPortada ||
     "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=90";
+  const bannerVideoFinal =
+    raw.banner_video_url !== undefined
+      ? raw.banner_video_url || undefined
+      : raw.videoPortada || undefined;
 
   return {
     ...raw,
@@ -115,6 +120,8 @@ function normalizeStaticLocal(raw: Local): Local {
     logo_url: logoFinal,
     fotoPortada: bannerFinal,
     banner_url: bannerFinal,
+    banner_video_url: bannerVideoFinal,
+    videoPortada: bannerVideoFinal,
     direccion: raw.direccion || raw.direccionDetalle,
     direccionDetalle: raw.direccion || raw.direccionDetalle,
     telefono_whatsapp: raw.telefono_whatsapp || raw.telefonoWhatsapp,
@@ -273,6 +280,14 @@ function mapSupabaseRowToLocal(
     base.fotoPortada ||
     "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=90";
 
+  const bannerVideoUrlFinal =
+    row.banner_video_url !== undefined
+      ? row.banner_video_url?.trim() || undefined
+      : row.video_portada?.trim() ||
+        base.banner_video_url ||
+        base.videoPortada ||
+        undefined;
+
   return {
     ...base,
     id: row.id,
@@ -306,8 +321,12 @@ function mapSupabaseRowToLocal(
     descripcionCorta: row.descripcion_corta || base.descripcionCorta,
     fotoPortada: bannerUrlFinal,
     banner_url: bannerUrlFinal,
-    videoPortada: row.video_portada || base.videoPortada,
-    videoFondo: row.video_fondo || base.videoFondo,
+    banner_video_url: bannerVideoUrlFinal,
+    videoPortada: bannerVideoUrlFinal,
+    videoFondo:
+      row.banner_video_url !== undefined
+        ? bannerVideoUrlFinal
+        : bannerVideoUrlFinal || row.video_fondo || base.videoFondo,
     logo: logoUrlFinal,
     logo_url: logoUrlFinal,
     categoriaFiltro:
@@ -344,6 +363,7 @@ async function seedRelationalTablesIfEmpty(): Promise<void> {
     email_transferencia: loc.email_transferencia || null,
     logo_url: loc.logo_url || loc.logo,
     banner_url: loc.banner_url || loc.fotoPortada,
+    banner_video_url: loc.banner_video_url || loc.videoPortada || null,
     plan: loc.plan || "autogestionado",
     precio_mensual: loc.precio_mensual || 15000,
     activo: loc.activo !== false,
@@ -353,7 +373,7 @@ async function seedRelationalTablesIfEmpty(): Promise<void> {
     calificacion: loc.calificacion,
     descripcion_corta: loc.descripcionCorta,
     foto_portada: loc.banner_url || loc.fotoPortada,
-    video_portada: loc.videoPortada || "",
+    video_portada: loc.banner_video_url || loc.videoPortada || "",
     video_fondo: loc.videoFondo || "",
     logo: loc.logo_url || loc.logo,
     categoria_filtro: loc.categoriaFiltro,
@@ -1175,6 +1195,7 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
   precio_mensual?: number;
   logo_url?: string;
   banner_url?: string;
+  banner_video_url?: string | null;
   activo?: boolean;
 }): Promise<{ ok: boolean; locales?: Local[]; local?: Local; error?: string }> {
   const supabase = getSupabaseClient();
@@ -1220,6 +1241,11 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
     existing?.fotoPortada ||
     "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=90";
 
+  const bannerVideoFinal =
+    input.banner_video_url !== undefined
+      ? input.banner_video_url?.trim() || null
+      : existing?.banner_video_url || existing?.videoPortada || null;
+
   const telefonoLimpio =
     input.telefono_whatsapp.replace(/\D/g, "") || "56912345678";
   const pinLimpio =
@@ -1250,6 +1276,9 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
     logo_url: logoFinal,
     foto_portada: bannerFinal,
     banner_url: bannerFinal,
+    banner_video_url: bannerVideoFinal,
+    video_portada: bannerVideoFinal || "",
+    video_fondo: bannerVideoFinal || "",
     sector: sectorFinal,
     ubicacion: sectorFinal,
     tiempo_estimado: existing?.tiempoEstimado || "25 - 35 min",

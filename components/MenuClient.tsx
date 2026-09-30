@@ -29,11 +29,12 @@ export default function MenuClient({ local }: MenuClientProps) {
   const storageKey = `pidetirua_cart_${local.slug}`;
   const theme = getLocalTheme(local.slug);
   const bannerPrincipal = local.banner_url || local.fotoPortada;
+  const bannerVideoUrl = local.banner_video_url || local.videoPortada;
   const logoPrincipal = local.logo_url || local.logo;
   const localSuspendido = local.activo === false;
-  const videoDeFondo = local.videoFondo || local.videoPortada;
+  const videoDeFondo = bannerVideoUrl || local.videoFondo;
   const posterFondo = getVideoPoster(videoDeFondo, bannerPrincipal);
-  const posterPortada = getVideoPoster(local.videoPortada, bannerPrincipal);
+  const posterPortada = getVideoPoster(bannerVideoUrl, bannerPrincipal);
   const telefonoDirecto = local.telefono_whatsapp || local.telefonoWhatsapp;
   const horaApertura = (local.horario || local.horarioEntrega)
     .split(" a ")[0]
@@ -195,28 +196,30 @@ export default function MenuClient({ local }: MenuClientProps) {
         {/* Portada e Identidad del Local */}
         <header className="relative">
           <div
-            className={`relative w-full overflow-hidden ${
-              local.videoPortada ? "aspect-video" : "h-52 sm:h-60"
-            } ${theme.headerBg}`}
+            className={`relative w-full overflow-hidden h-56 sm:h-64 ${theme.headerBg}`}
           >
-            {local.videoPortada && !local.banner_url ? (
+            {bannerVideoUrl ? (
               <video
-                src={local.videoPortada}
-                poster={posterPortada}
-                preload="auto"
+                key={bannerVideoUrl}
                 autoPlay
                 loop
                 muted
                 playsInline
-                className={`h-full w-full object-contain ${theme.headerBg}`}
-              />
+                poster={local.banner_url || posterPortada || undefined}
+                className="absolute inset-0 w-full h-full object-cover"
+              >
+                <source src={bannerVideoUrl} type="video/mp4" />
+                <source src={bannerVideoUrl} type="video/webm" />
+              </video>
             ) : (
               <img
                 src={bannerPrincipal}
                 alt={local.nombre}
-                className="h-full w-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover"
               />
             )}
+            {/* Capa de contraste semitransparente y degradado para lectura nítida */}
+            <div className="absolute inset-0 bg-black/40" />
             <div
               className={`absolute inset-0 bg-gradient-to-t ${theme.headerGradient}`}
             />

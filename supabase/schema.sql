@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS public.locales (
   descripcion_corta TEXT DEFAULT '',
   foto_portada TEXT DEFAULT '',
   banner_url TEXT DEFAULT '',
+  banner_video_url TEXT NULL,
   video_portada TEXT DEFAULT '',
   video_fondo TEXT DEFAULT '',
   logo TEXT DEFAULT '',
@@ -40,7 +41,7 @@ CREATE TABLE IF NOT EXISTS public.locales (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Asegurar que las columnas de datos bancarios, identidad visual y planes existan en `public.locales`
+-- Asegurar que las columnas de datos bancarios, identidad visual, video de portada y planes existan en `public.locales`
 ALTER TABLE public.locales
   ADD COLUMN IF NOT EXISTS banco TEXT NULL,
   ADD COLUMN IF NOT EXISTS tipo_cuenta TEXT NULL,
@@ -50,9 +51,16 @@ ALTER TABLE public.locales
   ADD COLUMN IF NOT EXISTS email_transferencia TEXT NULL,
   ADD COLUMN IF NOT EXISTS logo_url TEXT DEFAULT '',
   ADD COLUMN IF NOT EXISTS banner_url TEXT DEFAULT '',
+  ADD COLUMN IF NOT EXISTS banner_video_url TEXT NULL,
   ADD COLUMN IF NOT EXISTS plan TEXT NOT NULL DEFAULT 'autogestionado',
   ADD COLUMN IF NOT EXISTS precio_mensual INTEGER NOT NULL DEFAULT 15000,
   ADD COLUMN IF NOT EXISTS activo BOOLEAN NOT NULL DEFAULT true;
+
+UPDATE public.locales
+SET banner_video_url = NULLIF(video_portada, '')
+WHERE banner_video_url IS NULL
+  AND video_portada IS NOT NULL
+  AND video_portada <> '';
 
 -- 2. Tabla de Categorías
 CREATE TABLE IF NOT EXISTS public.categorias (

@@ -21,7 +21,8 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
 
   const bannerSrc = local.banner_url || local.fotoPortada;
   const logoSrc = local.logo_url || local.logo;
-  const videoSrc = local.videoFondo || local.videoPortada;
+  const videoSrc =
+    local.banner_video_url || local.videoFondo || local.videoPortada;
   const posterSrc = getVideoPoster(videoSrc, bannerSrc);
 
   // Cargar el video de las tarjetas inferiores solo cuando el usuario se acerca haciendo scroll,

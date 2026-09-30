@@ -28,9 +28,12 @@ import {
   Eye,
   EyeOff,
   Check,
+  Video,
+  Trash2,
 } from "lucide-react";
 import { Local, PlanComercial, SectorComuna } from "@/types/local";
 import { formatCLP, formatPhoneDisplay } from "@/lib/formatters";
+import { getSupabaseClient } from "@/lib/supabase";
 
 interface SuperAdminClientProps {
   initialLocales: Local[];
@@ -135,15 +138,18 @@ export default function SuperAdminClient({
   const [formPrecioMensual, setFormPrecioMensual] = useState<number>(15000);
   const [formLogoUrl, setFormLogoUrl] = useState<string>("");
   const [formBannerUrl, setFormBannerUrl] = useState<string>("");
+  const [formBannerVideoUrl, setFormBannerVideoUrl] = useState<string>("");
   const [formActivo, setFormActivo] = useState<boolean>(true);
 
   const [subiendoLogo, setSubiendoLogo] = useState<boolean>(false);
   const [subiendoBanner, setSubiendoBanner] = useState<boolean>(false);
+  const [subiendoVideo, setSubiendoVideo] = useState<boolean>(false);
   const [guardandoForm, setGuardandoForm] = useState<boolean>(false);
   const [errorForm, setErrorForm] = useState<string | null>(null);
 
   const inputLogoRef = useRef<HTMLInputElement | null>(null);
   const inputBannerRef = useRef<HTMLInputElement | null>(null);
+  const inputVideoRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (initialAuthenticated) {
@@ -245,6 +251,7 @@ export default function SuperAdminClient({
     setFormPrecioMensual(15000);
     setFormLogoUrl("");
     setFormBannerUrl("");
+    setFormBannerVideoUrl("");
     setFormActivo(true);
     setErrorForm(null);
     setMostrarFormulario(true);
@@ -276,6 +283,7 @@ export default function SuperAdminClient({
     setFormPrecioMensual(precioActual);
     setFormLogoUrl(loc.logo_url || loc.logo);
     setFormBannerUrl(loc.banner_url || loc.fotoPortada);
+    setFormBannerVideoUrl(loc.banner_video_url || loc.videoPortada || "");
     setFormActivo(loc.activo !== false);
     setErrorForm(null);
     setMostrarFormulario(true);
@@ -327,6 +335,62 @@ export default function SuperAdminClient({
     }
   };
 
+  const subirVideoPortadaSuperAdmin = async (file: File) => {
+    if (file.size > 25 * 1024 * 1024) {
+      setErrorForm(
+        "El archivo de video supera los 25 MB. Te recomendamos un video corto de menos de 15 MB para carga rápida en celulares."
+      );
+      return;
+    }
+
+    const slugRef = formSlug.trim() || slugifyTexto(formNombre) || "negocio";
+    setSubiendoVideo(true);
+    setErrorForm(null);
+
+    try {
+      const supabase = getSupabaseClient();
+      const ext = file.name.toLowerCase().endsWith(".webm") ? "webm" : "mp4";
+      const contentType =
+        file.type || (ext === "webm" ? "video/webm" : "video/mp4");
+      const safeName = file.name
+        .toLowerCase()
+        .replace(/[^a-z0-9.-]/g, "-")
+        .replace(/-+/g, "-");
+      const storagePath = `${slugRef}/banner-video-${Date.now()}-${safeName}`;
+
+      const { error: uploadErr } = await supabase.storage
+        .from("platos")
+        .upload(storagePath, file, {
+          contentType,
+          upsert: true,
+          cacheControl: "3600",
+        });
+
+      if (uploadErr) {
+        throw new Error(uploadErr.message);
+      }
+
+      const { data: pubData } = supabase.storage
+        .from("platos")
+        .getPublicUrl(storagePath);
+
+      if (!pubData?.publicUrl) {
+        throw new Error("No se pudo obtener la URL pública del video");
+      }
+
+      setFormBannerVideoUrl(pubData.publicUrl);
+      mostrarToast("🎥 Video de Portada subido al bucket 'platos'");
+    } catch (err) {
+      setErrorForm(
+        err instanceof Error
+          ? `Error subiendo video: ${err.message}`
+          : "No se pudo subir el video de portada"
+      );
+    } finally {
+      setSubiendoVideo(false);
+    }
+  };
+
   const handleGuardarLocal = async (e: React.FormEvent) => {
     e.preventDefault();
     if (guardandoForm) return;
@@ -364,6 +428,7 @@ export default function SuperAdminClient({
           precio_mensual: formPrecioMensual,
           logo_url: formLogoUrl.trim(),
           banner_url: formBannerUrl.trim(),
+          banner_video_url: formBannerVideoUrl.trim() || null,
           activo: formActivo,
         }),
       });
@@ -1057,6 +1122,104 @@ export default function SuperAdminClient({
                     </div>
                   </div>
                 </div>
+
+                {/* Cargador de Video de Portada (Opcional) */}
+                <div className="mt-4 rounded-2xl border border-amber-400/30 bg-black/35 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-white">
+                      <Video className="h-4 w-4 text-amber-400" />
+                      🎥 Video de Portada (Opcional)
+                    </span>
+                    {formBannerVideoUrl && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormBannerVideoUrl("");
+                          mostrarToast(
+                            "🗑️ Video eliminado del formulario. Se usará la Foto de Portada estática."
+                          );
+                        }}
+                        className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3 py-1.5 text-[11px] font-extrabold text-rose-200 transition hover:bg-rose-600 hover:text-white active:scale-95"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>🗑️ Eliminar Video</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="mt-1.5 rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-[11px] font-semibold text-amber-200">
+                    💡 Recomendación: Videos cortos de 5 a 10 segundos, formato
+                    horizontal y peso menor a 15 MB para carga rápida en
+                    celulares
+                  </p>
+
+                  <div className="mt-3 flex flex-col gap-3.5 sm:flex-row sm:items-center">
+                    <div className="relative flex h-24 w-44 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-white/25 bg-slate-900">
+                      {formBannerVideoUrl ? (
+                        <video
+                          key={formBannerVideoUrl}
+                          src={formBannerVideoUrl}
+                          poster={formBannerUrl || undefined}
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center gap-1 text-center text-slate-400">
+                          <Video className="h-6 w-6 text-slate-500" />
+                          <span className="text-[10px] font-bold">
+                            Sin video (usa imagen)
+                          </span>
+                        </div>
+                      )}
+                      {subiendoVideo && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/75 text-[10px] font-bold text-amber-300">
+                          <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
+                          <span>Subiendo...</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex-1 space-y-2">
+                      <input
+                        ref={inputVideoRef}
+                        type="file"
+                        accept="video/mp4,video/webm"
+                        className="hidden"
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) void subirVideoPortadaSuperAdmin(f);
+                          e.target.value = "";
+                        }}
+                      />
+                      <button
+                        type="button"
+                        disabled={subiendoVideo}
+                        onClick={() => inputVideoRef.current?.click()}
+                        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-xs font-black text-slate-950 shadow transition hover:from-amber-300 hover:to-amber-400 sm:w-auto"
+                      >
+                        <Video className="h-4 w-4" />
+                        <span>
+                          {subiendoVideo
+                            ? "Subiendo video a Supabase Storage..."
+                            : formBannerVideoUrl
+                            ? "Reemplazar Video de Portada (MP4 / WebM)"
+                            : "Subir Video de Portada (MP4 / WebM)"}
+                        </span>
+                      </button>
+
+                      <input
+                        type="text"
+                        value={formBannerVideoUrl}
+                        onChange={(e) => setFormBannerVideoUrl(e.target.value)}
+                        placeholder="O pega URL del video (.mp4 / .webm)..."
+                        className="w-full rounded-lg border border-white/15 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-900 placeholder:text-slate-400"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {errorForm && (
@@ -1075,7 +1238,12 @@ export default function SuperAdminClient({
                 </button>
                 <button
                   type="submit"
-                  disabled={guardandoForm || subiendoLogo || subiendoBanner}
+                  disabled={
+                    guardandoForm ||
+                    subiendoLogo ||
+                    subiendoBanner ||
+                    subiendoVideo
+                  }
                   className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 text-xs font-black text-slate-950 shadow-lg transition hover:bg-emerald-400 disabled:opacity-50 sm:text-sm"
                 >
                   {guardandoForm ? (
