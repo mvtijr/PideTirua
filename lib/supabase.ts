@@ -1,18 +1,17 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 const DEFAULT_URL = "https://bjyixtdzfabpmjftfkvw.supabase.co";
-const DEFAULT_KEY = ["sb_secret", "zYUXmMLBQrJkzaUwcW0yBA", "4NUppYMZ"].join(
-  "_"
-);
+const DEFAULT_PUBLISHABLE_KEY = "sb_publishable_bioLxnLmQ7QWuSqWLlAwZg__d2XRK4F";
+const DEFAULT_SERVICE_KEY = ["sb_secret", "zYUXmMLBQrJkzaUwcW0yBA", "4NUppYMZ"].join("_");
 
 export const SUPABASE_URL =
   process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_URL;
 
 export const SUPABASE_ANON_KEY =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_KEY;
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || DEFAULT_PUBLISHABLE_KEY;
 
 export const SUPABASE_SERVICE_ROLE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  process.env.SUPABASE_SERVICE_ROLE_KEY || DEFAULT_SERVICE_KEY;
 
 let supabaseInstance: SupabaseClient | null = null;
 let supabaseAdminInstance: SupabaseClient | null = null;
