@@ -10,6 +10,7 @@ import { GradientWave } from "@/components/ui/gradient-wave";
 import LocalCard from "@/components/LocalCard";
 import { ArrowRight, ChevronLeft, ChevronRight, Flame, Dices, Sparkles } from "lucide-react";
 import RecomendadorPlatosModal from "@/components/RecomendadorPlatosModal";
+import VoiceSearchInput from "@/components/VoiceSearchInput";
 
 interface DirectoryClientProps {
   locales: Local[];
@@ -240,10 +241,27 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
     }
   };
 
+  // Filtrado inteligente: soporta búsqueda por voz con detección de "abierto/abiertos"
   const localesFiltrados = useMemo(() => {
-    const query = busqueda.trim().toLowerCase();
+    const rawQuery = busqueda.trim().toLowerCase();
+
+    // Detección de intención por voz: "abierto", "abiertos", "abierto ahora"
+    const filtrarSoloAbiertos =
+      rawQuery.includes("abierto") || rawQuery.includes("abiertos");
+
+    // Limpieza de términos de estado para emparejar platos o rubros (ej: "sushi abierto" -> "sushi")
+    const query = rawQuery
+      .replace(/\babiertos\b/g, "")
+      .replace(/\babierto\b/g, "")
+      .replace(/\bahora\b/g, "")
+      .trim();
 
     return locales.filter((local) => {
+      // Si el cliente pide explícitamente locales abiertos, excluir los cerrados
+      if (filtrarSoloAbiertos && !local.abierto) {
+        return false;
+      }
+
       const coincideCategoria =
         categoriaActiva === "Todos" ||
         local.categoriaFiltro.includes(categoriaActiva);
@@ -253,6 +271,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
       if (!coincideCategoria || !coincideSector) return false;
 
+      // Si solo dijo "abierto" sin otro término, ya pasó la condición
       if (!query) return true;
 
       const enNombreORubro =
@@ -317,32 +336,14 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             </div>
           </div>
 
-          {/* Buscador rápido en Header */}
+          {/* Buscador rápido en Header con soporte de voz */}
           <div className="hidden lg:flex items-center flex-1 max-w-xs xl:max-w-md mx-space-md">
-            <div className="relative w-full flex items-center bg-white/85 backdrop-blur-md border border-white/60 rounded-lg px-space-sm py-space-xs">
-              <span className="material-symbols-outlined text-outline text-lg mr-space-xs">
-                search
-              </span>
-              <input
-                type="text"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                placeholder="Buscar local, empanadas, sushi, pollo asado..."
-                className="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none"
-              />
-              {busqueda && (
-                <button
-                  type="button"
-                  onClick={() => setBusqueda("")}
-                  className="text-outline hover:text-on-surface"
-                  aria-label="Limpiar búsqueda"
-                >
-                  <span className="material-symbols-outlined text-base">
-                    close
-                  </span>
-                </button>
-              )}
-            </div>
+            <VoiceSearchInput
+              value={busqueda}
+              onChange={setBusqueda}
+              onClear={() => setBusqueda("")}
+              placeholder="Buscar local, sushi, empanadas..."
+            />
           </div>
 
           <nav className="hidden xl:flex items-center gap-space-lg">
@@ -425,30 +426,14 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     </select>
                   </div>
 
-                  {/* Input Buscador */}
-                  <div className="relative flex-1 flex items-center bg-surface-container-low rounded-lg px-space-sm py-space-xs">
-                    <span className="material-symbols-outlined text-outline text-xl mr-2">
-                      search
-                    </span>
-                    <input
-                      type="text"
+                  {/* Input Buscador con Reconocimiento de Voz */}
+                  <div className="flex-1">
+                    <VoiceSearchInput
                       value={busqueda}
-                      onChange={(e) => setBusqueda(e.target.value)}
-                      placeholder="Buscar local, empanadas, sushi, pollo asado, Quidico..."
-                      className="w-full bg-transparent font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none"
+                      onChange={setBusqueda}
+                      onClear={() => setBusqueda("")}
+                      placeholder="Buscar local, sushi, empanadas, abierto ahora..."
                     />
-                    {busqueda && (
-                      <button
-                        type="button"
-                        onClick={() => setBusqueda("")}
-                        className="text-outline hover:text-on-surface"
-                        aria-label="Limpiar búsqueda"
-                      >
-                        <span className="material-symbols-outlined text-base">
-                          close
-                        </span>
-                      </button>
-                    )}
                   </div>
 
                   {/* Botón de Búsqueda */}
@@ -1179,7 +1164,18 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 </p>
               </div>
 
-              <div className="flex items-center gap-space-sm">
+              <div className="flex items-center gap-space-sm flex-wrap">
+                {busqueda && (
+                  <button
+                    type="button"
+                    onClick={() => setBusqueda("")}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200 px-3 py-1 text-xs font-bold text-rose-700 hover:bg-rose-100 transition active:scale-95 shadow-2xs"
+                    title="Restablecer búsqueda"
+                  >
+                    <span>Filtro: "{busqueda}"</span>
+                    <span className="material-symbols-outlined text-sm">close</span>
+                  </button>
+                )}
                 <span className="rounded-full bg-surface-container px-space-md py-space-xs font-label-md text-label-md text-primary font-bold">
                   {localesFiltrados.length}{" "}
                   {localesFiltrados.length === 1
