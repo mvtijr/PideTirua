@@ -342,6 +342,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               value={busqueda}
               onChange={setBusqueda}
               onClear={() => setBusqueda("")}
+              onSubmit={scrollADirectorio}
+              locales={locales}
               placeholder="Buscar local, sushi, empanadas..."
             />
           </div>
@@ -432,6 +434,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                       value={busqueda}
                       onChange={setBusqueda}
                       onClear={() => setBusqueda("")}
+                      onSubmit={scrollADirectorio}
+                      locales={locales}
                       placeholder="Buscar local, sushi, empanadas, abierto ahora..."
                     />
                   </div>
@@ -1166,15 +1170,20 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
               <div className="flex items-center gap-space-sm flex-wrap">
                 {busqueda && (
-                  <button
-                    type="button"
-                    onClick={() => setBusqueda("")}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 border border-rose-200 px-3 py-1 text-xs font-bold text-rose-700 hover:bg-rose-100 transition active:scale-95 shadow-2xs"
-                    title="Restablecer búsqueda"
-                  >
-                    <span>Filtro: "{busqueda}"</span>
-                    <span className="material-symbols-outlined text-sm">close</span>
-                  </button>
+                  <div className="flex items-center gap-2 rounded-full bg-amber-100 border border-amber-300 px-3.5 py-1 text-xs font-bold text-amber-950 shadow-xs">
+                    <span>
+                      Filtrando por: <strong className="text-amber-900">"{busqueda}"</strong>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setBusqueda("")}
+                      className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-amber-200/90 px-2 py-0.5 text-[11px] font-black text-amber-950 hover:bg-amber-300 transition active:scale-95"
+                      title="Quitar filtro"
+                    >
+                      <span>Quitar filtro</span>
+                      <span className="material-symbols-outlined text-xs">close</span>
+                    </button>
+                  </div>
                 )}
                 <span className="rounded-full bg-surface-container px-space-md py-space-xs font-label-md text-label-md text-primary font-bold">
                   {localesFiltrados.length}{" "}
