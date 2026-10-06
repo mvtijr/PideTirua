@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
   Mic,
@@ -42,6 +43,11 @@ export default function VoiceSearchInput({
   const [transcripcionVoz, setTranscripcionVoz] = useState("");
   const [errorVoz, setErrorVoz] = useState<string | null>(null);
   const [dropdownAbierto, setDropdownAbierto] = useState(false);
+  const [montado, setMontado] = useState(false);
+
+  useEffect(() => {
+    setMontado(true);
+  }, []);
 
   const contenedorRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -421,161 +427,171 @@ export default function VoiceSearchInput({
         </div>
       )}
 
-      {/* MODAL INTERACTIVO DE BÚSQUEDA POR VOZ */}
-      {modalVozAbierto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+      {/* MODAL INTERACTIVO DE BÚSQUEDA POR VOZ (MONTADO VÍA PORTAL EN BODY) */}
+      {montado &&
+        modalVozAbierto &&
+        typeof document !== "undefined" &&
+        createPortal(
           <div
-            className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/20 bg-slate-900 text-white shadow-2xl flex flex-col"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
+            onClick={() => {
+              detenerGrabacionVoz();
+              setModalVozAbierto(false);
+            }}
           >
-            {/* Cabecera */}
-            <div className="p-5 pb-4 bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md text-white shadow-inner">
-                  <Mic className="h-6 w-6" />
+            <div
+              className="relative w-full max-w-md my-auto overflow-hidden rounded-3xl border border-white/20 bg-slate-900 text-white shadow-2xl flex flex-col max-h-[92vh] shrink-0"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Cabecera */}
+              <div className="p-5 pb-4 bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 flex items-start justify-between shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md text-white shadow-inner">
+                    <Mic className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+                      <Sparkles className="h-3 w-3" />
+                      Buscador por Voz
+                    </span>
+                    <h3 className="mt-0.5 text-base sm:text-lg font-black text-white">
+                      ¿Qué quieres pedir hoy en Tirúa?
+                    </h3>
+                  </div>
                 </div>
-                <div>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
-                    <Sparkles className="h-3 w-3" />
-                    Buscador por Voz
-                  </span>
-                  <h3 className="mt-0.5 text-base sm:text-lg font-black text-white">
-                    ¿Qué quieres pedir hoy en Tirúa?
-                  </h3>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  detenerGrabacionVoz();
-                  setModalVozAbierto(false);
-                }}
-                className="rounded-full bg-black/20 p-2 text-white/80 hover:bg-black/40 hover:text-white transition active:scale-95"
-                aria-label="Cerrar búsqueda por voz"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Contenido Central */}
-            <div className="p-6 flex flex-col items-center text-center space-y-4">
-              {/* Botón Central Micrófono con Animación */}
-              <div className="relative my-2">
-                {escuchando && (
-                  <>
-                    <span className="animate-ping absolute inset-0 rounded-full bg-rose-500 opacity-40" />
-                    <span className="animate-pulse absolute -inset-3 rounded-full bg-amber-500/30" />
-                  </>
-                )}
 
                 <button
                   type="button"
-                  onClick={escuchando ? detenerGrabacionVoz : iniciarGrabacionVoz}
-                  className={`relative flex h-24 w-24 items-center justify-center rounded-full text-white shadow-2xl transition-transform active:scale-95 ${
-                    escuchando
-                      ? "bg-rose-600 ring-4 ring-rose-400"
-                      : "bg-gradient-to-tr from-amber-500 to-orange-500 hover:scale-105"
-                  }`}
-                  aria-label={escuchando ? "Detener grabación" : "Iniciar grabación"}
+                  onClick={() => {
+                    detenerGrabacionVoz();
+                    setModalVozAbierto(false);
+                  }}
+                  className="rounded-full bg-black/20 p-2 text-white/80 hover:bg-black/40 hover:text-white transition active:scale-95"
+                  aria-label="Cerrar búsqueda por voz"
                 >
-                  {escuchando ? (
-                    <Mic className="h-10 w-10 animate-bounce" />
-                  ) : (
-                    <Mic className="h-10 w-10" />
-                  )}
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 
-              {/* Mensaje de Estado */}
-              <div>
-                <p className="text-sm font-extrabold text-white">
-                  {escuchando
-                    ? "🔴 Te escuchamos... Di lo que buscas"
-                    : "Toca el micrófono para comenzar a hablar"}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Puedes decir: <em>"Sushi"</em>, <em>"Locales abiertos"</em>, <em>"Empanadas"</em> o el nombre de tu restaurante favorito.
-                </p>
-              </div>
+              {/* Contenido Central con scroll si es pantalla compacta */}
+              <div className="p-5 sm:p-6 overflow-y-auto flex flex-col items-center text-center space-y-4">
+                {/* Botón Central Micrófono con Animación */}
+                <div className="relative my-2">
+                  {escuchando && (
+                    <>
+                      <span className="animate-ping absolute inset-0 rounded-full bg-rose-500 opacity-40" />
+                      <span className="animate-pulse absolute -inset-3 rounded-full bg-amber-500/30" />
+                    </>
+                  )}
 
-              {/* Transcripción en Tiempo Real */}
-              <div className="w-full rounded-2xl border border-white/10 bg-black/40 p-4 min-h-[4.5rem] flex items-center justify-center text-left">
-                {transcripcionVoz ? (
-                  <p className="text-sm sm:text-base font-bold text-amber-300 italic">
-                    "{transcripcionVoz}"
+                  <button
+                    type="button"
+                    onClick={escuchando ? detenerGrabacionVoz : iniciarGrabacionVoz}
+                    className={`relative flex h-24 w-24 items-center justify-center rounded-full text-white shadow-2xl transition-transform active:scale-95 ${
+                      escuchando
+                        ? "bg-rose-600 ring-4 ring-rose-400"
+                        : "bg-gradient-to-tr from-amber-500 to-orange-500 hover:scale-105"
+                    }`}
+                    aria-label={escuchando ? "Detener grabación" : "Iniciar grabación"}
+                  >
+                    {escuchando ? (
+                      <Mic className="h-10 w-10 animate-bounce" />
+                    ) : (
+                      <Mic className="h-10 w-10" />
+                    )}
+                  </button>
+                </div>
+
+                {/* Mensaje de Estado */}
+                <div>
+                  <p className="text-sm font-extrabold text-white">
+                    {escuchando
+                      ? "🔴 Te escuchamos... Di lo que buscas"
+                      : "Toca el micrófono para comenzar a hablar"}
                   </p>
-                ) : (
-                  <p className="text-xs text-slate-500 italic">
-                    Aquí aparecerá lo que digas...
+                  <p className="text-xs text-slate-400 mt-1">
+                    Puedes decir: <em>"Sushi"</em>, <em>"Locales abiertos"</em>, <em>"Empanadas"</em> o el nombre de tu restaurante favorito.
                   </p>
+                </div>
+
+                {/* Transcripción en Tiempo Real */}
+                <div className="w-full rounded-2xl border border-white/10 bg-black/40 p-4 min-h-[4.5rem] flex items-center justify-center text-left">
+                  {transcripcionVoz ? (
+                    <p className="text-sm sm:text-base font-bold text-amber-300 italic">
+                      "{transcripcionVoz}"
+                    </p>
+                  ) : (
+                    <p className="text-xs text-slate-500 italic">
+                      Aquí aparecerá lo que digas...
+                    </p>
+                  )}
+                </div>
+
+                {/* Error si existe */}
+                {errorVoz && (
+                  <div className="flex items-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-200 text-left w-full">
+                    <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+                    <span>{errorVoz}</span>
+                  </div>
                 )}
-              </div>
 
-              {/* Error si existe */}
-              {errorVoz && (
-                <div className="flex items-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-200 text-left w-full">
-                  <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
-                  <span>{errorVoz}</span>
-                </div>
-              )}
-
-              {/* Chips Rápidos de Búsqueda de 1 Toque */}
-              <div className="w-full pt-1">
-                <span className="block text-[11px] font-bold text-slate-400 mb-2 text-left">
-                  O toca una búsqueda rápida recomendada:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    "🍣 Sushi",
-                    "🟢 Abierto ahora",
-                    "🥟 Empanadas",
-                    "🍗 Pollos asados",
-                    "🍔 Hamburguesas",
-                    "🐟 Pescados y mariscos",
-                  ].map((chip) => {
-                    const textoLimpio = chip.replace(/^[^\w\s]+/, "").trim();
-                    return (
-                      <button
-                        key={chip}
-                        type="button"
-                        onClick={() => aplicarBusquedaVoz(textoLimpio)}
-                        className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:border-amber-400 hover:bg-amber-500/20 transition active:scale-95"
-                      >
-                        {chip}
-                      </button>
-                    );
-                  })}
+                {/* Chips Rápidos de Búsqueda de 1 Toque */}
+                <div className="w-full pt-1">
+                  <span className="block text-[11px] font-bold text-slate-400 mb-2 text-left">
+                    O toca una búsqueda rápida recomendada:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      "🍣 Sushi",
+                      "🟢 Abierto ahora",
+                      "🥟 Empanadas",
+                      "🍗 Pollos asados",
+                      "🍔 Hamburguesas",
+                      "🐟 Pescados y mariscos",
+                    ].map((chip) => {
+                      const textoLimpio = chip.replace(/^[^\w\s]+/, "").trim();
+                      return (
+                        <button
+                          key={chip}
+                          type="button"
+                          onClick={() => aplicarBusquedaVoz(textoLimpio)}
+                          className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:border-amber-400 hover:bg-amber-500/20 transition active:scale-95"
+                        >
+                          {chip}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Acciones Inferiores */}
-            <div className="border-t border-white/10 bg-slate-950/60 p-4 flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => {
-                  detenerGrabacionVoz();
-                  setModalVozAbierto(false);
-                }}
-                className="flex-1 rounded-2xl border border-white/20 bg-white/5 py-3 text-xs font-bold text-white hover:bg-white/10 transition"
-              >
-                Cancelar
-              </button>
+              {/* Acciones Inferiores */}
+              <div className="border-t border-white/10 bg-slate-950/60 p-4 flex items-center gap-2.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    detenerGrabacionVoz();
+                    setModalVozAbierto(false);
+                  }}
+                  className="flex-1 rounded-2xl border border-white/20 bg-white/5 py-3 text-xs font-bold text-white hover:bg-white/10 transition"
+                >
+                  Cancelar
+                </button>
 
-              <button
-                type="button"
-                disabled={!transcripcionVoz.trim()}
-                onClick={() => aplicarBusquedaVoz(transcripcionVoz)}
-                className="flex-1 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-amber-400 hover:to-orange-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-              >
-                <Search className="h-4 w-4" />
-                <span>Buscar en Tirúa</span>
-              </button>
+                <button
+                  type="button"
+                  disabled={!transcripcionVoz.trim()}
+                  onClick={() => aplicarBusquedaVoz(transcripcionVoz)}
+                  className="flex-1 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-amber-400 hover:to-orange-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                >
+                  <Search className="h-4 w-4" />
+                  <span>Buscar en Tirúa</span>
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

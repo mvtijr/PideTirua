@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   Mic,
   MicOff,
@@ -64,6 +65,11 @@ export default function VoiceOrderButton({
   const [transcripcion, setTranscripcion] = useState("");
   const [mensajeEstado, setMensajeEstado] = useState<string | null>(null);
   const [errorVoz, setErrorVoz] = useState<string | null>(null);
+  const [montado, setMontado] = useState(false);
+
+  useEffect(() => {
+    setMontado(true);
+  }, []);
 
   const recognitionRef = useRef<any>(null);
 
@@ -297,13 +303,19 @@ export default function VoiceOrderButton({
         </button>
       </div>
 
-      {/* MODAL INTERACTIVO: GARZÓN VIRTUAL */}
-      {modalAbierto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+      {/* MODAL INTERACTIVO: GARZÓN VIRTUAL (MONTADO VÍA PORTAL EN BODY) */}
+      {montado &&
+        modalAbierto &&
+        typeof document !== "undefined" &&
+        createPortal(
           <div
-            className="relative w-full max-w-md overflow-hidden rounded-3xl border border-white/20 bg-slate-900 text-white shadow-2xl flex flex-col"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
+            onClick={handleCerrarModal}
           >
+            <div
+              className="relative w-full max-w-md my-auto overflow-hidden rounded-3xl border border-white/20 bg-slate-900 text-white shadow-2xl flex flex-col max-h-[92vh] shrink-0"
+              onClick={(e) => e.stopPropagation()}
+            >
             {/* Cabecera */}
             <div className="p-5 pb-4 bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 flex items-start justify-between">
               <div className="flex items-center gap-3">
@@ -429,7 +441,8 @@ export default function VoiceOrderButton({
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

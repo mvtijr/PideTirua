@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
   Dices,
@@ -48,6 +49,11 @@ export default function RecomendadorPlatosModal({
   const [antojo, setAntojo] = useState<Antojo | null>(null);
 
   const [busquedaTexto, setBusquedaTexto] = useState("");
+  const [montado, setMontado] = useState(false);
+
+  useEffect(() => {
+    setMontado(true);
+  }, []);
 
   const reiniciar = () => {
     setPaso(1);
@@ -265,12 +271,15 @@ export default function RecomendadorPlatosModal({
     return seleccionados;
   }, [conQuien, antojo, busquedaTexto, locales]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !montado || typeof document === "undefined") return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
+      onClick={handleCerrar}
+    >
       <div
-        className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/20 bg-slate-900 text-white shadow-2xl flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-lg my-auto overflow-hidden rounded-3xl border border-white/20 bg-slate-900 text-white shadow-2xl flex flex-col max-h-[92vh] shrink-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabecera con gradiente y botón cerrar */}
@@ -686,6 +695,7 @@ export default function RecomendadorPlatosModal({
           </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
