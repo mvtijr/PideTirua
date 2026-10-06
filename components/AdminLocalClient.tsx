@@ -199,6 +199,15 @@ export default function AdminLocalClient({
   const [pin, setPin] = useState<string>("");
   const [errorPin, setErrorPin] = useState<string | null>(null);
   const [validandoPin, setValidandoPin] = useState<boolean>(false);
+  const [segundosBloqueo, setSegundosBloqueo] = useState<number>(0);
+
+  useEffect(() => {
+    if (segundosBloqueo <= 0) return;
+    const interval = setInterval(() => {
+      setSegundosBloqueo((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [segundosBloqueo]);
 
   // Estado de guardado y Toast de feedback inmediato
   const [guardandoId, setGuardandoId] = useState<string | null>(null);
@@ -395,7 +404,7 @@ export default function AdminLocalClient({
 
   // Validar PIN contra Supabase
   const validarPin = async (pinAValidar: string) => {
-    if (pinAValidar.length !== 4 || validandoPin) return;
+    if (pinAValidar.length !== 4 || validandoPin || segundosBloqueo > 0) return;
     setValidandoPin(true);
     setErrorPin(null);
 
@@ -408,6 +417,10 @@ export default function AdminLocalClient({
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
+        if (res.status === 429 || data.locked) {
+          const waitMins = Number(data.waitMinutes) || 10;
+          setSegundosBloqueo(waitMins * 60);
+        }
         setErrorPin(data.error || "PIN incorrecto. Intenta nuevamente.");
         setPin("");
         return;
@@ -430,7 +443,7 @@ export default function AdminLocalClient({
   };
 
   const handleDigitoPin = (digito: string) => {
-    if (pin.length >= 4 || validandoPin) return;
+    if (pin.length >= 4 || validandoPin || segundosBloqueo > 0) return;
     const nuevoPin = `${pin}${digito}`;
     setPin(nuevoPin);
     setErrorPin(null);
@@ -440,7 +453,7 @@ export default function AdminLocalClient({
   };
 
   const handleBorrarDigito = () => {
-    if (validandoPin) return;
+    if (validandoPin || segundosBloqueo > 0) return;
     setPin((prev) => prev.slice(0, -1));
     setErrorPin(null);
   };
@@ -1134,6 +1147,7 @@ export default function AdminLocalClient({
               inputMode="numeric"
               pattern="[0-9]*"
               maxLength={4}
+              disabled={validandoPin || segundosBloqueo > 0}
               value={pin}
               onChange={(e) => {
                 const soloNumeros = e.target.value
@@ -1145,16 +1159,23 @@ export default function AdminLocalClient({
                   void validarPin(soloNumeros);
                 }
               }}
-              placeholder="Escribe tu PIN de 4 dígitos"
+              placeholder={segundosBloqueo > 0 ? "Bloqueado temporalmente" : "Escribe tu PIN de 4 dígitos"}
               aria-label="PIN de 4 dígitos"
-              className={`mt-3 w-52 rounded-xl border border-white/20 bg-black/35 px-3 py-1.5 text-center text-xs text-white placeholder:text-white/50 focus:outline-none ${brand.accentRing}`}
+              className={`mt-3 w-52 rounded-xl border border-white/20 bg-black/35 px-3 py-1.5 text-center text-xs text-white placeholder:text-white/50 focus:outline-none disabled:opacity-40 disabled:cursor-not-allowed ${brand.accentRing}`}
             />
 
-            {errorPin && (
+            {segundosBloqueo > 0 ? (
+              <div className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/20 px-3.5 py-2 text-center text-xs font-bold text-amber-200">
+                <Clock className="h-4 w-4 animate-spin text-amber-400" />
+                <span>
+                  Bloqueo por seguridad: reintenta en {Math.floor(segundosBloqueo / 60)}:{(segundosBloqueo % 60).toString().padStart(2, "0")}
+                </span>
+              </div>
+            ) : errorPin ? (
               <p className="mt-3 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3.5 py-2 text-center text-xs font-bold text-rose-200">
                 {errorPin}
               </p>
-            )}
+            ) : null}
           </div>
 
           {/* Teclado Numérico Táctil con los colores del negocio */}
@@ -1163,9 +1184,9 @@ export default function AdminLocalClient({
               <button
                 key={num}
                 type="button"
-                disabled={validandoPin}
+                disabled={validandoPin || segundosBloqueo > 0}
                 onClick={() => handleDigitoPin(num)}
-                className={`flex h-13 items-center justify-center rounded-2xl border py-3 text-xl font-extrabold shadow-sm transition active:scale-95 disabled:opacity-50 ${brand.pinBtn}`}
+                className={`flex h-13 items-center justify-center rounded-2xl border py-3 text-xl font-extrabold shadow-sm transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${brand.pinBtn}`}
               >
                 {num}
               </button>
@@ -1173,31 +1194,31 @@ export default function AdminLocalClient({
 
             <button
               type="button"
-              disabled={validandoPin || pin.length === 0}
+              disabled={validandoPin || pin.length === 0 || segundosBloqueo > 0}
               onClick={() => {
                 setPin("");
                 setErrorPin(null);
               }}
-              className="flex items-center justify-center rounded-2xl border border-white/15 bg-black/30 py-3 text-xs font-bold text-white/75 transition hover:bg-black/50 active:scale-95 disabled:opacity-40"
+              className="flex items-center justify-center rounded-2xl border border-white/15 bg-black/30 py-3 text-xs font-bold text-white/75 transition hover:bg-black/50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Limpiar
             </button>
 
             <button
               type="button"
-              disabled={validandoPin}
+              disabled={validandoPin || segundosBloqueo > 0}
               onClick={() => handleDigitoPin("0")}
-              className={`flex items-center justify-center rounded-2xl border py-3 text-xl font-extrabold shadow-sm transition active:scale-95 disabled:opacity-50 ${brand.pinBtn}`}
+              className={`flex items-center justify-center rounded-2xl border py-3 text-xl font-extrabold shadow-sm transition active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed ${brand.pinBtn}`}
             >
               0
             </button>
 
             <button
               type="button"
-              disabled={validandoPin || pin.length === 0}
+              disabled={validandoPin || pin.length === 0 || segundosBloqueo > 0}
               onClick={handleBorrarDigito}
               aria-label="Borrar último dígito"
-              className="flex items-center justify-center rounded-2xl border border-white/15 bg-black/30 py-3 text-white/80 transition hover:bg-black/50 active:scale-95 disabled:opacity-40"
+              className="flex items-center justify-center rounded-2xl border border-white/15 bg-black/30 py-3 text-white/80 transition hover:bg-black/50 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Delete className="h-5 w-5" />
             </button>
@@ -1205,7 +1226,7 @@ export default function AdminLocalClient({
 
           <button
             type="button"
-            disabled={pin.length !== 4 || validandoPin}
+            disabled={pin.length !== 4 || validandoPin || segundosBloqueo > 0}
             onClick={() => void validarPin(pin)}
             className={`mt-4 flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-extrabold shadow-lg transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-45 ${brand.accentBg}`}
           >

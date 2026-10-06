@@ -105,26 +105,53 @@ CREATE INDEX IF NOT EXISTS idx_locales_slug ON public.locales(slug);
 CREATE INDEX IF NOT EXISTS idx_categorias_local_id ON public.categorias(local_id);
 CREATE INDEX IF NOT EXISTS idx_productos_categoria_id ON public.productos(categoria_id);
 
--- Permisos y políticas RLS abiertas para lectura pública y administración
+-- ============================================================================
+-- Permisos y políticas RLS Definitivas (Principio de Mínimo Privilegio)
+-- Lectura pública para la carta; mutaciones restringidas a service_role
+-- ============================================================================
 ALTER TABLE public.locales ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.categorias ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.productos ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Permitir acceso total locales" ON public.locales;
-CREATE POLICY "Permitir acceso total locales"
+DROP POLICY IF EXISTS "Lectura publica locales" ON public.locales;
+DROP POLICY IF EXISTS "Gestion total locales service_role" ON public.locales;
+
+CREATE POLICY "Lectura publica locales"
+  ON public.locales FOR SELECT
+  USING (true);
+
+CREATE POLICY "Gestion total locales service_role"
   ON public.locales FOR ALL
+  TO service_role
   USING (true)
   WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Permitir acceso total categorias" ON public.categorias;
-CREATE POLICY "Permitir acceso total categorias"
+DROP POLICY IF EXISTS "Lectura publica categorias" ON public.categorias;
+DROP POLICY IF EXISTS "Gestion total categorias service_role" ON public.categorias;
+
+CREATE POLICY "Lectura publica categorias"
+  ON public.categorias FOR SELECT
+  USING (true);
+
+CREATE POLICY "Gestion total categorias service_role"
   ON public.categorias FOR ALL
+  TO service_role
   USING (true)
   WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Permitir acceso total productos" ON public.productos;
-CREATE POLICY "Permitir acceso total productos"
+DROP POLICY IF EXISTS "Lectura publica productos" ON public.productos;
+DROP POLICY IF EXISTS "Gestion total productos service_role" ON public.productos;
+
+CREATE POLICY "Lectura publica productos"
+  ON public.productos FOR SELECT
+  USING (true);
+
+CREATE POLICY "Gestion total productos service_role"
   ON public.productos FOR ALL
+  TO service_role
   USING (true)
   WITH CHECK (true);
 
@@ -201,8 +228,19 @@ CREATE INDEX IF NOT EXISTS idx_pedidos_local_slug_created
 ALTER TABLE public.pedidos ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Permitir acceso total pedidos" ON public.pedidos;
-CREATE POLICY "Permitir acceso total pedidos"
+DROP POLICY IF EXISTS "Creacion anonima de pedidos" ON public.pedidos;
+DROP POLICY IF EXISTS "Gestion total pedidos service_role" ON public.pedidos;
+
+-- 1. Clientes anónimos desde el Checkout pueden insertar nuevos pedidos
+CREATE POLICY "Creacion anonima de pedidos"
+  ON public.pedidos FOR INSERT
+  WITH CHECK (true);
+
+-- 2. Solo el rol administrativo (service_role) o backend autenticado puede leer y gestionar pedidos
+-- Esto previene fugas de datos masivas donde curiosos o bots lean pedidos vecinales
+CREATE POLICY "Gestion total pedidos service_role"
   ON public.pedidos FOR ALL
+  TO service_role
   USING (true)
   WITH CHECK (true);
 

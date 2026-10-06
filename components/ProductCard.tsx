@@ -1,6 +1,7 @@
 "use client";
 
-import { Plus, Minus, Sparkles, Ban, Flame } from "lucide-react";
+import { useState } from "react";
+import { Plus, Minus, Sparkles, Ban, Flame, Check } from "lucide-react";
 import { Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import { getLocalTheme } from "@/lib/localTheme";
@@ -20,6 +21,7 @@ export default function ProductCard({
   onDisminuir,
   localSlug,
 }: ProductCardProps) {
+  const [agregadoFeedback, setAgregadoFeedback] = useState(false);
   const theme = getLocalTheme(localSlug);
   const disponible = producto.disponible !== false;
   const imagenSrc = producto.imagen_url || producto.imagen;
@@ -29,6 +31,19 @@ export default function ProductCard({
     producto.precio_oferta > 0 &&
     producto.precio_oferta < producto.precio;
   const precioCobro = tieneOferta ? producto.precio_oferta! : producto.precio;
+
+  const handleAgregarClick = () => {
+    onAgregar(producto);
+    setAgregadoFeedback(true);
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try {
+        navigator.vibrate(25);
+      } catch {
+        // Ignorar si el navegador restringe vibración sin interacción previa
+      }
+    }
+    setTimeout(() => setAgregadoFeedback(false), 700);
+  };
 
   return (
     <div
@@ -117,7 +132,7 @@ export default function ProductCard({
             <button
               type="button"
               disabled
-              className="inline-flex cursor-not-allowed items-center gap-1.5 rounded-xl border border-slate-300 bg-slate-200 px-3.5 py-2 text-xs font-bold text-slate-500"
+              className="inline-flex min-h-[44px] cursor-not-allowed items-center gap-1.5 rounded-xl border border-slate-300 bg-slate-200/90 px-3.5 py-2 text-xs font-bold text-slate-500 shadow-none opacity-80"
             >
               <Ban className="h-3.5 w-3.5" />
               <span>Agotado</span>
@@ -125,36 +140,49 @@ export default function ProductCard({
           ) : cantidadEnCarrito === 0 ? (
             <button
               type="button"
-              onClick={() => onAgregar(producto)}
-              className={`inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold shadow-sm transition active:scale-95 ${theme.cardAddBtn}`}
+              onClick={handleAgregarClick}
+              className={`inline-flex min-h-[44px] min-w-[96px] items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm transition-all active:scale-95 ${
+                agregadoFeedback
+                  ? "bg-emerald-600 text-white shadow-emerald-600/30 ring-2 ring-emerald-400 scale-105"
+                  : theme.cardAddBtn
+              }`}
             >
-              <Plus className="h-4 w-4" />
-              <span>Agregar</span>
+              {agregadoFeedback ? (
+                <>
+                  <Check className="h-4 w-4 animate-bounce" />
+                  <span>¡Agregado!</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  <span>Agregar</span>
+                </>
+              )}
             </button>
           ) : (
             <div
-              className={`inline-flex items-center gap-2 rounded-xl border bg-surface-container-lowest p-1 shadow-sm ${theme.cardCounterBox}`}
+              className={`inline-flex min-h-[44px] items-center gap-2 rounded-xl border bg-surface-container-lowest px-2 py-1 shadow-sm ${theme.cardCounterBox}`}
             >
               <button
                 type="button"
                 onClick={() => onDisminuir(producto.id)}
-                className={`flex h-7 w-7 items-center justify-center rounded-lg transition active:scale-95 ${theme.cardMinusBtn}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg transition active:scale-90 ${theme.cardMinusBtn}`}
                 aria-label={`Quitar una unidad de ${producto.nombre}`}
               >
-                <Minus className="h-3.5 w-3.5" />
+                <Minus className="h-4 w-4" />
               </button>
               <span
-                className={`min-w-[1.25rem] text-center text-sm font-extrabold ${theme.cardQtyText}`}
+                className={`min-w-[1.5rem] text-center text-sm font-extrabold ${theme.cardQtyText}`}
               >
                 {cantidadEnCarrito}
               </span>
               <button
                 type="button"
-                onClick={() => onAgregar(producto)}
-                className={`flex h-7 w-7 items-center justify-center rounded-lg transition active:scale-95 ${theme.cardPlusBtn}`}
+                onClick={handleAgregarClick}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg transition active:scale-90 ${theme.cardPlusBtn}`}
                 aria-label={`Agregar otra unidad de ${producto.nombre}`}
               >
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="h-4 w-4" />
               </button>
             </div>
           )}

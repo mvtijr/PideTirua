@@ -20,6 +20,7 @@ import {
   Copy,
   CheckCircle2,
   Landmark,
+  Loader2,
 } from "lucide-react";
 import {
   DatosCheckout,
@@ -94,6 +95,7 @@ export default function CartDrawer({
   const [mostrarVistaPrevia, setMostrarVistaPrevia] = useState(false);
   const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
   const [datosCopiados, setDatosCopiados] = useState(false);
+  const [enviandoPedido, setEnviandoPedido] = useState(false);
 
   // Cargar datos previamente guardados del cliente desde localStorage
   useEffect(() => {
@@ -259,19 +261,43 @@ export default function CartDrawer({
       datos: datosCheckout,
     });
 
-    // Mutación asíncrona con keepalive para registrar el pedido en Supabase (estado: 'pendiente')
-    // mientras se abre WhatsApp sin bloquear el navegador móvil.
-    const guardarPedidoPromise = fetch("/api/pedidos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      keepalive: true,
-      body: JSON.stringify(payloadPedido),
-    }).catch((err) => {
-      console.error("Error registrando pedido en KDS:", err);
-    });
+    if (enviandoPedido) return;
+    setEnviandoPedido(true);
 
-    window.open(url, "_blank", "noopener,noreferrer");
-    await guardarPedidoPromise;
+    // Timeout de seguridad de 2.5s para no bloquear al cliente en conexiones 4G rurales inestables
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+    try {
+      await fetch("/api/pedidos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        signal: controller.signal,
+        body: JSON.stringify(payloadPedido),
+      });
+    } catch (err) {
+      // Plan de contingencia ante caída de señal 4G en Tirúa:
+      // Se registra advertencia pero JAMÁS se bloquea la orden del cliente hacia WhatsApp
+      console.warn("KDS sync fallback por red inestable:", err);
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    // Abrir WhatsApp de forma inmediata y garantizada
+    try {
+      const opened = window.open(url, "_blank", "noopener,noreferrer");
+      if (!opened || opened.closed || typeof opened.closed === "undefined") {
+        window.location.assign(url);
+      }
+    } catch {
+      window.location.assign(url);
+    }
+
+    setTimeout(() => {
+      setEnviandoPedido(false);
+      onClose();
+    }, 1200);
   };
 
   const mensajePrevia = formatWhatsAppMessage({
@@ -768,18 +794,30 @@ export default function CartDrawer({
             <button
               type="submit"
               disabled={
-                !local.abierto || local.activo === false || items.length === 0
+                enviandoPedido ||
+                !local.abierto ||
+                local.activo === false ||
+                items.length === 0
               }
-              className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-[#25D366] px-5 py-4 text-base font-extrabold text-white shadow-lg shadow-[#25D366]/25 transition hover:bg-[#20bd5a] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:opacity-65 disabled:shadow-none"
+              className="flex w-full min-h-[56px] items-center justify-center gap-2.5 rounded-2xl bg-[#25D366] px-5 py-4 text-base font-extrabold text-white shadow-lg shadow-[#25D366]/25 transition hover:bg-[#20bd5a] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:opacity-65 disabled:shadow-none"
             >
-              <MessageCircle className="h-5 w-5 fill-white" />
-              <span>
-                {local.activo === false
-                  ? "Servicio Suspendido"
-                  : local.abierto
-                  ? "Enviar pedido a WhatsApp"
-                  : "Local Cerrado por ahora"}
-              </span>
+              {enviandoPedido ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin text-white" />
+                  <span>Enviando pedido a WhatsApp...</span>
+                </>
+              ) : (
+                <>
+                  <MessageCircle className="h-5 w-5 fill-white" />
+                  <span>
+                    {local.activo === false
+                      ? "Servicio Suspendido"
+                      : local.abierto
+                      ? "Enviar pedido a WhatsApp"
+                      : "Local Cerrado por ahora"}
+                  </span>
+                </>
+              )}
             </button>
           </div>
         </form>

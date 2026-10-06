@@ -13,6 +13,12 @@ import {
   uploadPlatoFotoInSupabase,
   verifyLocalPinInSupabase,
 } from "@/lib/locales";
+import {
+  checkRateLimit,
+  getClientIp,
+  recordFailedAttempt,
+  resetRateLimit,
+} from "@/lib/security";
 
 export async function GET(
   _req: NextRequest,
@@ -39,16 +45,51 @@ export async function POST(
     const { slug } = await context.params;
     const body = await req.json();
     const { action } = body;
+    const ip = getClientIp(req);
+    const rateLimitKey = `admin-pin:${slug}:${ip}`;
 
     if (action === "verify-pin") {
+      const rateLimitStatus = checkRateLimit(
+        rateLimitKey,
+        5,
+        10 * 60 * 1000,
+        10 * 60 * 1000
+      );
+
+      if (!rateLimitStatus.allowed) {
+        const mins = Math.ceil(rateLimitStatus.retryAfterSeconds / 60);
+        return NextResponse.json(
+          {
+            ok: false,
+            error: `Demasiados intentos fallidos. Por seguridad, el acceso está bloqueado temporalmente por ${mins} minutos.`,
+            retryAfterSeconds: rateLimitStatus.retryAfterSeconds,
+          },
+          { status: 429 }
+        );
+      }
+
       const { pin } = body;
       const valido = await verifyLocalPinInSupabase(slug, String(pin || ""));
       if (!valido) {
+        const failedResult = recordFailedAttempt(
+          rateLimitKey,
+          5,
+          10 * 60 * 1000
+        );
         return NextResponse.json(
-          { ok: false, error: "PIN incorrecto. Intenta nuevamente." },
+          {
+            ok: false,
+            error: failedResult.locked
+              ? "Has superado el límite de 5 intentos fallidos. Bloqueado por 10 minutos."
+              : "PIN incorrecto. Intenta nuevamente.",
+            locked: failedResult.locked,
+            retryAfterSeconds: failedResult.retryAfterSeconds,
+          },
           { status: 401 }
         );
       }
+
+      resetRateLimit(rateLimitKey);
 
       const response = NextResponse.json({ ok: true });
       response.cookies.set(`pidetirua_admin_${slug}`, "authenticated", {
@@ -63,6 +104,23 @@ export async function POST(
       const response = NextResponse.json({ ok: true });
       response.cookies.delete(`pidetirua_admin_${slug}`);
       return response;
+    }
+
+    // CONTROL DE SEGURIDAD: Verificar que quien ejecuta la mutación tenga sesión activa de Admin o SuperAdmin
+    const isLocalAdmin =
+      req.cookies.get(`pidetirua_admin_${slug}`)?.value === "authenticated";
+    const isSuperAdmin =
+      req.cookies.get("pidetirua_superadmin")?.value === "authenticated";
+
+    if (!isLocalAdmin && !isSuperAdmin) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Acceso no autorizado. Debes iniciar sesión con tu PIN de seguridad.",
+        },
+        { status: 401 }
+      );
     }
 
     if (action === "toggle-abierto") {

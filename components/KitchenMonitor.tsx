@@ -143,6 +143,9 @@ export default function KitchenMonitor({
     "activos"
   );
   const [actualizandoId, setActualizandoId] = useState<string | null>(null);
+  const [estadoConexion, setEstadoConexion] = useState<
+    "conectado" | "reconectando"
+  >("conectado");
 
   const sonidoActivoRef = useRef<boolean>(true);
   const idsConocidosRef = useRef<Set<string>>(new Set());
@@ -162,6 +165,7 @@ export default function KitchenMonitor({
         );
         const data = await res.json();
         if (res.ok && data.ok && Array.isArray(data.pedidos)) {
+          setEstadoConexion("conectado");
           const lista: Pedido[] = data.pedidos;
 
           if (cargaInicialCompletaRef.current) {
@@ -188,9 +192,11 @@ export default function KitchenMonitor({
           }
           cargaInicialCompletaRef.current = true;
           setPedidos(lista);
+        } else {
+          setEstadoConexion("reconectando");
         }
       } catch {
-        // Ignorar error de red puntual
+        setEstadoConexion("reconectando");
       } finally {
         if (!silencioso) setCargando(false);
       }
@@ -198,7 +204,7 @@ export default function KitchenMonitor({
     [localSlug, onNotify]
   );
 
-  // Carga inicial + Suscripción Supabase Realtime (postgres_changes) + Respaldo periódico
+  // Carga inicial + Suscripción Supabase Realtime con autoresiliencia de reconexión
   useEffect(() => {
     void cargarPedidos(false);
 
@@ -213,13 +219,17 @@ export default function KitchenMonitor({
           filter: `local_slug=eq.${localSlug}`,
         },
         (payload) => {
+          setEstadoConexion("conectado");
           if (payload.eventType === "INSERT" && payload.new) {
             const nuevo = payload.new as Record<string, unknown>;
             const nuevoId = String(nuevo.id || "");
             const yaVisto = idsConocidosRef.current.has(nuevoId);
             idsConocidosRef.current.add(nuevoId);
 
-            if (!yaVisto && String(nuevo.estado || "pendiente") === "pendiente") {
+            if (
+              !yaVisto &&
+              String(nuevo.estado || "pendiente") === "pendiente"
+            ) {
               if (sonidoActivoRef.current) {
                 playKitchenDingDongChime();
               }
@@ -233,13 +243,37 @@ export default function KitchenMonitor({
           void cargarPedidos(true);
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          setEstadoConexion("conectado");
+        } else if (status === "TIMED_OUT" || status === "CHANNEL_ERROR") {
+          setEstadoConexion("reconectando");
+          void cargarPedidos(true);
+        } else if (status === "CLOSED") {
+          setEstadoConexion("reconectando");
+        }
+      });
 
+    // Escuchador de red nativo (se dispara si el Wi-Fi o 4G rural vuelve a estar disponible)
+    const handleOnline = () => {
+      setEstadoConexion("conectado");
+      void cargarPedidos(false);
+    };
+    const handleOffline = () => {
+      setEstadoConexion("reconectando");
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    // Respaldo periódico cada 4 segundos por si los WebSockets se suspenden en modo pantalla fija
     const timer = setInterval(() => {
       void cargarPedidos(true);
     }, 4000);
 
     return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
       clearInterval(timer);
       void supabase.removeChannel(channel);
     };
@@ -327,10 +361,17 @@ export default function KitchenMonitor({
             <h2 className="text-base font-extrabold text-white sm:text-lg">
               👨‍🍳 Monitor de Cocina en Vivo
             </h2>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold text-emerald-300 border border-emerald-400/30">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              En vivo
-            </span>
+            {estadoConexion === "conectado" ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold text-emerald-300 border border-emerald-400/30">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                En vivo
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-extrabold text-amber-300 border border-amber-400/30">
+                <RefreshCw className="h-2.5 w-2.5 animate-spin" />
+                Reconectando...
+              </span>
+            )}
           </div>
         </div>
 

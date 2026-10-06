@@ -11,6 +11,12 @@ import {
   verifySuperAdminKey,
 } from "@/lib/locales";
 import { PlanComercial, SectorComuna } from "@/types/local";
+import {
+  checkRateLimit,
+  getClientIp,
+  recordFailedAttempt,
+  resetRateLimit,
+} from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -23,19 +29,51 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { action } = body;
+    const ip = getClientIp(req);
+    const rateLimitKey = `superadmin-key:${ip}`;
 
     if (action === "verify-key") {
-      const { key } = body;
-      const valido = verifySuperAdminKey(String(key || ""));
-      if (!valido) {
+      const rateLimitStatus = checkRateLimit(
+        rateLimitKey,
+        5,
+        10 * 60 * 1000,
+        10 * 60 * 1000
+      );
+
+      if (!rateLimitStatus.allowed) {
+        const mins = Math.ceil(rateLimitStatus.retryAfterSeconds / 60);
         return NextResponse.json(
           {
             ok: false,
-            error: "Clave Maestra incorrecta. Verifica e intenta nuevamente.",
+            error: `Demasiados intentos fallidos. Acceso SuperAdmin bloqueado temporalmente por ${mins} minutos.`,
+            retryAfterSeconds: rateLimitStatus.retryAfterSeconds,
+          },
+          { status: 429 }
+        );
+      }
+
+      const { key } = body;
+      const valido = verifySuperAdminKey(String(key || ""));
+      if (!valido) {
+        const failedResult = recordFailedAttempt(
+          rateLimitKey,
+          5,
+          10 * 60 * 1000
+        );
+        return NextResponse.json(
+          {
+            ok: false,
+            error: failedResult.locked
+              ? "Has superado el límite de 5 intentos fallidos. Acceso bloqueado por 10 minutos."
+              : "Clave Maestra incorrecta. Verifica e intenta nuevamente.",
+            locked: failedResult.locked,
+            retryAfterSeconds: failedResult.retryAfterSeconds,
           },
           { status: 401 }
         );
       }
+
+      resetRateLimit(rateLimitKey);
 
       const response = NextResponse.json({ ok: true });
       response.cookies.set("pidetirua_superadmin", "authenticated", {
@@ -50,6 +88,20 @@ export async function POST(req: NextRequest) {
       const response = NextResponse.json({ ok: true });
       response.cookies.delete("pidetirua_superadmin");
       return response;
+    }
+
+    // CONTROL DE SEGURIDAD: Solo usuarios con cookie activa de SuperAdmin pueden ejecutar mutaciones de plataforma
+    const isSuperAdmin =
+      req.cookies.get("pidetirua_superadmin")?.value === "authenticated";
+    if (!isSuperAdmin) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Acceso no autorizado. Se requiere sesión de SuperAdmin autenticada.",
+        },
+        { status: 401 }
+      );
     }
 
     if (action === "ensure-video-bucket") {
