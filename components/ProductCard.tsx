@@ -127,21 +127,21 @@ export default function ProductCard({
             </span>
           </div>
 
-          {/* Controles de agregar o modificar cantidad */}
+          {/* Controles de agregar o modificar cantidad (Mínimo 48px táctil) */}
           {!disponible ? (
             <button
               type="button"
               disabled
-              className="inline-flex min-h-[44px] cursor-not-allowed items-center gap-1.5 rounded-xl border border-slate-300 bg-slate-200/90 px-3.5 py-2 text-xs font-bold text-slate-500 shadow-none opacity-80"
+              className="inline-flex min-h-[48px] cursor-not-allowed items-center gap-1.5 rounded-xl border border-slate-300 bg-slate-200/90 px-4 py-2 text-xs font-bold text-slate-500 shadow-none opacity-80"
             >
-              <Ban className="h-3.5 w-3.5" />
+              <Ban className="h-4 w-4" />
               <span>Agotado</span>
             </button>
           ) : cantidadEnCarrito === 0 ? (
             <button
               type="button"
               onClick={handleAgregarClick}
-              className={`inline-flex min-h-[44px] min-w-[96px] items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm transition-all active:scale-95 ${
+              className={`inline-flex min-h-[48px] min-w-[104px] items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-xs sm:text-sm font-extrabold shadow-sm transition-all active:scale-95 ${
                 agregadoFeedback
                   ? "bg-emerald-600 text-white shadow-emerald-600/30 ring-2 ring-emerald-400 scale-105"
                   : theme.cardAddBtn
@@ -155,31 +155,31 @@ export default function ProductCard({
               ) : (
                 <>
                   <Plus className="h-4 w-4" />
-                  <span>Agregar</span>
+                  <span>+ Agregar</span>
                 </>
               )}
             </button>
           ) : (
             <div
-              className={`inline-flex min-h-[44px] items-center gap-2 rounded-xl border bg-surface-container-lowest px-2 py-1 shadow-sm ${theme.cardCounterBox}`}
+              className={`inline-flex min-h-[48px] items-center gap-2 rounded-xl border bg-surface-container-lowest px-2 py-1 shadow-sm ${theme.cardCounterBox}`}
             >
               <button
                 type="button"
                 onClick={() => onDisminuir(producto.id)}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg transition active:scale-90 ${theme.cardMinusBtn}`}
+                className={`flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg transition active:scale-90 ${theme.cardMinusBtn}`}
                 aria-label={`Quitar una unidad de ${producto.nombre}`}
               >
                 <Minus className="h-4 w-4" />
               </button>
               <span
-                className={`min-w-[1.5rem] text-center text-sm font-extrabold ${theme.cardQtyText}`}
+                className={`min-w-[1.75rem] text-center text-sm font-black ${theme.cardQtyText}`}
               >
                 {cantidadEnCarrito}
               </span>
               <button
                 type="button"
                 onClick={handleAgregarClick}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg transition active:scale-90 ${theme.cardPlusBtn}`}
+                className={`flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg transition active:scale-90 ${theme.cardPlusBtn}`}
                 aria-label={`Agregar otra unidad de ${producto.nombre}`}
               >
                 <Plus className="h-4 w-4" />

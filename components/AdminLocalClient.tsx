@@ -36,6 +36,9 @@ import {
   KeyRound,
   BarChart3,
   Flame,
+  Copy,
+  Share2,
+  Megaphone,
 } from "lucide-react";
 import { Local, Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
@@ -200,14 +203,55 @@ export default function AdminLocalClient({
   const [errorPin, setErrorPin] = useState<string | null>(null);
   const [validandoPin, setValidandoPin] = useState<boolean>(false);
   const [segundosBloqueo, setSegundosBloqueo] = useState<number>(0);
+  const lockoutKey = `pidetirua_admin_lockout_${initialLocal.slug}`;
+
+  // Recuperar tiempo de bloqueo persistente contra fuerza bruta
+  useEffect(() => {
+    try {
+      const lockUntilStr = localStorage.getItem(lockoutKey);
+      if (lockUntilStr) {
+        const lockUntil = Number(lockUntilStr);
+        const diffSeconds = Math.ceil((lockUntil - Date.now()) / 1000);
+        if (diffSeconds > 0) {
+          setSegundosBloqueo(diffSeconds);
+          setErrorPin(
+            `Acceso temporalmente bloqueado por seguridad. Espera ${Math.ceil(
+              diffSeconds / 60
+            )} minutos.`
+          );
+        } else {
+          localStorage.removeItem(lockoutKey);
+        }
+      }
+    } catch {
+      // Ignorar en navegación privada
+    }
+  }, [lockoutKey]);
 
   useEffect(() => {
-    if (segundosBloqueo <= 0) return;
+    if (segundosBloqueo <= 0) {
+      try {
+        localStorage.removeItem(lockoutKey);
+      } catch {
+        // Ignorar
+      }
+      return;
+    }
     const interval = setInterval(() => {
-      setSegundosBloqueo((prev) => (prev > 0 ? prev - 1 : 0));
+      setSegundosBloqueo((prev) => {
+        if (prev <= 1) {
+          try {
+            localStorage.removeItem(lockoutKey);
+          } catch {
+            // Ignorar
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
     return () => clearInterval(interval);
-  }, [segundosBloqueo]);
+  }, [segundosBloqueo, lockoutKey]);
 
   // Estado de guardado y Toast de feedback inmediato
   const [guardandoId, setGuardandoId] = useState<string | null>(null);
@@ -257,6 +301,13 @@ export default function AdminLocalClient({
     "https://pidetirua.vercel.app"
   );
   const [descargandoQr, setDescargandoQr] = useState<boolean>(false);
+
+  // Estados para Micro-Herramientas de IA (Gemini)
+  const [generandoDescripcionId, setGenerandoDescripcionId] = useState<string | null>(null);
+  const [mostrarModalRedes, setMostrarModalRedes] = useState<boolean>(false);
+  const [textoPostRedes, setTextoPostRedes] = useState<string>("");
+  const [generandoPostRedes, setGenerandoPostRedes] = useState<boolean>(false);
+  const [postCopiado, setPostCopiado] = useState<boolean>(false);
 
   // Pestaña o sección activa en el panel admin
   const [pestanaActiva, setPestañaActiva] = useState<
@@ -365,12 +416,10 @@ export default function AdminLocalClient({
       return;
     }
     try {
-      const urlParams = new URLSearchParams(window.location.search);
-      const querySuperAdmin = urlParams.get("superadmin") === "true";
       const sesionSuperAdmin =
         localStorage.getItem("pidetirua_superadmin_session") === "authenticated";
 
-      if (querySuperAdmin || sesionSuperAdmin) {
+      if (sesionSuperAdmin) {
         setEsSuperAdmin(true);
         setAutenticado(true);
         localStorage.setItem(sessionKey, "authenticated");
@@ -418,8 +467,18 @@ export default function AdminLocalClient({
 
       if (!res.ok || !data.ok) {
         if (res.status === 429 || data.locked) {
-          const waitMins = Number(data.waitMinutes) || 10;
-          setSegundosBloqueo(waitMins * 60);
+          const waitSecs =
+            Number(data.retryAfterSeconds) ||
+            (Number(data.waitMinutes) || 10) * 60;
+          setSegundosBloqueo(waitSecs);
+          try {
+            localStorage.setItem(
+              lockoutKey,
+              String(Date.now() + waitSecs * 1000)
+            );
+          } catch {
+            // Ignorar
+          }
         }
         setErrorPin(data.error || "PIN incorrecto. Intenta nuevamente.");
         setPin("");
@@ -551,6 +610,118 @@ export default function AdminLocalClient({
       setGuardandoAjustes(false);
       setGuardandoId(null);
     }
+  };
+
+  // Micro-Herramienta IA 1: Generar descripción gastronómica apetitosa con Gemini
+  const handleGenerarDescripcionIa = async (
+    nombrePlato: string,
+    categoriaNombre: string,
+    targetId: "nuevo" | string
+  ) => {
+    const nombreLimpio = nombrePlato.trim();
+    if (!nombreLimpio) {
+      mostrarToast("Escribe primero el nombre del plato");
+      return;
+    }
+
+    setGenerandoDescripcionId(targetId);
+    try {
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "describe_dish",
+          nombre: nombreLimpio,
+          categoria: categoriaNombre,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.descripcion) {
+        if (targetId === "nuevo") {
+          setNuevaDescripcion(data.descripcion);
+        } else {
+          setEdiciones((prev) => ({
+            ...prev,
+            [targetId]: {
+              ...prev[targetId],
+              descripcion: data.descripcion,
+            },
+          }));
+        }
+        mostrarToast("✨ ¡Descripción generada con IA!");
+      } else {
+        mostrarToast(data.error || "No se pudo generar la descripción");
+      }
+    } catch {
+      mostrarToast("Error al conectar con el servicio de IA");
+    } finally {
+      setGenerandoDescripcionId(null);
+    }
+  };
+
+  // Micro-Herramienta IA 2: Generar publicación para redes sociales con Gemini
+  const handleGenerarPostRedes = async () => {
+    setGenerandoPostRedes(true);
+    try {
+      const platosDestacadosNombres = local.categorias
+        .flatMap((c) => c.productos)
+        .filter((p) => p.disponible !== false)
+        .slice(0, 5)
+        .map((p) => p.nombre)
+        .join(", ");
+
+      const res = await fetch("/api/ai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "social_post",
+          nombre_local: local.nombre,
+          rubro: local.rubro,
+          platos_destacados: platosDestacadosNombres,
+          link: `${publicOrigin}/${local.slug}`,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.post) {
+        setTextoPostRedes(data.post);
+      } else {
+        mostrarToast(data.error || "No se pudo generar el anuncio");
+      }
+    } catch {
+      mostrarToast("Error al generar anuncio con IA");
+    } finally {
+      setGenerandoPostRedes(false);
+    }
+  };
+
+  const handleCopiarPostRedes = async () => {
+    if (!textoPostRedes) return;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(textoPostRedes);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = textoPostRedes;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+      setPostCopiado(true);
+      mostrarToast("📋 ¡Texto copiado al portapapeles!");
+      setTimeout(() => setPostCopiado(false), 2500);
+    } catch {
+      mostrarToast("No se pudo copiar automáticamente");
+    }
+  };
+
+  const handleCompartirEstadoWhatsapp = () => {
+    if (!textoPostRedes) return;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoPostRedes)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   // Crear nueva categoría para ordenar la carta
@@ -1600,6 +1771,22 @@ export default function AdminLocalClient({
               <QrCode className="h-4 w-4 shrink-0" />
               <span>📱 Mi Cartel QR para Mesas</span>
             </button>
+
+            {/* Botón destacado para Generar Publicación para Redes / Estados con IA */}
+            <button
+              type="button"
+              onClick={() => {
+                setMostrarModalRedes(true);
+                if (!textoPostRedes) {
+                  void handleGenerarPostRedes();
+                }
+              }}
+              className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-2xl border border-amber-400/40 bg-gradient-to-r from-amber-500/25 via-orange-500/25 to-rose-500/25 px-4 py-3 text-xs font-extrabold text-white shadow-md transition hover:border-amber-400 hover:bg-black/40 active:scale-[0.99] sm:text-sm"
+            >
+              <Megaphone className="h-4 w-4 shrink-0 text-amber-400" />
+              <span>📢 Generar Publicación para Redes / Estados con IA</span>
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+            </button>
           </section>
         )}
 
@@ -2314,16 +2501,48 @@ export default function AdminLocalClient({
                 </div>
               </div>
 
-              {/* Descripción del plato */}
+              {/* Descripción del plato con botón IA */}
               <div>
-                <label className="mb-1 block text-xs font-extrabold uppercase tracking-wider text-white/90">
-                  5. Descripción de los ingredientes
-                </label>
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-white/90">
+                    5. Descripción de los ingredientes
+                  </label>
+                  <button
+                    type="button"
+                    disabled={generandoDescripcionId === "nuevo" || !nuevoNombre.trim()}
+                    onClick={() => {
+                      const cat = local.categorias.find((c) => c.id === nuevoCategoriaId);
+                      void handleGenerarDescripcionIa(
+                        nuevoNombre,
+                        cat ? cat.nombre : nuevaCategoriaNombre || local.rubro,
+                        "nuevo"
+                      );
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-amber-400/50 bg-amber-500/20 px-2.5 py-1 text-[11px] font-extrabold text-amber-300 transition hover:bg-amber-500/30 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
+                    title={
+                      !nuevoNombre.trim()
+                        ? "Escribe primero el nombre del plato"
+                        : "Generar descripción apetitosa con Gemini"
+                    }
+                  >
+                    {generandoDescripcionId === "nuevo" ? (
+                      <>
+                        <Loader2 className="h-3 w-3 animate-spin text-amber-300" />
+                        <span>Generando texto apetitoso...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                        <span>✨ Describir con IA</span>
+                      </>
+                    )}
+                  </button>
+                </div>
                 <textarea
                   rows={2}
                   value={nuevaDescripcion}
                   onChange={(e) => setNuevaDescripcion(e.target.value)}
-                  placeholder="Describe los ingredientes o acompañamientos del plato..."
+                  placeholder="Describe los ingredientes o pulsa '✨ Describir con IA'..."
                   className="w-full rounded-xl border border-white/20 bg-white px-3 py-2 text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none"
                 />
               </div>
@@ -2695,9 +2914,39 @@ export default function AdminLocalClient({
                         </div>
 
                         <div className="sm:col-span-8">
-                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                            Descripción
-                          </label>
+                          <div className="mb-1 flex items-center justify-between">
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                              Descripción
+                            </label>
+                            <button
+                              type="button"
+                              disabled={
+                                generandoDescripcionId === producto.id ||
+                                !editState.nombre.trim()
+                              }
+                              onClick={() =>
+                                void handleGenerarDescripcionIa(
+                                  editState.nombre,
+                                  categoria.nombre,
+                                  producto.id
+                                )
+                              }
+                              className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-extrabold text-amber-800 transition hover:bg-amber-100 active:scale-95 disabled:opacity-40"
+                              title="Generar descripción apetitosa con Gemini"
+                            >
+                              {generandoDescripcionId === producto.id ? (
+                                <>
+                                  <Loader2 className="h-2.5 w-2.5 animate-spin text-amber-600" />
+                                  <span>Generando...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Sparkles className="h-2.5 w-2.5 text-amber-600" />
+                                  <span>✨ Describir con IA</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
                           <input
                             type="text"
                             value={editState.descripcion}
@@ -2875,6 +3124,122 @@ export default function AdminLocalClient({
           </>
         )}
       </main>
+
+      {/* MODAL IA: GENERADOR DE PUBLICACIÓN PARA REDES Y ESTADOS DE WHATSAPP */}
+      {mostrarModalRedes && (
+        <div className="no-print fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div
+            className={`relative w-full max-w-lg overflow-hidden rounded-3xl border shadow-2xl ${brand.panelCardBg} text-white flex flex-col max-h-[92vh]`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Cabecera */}
+            <div className="p-5 pb-4 bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md text-white shadow-inner">
+                  <Megaphone className="h-6 w-6" />
+                </div>
+                <div>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+                    <Sparkles className="h-3 w-3" />
+                    Marketing con Gemini IA
+                  </span>
+                  <h3 className="mt-0.5 text-base sm:text-lg font-black text-white">
+                    📢 Anuncio para Redes y Estados
+                  </h3>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setMostrarModalRedes(false)}
+                className="rounded-full bg-black/20 p-2 text-white/80 hover:bg-black/40 hover:text-white transition active:scale-95"
+                aria-label="Cerrar modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Cuerpo */}
+            <div className="p-5 space-y-4 overflow-y-auto">
+              <p className={`text-xs ${brand.subtitleText}`}>
+                Texto promocional optimizado con emojis y tu enlace directo a la carta para publicar en tus Estados de WhatsApp, Facebook o Instagram:
+              </p>
+
+              {generandoPostRedes ? (
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-white/15 bg-black/30 p-8 text-center space-y-3">
+                  <Loader2 className={`h-8 w-8 animate-spin ${brand.accentText}`} />
+                  <p className="text-xs font-bold text-white/90">
+                    Generando texto apetitoso y vendedor con IA...
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="relative">
+                    <textarea
+                      rows={7}
+                      value={textoPostRedes}
+                      onChange={(e) => setTextoPostRedes(e.target.value)}
+                      placeholder="Escribe o genera un anuncio para tus redes sociales..."
+                      className="w-full rounded-2xl border border-white/20 bg-black/40 p-4 text-xs sm:text-sm font-medium leading-relaxed text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                    />
+                  </div>
+
+                  {/* Botones de acción */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleCopiarPostRedes}
+                      className="flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 py-3 px-4 text-xs font-black text-white transition hover:bg-white/20 active:scale-95"
+                    >
+                      {postCopiado ? (
+                        <>
+                          <Check className="h-4 w-4 text-emerald-400" />
+                          <span className="text-emerald-300">¡Copiado!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-4 w-4" />
+                          <span>📋 Copiar texto</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleCompartirEstadoWhatsapp}
+                      className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-3 px-4 text-xs font-black text-slate-950 shadow-md transition hover:bg-[#20ba59] active:scale-95"
+                    >
+                      <MessageCircle className="h-4 w-4 shrink-0" />
+                      <span>📲 Compartir en WhatsApp</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Pie del modal con botón regenerar */}
+            <div className="border-t border-white/10 bg-black/30 p-4 flex items-center justify-between gap-3">
+              <button
+                type="button"
+                disabled={generandoPostRedes}
+                onClick={handleGenerarPostRedes}
+                className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-300 hover:text-amber-200 transition disabled:opacity-50"
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>🔄 Generar otra versión</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setMostrarModalRedes(false)}
+                className="rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

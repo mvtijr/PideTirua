@@ -29,7 +29,7 @@ export default function FloatingCartBar({
         <button
           type="button"
           onClick={onOpenDrawer}
-          className={`flex w-full items-center justify-between rounded-2xl px-4 py-3.5 shadow-xl transition-all active:scale-[0.99] ${theme.floatingBtn}`}
+          className={`flex w-full min-h-[56px] items-center justify-between rounded-2xl px-4 py-3.5 shadow-xl transition-all active:scale-[0.99] ${theme.floatingBtn}`}
         >
           <div className="flex items-center gap-3">
             <div

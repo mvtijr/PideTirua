@@ -20,7 +20,15 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const isSuperAdmin =
+    req.cookies.get("pidetirua_superadmin")?.value === "authenticated";
+  if (!isSuperAdmin) {
+    return NextResponse.json(
+      { ok: false, error: "Acceso no autorizado a SuperAdmin" },
+      { status: 401 }
+    );
+  }
   const locales = await fetchAllLocales();
   return NextResponse.json({ ok: true, locales });
 }

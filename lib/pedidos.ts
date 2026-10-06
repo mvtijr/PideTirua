@@ -1,4 +1,4 @@
-import { getSupabaseClient } from "@/lib/supabase";
+import { getSupabaseAdminClient } from "@/lib/supabase-server";
 import {
   EstadoPedido,
   ItemPedidoGuardado,
@@ -62,7 +62,7 @@ export async function crearPedidoEnSupabase(
   input: NuevoPedidoInput
 ): Promise<{ ok: boolean; pedido?: Pedido; error?: string }> {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from("pedidos")
       .insert({
@@ -104,7 +104,7 @@ export async function listarPedidosPorLocalEnSupabase(
   localSlug: string
 ): Promise<Pedido[]> {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from("pedidos")
       .select("*")
@@ -129,7 +129,7 @@ export async function actualizarEstadoPedidoEnSupabase(
   nuevoEstado: EstadoPedido
 ): Promise<{ ok: boolean; pedido?: Pedido; error?: string }> {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = getSupabaseAdminClient();
     const { data, error } = await supabase
       .from("pedidos")
       .update({ estado: nuevoEstado })

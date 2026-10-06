@@ -136,7 +136,9 @@ export function formatWhatsAppMessage({
  * Genera la URL oficial de WhatsApp (https://wa.me/{telefono_whatsapp}?text={mensaje_codificado})
  */
 export function buildWhatsAppCheckoutUrl(payload: WhatsAppOrderPayload): string {
-  const telefonoLimpio = payload.local.telefonoWhatsapp.replace(/\D/g, "");
+  const rawTel =
+    payload.local.telefonoWhatsapp || payload.local.telefono_whatsapp || "";
+  const telefonoLimpio = rawTel.replace(/\D/g, "");
   const mensaje = formatWhatsAppMessage(payload);
   const mensajeCodificado = encodeURIComponent(mensaje);
   return `https://wa.me/${telefonoLimpio}?text=${mensajeCodificado}`;

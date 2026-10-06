@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { fetchLocalBySlug } from "@/lib/locales";
+import { fetchLocalBySlug, stripSensitiveLocalFields } from "@/lib/locales";
 import AdminLocalClient from "@/components/AdminLocalClient";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,6 @@ export const revalidate = 0;
 
 interface AdminLocalPageProps {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export async function generateMetadata({
@@ -32,10 +31,8 @@ export async function generateMetadata({
 
 export default async function AdminLocalPage({
   params,
-  searchParams,
 }: AdminLocalPageProps) {
   const { slug } = await params;
-  const resolvedSearch = searchParams ? await searchParams : {};
   const local = await fetchLocalBySlug(slug);
 
   if (!local) {
@@ -45,15 +42,13 @@ export default async function AdminLocalPage({
   const cookieStore = await cookies();
   const sesionCookie = cookieStore.get(`pidetirua_admin_${local.slug}`);
   const superAdminCookie = cookieStore.get("pidetirua_superadmin");
-  const isSuperAdmin =
-    superAdminCookie?.value === "authenticated" ||
-    resolvedSearch?.superadmin === "true";
+  const isSuperAdmin = superAdminCookie?.value === "authenticated";
   const initialAuthenticated =
     sesionCookie?.value === "authenticated" || isSuperAdmin;
 
   return (
     <AdminLocalClient
-      initialLocal={local}
+      initialLocal={initialAuthenticated ? local : stripSensitiveLocalFields(local)}
       initialAuthenticated={initialAuthenticated}
       initialSuperAdmin={isSuperAdmin}
     />

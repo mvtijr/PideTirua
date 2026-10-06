@@ -21,13 +21,30 @@ const STORAGE_BUCKET = "pidetirua-db";
 const STORAGE_STATE_FILE = "locales-state.json";
 const PLATOS_IMAGES_BUCKET = "platos";
 
-export const DEFAULT_SUPERADMIN_KEY =
-  process.env.SUPERADMIN_KEY || "Tirua2026Admin";
+import { timingSafeCompare } from "@/lib/security";
 
 export function verifySuperAdminKey(inputKey: string): boolean {
   const expected = (process.env.SUPERADMIN_KEY || "Tirua2026Admin").trim();
-  return inputKey.trim() === expected;
+  return timingSafeCompare(inputKey.trim(), expected);
 }
+
+/**
+ * Elimina campos administrativos y sensibles (PIN, datos comerciales privados)
+ * antes de enviar información de locales al cliente público o en páginas no autenticadas.
+ */
+export function stripSensitiveLocalFields(local: Local): Local {
+  const { pin, precio_mensual, dia_cobro, fecha_ultimo_pago, ...safeLocal } =
+    local;
+  return safeLocal as Local;
+}
+
+/**
+ * Sanitiza una lista completa de locales para consumo público.
+ */
+export function sanitizeLocalesForPublic(locales: Local[]): Local[] {
+  return locales.map(stripSensitiveLocalFields);
+}
+
 
 interface SupabaseProductoRow {
   id: string;
@@ -1286,7 +1303,7 @@ export async function verifyLocalPinInSupabase(
   const local = await fetchLocalBySlug(slug);
   if (!local) return false;
   const pinEsperado = (local.pin || "1234").trim();
-  return pinIngresado.trim() === pinEsperado;
+  return timingSafeCompare(pinIngresado.trim(), pinEsperado);
 }
 
 /**

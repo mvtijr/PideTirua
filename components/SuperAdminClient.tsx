@@ -284,6 +284,18 @@ export default function SuperAdminClient({
     }
   }, []);
 
+  const recargarLocales = async () => {
+    try {
+      const res = await fetch("/api/superadmin", { cache: "no-store" });
+      const data = await res.json();
+      if (res.ok && data.ok && Array.isArray(data.locales)) {
+        setLocales(data.locales);
+      }
+    } catch {
+      // Ignorar fallas de red
+    }
+  };
+
   useEffect(() => {
     if (initialAuthenticated) {
       setAutenticado(true);
@@ -294,6 +306,7 @@ export default function SuperAdminClient({
       const guardado = localStorage.getItem(SESSION_KEY);
       if (guardado === "authenticated") {
         setAutenticado(true);
+        void recargarLocales();
       }
     } catch {
       // Ignorar
@@ -355,6 +368,7 @@ export default function SuperAdminClient({
       }
 
       setAutenticado(true);
+      void recargarLocales();
       mostrarToast("Sesión SuperAdmin iniciada");
     } catch {
       setErrorClave("Error de conexión al verificar la Clave Maestra.");

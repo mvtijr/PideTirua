@@ -115,17 +115,42 @@ ALTER TABLE public.productos ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Permitir acceso total locales" ON public.locales;
 DROP POLICY IF EXISTS "Lectura publica locales" ON public.locales;
+DROP POLICY IF EXISTS "Lectura publica locales activos" ON public.locales;
 DROP POLICY IF EXISTS "Gestion total locales service_role" ON public.locales;
 
-CREATE POLICY "Lectura publica locales"
+-- 1. Solo locales activos son visibles para clientes anónimos y autenticados
+CREATE POLICY "Lectura publica locales activos"
   ON public.locales FOR SELECT
-  USING (true);
+  TO anon, authenticated
+  USING (activo = true);
 
+-- 2. Backend administrativo / service_role tiene acceso completo a locales
 CREATE POLICY "Gestion total locales service_role"
   ON public.locales FOR ALL
   TO service_role
   USING (true)
   WITH CHECK (true);
+
+-- 3. Función RPC segura para verificar PIN sin exponer la columna `pin` en consultas públicas
+CREATE OR REPLACE FUNCTION public.verify_local_pin(p_slug TEXT, p_pin TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_stored_pin VARCHAR(4);
+BEGIN
+  SELECT pin INTO v_stored_pin FROM public.locales WHERE slug = p_slug;
+  IF NOT FOUND THEN
+    RETURN FALSE;
+  END IF;
+  RETURN v_stored_pin = p_pin;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.verify_local_pin(TEXT, TEXT) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.verify_local_pin(TEXT, TEXT) TO anon, authenticated, service_role;
 
 DROP POLICY IF EXISTS "Permitir acceso total categorias" ON public.categorias;
 DROP POLICY IF EXISTS "Lectura publica categorias" ON public.categorias;
@@ -133,6 +158,7 @@ DROP POLICY IF EXISTS "Gestion total categorias service_role" ON public.categori
 
 CREATE POLICY "Lectura publica categorias"
   ON public.categorias FOR SELECT
+  TO anon, authenticated
   USING (true);
 
 CREATE POLICY "Gestion total categorias service_role"
@@ -147,6 +173,7 @@ DROP POLICY IF EXISTS "Gestion total productos service_role" ON public.productos
 
 CREATE POLICY "Lectura publica productos"
   ON public.productos FOR SELECT
+  TO anon, authenticated
   USING (true);
 
 CREATE POLICY "Gestion total productos service_role"
@@ -154,6 +181,7 @@ CREATE POLICY "Gestion total productos service_role"
   TO service_role
   USING (true)
   WITH CHECK (true);
+
 
 -- ============================================================================
 -- 4. Bucket `platos` y Políticas de Storage (SELECT, INSERT, UPDATE)
@@ -234,6 +262,7 @@ DROP POLICY IF EXISTS "Gestion total pedidos service_role" ON public.pedidos;
 -- 1. Clientes anónimos desde el Checkout pueden insertar nuevos pedidos
 CREATE POLICY "Creacion anonima de pedidos"
   ON public.pedidos FOR INSERT
+  TO anon, authenticated
   WITH CHECK (true);
 
 -- 2. Solo el rol administrativo (service_role) o backend autenticado puede leer y gestionar pedidos

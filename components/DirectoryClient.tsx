@@ -8,7 +8,8 @@ import { formatCLP } from "@/lib/formatters";
 import { getVideoPoster } from "@/lib/localTheme";
 import { GradientWave } from "@/components/ui/gradient-wave";
 import LocalCard from "@/components/LocalCard";
-import { ArrowRight, ChevronLeft, ChevronRight, Flame } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Flame, Dices, Sparkles } from "lucide-react";
+import RecomendadorPlatosModal from "@/components/RecomendadorPlatosModal";
 
 interface DirectoryClientProps {
   locales: Local[];
@@ -22,6 +23,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
     "Todos"
   );
   const [localQrModal, setLocalQrModal] = useState<Local | null>(null);
+  const [mostrarRecomendador, setMostrarRecomendador] = useState(false);
 
   // Platos con Oferta activa del Día de locales abiertos y activos
   const ofertasDelDia = useMemo(() => {
@@ -613,6 +615,41 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             </div>
           </section>
 
+          {/* BANNER INTERACTIVO RECOMENDADOR IA: ¿NO SABES QUÉ PEDIR HOY? */}
+          <div className="max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop my-4 sm:my-6">
+            <button
+              type="button"
+              onClick={() => setMostrarRecomendador(true)}
+              className="group relative w-full overflow-hidden rounded-3xl border-2 border-amber-400/60 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 p-5 sm:p-6 text-left text-white shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] active:scale-[0.99]"
+            >
+              <div className="absolute -right-8 -bottom-8 h-36 w-36 rounded-full bg-white/15 blur-2xl pointer-events-none" />
+              <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md shadow-inner text-amber-100 group-hover:rotate-12 transition-transform duration-300">
+                    <Dices className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-0.5 text-xs font-black uppercase tracking-wider text-white">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      Recomendador Rápido
+                    </span>
+                    <h3 className="mt-1 text-lg sm:text-2xl font-black tracking-tight text-white drop-shadow-sm">
+                      🎲 ¿No sabes qué pedir hoy? Descúbrelo en 2 toques
+                    </h3>
+                    <p className="mt-0.5 text-xs sm:text-sm font-semibold text-white/90">
+                      Elige con quién comes y tu antojo del momento. Te recomendamos los 3 mejores platos al instante.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-2 self-start sm:self-auto rounded-2xl bg-white px-4 py-2.5 text-xs sm:text-sm font-black text-slate-900 shadow-md transition-all group-hover:bg-amber-100 group-hover:translate-x-1">
+                  <span>Probar ahora</span>
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+              </div>
+            </button>
+          </div>
+
           {/* SECCIÓN COMUNAL: 🔥 OFERTAS Y PROMOS DE HOY EN TIRÚA */}
           {ofertasDelDia.length > 0 && (
             <section
@@ -776,10 +813,10 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
                             <Link
                               href={`/${oferta.localSlug}`}
-                              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 py-2.5 px-4 text-xs font-extrabold text-white shadow-md transition-all hover:from-emerald-500 hover:to-emerald-400 active:scale-95"
+                              className="flex w-full min-h-[48px] items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 py-3 px-4 text-sm font-extrabold text-white shadow-md transition-all hover:from-emerald-500 hover:to-emerald-400 active:scale-95"
                             >
                               <span>Pedir Promo</span>
-                              <ArrowRight className="h-3.5 w-3.5" />
+                              <ArrowRight className="h-4 w-4" />
                             </Link>
                           </div>
                         </div>
@@ -1289,6 +1326,13 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </div>
         </div>
       )}
+
+      {/* Modal interactivo de recomendación de platos */}
+      <RecomendadorPlatosModal
+        isOpen={mostrarRecomendador}
+        onClose={() => setMostrarRecomendador(false)}
+        locales={locales}
+      />
     </div>
   );
 }

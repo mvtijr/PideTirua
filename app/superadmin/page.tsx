@@ -13,10 +13,10 @@ export const metadata: Metadata = {
 };
 
 export default async function SuperAdminPage() {
-  const locales = await fetchAllLocales();
   const cookieStore = await cookies();
   const superAdminCookie = cookieStore.get("pidetirua_superadmin");
   const initialAuthenticated = superAdminCookie?.value === "authenticated";
+  const locales = initialAuthenticated ? await fetchAllLocales() : [];
 
   return (
     <SuperAdminClient

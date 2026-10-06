@@ -210,7 +210,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
           <div className="grid grid-cols-2 gap-space-xs pt-space-xs">
             <Link
               href={`/${local.slug}`}
-              className="bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md font-bold py-space-xs px-space-sm rounded-lg flex items-center justify-center gap-1 transition-colors"
+              className="min-h-[44px] bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md font-bold py-2.5 px-space-sm rounded-xl flex items-center justify-center gap-1 transition-colors"
             >
               <span className="material-symbols-outlined text-base">
                 restaurant_menu
@@ -218,14 +218,16 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
               <span>Ver Carta</span>
             </Link>
             <a
-              href={`https://wa.me/${
-                local.telefonoWhatsapp
-              }?text=${encodeURIComponent(
+              href={`https://wa.me/${(
+                local.telefonoWhatsapp ||
+                local.telefono_whatsapp ||
+                ""
+              ).replace(/\D/g, "")}?text=${encodeURIComponent(
                 `Hola ${local.nombre}, quisiera pedir desde PideTirúa`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#25D366] hover:bg-[#20bd5a] text-white font-label-md text-label-md font-bold py-space-xs px-space-sm rounded-lg flex items-center justify-center gap-1 transition-colors shadow-sm"
+              className="min-h-[44px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-label-md text-label-md font-bold py-2.5 px-space-sm rounded-xl flex items-center justify-center gap-1 transition-colors shadow-sm"
             >
               <span className="material-symbols-outlined text-base">chat</span>
               <span>WhatsApp</span>

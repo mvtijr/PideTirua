@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchLocalBySlug, getAllLocales } from "@/lib/locales";
+import {
+  fetchLocalBySlug,
+  getAllLocales,
+  stripSensitiveLocalFields,
+} from "@/lib/locales";
 import MenuClient from "@/components/MenuClient";
 
 export const dynamic = "force-dynamic";
@@ -43,5 +47,5 @@ export default async function LocalMenuPage({ params }: LocalMenuPageProps) {
     notFound();
   }
 
-  return <MenuClient local={local} />;
+  return <MenuClient local={stripSensitiveLocalFields(local)} />;
 }

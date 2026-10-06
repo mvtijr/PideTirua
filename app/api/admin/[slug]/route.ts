@@ -63,6 +63,8 @@ export async function POST(
             ok: false,
             error: `Demasiados intentos fallidos. Por seguridad, el acceso está bloqueado temporalmente por ${mins} minutos.`,
             retryAfterSeconds: rateLimitStatus.retryAfterSeconds,
+            waitMinutes: mins,
+            locked: true,
           },
           { status: 429 }
         );
@@ -76,6 +78,7 @@ export async function POST(
           5,
           10 * 60 * 1000
         );
+        const mins = Math.ceil(failedResult.retryAfterSeconds / 60);
         return NextResponse.json(
           {
             ok: false,
@@ -84,8 +87,9 @@ export async function POST(
               : "PIN incorrecto. Intenta nuevamente.",
             locked: failedResult.locked,
             retryAfterSeconds: failedResult.retryAfterSeconds,
+            waitMinutes: mins,
           },
-          { status: 401 }
+          { status: failedResult.locked ? 429 : 401 }
         );
       }
 
