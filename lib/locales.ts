@@ -39,6 +39,9 @@ interface SupabaseProductoRow {
   disponible: boolean;
   destacado?: boolean | null;
   etiqueta?: string | null;
+  es_oferta?: boolean | null;
+  precio_oferta?: number | null;
+  texto_promo?: string | null;
   orden?: number | null;
 }
 
@@ -158,6 +161,12 @@ function normalizeStaticLocal(raw: Local): Local {
         imagen: prod.imagen_url || prod.imagen,
         imagen_url: prod.imagen_url || prod.imagen,
         disponible: prod.disponible !== false,
+        es_oferta: Boolean(prod.es_oferta),
+        precio_oferta:
+          typeof prod.precio_oferta === "number"
+            ? prod.precio_oferta
+            : undefined,
+        texto_promo: prod.texto_promo?.trim() || undefined,
       })),
     })),
   };
@@ -280,6 +289,15 @@ function mapSupabaseRowToLocal(
               disponible: p.disponible !== false,
               destacado: p.destacado ?? fallbackProd?.destacado,
               etiqueta: p.etiqueta ?? fallbackProd?.etiqueta,
+              es_oferta: Boolean(p.es_oferta ?? fallbackProd?.es_oferta),
+              precio_oferta:
+                p.precio_oferta != null
+                  ? Number(p.precio_oferta)
+                  : fallbackProd?.precio_oferta,
+              texto_promo:
+                p.texto_promo != null
+                  ? String(p.texto_promo)
+                  : fallbackProd?.texto_promo,
             };
           });
 
@@ -436,6 +454,9 @@ async function seedRelationalTablesIfEmpty(): Promise<void> {
     disponible: boolean;
     destacado: boolean;
     etiqueta: string | null;
+    es_oferta?: boolean;
+    precio_oferta?: number | null;
+    texto_promo?: string | null;
     orden: number;
   }[] = [];
 
@@ -459,6 +480,9 @@ async function seedRelationalTablesIfEmpty(): Promise<void> {
           disponible: prod.disponible !== false,
           destacado: Boolean(prod.destacado),
           etiqueta: prod.etiqueta ?? null,
+          es_oferta: Boolean(prod.es_oferta),
+          precio_oferta: prod.precio_oferta ?? null,
+          texto_promo: prod.texto_promo ?? null,
           orden: prodIdx + 1,
         });
       });
@@ -957,6 +981,9 @@ export async function updateProductoInSupabase(
     disponible?: boolean;
     imagen_url?: string;
     etiqueta?: string;
+    es_oferta?: boolean;
+    precio_oferta?: number | null;
+    texto_promo?: string | null;
   }
 ): Promise<{ ok: boolean; local?: Local }> {
   const supabase = getSupabaseClient();
@@ -980,12 +1007,42 @@ export async function updateProductoInSupabase(
   if (typeof cambios.etiqueta === "string") {
     updatePayload.etiqueta = cambios.etiqueta.trim() || null;
   }
+  if (typeof cambios.es_oferta === "boolean") {
+    updatePayload.es_oferta = cambios.es_oferta;
+  }
+  if (cambios.precio_oferta !== undefined) {
+    updatePayload.precio_oferta =
+      cambios.precio_oferta != null &&
+      !Number.isNaN(Number(cambios.precio_oferta))
+        ? Math.round(Number(cambios.precio_oferta))
+        : null;
+  }
+  if (cambios.texto_promo !== undefined) {
+    updatePayload.texto_promo =
+      cambios.texto_promo?.trim() ? cambios.texto_promo.trim() : null;
+  }
 
   if (Object.keys(updatePayload).length > 0) {
-    await supabase
+    const { error: updErr } = await supabase
       .from("productos")
       .update(updatePayload)
       .eq("id", productoId);
+
+    if (
+      updErr &&
+      (updErr.code === "42703" || updErr.message?.includes("column"))
+    ) {
+      const safePayload = { ...updatePayload };
+      delete safePayload.es_oferta;
+      delete safePayload.precio_oferta;
+      delete safePayload.texto_promo;
+      if (Object.keys(safePayload).length > 0) {
+        await supabase
+          .from("productos")
+          .update(safePayload)
+          .eq("id", productoId);
+      }
+    }
   }
 
   const locales = await fetchAllLocales();
@@ -1019,6 +1076,23 @@ export async function updateProductoInSupabase(
             ...(typeof cambios.etiqueta === "string"
               ? { etiqueta: cambios.etiqueta.trim() || undefined }
               : {}),
+            ...(typeof cambios.es_oferta === "boolean"
+              ? { es_oferta: cambios.es_oferta }
+              : {}),
+            ...(cambios.precio_oferta !== undefined
+              ? {
+                  precio_oferta:
+                    cambios.precio_oferta != null &&
+                    !Number.isNaN(Number(cambios.precio_oferta))
+                      ? Math.round(Number(cambios.precio_oferta))
+                      : undefined,
+                }
+              : {}),
+            ...(cambios.texto_promo !== undefined
+              ? {
+                  texto_promo: cambios.texto_promo?.trim() || undefined,
+                }
+              : {}),
             imagen: nuevaImagen,
             imagen_url: nuevaImagen,
           };
@@ -1050,6 +1124,9 @@ export async function createProductoInSupabase(
     imagen_url: string;
     etiqueta?: string;
     disponible?: boolean;
+    es_oferta?: boolean;
+    precio_oferta?: number;
+    texto_promo?: string;
   }
 ): Promise<{ ok: boolean; local?: Local; error?: string }> {
   const supabase = getSupabaseClient();
@@ -1095,9 +1172,14 @@ export async function createProductoInSupabase(
     disponible: datos.disponible !== false,
     destacado: Boolean(datos.etiqueta?.trim()),
     ...(datos.etiqueta?.trim() ? { etiqueta: datos.etiqueta.trim() } : {}),
+    es_oferta: Boolean(datos.es_oferta),
+    ...(typeof datos.precio_oferta === "number" && !Number.isNaN(datos.precio_oferta)
+      ? { precio_oferta: Math.round(datos.precio_oferta) }
+      : {}),
+    ...(datos.texto_promo?.trim() ? { texto_promo: datos.texto_promo.trim() } : {}),
   };
 
-  await supabase.from("productos").insert({
+  const insertPayload: Record<string, unknown> = {
     id: nuevoProducto.id,
     categoria_id: targetCategoriaId,
     nombre: nuevoProducto.nombre,
@@ -1107,8 +1189,22 @@ export async function createProductoInSupabase(
     disponible: nuevoProducto.disponible,
     destacado: Boolean(nuevoProducto.destacado),
     etiqueta: nuevoProducto.etiqueta ?? null,
+    es_oferta: Boolean(nuevoProducto.es_oferta),
+    precio_oferta: nuevoProducto.precio_oferta ?? null,
+    texto_promo: nuevoProducto.texto_promo ?? null,
     orden: 99,
-  });
+  };
+
+  const { error: insErr } = await supabase.from("productos").insert(insertPayload);
+  if (
+    insErr &&
+    (insErr.code === "42703" || insErr.message?.includes("column"))
+  ) {
+    delete insertPayload.es_oferta;
+    delete insertPayload.precio_oferta;
+    delete insertPayload.texto_promo;
+    await supabase.from("productos").insert(insertPayload);
+  }
 
   const actualizados = locales.map((loc) => {
     if (loc.slug.toLowerCase() !== slug.toLowerCase()) return loc;

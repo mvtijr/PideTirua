@@ -8,6 +8,7 @@ import { formatCLP } from "@/lib/formatters";
 import { getVideoPoster } from "@/lib/localTheme";
 import { GradientWave } from "@/components/ui/gradient-wave";
 import LocalCard from "@/components/LocalCard";
+import { ArrowRight, ChevronLeft, ChevronRight, Flame } from "lucide-react";
 
 interface DirectoryClientProps {
   locales: Local[];
@@ -21,6 +22,66 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
     "Todos"
   );
   const [localQrModal, setLocalQrModal] = useState<Local | null>(null);
+
+  // Platos con Oferta activa del Día de locales abiertos y activos
+  const ofertasDelDia = useMemo(() => {
+    const listado: Array<{
+      localSlug: string;
+      localNombre: string;
+      localLogo: string;
+      localAbierto: boolean;
+      localHorario: string;
+      productoId: string;
+      productoNombre: string;
+      productoDescripcion: string;
+      imagen: string;
+      precioOriginal: number;
+      precioOferta: number;
+      textoPromo: string;
+    }> = [];
+
+    locales
+      .filter((loc) => loc.activo !== false)
+      .forEach((loc) => {
+        loc.categorias.forEach((cat) => {
+          cat.productos.forEach((p) => {
+            if (p.es_oferta && p.disponible !== false) {
+              const precioOferta =
+                typeof p.precio_oferta === "number" && p.precio_oferta > 0
+                  ? p.precio_oferta
+                  : p.precio;
+              listado.push({
+                localSlug: loc.slug,
+                localNombre: loc.nombre,
+                localLogo: loc.logo,
+                localAbierto: loc.abierto,
+                localHorario: loc.horario || loc.tiempoEstimado,
+                productoId: p.id,
+                productoNombre: p.nombre,
+                productoDescripcion: p.descripcion,
+                imagen: p.imagen_url || p.imagen,
+                precioOriginal: p.precio,
+                precioOferta,
+                textoPromo: p.texto_promo || "🔥 Oferta del Día",
+              });
+            }
+          });
+        });
+      });
+
+    return listado;
+  }, [locales]);
+
+  const carruselPromosRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollPromos = (direccion: "izq" | "der") => {
+    if (!carruselPromosRef.current) return;
+    const scrollAmount = 320;
+    carruselPromosRef.current.scrollBy({
+      left: direccion === "izq" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
 
   // Estado del Carrusel de Platos Destacados del Hero (extraído de los locales existentes)
   const platosDestacados = useMemo(() => {
@@ -551,6 +612,184 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               )}
             </div>
           </section>
+
+          {/* SECCIÓN COMUNAL: 🔥 OFERTAS Y PROMOS DE HOY EN TIRÚA */}
+          {ofertasDelDia.length > 0 && (
+            <section
+              id="ofertas-hoy"
+              className="relative w-full py-8 md:py-10 bg-gradient-to-b from-orange-50/70 via-amber-50/40 to-transparent border-y border-orange-200/50"
+            >
+              <div className="max-w-[1280px] mx-auto px-margin md:px-margin-tablet lg:px-margin-desktop">
+                {/* Encabezado con título, badge y controles de navegación */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-3 py-1 text-xs font-black text-white shadow-sm">
+                      <Flame className="h-3.5 w-3.5 fill-amber-300 text-amber-300 animate-pulse" />
+                      <span>Promos Especiales de Hoy</span>
+                    </div>
+                    <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+                      🔥 Ofertas y Promos de Hoy en Tirúa
+                    </h2>
+                    <p className="mt-1 text-xs sm:text-sm font-medium text-slate-600">
+                      Descuentos imperdibles en locales de Tirúa Centro y Quidico. ¡Pide antes que se agoten!
+                    </p>
+                  </div>
+
+                  {/* Botones de navegación para desktop / tablet */}
+                  {ofertasDelDia.length > 1 && (
+                    <div className="hidden sm:flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => scrollPromos("izq")}
+                        aria-label="Ver ofertas anteriores"
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-orange-200 bg-white text-slate-700 shadow-sm transition hover:bg-orange-50 hover:text-orange-600 active:scale-95"
+                      >
+                        <ChevronLeft className="h-5 w-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => scrollPromos("der")}
+                        aria-label="Ver siguientes ofertas"
+                        className="flex h-10 w-10 items-center justify-center rounded-full border border-orange-200 bg-white text-slate-700 shadow-sm transition hover:bg-orange-50 hover:text-orange-600 active:scale-95"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Pista desplazable / swipeable en móvil con snap */}
+                <div
+                  ref={carruselPromosRef}
+                  className="flex gap-4 overflow-x-auto pb-4 pt-1 no-scrollbar scroll-smooth snap-x snap-mandatory"
+                >
+                  {ofertasDelDia.map((oferta, idx) => {
+                    const tieneDescuento =
+                      oferta.precioOferta < oferta.precioOriginal;
+                    const porcentajeDescuento = tieneDescuento
+                      ? Math.round(
+                          ((oferta.precioOriginal - oferta.precioOferta) /
+                            oferta.precioOriginal) *
+                            100
+                        )
+                      : null;
+
+                    return (
+                      <div
+                        key={`${oferta.localSlug}-${oferta.productoId}-${idx}`}
+                        className="group flex w-[285px] sm:w-[320px] shrink-0 snap-start flex-col overflow-hidden rounded-3xl border border-orange-200 bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                      >
+                        {/* Foto del plato con badges flotantes */}
+                        <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+                          <img
+                            src={oferta.imagen}
+                            alt={oferta.productoNombre}
+                            decoding="async"
+                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+
+                          {/* Etiqueta de Promo llamativa */}
+                          <div className="absolute left-3 top-3">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-2.5 py-1 text-[11px] font-black text-white shadow-lg">
+                              <Flame className="h-3 w-3 fill-amber-300 text-amber-300" />
+                              <span>{oferta.textoPromo}</span>
+                            </span>
+                          </div>
+
+                          {/* Porcentaje OFF si aplica */}
+                          {porcentajeDescuento && (
+                            <div className="absolute right-3 top-3">
+                              <span className="rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-black text-slate-950 shadow-md">
+                                -{porcentajeDescuento}%
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Estado del local (Abierto / Cerrado) */}
+                          <div className="absolute bottom-2.5 left-3">
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-extrabold backdrop-blur-md shadow-xs ${
+                                oferta.localAbierto
+                                  ? "bg-emerald-600/90 text-white"
+                                  : "bg-rose-600/90 text-white"
+                              }`}
+                            >
+                              <span>
+                                {oferta.localAbierto ? "🟢 Abierto" : "🔴 Cerrado"}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Contenido de la tarjeta */}
+                        <div className="flex flex-1 flex-col justify-between p-4">
+                          <div>
+                            {/* Nombre del local de origen */}
+                            <Link
+                              href={`/${oferta.localSlug}`}
+                              className="group/local inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary transition-colors"
+                            >
+                              {oferta.localLogo && (
+                                <img
+                                  src={oferta.localLogo}
+                                  alt={oferta.localNombre}
+                                  className="h-4 w-4 rounded-full object-cover border border-slate-200"
+                                />
+                              )}
+                              <span className="line-clamp-1 group-hover/local:underline">
+                                {oferta.localNombre}
+                              </span>
+                            </Link>
+
+                            {/* Nombre del plato */}
+                            <h3 className="mt-1 text-base font-black text-slate-900 line-clamp-1">
+                              {oferta.productoNombre}
+                            </h3>
+
+                            {/* Descripción del plato */}
+                            {oferta.productoDescripcion && (
+                              <p className="mt-0.5 text-xs text-slate-600 line-clamp-2">
+                                {oferta.productoDescripcion}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Precios y Botón "Pedir Promo" */}
+                          <div className="mt-4 border-t border-slate-100 pt-3">
+                            <div className="mb-3 flex items-baseline justify-between">
+                              <div>
+                                {tieneDescuento && (
+                                  <span className="block text-[11px] font-bold text-slate-400 line-through">
+                                    {formatCLP(oferta.precioOriginal)}
+                                  </span>
+                                )}
+                                <span className="text-lg font-black text-emerald-600 sm:text-xl">
+                                  {formatCLP(oferta.precioOferta)}
+                                </span>
+                              </div>
+
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                {oferta.localHorario}
+                              </span>
+                            </div>
+
+                            <Link
+                              href={`/${oferta.localSlug}`}
+                              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-500 py-2.5 px-4 text-xs font-extrabold text-white shadow-md transition-all hover:from-emerald-500 hover:to-emerald-400 active:scale-95"
+                            >
+                              <span>Pedir Promo</span>
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* SECCIÓN COVERFLOW 3D PERSPECTIVE SOBRE EL FONDO GRADIENT WAVE */}
           <section

@@ -169,6 +169,9 @@ export async function POST(
         imagen_url,
         etiqueta,
         disponible,
+        es_oferta,
+        precio_oferta,
+        texto_promo,
       } = body;
 
       if (!nombre || typeof nombre !== "string" || !nombre.trim()) {
@@ -198,6 +201,13 @@ export async function POST(
         imagen_url: typeof imagen_url === "string" ? imagen_url : "",
         etiqueta: typeof etiqueta === "string" ? etiqueta : undefined,
         disponible: disponible !== false,
+        es_oferta: typeof es_oferta === "boolean" ? es_oferta : false,
+        precio_oferta:
+          typeof precio_oferta === "number" && !Number.isNaN(precio_oferta)
+            ? Number(precio_oferta)
+            : undefined,
+        texto_promo:
+          typeof texto_promo === "string" ? texto_promo.trim() : undefined,
       });
 
       revalidatePath("/");
@@ -215,6 +225,9 @@ export async function POST(
         disponible,
         imagen_url,
         etiqueta,
+        es_oferta,
+        precio_oferta,
+        texto_promo,
       } = body;
       const result = await updateProductoInSupabase(slug, String(productoId), {
         ...(typeof nombre === "string" ? { nombre } : {}),
@@ -223,6 +236,21 @@ export async function POST(
         ...(typeof disponible === "boolean" ? { disponible } : {}),
         ...(typeof imagen_url === "string" ? { imagen_url } : {}),
         ...(typeof etiqueta === "string" ? { etiqueta } : {}),
+        ...(typeof es_oferta === "boolean" ? { es_oferta } : {}),
+        ...(precio_oferta !== undefined
+          ? {
+              precio_oferta:
+                precio_oferta != null && !Number.isNaN(Number(precio_oferta))
+                  ? Number(precio_oferta)
+                  : null,
+            }
+          : {}),
+        ...(texto_promo !== undefined
+          ? {
+              texto_promo:
+                typeof texto_promo === "string" ? texto_promo.trim() : null,
+            }
+          : {}),
       });
       revalidatePath("/");
       revalidatePath(`/${slug}`);

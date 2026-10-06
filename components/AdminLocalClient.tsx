@@ -34,11 +34,14 @@ import {
   Clock,
   MapPin,
   KeyRound,
+  BarChart3,
+  Flame,
 } from "lucide-react";
 import { Local, Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
 import KitchenMonitor from "@/components/KitchenMonitor";
+import VentasReportes from "@/components/VentasReportes";
 
 interface AdminLocalClientProps {
   initialLocal: Local;
@@ -246,6 +249,11 @@ export default function AdminLocalClient({
   );
   const [descargandoQr, setDescargandoQr] = useState<boolean>(false);
 
+  // Pestaña o sección activa en el panel admin
+  const [pestanaActiva, setPestañaActiva] = useState<
+    "todas" | "reportes" | "cocina" | "carta"
+  >("todas");
+
   // Estado del formulario "Subir Nuevo Plato"
   const [mostrarFormNuevo, setMostrarFormNuevo] = useState<boolean>(false);
   const [nuevoCategoriaId, setNuevoCategoriaId] = useState<string>(
@@ -258,21 +266,40 @@ export default function AdminLocalClient({
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState<string>("");
   const [nuevaFotoUrl, setNuevaFotoUrl] = useState<string>("");
   const [subiendoFotoNueva, setSubiendoFotoNueva] = useState<boolean>(false);
+  const [nuevoEsOferta, setNuevoEsOferta] = useState<boolean>(false);
+  const [nuevoPrecioOferta, setNuevoPrecioOferta] = useState<string>("");
+  const [nuevoTextoPromo, setNuevoTextoPromo] = useState<string>("");
   const [creandoPlato, setCreandoPlato] = useState<boolean>(false);
   const [errorNuevoPlato, setErrorNuevoPlato] = useState<string | null>(null);
 
   const inputFotoNuevoRef = useRef<HTMLInputElement | null>(null);
 
-  // Estado local de edición rápida de nombre, precio, descripción y etiqueta por producto
+  // Estado local de edición rápida de nombre, precio, descripción, etiqueta y oferta por producto
   const [ediciones, setEdiciones] = useState<
     Record<
       string,
-      { nombre: string; precio: string; descripcion: string; etiqueta: string }
+      {
+        nombre: string;
+        precio: string;
+        descripcion: string;
+        etiqueta: string;
+        es_oferta: boolean;
+        precio_oferta: string;
+        texto_promo: string;
+      }
     >
   >(() => {
     const map: Record<
       string,
-      { nombre: string; precio: string; descripcion: string; etiqueta: string }
+      {
+        nombre: string;
+        precio: string;
+        descripcion: string;
+        etiqueta: string;
+        es_oferta: boolean;
+        precio_oferta: string;
+        texto_promo: string;
+      }
     > = {};
     for (const cat of initialLocal.categorias) {
       for (const prod of cat.productos) {
@@ -281,6 +308,10 @@ export default function AdminLocalClient({
           precio: String(prod.precio),
           descripcion: prod.descripcion,
           etiqueta: prod.etiqueta || "",
+          es_oferta: Boolean(prod.es_oferta),
+          precio_oferta:
+            prod.precio_oferta != null ? String(prod.precio_oferta) : "",
+          texto_promo: prod.texto_promo || "",
         };
       }
     }
@@ -290,7 +321,15 @@ export default function AdminLocalClient({
   useEffect(() => {
     const map: Record<
       string,
-      { nombre: string; precio: string; descripcion: string; etiqueta: string }
+      {
+        nombre: string;
+        precio: string;
+        descripcion: string;
+        etiqueta: string;
+        es_oferta: boolean;
+        precio_oferta: string;
+        texto_promo: string;
+      }
     > = {};
     for (const cat of local.categorias) {
       for (const prod of cat.productos) {
@@ -299,6 +338,10 @@ export default function AdminLocalClient({
           precio: String(prod.precio),
           descripcion: prod.descripcion,
           etiqueta: prod.etiqueta || "",
+          es_oferta: Boolean(prod.es_oferta),
+          precio_oferta:
+            prod.precio_oferta != null ? String(prod.precio_oferta) : "",
+          texto_promo: prod.texto_promo || "",
         };
       }
     }
@@ -671,6 +714,10 @@ export default function AdminLocalClient({
     setErrorNuevoPlato(null);
 
     try {
+      const precioOfertaNum = Number(
+        String(nuevoPrecioOferta).replace(/[^0-9]/g, "")
+      );
+
       const res = await fetch(`/api/admin/${local.slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -688,6 +735,13 @@ export default function AdminLocalClient({
           imagen_url: nuevaFotoUrl.trim(),
           etiqueta: nuevaEtiqueta.trim() || undefined,
           disponible: true,
+          es_oferta: nuevoEsOferta,
+          precio_oferta:
+            nuevoEsOferta && precioOfertaNum > 0 ? precioOfertaNum : undefined,
+          texto_promo:
+            nuevoEsOferta && nuevoTextoPromo.trim()
+              ? nuevoTextoPromo.trim()
+              : undefined,
         }),
       });
 
@@ -708,8 +762,16 @@ export default function AdminLocalClient({
       setNuevaEtiqueta("");
       setNuevaFotoUrl("");
       setNuevaCategoriaNombre("");
+      setNuevoEsOferta(false);
+      setNuevoPrecioOferta("");
+      setNuevoTextoPromo("");
       setMostrarFormNuevo(false);
-      mostrarToast(`Plato "${nombreLimpio}" publicado en la carta`);
+
+      if (nuevoEsOferta) {
+        mostrarToast("Oferta activada en la portada de Tirúa");
+      } else {
+        mostrarToast(`Plato "${nombreLimpio}" publicado en la carta`);
+      }
     } catch {
       setErrorNuevoPlato("Error de conexión al guardar el plato.");
     } finally {
@@ -757,7 +819,7 @@ export default function AdminLocalClient({
     }
   };
 
-  // Guardar edición rápida de Nombre, Precio, Descripción y Etiqueta de un producto
+  // Guardar edición rápida de Nombre, Precio, Descripción, Etiqueta y Oferta de un producto
   const handleGuardarEdicionProducto = async (producto: Producto) => {
     const edicion = ediciones[producto.id];
     if (!edicion) return;
@@ -768,6 +830,11 @@ export default function AdminLocalClient({
     const precioNumero = Number(
       String(edicion.precio).replace(/[^0-9]/g, "")
     );
+    const esOferta = Boolean(edicion.es_oferta);
+    const precioOfertaNum = Number(
+      String(edicion.precio_oferta || "").replace(/[^0-9]/g, "")
+    );
+    const textoPromoLimpio = edicion.texto_promo?.trim() || "";
 
     if (!nombreLimpio || Number.isNaN(precioNumero) || precioNumero <= 0) {
       return;
@@ -777,7 +844,10 @@ export default function AdminLocalClient({
       nombreLimpio === producto.nombre &&
       precioNumero === producto.precio &&
       descripcionLimpia === producto.descripcion &&
-      etiquetaLimpia === (producto.etiqueta || "")
+      etiquetaLimpia === (producto.etiqueta || "") &&
+      esOferta === Boolean(producto.es_oferta) &&
+      (precioOfertaNum || 0) === (producto.precio_oferta || 0) &&
+      textoPromoLimpio === (producto.texto_promo || "")
     ) {
       return;
     }
@@ -794,6 +864,11 @@ export default function AdminLocalClient({
                 precio: precioNumero,
                 descripcion: descripcionLimpia,
                 etiqueta: etiquetaLimpia || undefined,
+                es_oferta: esOferta,
+                precio_oferta:
+                  esOferta && precioOfertaNum > 0 ? precioOfertaNum : undefined,
+                texto_promo:
+                  esOferta && textoPromoLimpio ? textoPromoLimpio : undefined,
               }
             : p
         ),
@@ -812,13 +887,22 @@ export default function AdminLocalClient({
           precio: precioNumero,
           descripcion: descripcionLimpia,
           etiqueta: etiquetaLimpia,
+          es_oferta: esOferta,
+          precio_oferta:
+            esOferta && precioOfertaNum > 0 ? precioOfertaNum : null,
+          texto_promo: esOferta && textoPromoLimpio ? textoPromoLimpio : null,
         }),
       });
       const data = await res.json();
       if (res.ok && data.ok && data.local) {
         setLocal(data.local);
       }
-      mostrarToast("Cambio guardado");
+
+      if (esOferta) {
+        mostrarToast("Oferta activada en la portada de Tirúa");
+      } else {
+        mostrarToast("Cambio guardado");
+      }
     } finally {
       setGuardandoId(null);
     }
@@ -1348,115 +1432,193 @@ export default function AdminLocalClient({
           </div>
         </section>
 
-        {/* 1. CONTROL MAESTRO: Switch grande para estado Abierto / Cerrado */}
-        <section
-          className={`no-print rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <span
-              className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
-            >
-              <Store className="h-4 w-4" />
-              Control Maestro del Local
-            </span>
-            <span className={`text-xs font-semibold ${brand.subtitleText}`}>
-              Horario: {local.horario}
-            </span>
-          </div>
-
-          <p className={`mt-1 text-xs ${brand.subtitleText}`}>
-            Toca el interruptor para abrir o cerrar la recepción de pedidos en
-            tu carta digital al instante:
-          </p>
-
+        {/* NAVEGACIÓN DESTACADA POR PESTAÑAS DEL PANEL ADMIN */}
+        <div className="no-print -mt-1 flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-white/15 bg-black/40 p-1.5 backdrop-blur-md scrollbar-none">
           <button
             type="button"
-            disabled={guardandoId === "local-abierto"}
-            onClick={handleToggleAbierto}
-            className={`mt-4 flex w-full items-center justify-between rounded-2xl border-2 px-5 py-4 text-left shadow-lg transition-all active:scale-[0.99] ${
-              local.abierto
-                ? "border-emerald-400 bg-emerald-600 text-white shadow-emerald-900/30 hover:bg-emerald-500"
-                : "border-rose-400 bg-rose-600 text-white shadow-rose-900/30 hover:bg-rose-500"
+            onClick={() => setPestañaActiva("todas")}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black transition active:scale-95 ${
+              pestanaActiva === "todas"
+                ? `${brand.accentBg} shadow-sm`
+                : "text-white/80 hover:bg-white/10 hover:text-white"
             }`}
           >
-            <div>
-              <span className="block text-[11px] font-bold uppercase tracking-wider text-white/85">
-                Estado actual en vivo
-              </span>
-              <span className="mt-0.5 block text-lg font-black sm:text-xl">
-                {local.abierto ? "🟢 Local Abierto" : "🔴 Local Cerrado"}
-              </span>
-              <span className="mt-0.5 block text-xs font-medium text-white/90">
-                {local.abierto
-                  ? "Recibiendo pedidos por WhatsApp"
-                  : "Carrito bloqueado · Solo lectura de carta"}
-              </span>
-            </div>
-
-            <div className="flex flex-col items-end gap-1">
-              <div
-                className={`relative flex h-9 w-16 items-center rounded-full p-1 transition-colors ${
-                  local.abierto ? "bg-emerald-950/45" : "bg-rose-950/45"
-                }`}
-              >
-                <div
-                  className={`h-7 w-7 rounded-full bg-white shadow-md transition-transform ${
-                    local.abierto ? "translate-x-7" : "translate-x-0"
-                  }`}
-                />
-              </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
-                {guardandoId === "local-abierto"
-                  ? "Guardando..."
-                  : "Tocar para cambiar"}
-              </span>
-            </div>
+            <span>👁️ Ver Todo</span>
           </button>
 
-          {/* Resumen rápido de platos y botón rápido para Cartel QR */}
-          <div className="mt-4 grid grid-cols-2 gap-2.5 text-center">
-            <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/15 p-2.5">
-              <span className="block text-lg font-black text-emerald-300">
-                {productosDisponibles}
-              </span>
-              <span className="text-[11px] font-bold text-emerald-100">
-                Platos Disponibles
-              </span>
-            </div>
-            <div className="rounded-2xl border border-white/15 bg-white/10 p-2.5">
-              <span className="block text-lg font-black text-white">
-                {totalProductos - productosDisponibles}
-              </span>
-              <span className={`text-[11px] font-bold ${brand.subtitleText}`}>
-                Platos Agotados
-              </span>
-            </div>
-          </div>
-
-          {/* Botón destacado rápido para abrir el Cartel QR para Mesas */}
           <button
             type="button"
-            onClick={() => setMostrarCartelQr((prev) => !prev)}
-            className={`mt-3.5 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-xs font-extrabold shadow-md transition active:scale-[0.99] sm:text-sm ${brand.accentBg}`}
+            onClick={() => setPestañaActiva("reportes")}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black transition active:scale-95 ${
+              pestanaActiva === "reportes"
+                ? "bg-emerald-600 text-white shadow-sm"
+                : "text-white/80 hover:bg-white/10 hover:text-white"
+            }`}
           >
-            <QrCode className="h-4 w-4 shrink-0" />
-            <span>📱 Mi Cartel QR para Mesas</span>
+            <BarChart3 className="h-3.5 w-3.5" />
+            <span>📊 Ventas</span>
           </button>
-        </section>
+
+          <button
+            type="button"
+            onClick={() => setPestañaActiva("cocina")}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black transition active:scale-95 ${
+              pestanaActiva === "cocina"
+                ? "bg-amber-500 text-slate-950 shadow-sm"
+                : "text-white/80 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <span>👨‍🍳 Cocina</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPestañaActiva("carta")}
+            className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 text-xs font-black transition active:scale-95 ${
+              pestanaActiva === "carta"
+                ? `${brand.accentBg} shadow-sm`
+                : "text-white/80 hover:bg-white/10 hover:text-white"
+            }`}
+          >
+            <span>🍽️ Carta</span>
+          </button>
+        </div>
+
+        {/* 1. CONTROL MAESTRO: Switch grande para estado Abierto / Cerrado */}
+        {(pestanaActiva === "carta" || pestanaActiva === "todas") && (
+          <section
+            className={`no-print rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span
+                className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+              >
+                <Store className="h-4 w-4" />
+                Control Maestro del Local
+              </span>
+              <span className={`text-xs font-semibold ${brand.subtitleText}`}>
+                Horario: {local.horario}
+              </span>
+            </div>
+
+            <p className={`mt-1 text-xs ${brand.subtitleText}`}>
+              Toca el interruptor para abrir o cerrar la recepción de pedidos en
+              tu carta digital al instante:
+            </p>
+
+            <button
+              type="button"
+              disabled={guardandoId === "local-abierto"}
+              onClick={handleToggleAbierto}
+              className={`mt-4 flex w-full items-center justify-between rounded-2xl border-2 px-5 py-4 text-left shadow-lg transition-all active:scale-[0.99] ${
+                local.abierto
+                  ? "border-emerald-400 bg-emerald-600 text-white shadow-emerald-900/30 hover:bg-emerald-500"
+                  : "border-rose-400 bg-rose-600 text-white shadow-rose-900/30 hover:bg-rose-500"
+              }`}
+            >
+              <div>
+                <span className="block text-[11px] font-bold uppercase tracking-wider text-white/85">
+                  Estado actual en vivo
+                </span>
+                <span className="mt-0.5 block text-lg font-black sm:text-xl">
+                  {local.abierto ? "🟢 Local Abierto" : "🔴 Local Cerrado"}
+                </span>
+                <span className="mt-0.5 block text-xs font-medium text-white/90">
+                  {local.abierto
+                    ? "Recibiendo pedidos por WhatsApp"
+                    : "Carrito bloqueado · Solo lectura de carta"}
+                </span>
+              </div>
+
+              <div className="flex flex-col items-end gap-1">
+                <div
+                  className={`relative flex h-9 w-16 items-center rounded-full p-1 transition-colors ${
+                    local.abierto ? "bg-emerald-950/45" : "bg-rose-950/45"
+                  }`}
+                >
+                  <div
+                    className={`h-7 w-7 rounded-full bg-white shadow-md transition-transform ${
+                      local.abierto ? "translate-x-7" : "translate-x-0"
+                    }`}
+                  />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
+                  {guardandoId === "local-abierto"
+                    ? "Guardando..."
+                    : "Tocar para cambiar"}
+                </span>
+              </div>
+            </button>
+
+            {/* Resumen rápido de platos y botón rápido para Cartel QR */}
+            <div className="mt-4 grid grid-cols-2 gap-2.5 text-center">
+              <div className="rounded-2xl border border-emerald-400/30 bg-emerald-500/15 p-2.5">
+                <span className="block text-lg font-black text-emerald-300">
+                  {productosDisponibles}
+                </span>
+                <span className="text-[11px] font-bold text-emerald-100">
+                  Platos Disponibles
+                </span>
+              </div>
+              <div className="rounded-2xl border border-white/15 bg-white/10 p-2.5">
+                <span className="block text-lg font-black text-white">
+                  {totalProductos - productosDisponibles}
+                </span>
+                <span className={`text-[11px] font-bold ${brand.subtitleText}`}>
+                  Platos Agotados
+                </span>
+              </div>
+            </div>
+
+            {/* Botón destacado rápido para abrir el Cartel QR para Mesas */}
+            <button
+              type="button"
+              onClick={() => setMostrarCartelQr((prev) => !prev)}
+              className={`mt-3.5 flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3 text-xs font-extrabold shadow-md transition active:scale-[0.99] sm:text-sm ${brand.accentBg}`}
+            >
+              <QrCode className="h-4 w-4 shrink-0" />
+              <span>📱 Mi Cartel QR para Mesas</span>
+            </button>
+          </section>
+        )}
+
+        {/* 1.25 REPORTE DE VENTAS Y MÉTRICAS PARA EL DUEÑO */}
+        {(pestanaActiva === "reportes" || pestanaActiva === "todas") && (
+          <VentasReportes
+            localSlug={local.slug}
+            localNombre={local.nombre}
+            accentBg={brand.accentBg}
+            accentText={brand.accentText}
+            panelCardBg={brand.panelCardBg}
+            subtitleText={brand.subtitleText}
+            onNotify={mostrarToast}
+          />
+        )}
 
         {/* 1.5 MONITOR DE COCINA EN TIEMPO REAL CON ALERTA SONORA (KDS) */}
-        <KitchenMonitor
-          localSlug={local.slug}
-          localNombre={local.nombre}
-          accentBg={brand.accentBg}
-          accentText={brand.accentText}
-          panelCardBg={brand.panelCardBg}
-          subtitleText={brand.subtitleText}
-          onNotify={mostrarToast}
-        />
+        <div
+          className={
+            pestanaActiva === "cocina" || pestanaActiva === "todas"
+              ? "block"
+              : "hidden"
+          }
+        >
+          <KitchenMonitor
+            localSlug={local.slug}
+            localNombre={local.nombre}
+            accentBg={brand.accentBg}
+            accentText={brand.accentText}
+            panelCardBg={brand.panelCardBg}
+            subtitleText={brand.subtitleText}
+            onNotify={mostrarToast}
+          />
+        </div>
 
-        {/* 2. GENERADOR DE CARTEL QR LISTO PARA IMPRIMIR */}
-        <section
+        {/* SECCIONES DE GESTIÓN DE CARTA Y OPERACIÓN */}
+        {(pestanaActiva === "carta" || pestanaActiva === "todas") && (
+          <>
+            {/* 2. GENERADOR DE CARTEL QR LISTO PARA IMPRIMIR */}
+            <section
           className={`rounded-3xl border p-5 shadow-xl print:border-none print:bg-transparent print:p-0 print:shadow-none ${brand.panelCardBg}`}
         >
           <div className="no-print flex flex-wrap items-center justify-between gap-3">
@@ -2145,6 +2307,69 @@ export default function AdminLocalClient({
                 />
               </div>
 
+              {/* 6. Interruptor de Oferta del Día */}
+              <div className="rounded-2xl border border-white/20 bg-black/35 p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Flame className="h-4 w-4 text-rose-400 fill-rose-400" />
+                    <div>
+                      <span className="block text-xs font-black uppercase tracking-wider text-white">
+                        ¿Activar como Oferta del Día?
+                      </span>
+                      <span className="block text-[11px] font-medium text-white/70">
+                        Se promocionará en el carrusel de ofertas de la portada comunal
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setNuevoEsOferta((prev) => !prev)}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      nuevoEsOferta ? "bg-rose-600" : "bg-slate-700"
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        nuevoEsOferta ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {nuevoEsOferta && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    <div>
+                      <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-rose-300">
+                        Precio Oferta (CLP) *
+                      </label>
+                      <div className="relative">
+                        <DollarSign className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+                        <input
+                          type="number"
+                          inputMode="numeric"
+                          value={nuevoPrecioOferta}
+                          onChange={(e) => setNuevoPrecioOferta(e.target.value)}
+                          placeholder="Ej: 6000"
+                          className="w-full rounded-xl border border-rose-300/60 bg-white py-2 pl-7 pr-3 text-xs font-black text-slate-900 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-rose-300">
+                        Etiqueta de Promo (ej: 20% OFF, 2x1)
+                      </label>
+                      <input
+                        type="text"
+                        value={nuevoTextoPromo}
+                        onChange={(e) => setNuevoTextoPromo(e.target.value)}
+                        placeholder="Ej: 20% OFF, 2x1, Promo del Día"
+                        className="w-full rounded-xl border border-rose-300/60 bg-white px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {errorNuevoPlato && (
                 <p className="rounded-xl border border-rose-400/50 bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-200">
                   {errorNuevoPlato}
@@ -2201,15 +2426,27 @@ export default function AdminLocalClient({
                     precio: String(producto.precio),
                     descripcion: producto.descripcion,
                     etiqueta: producto.etiqueta || "",
+                    es_oferta: Boolean(producto.es_oferta),
+                    precio_oferta:
+                      producto.precio_oferta != null
+                        ? String(producto.precio_oferta)
+                        : "",
+                    texto_promo: producto.texto_promo || "",
                   };
                   const precioNumerico = Number(
                     String(editState.precio).replace(/[^0-9]/g, "")
+                  );
+                  const precioOfertaNumerico = Number(
+                    String(editState.precio_oferta || "").replace(/[^0-9]/g, "")
                   );
                   const hayCambiosSinGuardar =
                     editState.nombre.trim() !== producto.nombre ||
                     precioNumerico !== producto.precio ||
                     editState.descripcion.trim() !== producto.descripcion ||
-                    editState.etiqueta.trim() !== (producto.etiqueta || "");
+                    editState.etiqueta.trim() !== (producto.etiqueta || "") ||
+                    Boolean(editState.es_oferta) !== Boolean(producto.es_oferta) ||
+                    (precioOfertaNumerico || 0) !== (producto.precio_oferta || 0) ||
+                    editState.texto_promo.trim() !== (producto.texto_promo || "");
 
                   return (
                     <div
@@ -2496,6 +2733,116 @@ export default function AdminLocalClient({
                             className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none"
                           />
                         </div>
+
+                        {/* Control de Oferta del Día */}
+                        <div className="mt-1 rounded-xl border border-orange-200/90 bg-orange-50/70 p-2.5 sm:col-span-12">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-orange-950">
+                              <input
+                                type="checkbox"
+                                checked={Boolean(editState.es_oferta)}
+                                onChange={(e) => {
+                                  const activo = e.target.checked;
+                                  const updated = {
+                                    ...editState,
+                                    es_oferta: activo,
+                                    precio_oferta:
+                                      activo && !editState.precio_oferta
+                                        ? String(Math.round(producto.precio * 0.85))
+                                        : editState.precio_oferta,
+                                    texto_promo:
+                                      activo && !editState.texto_promo
+                                        ? "🔥 Oferta del Día"
+                                        : editState.texto_promo,
+                                  };
+                                  setEdiciones((prev) => ({
+                                    ...prev,
+                                    [producto.id]: updated,
+                                  }));
+                                }}
+                                className="h-4 w-4 rounded border-orange-300 text-orange-600 focus:ring-orange-500"
+                              />
+                              <Flame className="h-3.5 w-3.5 text-orange-600" />
+                              <span>¿Activar como Oferta del Día?</span>
+                            </label>
+
+                            {editState.es_oferta && (
+                              <span className="rounded-full bg-orange-200/80 px-2 py-0.5 text-[10px] font-extrabold text-orange-800">
+                                Visible en portada de Tirúa
+                              </span>
+                            )}
+                          </div>
+
+                          {editState.es_oferta && (
+                            <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                              <div>
+                                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-orange-950">
+                                  Precio Oferta (CLP)
+                                </label>
+                                <div className="relative">
+                                  <DollarSign className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-orange-500" />
+                                  <input
+                                    type="number"
+                                    inputMode="numeric"
+                                    value={editState.precio_oferta}
+                                    placeholder={String(Math.round(producto.precio * 0.85))}
+                                    onChange={(e) =>
+                                      setEdiciones((prev) => ({
+                                        ...prev,
+                                        [producto.id]: {
+                                          ...editState,
+                                          precio_oferta: e.target.value,
+                                        },
+                                      }))
+                                    }
+                                    onBlur={() => {
+                                      if (hayCambiosSinGuardar) {
+                                        void handleGuardarEdicionProducto(producto);
+                                      }
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.currentTarget.blur();
+                                      }
+                                    }}
+                                    className="w-full rounded-xl border border-orange-300 bg-white py-1.5 pl-7 pr-2.5 text-xs font-black text-orange-950 focus:border-orange-600 focus:outline-none"
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-orange-950">
+                                  Etiqueta de Promo
+                                </label>
+                                <input
+                                  type="text"
+                                  value={editState.texto_promo}
+                                  placeholder="Ej: 20% OFF, Promo del Día, 2x1"
+                                  onChange={(e) =>
+                                    setEdiciones((prev) => ({
+                                      ...prev,
+                                      [producto.id]: {
+                                        ...editState,
+                                        texto_promo: e.target.value,
+                                      },
+                                    }))
+                                  }
+                                  onBlur={() => {
+                                    if (hayCambiosSinGuardar) {
+                                      void handleGuardarEdicionProducto(producto);
+                                    }
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      e.currentTarget.blur();
+                                    }
+                                  }}
+                                  className="w-full rounded-xl border border-orange-300 bg-white px-3 py-1.5 text-xs font-bold text-orange-950 placeholder:text-orange-400 focus:border-orange-600 focus:outline-none"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -2503,7 +2850,9 @@ export default function AdminLocalClient({
               </div>
             </section>
           ))}
-        </div>
+          </div>
+          </>
+        )}
       </main>
     </div>
   );

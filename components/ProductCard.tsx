@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Minus, Sparkles, Ban } from "lucide-react";
+import { Plus, Minus, Sparkles, Ban, Flame } from "lucide-react";
 import { Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import { getLocalTheme } from "@/lib/localTheme";
@@ -23,6 +23,12 @@ export default function ProductCard({
   const theme = getLocalTheme(localSlug);
   const disponible = producto.disponible !== false;
   const imagenSrc = producto.imagen_url || producto.imagen;
+  const tieneOferta =
+    Boolean(producto.es_oferta) &&
+    typeof producto.precio_oferta === "number" &&
+    producto.precio_oferta > 0 &&
+    producto.precio_oferta < producto.precio;
+  const precioCobro = tieneOferta ? producto.precio_oferta! : producto.precio;
 
   return (
     <div
@@ -42,6 +48,12 @@ export default function ProductCard({
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-300 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wide text-slate-700">
                 <Ban className="h-3 w-3 text-slate-600" />
                 Agotado
+              </span>
+            )}
+            {disponible && tieneOferta && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-black text-rose-700 border border-rose-200">
+                <Flame className="h-3 w-3 text-rose-600 fill-rose-600" />
+                {producto.texto_promo || "Promo del Día"}
               </span>
             )}
             {disponible && producto.etiqueta && (
@@ -81,13 +93,24 @@ export default function ProductCard({
         </div>
 
         <div className="mt-3 flex items-center justify-between gap-2">
-          <span
-            className={`text-base font-extrabold tracking-tight sm:text-lg ${
-              !disponible ? "text-slate-400" : theme.cardPrice
-            }`}
-          >
-            {formatCLP(producto.precio)}
-          </span>
+          <div className="flex flex-col">
+            {tieneOferta && disponible && (
+              <span className="text-xs font-bold text-slate-400 line-through decoration-rose-400">
+                {formatCLP(producto.precio)}
+              </span>
+            )}
+            <span
+              className={`text-base font-extrabold tracking-tight sm:text-lg ${
+                !disponible
+                  ? "text-slate-400"
+                  : tieneOferta
+                  ? "text-rose-600 font-black"
+                  : theme.cardPrice
+              }`}
+            >
+              {formatCLP(precioCobro)}
+            </span>
+          </div>
 
           {/* Controles de agregar o modificar cantidad */}
           {!disponible ? (
@@ -140,6 +163,12 @@ export default function ProductCard({
 
       {/* Imagen del producto */}
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-surface-container sm:h-32 sm:w-32">
+        {tieneOferta && disponible && (
+          <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 rounded-lg bg-rose-600/95 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-md backdrop-blur-xs animate-pulse">
+            <Flame className="h-3 w-3 fill-white text-white" />
+            <span>{producto.texto_promo || "OFERTA"}</span>
+          </div>
+        )}
         <img
           src={imagenSrc}
           alt={producto.nombre}

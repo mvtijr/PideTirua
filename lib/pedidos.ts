@@ -38,7 +38,8 @@ function normalizePedidoRow(row: Record<string, unknown>): Pedido {
   const estado: EstadoPedido =
     estadoRaw === "preparando" ||
     estadoRaw === "listo" ||
-    estadoRaw === "entregado"
+    estadoRaw === "entregado" ||
+    estadoRaw === "cancelado"
       ? estadoRaw
       : "pendiente";
 

@@ -100,6 +100,7 @@ export async function PATCH(req: NextRequest) {
       "preparando",
       "listo",
       "entregado",
+      "cancelado",
     ];
     if (!estadosValidos.includes(estado)) {
       return NextResponse.json(

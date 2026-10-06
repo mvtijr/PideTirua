@@ -35,6 +35,7 @@ import {
   formatCLP,
   formatPhoneDisplay,
   formatWhatsAppMessage,
+  getPrecioEfectivoProducto,
 } from "@/lib/formatters";
 import { getLocalTheme } from "@/lib/localTheme";
 
@@ -240,12 +241,15 @@ export default function CartDrawer({
       metodo_pago:
         metodoPago === "Transferencia Bancaria" ? "Transferencia" : "Efectivo",
       notas: notasCompletas,
-      items: items.map(({ producto, cantidad }) => ({
-        nombre: producto.nombre,
-        cantidad,
-        precio: producto.precio,
-        subtotal: producto.precio * cantidad,
-      })),
+      items: items.map(({ producto, cantidad }) => {
+        const precioUnitario = getPrecioEfectivoProducto(producto);
+        return {
+          nombre: producto.nombre,
+          cantidad,
+          precio: precioUnitario,
+          subtotal: precioUnitario * cantidad,
+        };
+      }),
       total,
     };
 
@@ -380,12 +384,30 @@ export default function CartDrawer({
                         >
                           {producto.nombre}
                         </p>
-                        <p className="text-xs font-medium text-on-surface-variant">
-                          {formatCLP(producto.precio)} c/u ·{" "}
-                          <strong className={theme.drawerItemTotal}>
-                            {formatCLP(producto.precio * cantidad)}
-                          </strong>
-                        </p>
+                        {(() => {
+                          const precioUnitario = getPrecioEfectivoProducto(producto);
+                          const esPromo =
+                            producto.es_oferta &&
+                            typeof producto.precio_oferta === "number" &&
+                            producto.precio_oferta > 0 &&
+                            producto.precio_oferta < producto.precio;
+                          return (
+                            <p className="text-xs font-medium text-on-surface-variant">
+                              {esPromo && (
+                                <span className="mr-1 text-[11px] text-slate-400 line-through">
+                                  {formatCLP(producto.precio)}
+                                </span>
+                              )}
+                              <span className={esPromo ? "font-bold text-rose-600" : ""}>
+                                {formatCLP(precioUnitario)} c/u
+                              </span>{" "}
+                              ·{" "}
+                              <strong className={theme.drawerItemTotal}>
+                                {formatCLP(precioUnitario * cantidad)}
+                              </strong>
+                            </p>
+                          );
+                        })()}
                       </div>
 
                       <div

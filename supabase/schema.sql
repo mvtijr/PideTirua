@@ -86,13 +86,19 @@ CREATE TABLE IF NOT EXISTS public.productos (
   disponible BOOLEAN NOT NULL DEFAULT true,
   destacado BOOLEAN NOT NULL DEFAULT false,
   etiqueta TEXT NULL,
+  es_oferta BOOLEAN NOT NULL DEFAULT false,
+  precio_oferta INTEGER NULL,
+  texto_promo TEXT NULL,
   orden INTEGER NOT NULL DEFAULT 1,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Asegurar que la columna `etiqueta` exista en `public.productos` (nullable)
+-- Asegurar que las columnas de etiqueta y ofertas existan en `public.productos`
 ALTER TABLE public.productos
-  ADD COLUMN IF NOT EXISTS etiqueta TEXT NULL;
+  ADD COLUMN IF NOT EXISTS etiqueta TEXT NULL,
+  ADD COLUMN IF NOT EXISTS es_oferta BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS precio_oferta INTEGER NULL,
+  ADD COLUMN IF NOT EXISTS texto_promo TEXT NULL;
 
 -- Índices para consultas rápidas por slug y relaciones
 CREATE INDEX IF NOT EXISTS idx_locales_slug ON public.locales(slug);
@@ -186,7 +192,7 @@ CREATE TABLE IF NOT EXISTS public.pedidos (
   items JSONB NOT NULL DEFAULT '[]'::jsonb,
   total INTEGER NOT NULL DEFAULT 0,
   estado TEXT NOT NULL DEFAULT 'pendiente'
-    CHECK (estado IN ('pendiente', 'preparando', 'listo', 'entregado'))
+    CHECK (estado IN ('pendiente', 'preparando', 'listo', 'entregado', 'cancelado'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_pedidos_local_slug_created

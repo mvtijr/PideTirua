@@ -24,6 +24,9 @@ export interface Producto {
   disponible?: boolean;
   destacado?: boolean;
   etiqueta?: string;
+  es_oferta?: boolean;
+  precio_oferta?: number; // En pesos chilenos (CLP) rebajado
+  texto_promo?: string; // Ej: "2x1", "20% OFF", "Promo del Día"
 }
 
 export interface CategoriaMenu {
@@ -89,7 +92,12 @@ export interface DatosCheckout {
   notasAdicionales: string;
 }
 
-export type EstadoPedido = "pendiente" | "preparando" | "listo" | "entregado";
+export type EstadoPedido =
+  | "pendiente"
+  | "preparando"
+  | "listo"
+  | "entregado"
+  | "cancelado";
 
 export interface ItemPedidoGuardado {
   nombre: string;

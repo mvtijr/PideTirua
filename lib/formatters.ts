@@ -1,4 +1,4 @@
-import { DatosCheckout, ItemCarrito, Local } from "@/types/local";
+import { DatosCheckout, ItemCarrito, Local, Producto } from "@/types/local";
 
 /**
  * Formatea un número como Peso Chileno ($ CLP con puntos de miles, ej: $12.500).
@@ -30,11 +30,26 @@ interface WhatsAppOrderPayload {
 }
 
 /**
+ * Obtiene el precio efectivo a cobrar por un producto (aplica precio_oferta si es_oferta está activo).
+ */
+export function getPrecioEfectivoProducto(producto: Producto): number {
+  if (
+    producto.es_oferta &&
+    typeof producto.precio_oferta === "number" &&
+    producto.precio_oferta > 0
+  ) {
+    return producto.precio_oferta;
+  }
+  return producto.precio;
+}
+
+/**
  * Calcula subtotal y total general del pedido (sin costos de delivery).
  */
 export function calcularTotalesCarrito(items: ItemCarrito[]) {
   const subtotal = items.reduce(
-    (acc, item) => acc + item.producto.precio * item.cantidad,
+    (acc, item) =>
+      acc + getPrecioEfectivoProducto(item.producto) * item.cantidad,
     0
   );
   const total = subtotal;
@@ -71,12 +86,19 @@ export function formatWhatsAppMessage({
       : datos.direccionOMesa.trim() || "Por confirmar";
 
   const detalleLineas = items
-    .map(
-      (item) =>
-        `• *${item.cantidad}x* ${item.producto.nombre} — ${formatCLP(
-          item.producto.precio * item.cantidad
-        )} _(${formatCLP(item.producto.precio)} c/u)_`
-    )
+    .map((item) => {
+      const precioUnitario = getPrecioEfectivoProducto(item.producto);
+      const enOferta =
+        item.producto.es_oferta &&
+        typeof item.producto.precio_oferta === "number" &&
+        item.producto.precio_oferta > 0;
+      const tagPromo = enOferta
+        ? ` 🔥 _[PROMO: ${item.producto.texto_promo || "OFERTA"}]_`
+        : "";
+      return `• *${item.cantidad}x* ${item.producto.nombre}${tagPromo} — ${formatCLP(
+        precioUnitario * item.cantidad
+      )} _(${formatCLP(precioUnitario)} c/u)_`;
+    })
     .join("\n");
 
   const lineasMensaje = [
