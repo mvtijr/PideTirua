@@ -148,12 +148,14 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json().catch(() => ({}));
-    const transcripcion = sanitizeString(String(body.transcripcion || "")).trim();
+    let transcripcion = sanitizeString(String(body.transcripcion || "")).trim();
+    const audioBase64 = String(body.audioBase64 || "").trim();
+    const mimeType = String(body.mimeType || "audio/webm").trim();
     const menu: MenuItemInput[] = Array.isArray(body.menu) ? body.menu : [];
 
-    if (!transcripcion) {
+    if (!transcripcion && !audioBase64) {
       return NextResponse.json(
-        { error: "No se recibió ninguna transcripción de audio." },
+        { error: "No se recibió ninguna transcripción de audio ni grabación." },
         { status: 400 }
       );
     }
@@ -167,9 +169,9 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY?.trim() || "";
 
-    // Si no hay API key de Gemini configurada, ejecutamos el matcher de respaldo
+    // Si no hay API key de Gemini configurada, ejecutamos el matcher de respaldo con texto
     if (!apiKey) {
-      const fallback = fallbackVoiceOrderMatching(transcripcion, menu);
+      const fallback = fallbackVoiceOrderMatching(transcripcion || "pedido", menu);
       return NextResponse.json({ ok: true, ...fallback, isFallback: true });
     }
 
@@ -190,13 +192,10 @@ export async function POST(req: NextRequest) {
       }));
 
       const prompt = `Eres el mesero virtual de un restaurante en Tirúa, Chile.
-Tu tarea es analizar lo que dijo el cliente y emparéjarlo ÚNICAMENTE con los platos disponibles en el menú provisto.
+Tu tarea es analizar ${audioBase64 ? "el audio provisto" : `lo que dijo el cliente: "${transcripcion}"`} y emparéjarlo ÚNICAMENTE con los platos disponibles en el menú provisto.
 
 MENÚ DISPONIBLE DEL LOCAL:
 ${JSON.stringify(menuCompacto, null, 2)}
-
-FRASE DICHA POR EL CLIENTE:
-"${transcripcion}"
 
 REGLAS ESTRICTAS:
 1. Empareja únicamente platos que realmente existen en el menú provisto.
@@ -211,10 +210,20 @@ REGLAS ESTRICTAS:
   "respuesta_audio": "Frase corta y amable confirmando los platos agregados en tono chileno natural (máximo 20 palabras), o avisando con cariño si algún plato no está en la carta."
 }`;
 
+      const contents: any[] = [prompt];
+      if (audioBase64) {
+        contents.push({
+          inlineData: {
+            data: audioBase64,
+            mimeType: mimeType.split(";")[0] || "audio/webm",
+          },
+        });
+      }
+
       const result = await Promise.race([
-        model.generateContent(prompt),
+        model.generateContent(contents),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("Timeout Gemini Voice Order")), 4500)
+          setTimeout(() => reject(new Error("Timeout Gemini Voice Order")), 5500)
         ),
       ]);
 
@@ -230,6 +239,7 @@ REGLAS ESTRICTAS:
       if (Array.isArray(parsed.items_agregados) && typeof parsed.respuesta_audio === "string") {
         return NextResponse.json({
           ok: true,
+          texto_reconocido: parsed.texto_reconocido || transcripcion,
           items_agregados: parsed.items_agregados,
           respuesta_audio: parsed.respuesta_audio,
           isFallback: false,

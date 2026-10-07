@@ -51,6 +51,22 @@ function hablarEnEspanol(texto: string) {
   }
 }
 
+/**
+ * Convierte un Blob de audio a string base64 puro
+ */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      const base64String = dataUrl.split(",")[1];
+      resolve(base64String || "");
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export default function VoiceOrderButton({
   localNombre,
   menu,
@@ -72,110 +88,181 @@ export default function VoiceOrderButton({
   }, []);
 
   const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioBlobRef = useRef<{ blob: Blob; mimeType: string } | null>(null);
+
+  const detenerTodoAudio = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch {
+        // Ignorar
+      }
+      recognitionRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        // Ignorar
+      }
+      mediaRecorderRef.current = null;
+    }
+    if (mediaStreamRef.current) {
+      try {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      } catch {
+        // Ignorar
+      }
+      mediaStreamRef.current = null;
+    }
+    setEscuchando(false);
+  };
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognition) return;
-
-    try {
-      const recognition = new SpeechRecognition();
-      recognition.lang = "es-CL";
-      recognition.interimResults = true;
-      recognition.continuous = false;
-
-      recognition.onstart = () => {
-        setEscuchando(true);
-        setErrorVoz(null);
-        setMensajeEstado("Te escucho... dime qué deseas pedir");
-      };
-
-      recognition.onresult = (event: any) => {
-        let texto = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          texto += event.results[i][0].transcript;
-        }
-        if (texto) {
-          setTranscripcion(texto);
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        setEscuchando(false);
-        if (event.error === "not-allowed") {
-          setErrorVoz("Permiso de micrófono denegado. Habilita el acceso en tu navegador.");
-        } else if (event.error === "no-speech") {
-          setMensajeEstado("No se detectó audio. Pulsa el micrófono para intentar de nuevo.");
-        } else {
-          setErrorVoz("Hubo un error con el reconocimiento de voz.");
-        }
-      };
-
-      recognition.onend = () => {
-        setEscuchando(false);
-      };
-
-      recognitionRef.current = recognition;
-    } catch {
-      // Ignorar inicialización si falla
-    }
-
     return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch {
-          // Ignorar
-        }
-      }
+      detenerTodoAudio();
     };
   }, []);
 
-  const iniciarEscucha = () => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      alert("Tu navegador no soporta entrada de voz. Te recomendamos Google Chrome o Safari.");
-      return;
-    }
-
+  const iniciarEscucha = async () => {
+    detenerTodoAudio();
     setTranscripcion("");
     setErrorVoz(null);
     setMensajeEstado("Iniciando micrófono...");
     setModalAbierto(true);
+    audioChunksRef.current = [];
+    audioBlobRef.current = null;
 
+    // 1. Iniciar MediaRecorder para soporte universal (Opera GX, Safari, Chrome, etc.)
     try {
-      recognitionRef.current?.start();
-    } catch {
-      // Si ya estaba activo, reiniciar
-      try {
-        recognitionRef.current?.stop();
-        setTimeout(() => recognitionRef.current?.start(), 150);
-      } catch {
-        // Ignorar
+      if (navigator.mediaDevices?.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaStreamRef.current = stream;
+
+        let mimeType = "audio/webm";
+        if (typeof MediaRecorder !== "undefined") {
+          if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+            mimeType = "audio/webm;codecs=opus";
+          } else if (MediaRecorder.isTypeSupported("audio/webm")) {
+            mimeType = "audio/webm";
+          } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+            mimeType = "audio/mp4";
+          }
+        }
+
+        const recorder = new MediaRecorder(stream, { mimeType });
+        mediaRecorderRef.current = recorder;
+
+        recorder.ondataavailable = (e) => {
+          if (e.data.size > 0) {
+            audioChunksRef.current.push(e.data);
+          }
+        };
+
+        recorder.onstop = () => {
+          const blob = new Blob(audioChunksRef.current, { type: mimeType });
+          if (blob.size > 0) {
+            audioBlobRef.current = { blob, mimeType };
+          }
+        };
+
+        recorder.start(250);
+        setEscuchando(true);
+        setMensajeEstado("Te escucho... dime qué platos deseas pedir");
+      }
+    } catch (err: any) {
+      if (err.name === "NotAllowedError") {
+        setErrorVoz("Permiso de micrófono denegado. Habilítalo en tu navegador.");
+      }
+    }
+
+    // 2. Iniciar paralelamente Web Speech API si el navegador lo soporta nativamente
+    if (typeof window !== "undefined") {
+      const SpeechRecognition =
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
+
+      if (SpeechRecognition) {
+        try {
+          const recognition = new SpeechRecognition();
+          recognition.lang = "es-CL";
+          recognition.interimResults = true;
+          recognition.continuous = false;
+
+          recognition.onresult = (event: any) => {
+            let final = "";
+            let interim = "";
+            for (let i = 0; i < event.results.length; i++) {
+              if (event.results[i].isFinal) {
+                final += event.results[i][0].transcript;
+              } else {
+                interim += event.results[i][0].transcript;
+              }
+            }
+            const capturado = (final || interim).trim();
+            if (capturado) {
+              setTranscripcion(capturado);
+            }
+          };
+
+          recognition.onerror = () => {
+            // Ignorar errores de Web Speech (MediaRecorder respalda la comanda)
+          };
+
+          recognition.onend = () => {
+            setEscuchando(false);
+          };
+
+          recognitionRef.current = recognition;
+          recognition.start();
+        } catch {
+          // Ignorar
+        }
       }
     }
   };
 
   const detenerEscucha = () => {
-    try {
-      recognitionRef.current?.stop();
-    } catch {
-      // Ignorar
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        // Ignorar
+      }
+    }
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {
+        // Ignorar
+      }
     }
     setEscuchando(false);
   };
 
   const procesarComandaConIa = async () => {
     detenerEscucha();
-    const textoLimpio = transcripcion.trim();
 
-    if (!textoLimpio) {
+    // Pequeño retardo para asegurar que el blob de MediaRecorder esté listo
+    await new Promise((r) => setTimeout(r, 200));
+
+    const textoLimpio = transcripcion.trim();
+    let audioBase64 = "";
+    let mimeType = "audio/webm";
+
+    if (audioBlobRef.current) {
+      try {
+        audioBase64 = await blobToBase64(audioBlobRef.current.blob);
+        mimeType = audioBlobRef.current.mimeType;
+      } catch (err) {
+        console.error("Error convirtiendo audio a base64:", err);
+      }
+    }
+
+    if (!textoLimpio && !audioBase64) {
       setErrorVoz("Por favor habla al micrófono antes de enviar tu comanda.");
       return;
     }
@@ -200,6 +287,8 @@ export default function VoiceOrderButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           transcripcion: textoLimpio,
+          audioBase64: audioBase64 || undefined,
+          mimeType,
           menu: menuDisponible,
         }),
       });
@@ -208,6 +297,10 @@ export default function VoiceOrderButton({
 
       if (!res.ok || !data.ok) {
         throw new Error(data.error || "No pudimos interpretar tu comanda.");
+      }
+
+      if (data.texto_reconocido && !transcripcion) {
+        setTranscripcion(data.texto_reconocido);
       }
 
       const itemsAgregadosRaw: Array<{

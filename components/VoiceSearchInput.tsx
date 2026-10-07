@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Mic,
   MicOff,
@@ -14,7 +15,7 @@ import {
   UtensilsCrossed,
   ArrowRight,
   AlertCircle,
-  Clock,
+  CheckCircle2,
 } from "lucide-react";
 import { Local, Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
@@ -29,6 +30,110 @@ interface VoiceSearchInputProps {
   locales?: Local[];
 }
 
+/**
+ * Convierte un Blob de audio a string base64 puro
+ */
+function blobToBase64(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const dataUrl = reader.result as string;
+      const base64String = dataUrl.split(",")[1];
+      resolve(base64String || "");
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
+ * Clasificador instantáneo del lado del cliente para redirigir a un local en 0ms
+ */
+function clasificarLocalCliente(
+  texto: string,
+  locales: Local[]
+): { slug: string; nombre: string } | null {
+  const norm = texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+
+  // 1. Coincidencia directa por nombre o slug
+  for (const loc of locales) {
+    const normNombre = loc.nombre
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+    const slugPalabras = loc.slug.replace(/-/g, " ");
+
+    if (norm.includes(normNombre) || norm.includes(slugPalabras)) {
+      return { slug: loc.slug, nombre: loc.nombre };
+    }
+  }
+
+  // 2. Coincidencia por especialidad exclusiva de cada local en Tirúa
+  if (
+    norm.includes("sushi") ||
+    norm.includes("bendito") ||
+    norm.includes("roll") ||
+    norm.includes("handroll") ||
+    norm.includes("tempura") ||
+    norm.includes("furay") ||
+    norm.includes("smash") ||
+    norm.includes("burger") ||
+    norm.includes("hamburguesa")
+  ) {
+    return { slug: "sushi-burger", nombre: "Sushi Burger Tirúa" };
+  }
+
+  if (
+    norm.includes("tranquera") ||
+    norm.includes("pollo") ||
+    norm.includes("chorrillana") ||
+    norm.includes("chorillana") ||
+    norm.includes("churrasco") ||
+    norm.includes("completo") ||
+    norm.includes("tocomple") ||
+    norm.includes("italiano") ||
+    norm.includes("chacarero") ||
+    norm.includes("spiedo")
+  ) {
+    return { slug: "las-tranqueras", nombre: "Las Tranqueras Tirúa" };
+  }
+
+  if (
+    norm.includes("rio mar") ||
+    norm.includes("riomar") ||
+    norm.includes("cafeteria") ||
+    norm.includes("cafe") ||
+    norm.includes("kuchen") ||
+    norm.includes("murtilla") ||
+    norm.includes("cazuela") ||
+    norm.includes("pastel de choclo") ||
+    norm.includes("once")
+  ) {
+    return { slug: "rio-mar", nombre: "Cafetería y Restaurante Río Mar" };
+  }
+
+  if (
+    norm.includes("pacifico") ||
+    norm.includes("empanada") ||
+    norm.includes("paila marina") ||
+    norm.includes("paila") ||
+    norm.includes("marisco") ||
+    norm.includes("reineta") ||
+    norm.includes("chupe") ||
+    norm.includes("jaiba") ||
+    norm.includes("congrio") ||
+    norm.includes("quidico")
+  ) {
+    return { slug: "gran-pacifico", nombre: "Restaurant Gran Pacífico" };
+  }
+
+  return null;
+}
+
 export default function VoiceSearchInput({
   value,
   onChange,
@@ -38,19 +143,28 @@ export default function VoiceSearchInput({
   className = "",
   locales = [],
 }: VoiceSearchInputProps) {
+  const router = useRouter();
+
   const [modalVozAbierto, setModalVozAbierto] = useState(false);
   const [escuchando, setEscuchando] = useState(false);
+  const [procesandoIa, setProcesandoIa] = useState(false);
+  const [redirigiendoA, setRedirigiendoA] = useState<string | null>(null);
   const [transcripcionVoz, setTranscripcionVoz] = useState("");
   const [errorVoz, setErrorVoz] = useState<string | null>(null);
   const [dropdownAbierto, setDropdownAbierto] = useState(false);
   const [montado, setMontado] = useState(false);
 
+  const contenedorRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const transcripcionCapturadaRef = useRef<string>("");
+  const autoStopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     setMontado(true);
   }, []);
-
-  const contenedorRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
 
   // Cerrar dropdown al hacer clic fuera del componente
   useEffect(() => {
@@ -66,100 +180,275 @@ export default function VoiceSearchInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Detener reconocimiento al desmontar
+  // Limpiar recursos de audio al desmontar
   useEffect(() => {
     return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch {
-          // Ignorar
-        }
-      }
+      detenerTodoAudio();
     };
   }, []);
 
-  // Iniciar reconocimiento de voz con instancia fresca
-  const abrirModalVoz = () => {
-    setModalVozAbierto(true);
-    setTranscripcionVoz("");
-    setErrorVoz(null);
-    iniciarGrabacionVoz();
+  const detenerTodoAudio = () => {
+    if (autoStopTimeoutRef.current) {
+      clearTimeout(autoStopTimeoutRef.current);
+      autoStopTimeoutRef.current = null;
+    }
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch {
+        // Ignorar
+      }
+      recognitionRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        // Ignorar
+      }
+      mediaRecorderRef.current = null;
+    }
+    if (mediaStreamRef.current) {
+      try {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      } catch {
+        // Ignorar
+      }
+      mediaStreamRef.current = null;
+    }
+    setEscuchando(false);
   };
 
-  const iniciarGrabacionVoz = () => {
-    setErrorVoz(null);
+  /**
+   * Ejecuta la redirección inmediata a la carta del local o filtra el directorio sin apretar botones
+   */
+  const procesarResultadoYRedirigir = (
+    texto: string,
+    localSlugForzado?: string | null,
+    nombreLocalForzado?: string | null
+  ) => {
+    detenerTodoAudio();
+    const textoLimpio = texto.trim();
+    if (!textoLimpio) return;
 
-    if (typeof window === "undefined") return;
-    const SpeechRecognition =
-      (window as any).SpeechRecognition ||
-      (window as any).webkitSpeechRecognition;
+    // Verificar si corresponde a un local específico
+    const match =
+      localSlugForzado
+        ? { slug: localSlugForzado, nombre: nombreLocalForzado || localSlugForzado }
+        : clasificarLocalCliente(textoLimpio, locales);
 
-    if (!SpeechRecognition) {
-      setErrorVoz(
-        "Tu navegador no soporta entrada de voz. Puedes usar los accesos directos o escribir tu búsqueda."
-      );
+    if (match) {
+      // REDIRECCIÓN INMEDIATA AL LOCAL SIN TOCAR BOTÓN
+      setRedirigiendoA(match.nombre);
+      setErrorVoz(null);
+
+      setTimeout(() => {
+        setModalVozAbierto(false);
+        setDropdownAbierto(false);
+        router.push(`/${match.slug}`);
+      }, 500);
       return;
     }
 
+    // Si es búsqueda comunal general (ej: "abiertos", "comida rápida")
+    onChange(textoLimpio);
+    setRedirigiendoA("Resultados de Tirúa");
+
+    setTimeout(() => {
+      setModalVozAbierto(false);
+      setDropdownAbierto(false);
+      onSubmit?.();
+    }, 450);
+  };
+
+  /**
+   * Procesa el archivo de audio capturado con Gemini si Web Speech no dio texto (ej: en Opera GX)
+   */
+  const procesarAudioConGemini = async (audioBlob: Blob, mimeType: string) => {
+    // Si ya capturamos texto por Web Speech API, no llamar a la API
+    if (transcripcionCapturadaRef.current.trim()) {
+      procesarResultadoYRedirigir(transcripcionCapturadaRef.current);
+      return;
+    }
+
+    setProcesandoIa(true);
+    setErrorVoz(null);
+
     try {
-      // Detener anterior si existía
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch {
-          // Ignorar
-        }
+      const base64 = await blobToBase64(audioBlob);
+      if (!base64) {
+        setErrorVoz("No se pudo capturar el audio del micrófono.");
+        setProcesandoIa(false);
+        return;
       }
 
-      const recognition = new SpeechRecognition();
-      recognition.lang = "es-CL";
-      recognition.interimResults = true;
-      recognition.continuous = false;
+      const res = await fetch("/api/ai/voice-search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          audioBase64: base64,
+          mimeType,
+        }),
+      });
 
-      recognition.onstart = () => {
-        setEscuchando(true);
-        setErrorVoz(null);
-      };
+      const data = await res.json();
 
-      recognition.onresult = (event: any) => {
-        let texto = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          texto += event.results[i][0].transcript;
-        }
-        if (texto) {
-          setTranscripcionVoz(texto);
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        setEscuchando(false);
-        if (event.error === "not-allowed") {
-          setErrorVoz(
-            "Permiso de micrófono denegado. Habilita el acceso en tu navegador para hablar."
-          );
-        } else if (event.error === "no-speech") {
-          setErrorVoz(
-            "No se detectó audio. Pulsa el micrófono para hablar de nuevo."
-          );
-        } else {
-          setErrorVoz("No se pudo capturar el audio. Inténtalo nuevamente.");
-        }
-      };
-
-      recognition.onend = () => {
-        setEscuchando(false);
-      };
-
-      recognitionRef.current = recognition;
-      recognition.start();
-    } catch (err: any) {
-      setEscuchando(false);
-      setErrorVoz("No se pudo iniciar el micrófono: " + (err?.message || "error"));
+      if (data.ok && data.texto_transcrito) {
+        setTranscripcionVoz(data.texto_transcrito);
+        procesarResultadoYRedirigir(
+          data.texto_transcrito,
+          data.local_slug,
+          data.nombre_local
+        );
+      } else {
+        setErrorVoz(
+          data.error ||
+            "No pudimos reconocer el audio. Prueba hablando más cerca o toca un acceso directo."
+        );
+      }
+    } catch {
+      setErrorVoz("Error de conexión al procesar el audio.");
+    } finally {
+      setProcesandoIa(false);
     }
   };
 
-  const detenerGrabacionVoz = () => {
+  /**
+   * Inicia la captura dual (MediaRecorder + Web Speech API) para funcionar en Opera GX y cualquier navegador
+   */
+  const abrirModalVoz = () => {
+    setModalVozAbierto(true);
+    setTranscripcionVoz("");
+    transcripcionCapturadaRef.current = "";
+    setErrorVoz(null);
+    setRedirigiendoA(null);
+    iniciarGrabacionDual();
+  };
+
+  const iniciarGrabacionDual = async () => {
+    detenerTodoAudio();
+    setErrorVoz(null);
+    setRedirigiendoA(null);
+    transcripcionCapturadaRef.current = "";
+    audioChunksRef.current = [];
+
+    // 1. Obtener acceso al micrófono mediante getUserMedia (100% compatible con Opera GX, Safari, Chrome, etc.)
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setErrorVoz("Tu navegador no permite acceso al micrófono.");
+        return;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+
+      // Seleccionar formato soportado
+      let mimeType = "audio/webm";
+      if (typeof MediaRecorder !== "undefined") {
+        if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+          mimeType = "audio/webm;codecs=opus";
+        } else if (MediaRecorder.isTypeSupported("audio/webm")) {
+          mimeType = "audio/webm";
+        } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+          mimeType = "audio/mp4";
+        } else if (MediaRecorder.isTypeSupported("audio/ogg")) {
+          mimeType = "audio/ogg";
+        }
+      }
+
+      const recorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        if (audioBlob.size > 0) {
+          procesarAudioConGemini(audioBlob, mimeType);
+        }
+      };
+
+      recorder.start(250);
+      setEscuchando(true);
+
+      // Auto-detener después de 3.8 segundos para procesar y redirigir automáticamente
+      autoStopTimeoutRef.current = setTimeout(() => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+          mediaRecorderRef.current.stop();
+          setEscuchando(false);
+        }
+      }, 3800);
+    } catch (err: any) {
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        setErrorVoz("Permiso de micrófono denegado en tu navegador. Habilítalo para hablar.");
+      } else {
+        setErrorVoz("No se pudo iniciar el micrófono en tu dispositivo.");
+      }
+      return;
+    }
+
+    // 2. Ejecutar paralelamente Web Speech API si está disponible
+    if (typeof window !== "undefined") {
+      const SpeechRecognition =
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition;
+
+      if (SpeechRecognition) {
+        try {
+          const recognition = new SpeechRecognition();
+          recognition.lang = "es-CL";
+          recognition.interimResults = true;
+          recognition.continuous = false;
+
+          recognition.onresult = (event: any) => {
+            let final = "";
+            let interim = "";
+            for (let i = 0; i < event.results.length; i++) {
+              if (event.results[i].isFinal) {
+                final += event.results[i][0].transcript;
+              } else {
+                interim += event.results[i][0].transcript;
+              }
+            }
+            const capturado = (final || interim).trim();
+            if (capturado) {
+              setTranscripcionVoz(capturado);
+              transcripcionCapturadaRef.current = capturado;
+
+              // Si ya detectó una frase completa con coincidencia a un local, redirigir sin esperar el timer
+              const match = clasificarLocalCliente(capturado, locales);
+              if (match) {
+                detenerTodoAudio();
+                procesarResultadoYRedirigir(capturado, match.slug, match.nombre);
+              }
+            }
+          };
+
+          recognition.onerror = () => {
+            // Si Web Speech falla (habitual en Opera GX), dejamos que MediaRecorder + Gemini se encarguen
+          };
+
+          recognitionRef.current = recognition;
+          recognition.start();
+        } catch {
+          // Ignorar fallos de Web Speech API
+        }
+      }
+    }
+  };
+
+  const terminarYProcesarManual = () => {
+    if (autoStopTimeoutRef.current) {
+      clearTimeout(autoStopTimeoutRef.current);
+      autoStopTimeoutRef.current = null;
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -168,21 +457,6 @@ export default function VoiceSearchInput({
       }
     }
     setEscuchando(false);
-  };
-
-  const aplicarBusquedaVoz = (termino: string) => {
-    detenerGrabacionVoz();
-    const textoLimpio = termino.trim();
-    if (!textoLimpio) return;
-
-    onChange(textoLimpio);
-    setModalVozAbierto(false);
-    setDropdownAbierto(false);
-
-    // Desplazar automáticamente a los resultados
-    setTimeout(() => {
-      onSubmit?.();
-    }, 120);
   };
 
   const handleLimpiar = () => {
@@ -435,7 +709,7 @@ export default function VoiceSearchInput({
           <div
             className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
             onClick={() => {
-              detenerGrabacionVoz();
+              detenerTodoAudio();
               setModalVozAbierto(false);
             }}
           >
@@ -452,10 +726,10 @@ export default function VoiceSearchInput({
                   <div>
                     <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
                       <Sparkles className="h-3 w-3" />
-                      Buscador por Voz
+                      Asistente por Voz con IA
                     </span>
                     <h3 className="mt-0.5 text-base sm:text-lg font-black text-white">
-                      ¿Qué quieres pedir hoy en Tirúa?
+                      Dime qué restaurante o comida buscas
                     </h3>
                   </div>
                 </div>
@@ -463,7 +737,7 @@ export default function VoiceSearchInput({
                 <button
                   type="button"
                   onClick={() => {
-                    detenerGrabacionVoz();
+                    detenerTodoAudio();
                     setModalVozAbierto(false);
                   }}
                   className="rounded-full bg-black/20 p-2 text-white/80 hover:bg-black/40 hover:text-white transition active:scale-95"
@@ -475,94 +749,121 @@ export default function VoiceSearchInput({
 
               {/* Contenido Central con scroll si es pantalla compacta */}
               <div className="p-5 sm:p-6 overflow-y-auto flex flex-col items-center text-center space-y-4">
-                {/* Botón Central Micrófono con Animación */}
-                <div className="relative my-2">
-                  {escuchando && (
-                    <>
-                      <span className="animate-ping absolute inset-0 rounded-full bg-rose-500 opacity-40" />
-                      <span className="animate-pulse absolute -inset-3 rounded-full bg-amber-500/30" />
-                    </>
-                  )}
+                {/* Banner de Redirección Automática si ya se reconoció el local */}
+                {redirigiendoA ? (
+                  <div className="w-full rounded-2xl border border-emerald-500/40 bg-emerald-500/20 p-4 text-center animate-in zoom-in-95 duration-200">
+                    <div className="flex items-center justify-center gap-2 text-emerald-300 font-black text-sm sm:text-base">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                      <span>¡Entendido! Te llevamos a {redirigiendoA}...</span>
+                    </div>
+                    <p className="text-xs text-emerald-200/80 mt-1">
+                      Abriendo su carta digital de forma inmediata...
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Botón Central Micrófono con Animación */}
+                    <div className="relative my-2">
+                      {escuchando && (
+                        <>
+                          <span className="animate-ping absolute inset-0 rounded-full bg-rose-500 opacity-40" />
+                          <span className="animate-pulse absolute -inset-3 rounded-full bg-amber-500/30" />
+                        </>
+                      )}
 
-                  <button
-                    type="button"
-                    onClick={escuchando ? detenerGrabacionVoz : iniciarGrabacionVoz}
-                    className={`relative flex h-24 w-24 items-center justify-center rounded-full text-white shadow-2xl transition-transform active:scale-95 ${
-                      escuchando
-                        ? "bg-rose-600 ring-4 ring-rose-400"
-                        : "bg-gradient-to-tr from-amber-500 to-orange-500 hover:scale-105"
-                    }`}
-                    aria-label={escuchando ? "Detener grabación" : "Iniciar grabación"}
-                  >
-                    {escuchando ? (
-                      <Mic className="h-10 w-10 animate-bounce" />
-                    ) : (
-                      <Mic className="h-10 w-10" />
+                      <button
+                        type="button"
+                        onClick={escuchando ? terminarYProcesarManual : iniciarGrabacionDual}
+                        disabled={procesandoIa}
+                        className={`relative flex h-24 w-24 items-center justify-center rounded-full text-white shadow-2xl transition-transform active:scale-95 ${
+                          procesandoIa
+                            ? "bg-amber-600 ring-4 ring-amber-400/50"
+                            : escuchando
+                            ? "bg-rose-600 ring-4 ring-rose-400"
+                            : "bg-gradient-to-tr from-amber-500 to-orange-500 hover:scale-105"
+                        }`}
+                        aria-label={escuchando ? "Detener grabación" : "Iniciar grabación"}
+                      >
+                        {procesandoIa ? (
+                          <Loader2 className="h-10 w-10 animate-spin" />
+                        ) : escuchando ? (
+                          <Mic className="h-10 w-10 animate-bounce" />
+                        ) : (
+                          <Mic className="h-10 w-10" />
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Mensaje de Estado */}
+                    <div>
+                      <p className="text-sm font-extrabold text-white">
+                        {procesandoIa
+                          ? "🤖 Procesando tu voz con IA..."
+                          : escuchando
+                          ? "🔴 Te escuchamos... Di tu restaurante o plato"
+                          : "Toca el micrófono para comenzar a hablar"}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        Al decirlo, <strong>te redirigiremos de inmediato a su carta digital</strong> sin tener que apretar botones.
+                      </p>
+                    </div>
+
+                    {/* Transcripción en Tiempo Real */}
+                    <div className="w-full rounded-2xl border border-white/10 bg-black/40 p-4 min-h-[4.5rem] flex items-center justify-center text-left">
+                      {transcripcionVoz ? (
+                        <p className="text-sm sm:text-base font-bold text-amber-300 italic">
+                          "{transcripcionVoz}"
+                        </p>
+                      ) : (
+                        <p className="text-xs text-slate-500 italic">
+                          {escuchando
+                            ? "Habla ahora, te escuchamos..."
+                            : "Aquí aparecerá lo que digas..."}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Error si existe */}
+                    {errorVoz && (
+                      <div className="flex items-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-200 text-left w-full">
+                        <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+                        <span>{errorVoz}</span>
+                      </div>
                     )}
-                  </button>
-                </div>
 
-                {/* Mensaje de Estado */}
-                <div>
-                  <p className="text-sm font-extrabold text-white">
-                    {escuchando
-                      ? "🔴 Te escuchamos... Di lo que buscas"
-                      : "Toca el micrófono para comenzar a hablar"}
-                  </p>
-                  <p className="text-xs text-slate-400 mt-1">
-                    Puedes decir: <em>"Sushi"</em>, <em>"Locales abiertos"</em>, <em>"Empanadas"</em> o el nombre de tu restaurante favorito.
-                  </p>
-                </div>
-
-                {/* Transcripción en Tiempo Real */}
-                <div className="w-full rounded-2xl border border-white/10 bg-black/40 p-4 min-h-[4.5rem] flex items-center justify-center text-left">
-                  {transcripcionVoz ? (
-                    <p className="text-sm sm:text-base font-bold text-amber-300 italic">
-                      "{transcripcionVoz}"
-                    </p>
-                  ) : (
-                    <p className="text-xs text-slate-500 italic">
-                      Aquí aparecerá lo que digas...
-                    </p>
-                  )}
-                </div>
-
-                {/* Error si existe */}
-                {errorVoz && (
-                  <div className="flex items-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-200 text-left w-full">
-                    <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
-                    <span>{errorVoz}</span>
-                  </div>
+                    {/* Chips Rápidos de Redirección Inmediata (1 Toque) */}
+                    <div className="w-full pt-1">
+                      <span className="block text-[11px] font-bold text-slate-400 mb-2 text-left">
+                        O toca un acceso directo para ir de inmediato:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          { etiqueta: "🍣 Sushi", query: "sushi", slug: "sushi-burger", nombre: "Sushi Burger Tirúa" },
+                          { etiqueta: "🍗 Pollos asados", query: "pollos asados", slug: "las-tranqueras", nombre: "Las Tranqueras Tirúa" },
+                          { etiqueta: "🥟 Empanadas", query: "empanadas", slug: "gran-pacifico", nombre: "Restaurant Gran Pacífico" },
+                          { etiqueta: "🍔 Hamburguesas", query: "hamburguesas", slug: "sushi-burger", nombre: "Sushi Burger Tirúa" },
+                          { etiqueta: "🐟 Pescados y mariscos", query: "pescados", slug: "gran-pacifico", nombre: "Restaurant Gran Pacífico" },
+                          { etiqueta: "🟢 Abierto ahora", query: "abierto ahora", slug: null, nombre: null },
+                        ].map((chip) => (
+                          <button
+                            key={chip.etiqueta}
+                            type="button"
+                            onClick={() =>
+                              procesarResultadoYRedirigir(
+                                chip.query,
+                                chip.slug,
+                                chip.nombre
+                              )
+                            }
+                            className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:border-amber-400 hover:bg-amber-500/20 transition active:scale-95"
+                          >
+                            {chip.etiqueta}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </>
                 )}
-
-                {/* Chips Rápidos de Búsqueda de 1 Toque */}
-                <div className="w-full pt-1">
-                  <span className="block text-[11px] font-bold text-slate-400 mb-2 text-left">
-                    O toca una búsqueda rápida recomendada:
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {[
-                      "🍣 Sushi",
-                      "🟢 Abierto ahora",
-                      "🥟 Empanadas",
-                      "🍗 Pollos asados",
-                      "🍔 Hamburguesas",
-                      "🐟 Pescados y mariscos",
-                    ].map((chip) => {
-                      const textoLimpio = chip.replace(/^[^\w\s]+/, "").trim();
-                      return (
-                        <button
-                          key={chip}
-                          type="button"
-                          onClick={() => aplicarBusquedaVoz(textoLimpio)}
-                          className="rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-bold text-white hover:border-amber-400 hover:bg-amber-500/20 transition active:scale-95"
-                        >
-                          {chip}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
               </div>
 
               {/* Acciones Inferiores */}
@@ -570,7 +871,7 @@ export default function VoiceSearchInput({
                 <button
                   type="button"
                   onClick={() => {
-                    detenerGrabacionVoz();
+                    detenerTodoAudio();
                     setModalVozAbierto(false);
                   }}
                   className="flex-1 rounded-2xl border border-white/20 bg-white/5 py-3 text-xs font-bold text-white hover:bg-white/10 transition"
@@ -578,15 +879,35 @@ export default function VoiceSearchInput({
                   Cancelar
                 </button>
 
-                <button
-                  type="button"
-                  disabled={!transcripcionVoz.trim()}
-                  onClick={() => aplicarBusquedaVoz(transcripcionVoz)}
-                  className="flex-1 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-amber-400 hover:to-orange-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-                >
-                  <Search className="h-4 w-4" />
-                  <span>Buscar en Tirúa</span>
-                </button>
+                {escuchando ? (
+                  <button
+                    type="button"
+                    onClick={terminarYProcesarManual}
+                    className="flex-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-emerald-400 hover:to-teal-400 active:scale-95 flex items-center justify-center gap-1.5"
+                  >
+                    <span>Listo, ir al local</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={!transcripcionVoz.trim() || procesandoIa}
+                    onClick={() => procesarResultadoYRedirigir(transcripcionVoz)}
+                    className="flex-1 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-amber-400 hover:to-orange-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                  >
+                    {procesandoIa ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span>Analizando...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Ir al local</span>
+                        <ArrowRight className="h-4 w-4" />
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           </div>,
