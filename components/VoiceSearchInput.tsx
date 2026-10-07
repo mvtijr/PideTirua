@@ -19,6 +19,14 @@ import {
 } from "lucide-react";
 import { Local, Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
+import {
+  getPersistentAudioStream,
+  mutePersistentAudioStream,
+  getSupportedAudioMimeType,
+  audioBlobToBase64,
+  canUseWebSpeechAPI,
+  isOperaBrowser,
+} from "@/lib/voiceAudio";
 
 interface VoiceSearchInputProps {
   value: string;
@@ -28,22 +36,6 @@ interface VoiceSearchInputProps {
   placeholder?: string;
   className?: string;
   locales?: Local[];
-}
-
-/**
- * Convierte un Blob de audio a string base64 puro
- */
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUrl = reader.result as string;
-      const base64String = dataUrl.split(",")[1];
-      resolve(base64String || "");
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
 }
 
 /**
@@ -200,22 +192,21 @@ export default function VoiceSearchInput({
       }
       recognitionRef.current = null;
     }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+    if (mediaRecorderRef.current) {
       try {
-        mediaRecorderRef.current.stop();
+        // Desconectar handlers para evitar llamadas cruzadas asíncronas
+        mediaRecorderRef.current.onstop = null;
+        mediaRecorderRef.current.ondataavailable = null;
+        if (mediaRecorderRef.current.state !== "inactive") {
+          mediaRecorderRef.current.stop();
+        }
       } catch {
         // Ignorar
       }
       mediaRecorderRef.current = null;
     }
-    if (mediaStreamRef.current) {
-      try {
-        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      } catch {
-        // Ignorar
-      }
-      mediaStreamRef.current = null;
-    }
+    // Muteamos el stream persistente SIN destruirlo para preservar los permisos en Opera GX / Chrome
+    mutePersistentAudioStream();
     setEscuchando(false);
   };
 
@@ -262,10 +253,10 @@ export default function VoiceSearchInput({
   };
 
   /**
-   * Procesa el archivo de audio capturado con Gemini si Web Speech no dio texto (ej: en Opera GX)
+   * Procesa el archivo de audio capturado con Gemini 1.5 Flash (Opera GX, Safari, Chrome, etc.)
    */
   const procesarAudioConGemini = async (audioBlob: Blob, mimeType: string) => {
-    // Si ya capturamos texto por Web Speech API, no llamar a la API
+    // Si ya capturamos texto por Web Speech API (en Chrome), no es necesario consultar Gemini
     if (transcripcionCapturadaRef.current.trim()) {
       procesarResultadoYRedirigir(transcripcionCapturadaRef.current);
       return;
@@ -275,9 +266,9 @@ export default function VoiceSearchInput({
     setErrorVoz(null);
 
     try {
-      const base64 = await blobToBase64(audioBlob);
-      if (!base64) {
-        setErrorVoz("No se pudo capturar el audio del micrófono.");
+      const base64 = await audioBlobToBase64(audioBlob);
+      if (!base64 || audioBlob.size < 600) {
+        setErrorVoz("No se detectó audio claro. Intenta hablar más cerca del micrófono.");
         setProcesandoIa(false);
         return;
       }
@@ -303,18 +294,18 @@ export default function VoiceSearchInput({
       } else {
         setErrorVoz(
           data.error ||
-            "No pudimos reconocer el audio. Prueba hablando más cerca o toca un acceso directo."
+            "No pudimos reconocer el audio. Prueba hablando de nuevo o toca un acceso directo abajo."
         );
       }
     } catch {
-      setErrorVoz("Error de conexión al procesar el audio.");
+      setErrorVoz("Error de conexión con el servicio de voz.");
     } finally {
       setProcesandoIa(false);
     }
   };
 
   /**
-   * Inicia la captura dual (MediaRecorder + Web Speech API) para funcionar en Opera GX y cualquier navegador
+   * Inicia la captura de voz con stream persistente (no vuelve a pedir permisos en Opera GX)
    */
   const abrirModalVoz = () => {
     setModalVozAbierto(true);
@@ -329,33 +320,30 @@ export default function VoiceSearchInput({
     detenerTodoAudio();
     setErrorVoz(null);
     setRedirigiendoA(null);
+    setProcesandoIa(false);
     transcripcionCapturadaRef.current = "";
     audioChunksRef.current = [];
 
-    // 1. Obtener acceso al micrófono mediante getUserMedia (100% compatible con Opera GX, Safari, Chrome, etc.)
+    // 1. Obtener o reutilizar el stream persistente (evita pedir permisos repetidamente en Opera GX)
+    let stream: MediaStream;
     try {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        setErrorVoz("Tu navegador no permite acceso al micrófono.");
-        return;
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream = await getPersistentAudioStream();
       mediaStreamRef.current = stream;
-
-      // Seleccionar formato soportado
-      let mimeType = "audio/webm";
-      if (typeof MediaRecorder !== "undefined") {
-        if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
-          mimeType = "audio/webm;codecs=opus";
-        } else if (MediaRecorder.isTypeSupported("audio/webm")) {
-          mimeType = "audio/webm";
-        } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
-          mimeType = "audio/mp4";
-        } else if (MediaRecorder.isTypeSupported("audio/ogg")) {
-          mimeType = "audio/ogg";
-        }
+    } catch (err: any) {
+      console.warn("Error accediendo al micrófono:", err);
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        setErrorVoz(
+          "Permiso de micrófono no otorgado. En Opera GX o Chrome, haz clic en el icono del candado en la barra de direcciones y selecciona 'Permitir'."
+        );
+      } else {
+        setErrorVoz("No se pudo iniciar el micrófono en tu dispositivo.");
       }
+      return;
+    }
 
+    const mimeType = getSupportedAudioMimeType();
+
+    try {
       const recorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = recorder;
 
@@ -366,8 +354,11 @@ export default function VoiceSearchInput({
       };
 
       recorder.onstop = () => {
+        // Silenciar pistas para privacidad sin revocar el permiso del navegador
+        mutePersistentAudioStream();
+
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-        if (audioBlob.size > 0) {
+        if (audioBlob.size > 0 && recorder === mediaRecorderRef.current) {
           procesarAudioConGemini(audioBlob, mimeType);
         }
       };
@@ -375,30 +366,28 @@ export default function VoiceSearchInput({
       recorder.start(250);
       setEscuchando(true);
 
-      // Auto-detener después de 3.8 segundos para procesar y redirigir automáticamente
+      // Auto-detener después de 4.5 segundos si el usuario no tocó antes el botón de detener
       autoStopTimeoutRef.current = setTimeout(() => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
           mediaRecorderRef.current.stop();
           setEscuchando(false);
         }
-      }, 3800);
-    } catch (err: any) {
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        setErrorVoz("Permiso de micrófono denegado en tu navegador. Habilítalo para hablar.");
-      } else {
-        setErrorVoz("No se pudo iniciar el micrófono en tu dispositivo.");
-      }
+      }, 4500);
+    } catch (err) {
+      console.error("Error al instanciar MediaRecorder:", err);
+      setErrorVoz("No se pudo iniciar la grabación en tu navegador.");
       return;
     }
 
-    // 2. Ejecutar paralelamente Web Speech API si está disponible
-    if (typeof window !== "undefined") {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
+    // 2. Ejecutar Web Speech API SOLO si el navegador lo soporta de forma confiable (Chrome, Safari, Edge)
+    // En Opera GX está deshabilitado para evitar conflictos de hardware y errores de red
+    if (canUseWebSpeechAPI()) {
+      try {
+        const SpeechRecognition =
+          (window as any).SpeechRecognition ||
+          (window as any).webkitSpeechRecognition;
 
-      if (SpeechRecognition) {
-        try {
+        if (SpeechRecognition) {
           const recognition = new SpeechRecognition();
           recognition.lang = "es-CL";
           recognition.interimResults = true;
@@ -419,7 +408,6 @@ export default function VoiceSearchInput({
               setTranscripcionVoz(capturado);
               transcripcionCapturadaRef.current = capturado;
 
-              // Si ya detectó una frase completa con coincidencia a un local, redirigir sin esperar el timer
               const match = clasificarLocalCliente(capturado, locales);
               if (match) {
                 detenerTodoAudio();
@@ -429,14 +417,23 @@ export default function VoiceSearchInput({
           };
 
           recognition.onerror = () => {
-            // Si Web Speech falla (habitual en Opera GX), dejamos que MediaRecorder + Gemini se encarguen
+            try {
+              recognition.abort();
+            } catch {
+              // Ignorar
+            }
+            recognitionRef.current = null;
+          };
+
+          recognition.onend = () => {
+            recognitionRef.current = null;
           };
 
           recognitionRef.current = recognition;
           recognition.start();
-        } catch {
-          // Ignorar fallos de Web Speech API
         }
+      } catch {
+        // Ignorar fallos de Web Speech API
       }
     }
   };
@@ -446,15 +443,15 @@ export default function VoiceSearchInput({
       clearTimeout(autoStopTimeoutRef.current);
       autoStopTimeoutRef.current = null;
     }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      mediaRecorderRef.current.stop();
-    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
       } catch {
         // Ignorar
       }
+    }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
     }
     setEscuchando(false);
   };
@@ -825,9 +822,19 @@ export default function VoiceSearchInput({
 
                     {/* Error si existe */}
                     {errorVoz && (
-                      <div className="flex items-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-200 text-left w-full">
-                        <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
-                        <span>{errorVoz}</span>
+                      <div className="w-full space-y-2">
+                        <div className="flex items-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3 py-2 text-xs font-bold text-rose-200 text-left w-full">
+                          <AlertCircle className="h-4 w-4 shrink-0 text-rose-400" />
+                          <span>{errorVoz}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={iniciarGrabacionDual}
+                          className="w-full py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                        >
+                          <Mic className="h-3.5 w-3.5" />
+                          <span>Reintentar hablar al micrófono</span>
+                        </button>
                       </div>
                     )}
 
@@ -862,6 +869,11 @@ export default function VoiceSearchInput({
                         ))}
                       </div>
                     </div>
+
+                    {/* Tip para permisos en Opera GX / Chrome */}
+                    <p className="text-[10px] text-slate-400/90 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-left w-full">
+                      💡 <strong>Tip Opera GX:</strong> Al permitir el micrófono, selecciona <em>&quot;Permitir en todas las visitas&quot;</em> o <em>&quot;Recordar&quot;</em> para que el navegador no te pida confirmación cada vez.
+                    </p>
                   </>
                 )}
               </div>

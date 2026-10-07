@@ -14,6 +14,13 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { Producto } from "@/types/local";
+import {
+  getPersistentAudioStream,
+  mutePersistentAudioStream,
+  getSupportedAudioMimeType,
+  audioBlobToBase64,
+  canUseWebSpeechAPI,
+} from "@/lib/voiceAudio";
 
 interface VoiceOrderButtonProps {
   localNombre: string;
@@ -51,22 +58,6 @@ function hablarEnEspanol(texto: string) {
   }
 }
 
-/**
- * Convierte un Blob de audio a string base64 puro
- */
-function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const dataUrl = reader.result as string;
-      const base64String = dataUrl.split(",")[1];
-      resolve(base64String || "");
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-}
-
 export default function VoiceOrderButton({
   localNombre,
   menu,
@@ -102,22 +93,19 @@ export default function VoiceOrderButton({
       }
       recognitionRef.current = null;
     }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+    if (mediaRecorderRef.current) {
       try {
-        mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.onstop = null;
+        mediaRecorderRef.current.ondataavailable = null;
+        if (mediaRecorderRef.current.state !== "inactive") {
+          mediaRecorderRef.current.stop();
+        }
       } catch {
         // Ignorar
       }
       mediaRecorderRef.current = null;
     }
-    if (mediaStreamRef.current) {
-      try {
-        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      } catch {
-        // Ignorar
-      }
-      mediaStreamRef.current = null;
-    }
+    mutePersistentAudioStream();
     setEscuchando(false);
   };
 
@@ -136,57 +124,55 @@ export default function VoiceOrderButton({
     audioChunksRef.current = [];
     audioBlobRef.current = null;
 
-    // 1. Iniciar MediaRecorder para soporte universal (Opera GX, Safari, Chrome, etc.)
+    let stream: MediaStream;
     try {
-      if (navigator.mediaDevices?.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaStreamRef.current = stream;
-
-        let mimeType = "audio/webm";
-        if (typeof MediaRecorder !== "undefined") {
-          if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
-            mimeType = "audio/webm;codecs=opus";
-          } else if (MediaRecorder.isTypeSupported("audio/webm")) {
-            mimeType = "audio/webm";
-          } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
-            mimeType = "audio/mp4";
-          }
-        }
-
-        const recorder = new MediaRecorder(stream, { mimeType });
-        mediaRecorderRef.current = recorder;
-
-        recorder.ondataavailable = (e) => {
-          if (e.data.size > 0) {
-            audioChunksRef.current.push(e.data);
-          }
-        };
-
-        recorder.onstop = () => {
-          const blob = new Blob(audioChunksRef.current, { type: mimeType });
-          if (blob.size > 0) {
-            audioBlobRef.current = { blob, mimeType };
-          }
-        };
-
-        recorder.start(250);
-        setEscuchando(true);
-        setMensajeEstado("Te escucho... dime qué platos deseas pedir");
-      }
+      stream = await getPersistentAudioStream();
+      mediaStreamRef.current = stream;
     } catch (err: any) {
-      if (err.name === "NotAllowedError") {
-        setErrorVoz("Permiso de micrófono denegado. Habilítalo en tu navegador.");
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        setErrorVoz("Permiso de micrófono denegado. Habilítalo en tu navegador para pedir por voz.");
+      } else {
+        setErrorVoz("No se pudo iniciar el micrófono en tu dispositivo.");
       }
+      return;
     }
 
-    // 2. Iniciar paralelamente Web Speech API si el navegador lo soporta nativamente
-    if (typeof window !== "undefined") {
-      const SpeechRecognition =
-        (window as any).SpeechRecognition ||
-        (window as any).webkitSpeechRecognition;
+    const mimeType = getSupportedAudioMimeType();
 
-      if (SpeechRecognition) {
-        try {
+    try {
+      const recorder = new MediaRecorder(stream, { mimeType });
+      mediaRecorderRef.current = recorder;
+
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
+
+      recorder.onstop = () => {
+        mutePersistentAudioStream();
+        const blob = new Blob(audioChunksRef.current, { type: mimeType });
+        if (blob.size > 0) {
+          audioBlobRef.current = { blob, mimeType };
+        }
+      };
+
+      recorder.start(250);
+      setEscuchando(true);
+      setMensajeEstado("Te escucho... dime qué platos deseas pedir");
+    } catch (err) {
+      console.error("Error al iniciar MediaRecorder:", err);
+      setErrorVoz("No se pudo iniciar la grabación en tu dispositivo.");
+      return;
+    }
+
+    if (canUseWebSpeechAPI()) {
+      try {
+        const SpeechRecognition =
+          (window as any).SpeechRecognition ||
+          (window as any).webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
           const recognition = new SpeechRecognition();
           recognition.lang = "es-CL";
           recognition.interimResults = true;
@@ -209,37 +195,37 @@ export default function VoiceOrderButton({
           };
 
           recognition.onerror = () => {
-            // Ignorar errores de Web Speech (MediaRecorder respalda la comanda)
+            try {
+              recognition.abort();
+            } catch {}
+            recognitionRef.current = null;
           };
 
           recognition.onend = () => {
-            setEscuchando(false);
+            recognitionRef.current = null;
           };
 
           recognitionRef.current = recognition;
           recognition.start();
-        } catch {
-          // Ignorar
         }
+      } catch {
+        // Ignorar
       }
     }
   };
 
   const detenerEscucha = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      try {
-        mediaRecorderRef.current.stop();
-      } catch {
-        // Ignorar
-      }
-    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
-      } catch {
-        // Ignorar
-      }
+      } catch {}
     }
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {}
+    }
+    mutePersistentAudioStream();
     setEscuchando(false);
   };
 
@@ -255,7 +241,7 @@ export default function VoiceOrderButton({
 
     if (audioBlobRef.current) {
       try {
-        audioBase64 = await blobToBase64(audioBlobRef.current.blob);
+        audioBase64 = await audioBlobToBase64(audioBlobRef.current.blob);
         mimeType = audioBlobRef.current.mimeType;
       } catch (err) {
         console.error("Error convirtiendo audio a base64:", err);

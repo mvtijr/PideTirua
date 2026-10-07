@@ -220,11 +220,47 @@ Responde ÚNICAMENTE en formato JSON plano:
         .replace(/```$/, "")
         .trim();
 
-      const parsed = JSON.parse(cleanedJson);
+      let parsed: any = null;
+      try {
+        parsed = JSON.parse(cleanedJson);
+      } catch {
+        const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          try {
+            parsed = JSON.parse(jsonMatch[0]);
+          } catch {
+            // Ignorar
+          }
+        }
+      }
+
+      if (!parsed) {
+        // Si no vino como JSON válido, clasificamos el texto en bruto con el motor algorítmico
+        const textoLimpio = rawText.replace(/[\{\}\[\]"']/g, "").slice(0, 100).trim();
+        const match = clasificarIntencionLocal(textoLimpio);
+        return NextResponse.json({
+          ok: true,
+          texto_transcrito: textoLimpio,
+          local_slug: match.local_slug,
+          nombre_local: match.nombre_local,
+          accion: match.accion,
+          origen: "gemini_multimodal_raw",
+        });
+      }
 
       const textoReconocido = String(parsed.texto_transcrito || "").trim();
-      const localSlug = parsed.local_slug ? String(parsed.local_slug).trim() : null;
-      const nombreLocal = parsed.nombre_local ? String(parsed.nombre_local).trim() : null;
+      let localSlug = parsed.local_slug ? String(parsed.local_slug).trim() : null;
+      let nombreLocal = parsed.nombre_local ? String(parsed.nombre_local).trim() : null;
+
+      // Si Gemini no asignó localSlug pero el texto menciona uno de los restaurantes
+      if (!localSlug && textoReconocido) {
+        const matchDirecto = clasificarIntencionLocal(textoReconocido);
+        if (matchDirecto.local_slug) {
+          localSlug = matchDirecto.local_slug;
+          nombreLocal = matchDirecto.nombre_local;
+        }
+      }
+
       const accion = localSlug ? "redirigir_local" : (parsed.accion || "filtrar_directorio");
 
       return NextResponse.json({
