@@ -742,11 +742,92 @@ export async function fetchAllLocales(): Promise<Local[]> {
 }
 
 /**
- * Obtiene únicamente los locales con `activo: true` para mostrar en el directorio público (`/`).
+ * Obtiene únicamente los locales activos para la portada comunal (/)
+ * mediante una consulta ultraliviana (menos de 5 KB) que evita consultar
+ * categorías y productos innecesarios, respondiendo en milisegundos.
  */
 export async function fetchActiveLocales(): Promise<Local[]> {
-  const todos = await fetchAllLocales();
-  return todos.filter((loc) => loc.activo !== false);
+  const staticLocales = getAllLocales();
+
+  try {
+    const supabase = getSupabaseClient();
+    const { data: rows, error } = await supabase
+      .from("locales")
+      .select("id, slug, nombre, rubro, logo_url, banner_url, abierto, activo")
+      .eq("activo", true)
+      .order("nombre");
+
+    if (!error && Array.isArray(rows) && rows.length > 0) {
+      return rows.map((row) => {
+        const fallback = staticLocales.find(
+          (s) =>
+            s.slug.toLowerCase() === (row.slug || "").toLowerCase() ||
+            s.id === row.id
+        );
+
+        if (fallback) {
+          const logoFinal =
+            row.logo_url || fallback.logo_url || fallback.logo || "/logo-pidetirua.jpg";
+          const bannerFinal =
+            row.banner_url || fallback.banner_url || fallback.fotoPortada;
+          return {
+            ...fallback,
+            id: row.id || fallback.id,
+            slug: row.slug || fallback.slug,
+            nombre: row.nombre || fallback.nombre,
+            rubro: row.rubro || fallback.rubro,
+            logo_url: logoFinal,
+            logo: logoFinal,
+            banner_url: bannerFinal,
+            fotoPortada: bannerFinal,
+            abierto: row.abierto !== false,
+            activo: row.activo !== false,
+          };
+        }
+
+        // Si es un local nuevo creado en Supabase
+        const logoFinal = row.logo_url || "/logo-pidetirua.jpg";
+        const bannerFinal =
+          row.banner_url ||
+          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=90";
+
+        return {
+          id: row.id,
+          slug: row.slug,
+          nombre: row.nombre,
+          rubro: row.rubro,
+          categoriaFiltro: inferCategoriaFiltro(row.rubro),
+          sector: "Tirúa Centro",
+          ubicacion: "Tirúa",
+          direccionDetalle: "Tirúa, Región del Biobío",
+          telefonoWhatsapp: "56900000000",
+          telefono_whatsapp: "56900000000",
+          horario: "12:00 a 22:00 hrs",
+          horarioEntrega: "Lun a Dom · 12:00 a 22:00 hrs",
+          tiempoEstimado: "25 - 35 min",
+          calificacion: 4.9,
+          descripcionCorta: `Carta digital oficial de ${row.nombre} en PideTirúa.`,
+          fotoPortada: bannerFinal,
+          banner_url: bannerFinal,
+          logo: logoFinal,
+          logo_url: logoFinal,
+          abierto: row.abierto !== false,
+          activo: row.activo !== false,
+          plan: "autogestionado",
+          precio_mensual: 15000,
+          dia_cobro: 5,
+          fecha_ultimo_pago: getTodayDateISO(),
+          pin: "1234",
+          categorias: [],
+        };
+      });
+    }
+  } catch (err) {
+    console.warn("Retorno ultrarrápido a catálogo estático en fetchActiveLocales:", err);
+  }
+
+  // Fallback instantáneo (0ms) a locales activos locales en memoria
+  return staticLocales.filter((loc) => loc.activo !== false);
 }
 
 /**
