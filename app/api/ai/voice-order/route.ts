@@ -181,6 +181,7 @@ export async function POST(req: NextRequest) {
         model: "gemini-1.5-flash",
         generationConfig: {
           temperature: 0.2, // Respuestas deterministas y precisas para comanda
+          responseMimeType: "application/json",
         },
       });
 
@@ -202,8 +203,9 @@ REGLAS ESTRICTAS:
 2. Tolera modismos chilenos y variaciones coloquiales (ej: "tocomple" = completo, "papas" = papas fritas, "chela" = cerveza, "bebida" = bebida/lata/gaseosa, "promo" = promociones).
 3. Si el cliente menciona una cantidad (ej: "dos", "tres", "medio", "un par"), refléjala en el campo "cantidad". Si no menciona cantidad, asume 1.
 4. Si el cliente pidió algo que NO está en el menú, NO inventes platos; infórmalo amablemente en "respuesta_audio".
-5. Responde OBLIGATORIAMENTE en formato JSON PURO, sin markdown, sin etiquetas \`\`\`json. Estructura exacta:
+5. Responde OBLIGATORIAMENTE en formato JSON PURO con esta estructura exacta:
 {
+  "texto_reconocido": "lo que dijo el cliente",
   "items_agregados": [
     { "producto_id": "id_del_producto", "cantidad": 1, "notas": "opcional" }
   ],
@@ -220,10 +222,11 @@ REGLAS ESTRICTAS:
         });
       }
 
+      // Timeout generoso de 15 segundos para latencias móviles internacionales
       const result = await Promise.race([
         model.generateContent(contents),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("Timeout Gemini Voice Order")), 5500)
+          setTimeout(() => reject(new Error("Timeout Gemini Voice Order")), 15000)
         ),
       ]);
 

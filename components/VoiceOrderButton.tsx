@@ -17,6 +17,8 @@ import { Producto } from "@/types/local";
 import {
   getFreshAudioStream,
   stopAudioStream,
+  getOrCreateLiveAudioStream,
+  isStreamLive,
   getSupportedAudioMimeType,
   audioBlobToBase64,
   canUseWebSpeechAPI,
@@ -84,7 +86,7 @@ export default function VoiceOrderButton({
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioBlobRef = useRef<{ blob: Blob; mimeType: string } | null>(null);
 
-  const detenerTodoAudio = () => {
+  const detenerGrabacionActiva = () => {
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -105,21 +107,25 @@ export default function VoiceOrderButton({
       }
       mediaRecorderRef.current = null;
     }
+    setEscuchando(false);
+  };
+
+  const liberarMicrofonoYRecursos = () => {
+    detenerGrabacionActiva();
     if (mediaStreamRef.current) {
       stopAudioStream(mediaStreamRef.current);
       mediaStreamRef.current = null;
     }
-    setEscuchando(false);
   };
 
   useEffect(() => {
     return () => {
-      detenerTodoAudio();
+      liberarMicrofonoYRecursos();
     };
   }, []);
 
   const iniciarEscucha = async () => {
-    detenerTodoAudio();
+    detenerGrabacionActiva();
     setTranscripcion("");
     setErrorVoz(null);
     setMensajeEstado("Iniciando micrófono...");
@@ -129,7 +135,7 @@ export default function VoiceOrderButton({
 
     let stream: MediaStream;
     try {
-      stream = await getFreshAudioStream();
+      stream = await getOrCreateLiveAudioStream(mediaStreamRef.current);
       mediaStreamRef.current = stream;
     } catch (err: any) {
       if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
@@ -147,20 +153,20 @@ export default function VoiceOrderButton({
       mediaRecorderRef.current = recorder;
 
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
+        if (e.data && e.data.size > 0) {
           audioChunksRef.current.push(e.data);
         }
       };
 
       recorder.onstop = () => {
-        stopAudioStream(stream);
+        // Mantener stream vivo en mediaStreamRef.current para pedidos sucesivos
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
         if (blob.size > 0) {
           audioBlobRef.current = { blob, mimeType };
         }
       };
 
-      recorder.start(200);
+      recorder.start(150);
       setEscuchando(true);
       setMensajeEstado("Te escucho... dime qué platos deseas pedir");
     } catch (err) {
@@ -227,10 +233,6 @@ export default function VoiceOrderButton({
       try {
         mediaRecorderRef.current.stop();
       } catch {}
-    }
-    if (mediaStreamRef.current) {
-      stopAudioStream(mediaStreamRef.current);
-      mediaStreamRef.current = null;
     }
     setEscuchando(false);
   };
@@ -331,6 +333,7 @@ export default function VoiceOrderButton({
         }
 
         // 3. Abrir el carrito para que el cliente confirme visualmente
+        liberarMicrofonoYRecursos();
         setModalAbierto(false);
         onAbrirCarrito();
       } else {
@@ -355,7 +358,7 @@ export default function VoiceOrderButton({
   };
 
   const handleCerrarModal = () => {
-    detenerEscucha();
+    liberarMicrofonoYRecursos();
     setModalAbierto(false);
     setTranscripcion("");
     setErrorVoz(null);

@@ -175,6 +175,7 @@ export async function POST(req: NextRequest) {
         model: "gemini-1.5-flash",
         generationConfig: {
           temperature: 0.1, // Determinista para comandos de voz
+          responseMimeType: "application/json",
         },
       });
 
@@ -189,14 +190,14 @@ export async function POST(req: NextRequest) {
 Tu misión:
 1. Escucha atentamente el audio y transcribe EXACTAMENTE lo que dijo el usuario en español chileno.
 2. Identifica si el usuario pide o menciona un restaurante o plato exclusivo de Tirúa:
-   - "sushi-burger" (Sushi Burger Tirúa): sushi, rolls, handroll, smash burgers, tablas de sushi.
-   - "las-tranqueras" (Las Tranqueras Tirúa): pollos asados, papas fritas, churrascos, completos, chorrillanas.
-   - "rio-mar" (Cafetería y Restaurante Río Mar): salmón a la plancha, cazuela sureña, pastel de choclo, kuchen, café, once.
-   - "gran-pacifico" (Restaurant Gran Pacífico en Quidico): empanadas de mariscos (camarón, machas), paila marina, chupe de jaiba, reineta frita, caldillo de congrio.
+   - "sushi-burger" (Sushi Burger Tirúa): sushi, rolls, handroll, smash burgers, tablas de sushi, papas fritas con burger, nikkei.
+   - "las-tranqueras" (Las Tranqueras Tirúa): pollos asados, papas fritas, churrascos, completos, tocomple, chorrillanas, chacarero.
+   - "rio-mar" (Cafetería y Restaurante Río Mar): salmón a la plancha, cazuela sureña, pastel de choclo, kuchen, café, once, desayuno.
+   - "gran-pacifico" (Restaurant Gran Pacífico en Quidico): empanadas de mariscos (camarón, machas), paila marina, chupe de jaiba, reineta frita, caldillo de congrio, pescado frito.
 3. Si el usuario pidió comida o nombró un restaurante que corresponde a uno de ellos, define "local_slug" con su slug respectivo.
-4. Si es una búsqueda genérica (ej: "locales abiertos", "comida", "buscar"), define "local_slug": null.
+4. Si es una búsqueda genérica (ej: "locales abiertos", "comida rápida", "buscar restaurante"), define "local_slug": null.
 
-Responde ÚNICAMENTE en formato JSON plano:
+Responde OBLIGATORIAMENTE en JSON con esta estructura:
 {
   "texto_transcrito": "lo que dijo el usuario",
   "local_slug": "sushi-burger" | "las-tranqueras" | "rio-mar" | "gran-pacifico" | null,
@@ -204,8 +205,9 @@ Responde ÚNICAMENTE en formato JSON plano:
   "accion": "redirigir_local" | "filtrar_directorio"
 }`;
 
+      // Timeout generoso de 15 segundos para latencias móviles internacionales
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout Gemini Audio")), 5000)
+        setTimeout(() => reject(new Error("Timeout Gemini Audio")), 15000)
       );
 
       const geminiResult = await Promise.race([

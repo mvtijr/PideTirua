@@ -22,6 +22,8 @@ import { formatCLP } from "@/lib/formatters";
 import {
   getFreshAudioStream,
   stopAudioStream,
+  getOrCreateLiveAudioStream,
+  isStreamLive,
   createAudioLevelAnalyser,
   getSupportedAudioMimeType,
   audioBlobToBase64,
@@ -187,18 +189,18 @@ export default function VoiceSearchInput({
   // Limpiar recursos de audio al desmontar
   useEffect(() => {
     return () => {
-      detenerTodoAudio();
+      liberarMicrofonoYRecursos();
     };
   }, []);
 
-  const detenerTodoAudio = () => {
+  /**
+   * Detiene la grabación activa y el análisis sin destruir el MediaStream subyacente
+   * para permitir grabaciones sucesivas instantáneas sin pedir permisos de nuevo.
+   */
+  const detenerGrabacionActiva = () => {
     if (autoStopTimeoutRef.current) {
       clearTimeout(autoStopTimeoutRef.current);
       autoStopTimeoutRef.current = null;
-    }
-    if (cuentaRegresivaIntervalRef.current) {
-      clearInterval(cuentaRegresivaIntervalRef.current);
-      cuentaRegresivaIntervalRef.current = null;
     }
     if (analyserRef.current) {
       try {
@@ -228,22 +230,40 @@ export default function VoiceSearchInput({
       }
       mediaRecorderRef.current = null;
     }
+    setEscuchando(false);
+    setVolumenVoz(0);
+  };
+
+  /**
+   * Libera completamente el micrófono y cierra todas las pistas.
+   * Se invoca únicamente al cerrar el modal o al navegar.
+   */
+  const liberarMicrofonoYRecursos = () => {
+    detenerGrabacionActiva();
+    if (cuentaRegresivaIntervalRef.current) {
+      clearInterval(cuentaRegresivaIntervalRef.current);
+      cuentaRegresivaIntervalRef.current = null;
+    }
     if (mediaStreamRef.current) {
       stopAudioStream(mediaStreamRef.current);
       mediaStreamRef.current = null;
     }
-    setEscuchando(false);
-    setVolumenVoz(0);
+  };
+
+  const cerrarModal = () => {
+    liberarMicrofonoYRecursos();
+    setModalVozAbierto(false);
+    setMatchPendiente(null);
+    setRedirigiendoA(null);
+    setErrorVoz(null);
+    setProcesandoIa(false);
   };
 
   /**
    * Navegación inmediata manual al presionar "Ir ahora"
    */
   const ejecutarNavegacionInmediata = (slug: string) => {
-    if (cuentaRegresivaIntervalRef.current) {
-      clearInterval(cuentaRegresivaIntervalRef.current);
-      cuentaRegresivaIntervalRef.current = null;
-    }
+    liberarMicrofonoYRecursos();
     setModalVozAbierto(false);
     setDropdownAbierto(false);
     setMatchPendiente(null);
@@ -270,7 +290,7 @@ export default function VoiceSearchInput({
     localSlugForzado?: string | null,
     nombreLocalForzado?: string | null
   ) => {
-    detenerTodoAudio();
+    detenerGrabacionActiva();
     const textoLimpio = texto.trim();
     if (!textoLimpio) return;
 
@@ -309,6 +329,7 @@ export default function VoiceSearchInput({
             clearInterval(cuentaRegresivaIntervalRef.current);
             cuentaRegresivaIntervalRef.current = null;
           }
+          liberarMicrofonoYRecursos();
           setModalVozAbierto(false);
           setDropdownAbierto(false);
           setMatchPendiente(null);
@@ -322,6 +343,7 @@ export default function VoiceSearchInput({
     // Si es búsqueda comunal general (ej: "abiertos", "comida rápida")
     setRedirigiendoA("Filtrando en Directorio...");
     setTimeout(() => {
+      liberarMicrofonoYRecursos();
       onChange(textoLimpio);
       setModalVozAbierto(false);
       setDropdownAbierto(false);
@@ -344,7 +366,7 @@ export default function VoiceSearchInput({
 
     try {
       const base64 = await audioBlobToBase64(audioBlob);
-      if (!base64 || audioBlob.size < 600) {
+      if (!base64 || audioBlob.size < 400) {
         setErrorVoz("No se detectó audio claro. Intenta hablar más cerca del micrófono.");
         setProcesandoIa(false);
         return;
@@ -382,7 +404,7 @@ export default function VoiceSearchInput({
   };
 
   /**
-   * Inicia la captura de voz con un stream fresco para garantizar audio en cada intento
+   * Abre el modal y arranca la grabación inmediatamente
    */
   const abrirModalVoz = () => {
     setModalVozAbierto(true);
@@ -395,7 +417,11 @@ export default function VoiceSearchInput({
   };
 
   const iniciarGrabacionDual = async () => {
-    detenerTodoAudio();
+    detenerGrabacionActiva();
+    if (cuentaRegresivaIntervalRef.current) {
+      clearInterval(cuentaRegresivaIntervalRef.current);
+      cuentaRegresivaIntervalRef.current = null;
+    }
     setErrorVoz(null);
     setRedirigiendoA(null);
     setMatchPendiente(null);
@@ -404,10 +430,10 @@ export default function VoiceSearchInput({
     transcripcionCapturadaRef.current = "";
     audioChunksRef.current = [];
 
-    // 1. Obtener stream fresco de audio para garantizar buffers limpios en cada intento
+    // Reutilizar el stream existente si sigue activo, o pedir uno nuevo si no lo está
     let stream: MediaStream;
     try {
-      stream = await getFreshAudioStream();
+      stream = await getOrCreateLiveAudioStream(mediaStreamRef.current);
       mediaStreamRef.current = stream;
     } catch (err: any) {
       console.warn("Error accediendo al micrófono:", err);
@@ -421,7 +447,7 @@ export default function VoiceSearchInput({
       return;
     }
 
-    // Iniciar analizador de volumen en vivo
+    // Iniciar analizador de volumen en vivo sin interferir en la grabación
     analyserRef.current = createAudioLevelAnalyser(stream, (vol) => {
       setVolumenVoz(vol);
     });
@@ -433,7 +459,7 @@ export default function VoiceSearchInput({
       mediaRecorderRef.current = recorder;
 
       recorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
+        if (e.data && e.data.size > 0) {
           audioChunksRef.current.push(e.data);
         }
       };
@@ -441,33 +467,36 @@ export default function VoiceSearchInput({
       recorder.onstop = () => {
         if (analyserRef.current) {
           analyserRef.current.stop();
+          analyserRef.current = null;
         }
-        stopAudioStream(stream);
-
+        // NOTA: NO detenemos stream aquí para permitir múltiples intentos en el mismo modal
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-        if (audioBlob.size > 0 && recorder === mediaRecorderRef.current) {
+        if (audioBlob.size >= 400 && recorder === mediaRecorderRef.current) {
           procesarAudioConGemini(audioBlob, mimeType);
+        } else if (recorder === mediaRecorderRef.current && !transcripcionCapturadaRef.current) {
+          setErrorVoz("No se detectó audio claro. Intenta hablar más cerca del micrófono.");
+          setEscuchando(false);
+          setProcesandoIa(false);
         }
       };
 
-      recorder.start(200);
+      recorder.start(150);
       setEscuchando(true);
 
-      // Auto-detener después de 4.5 segundos si el usuario no tocó antes el botón de detener
+      // Auto-detener después de 4.8 segundos si el usuario no tocó antes el botón de detener
       autoStopTimeoutRef.current = setTimeout(() => {
         if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
           mediaRecorderRef.current.stop();
           setEscuchando(false);
         }
-      }, 4500);
+      }, 4800);
     } catch (err) {
       console.error("Error al instanciar MediaRecorder:", err);
       setErrorVoz("No se pudo iniciar la grabación en tu navegador.");
       return;
     }
 
-    // 2. Ejecutar Web Speech API SOLO en navegadores compatibles (Chrome, Safari, Edge)
-    // En Opera GX está deshabilitado para evitar conflictos de hardware
+    // Web Speech API en navegadores nativos compatibles (Chrome, Safari, Edge)
     if (canUseWebSpeechAPI()) {
       try {
         const SpeechRecognition =
@@ -497,7 +526,7 @@ export default function VoiceSearchInput({
 
               const match = clasificarLocalCliente(capturado, locales);
               if (match) {
-                detenerTodoAudio();
+                detenerGrabacionActiva();
                 procesarResultadoYRedirigir(capturado, match.slug, match.nombre);
               }
             }
@@ -538,7 +567,11 @@ export default function VoiceSearchInput({
       }
     }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      mediaRecorderRef.current.stop();
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {
+        // Ignorar
+      }
     }
     setEscuchando(false);
   };
@@ -792,10 +825,7 @@ export default function VoiceSearchInput({
         createPortal(
           <div
             className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
-            onClick={() => {
-              detenerTodoAudio();
-              setModalVozAbierto(false);
-            }}
+            onClick={cerrarModal}
           >
             <div
               className="relative w-full max-w-md my-auto overflow-hidden rounded-3xl border border-white/20 bg-slate-900 text-white shadow-2xl flex flex-col max-h-[92vh] shrink-0"
@@ -820,10 +850,7 @@ export default function VoiceSearchInput({
 
                 <button
                   type="button"
-                  onClick={() => {
-                    detenerTodoAudio();
-                    setModalVozAbierto(false);
-                  }}
+                  onClick={cerrarModal}
                   className="rounded-full bg-black/20 p-2 text-white/80 hover:bg-black/40 hover:text-white transition active:scale-95"
                   aria-label="Cerrar búsqueda por voz"
                 >
@@ -1062,10 +1089,7 @@ export default function VoiceSearchInput({
                   <>
                     <button
                       type="button"
-                      onClick={() => {
-                        detenerTodoAudio();
-                        setModalVozAbierto(false);
-                      }}
+                      onClick={cerrarModal}
                       className="flex-1 rounded-2xl border border-white/20 bg-white/5 py-3 text-xs font-bold text-white hover:bg-white/10 transition"
                     >
                       Cerrar

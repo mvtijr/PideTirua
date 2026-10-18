@@ -29,8 +29,20 @@ export function canUseWebSpeechAPI(): boolean {
 }
 
 /**
+ * Comprueba si un MediaStream sigue activo y con pistas de audio vivas
+ */
+export function isStreamLive(stream: MediaStream | null): boolean {
+  if (!stream || !stream.active) return false;
+  try {
+    const tracks = stream.getAudioTracks();
+    return tracks.length > 0 && tracks.some((t) => t.readyState === "live" && t.enabled);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Obtiene un nuevo MediaStream limpio desde el micrófono.
- * Cada grabación recibe un stream fresco para evitar bugs de silencio en Chromium.
  */
 export async function getFreshAudioStream(): Promise<MediaStream> {
   if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
@@ -46,6 +58,19 @@ export async function getFreshAudioStream(): Promise<MediaStream> {
   });
 
   return stream;
+}
+
+/**
+ * Obtiene un stream activo reutilizando el existente si sigue vivo,
+ * evitando pedir permisos repetidamente en cada intento.
+ */
+export async function getOrCreateLiveAudioStream(
+  currentStream: MediaStream | null
+): Promise<MediaStream> {
+  if (isStreamLive(currentStream)) {
+    return currentStream!;
+  }
+  return await getFreshAudioStream();
 }
 
 /**
@@ -75,6 +100,8 @@ export function createAudioLevelAnalyser(
   onVolumeChange: (volumen: number) => void
 ): { stop: () => void; getMaxVolume: () => number } {
   let audioCtx: AudioContext | null = null;
+  let source: MediaStreamAudioSourceNode | null = null;
+  let analyser: AnalyserNode | null = null;
   let animId: number | null = null;
   let maxVolume = 0;
 
@@ -86,8 +113,14 @@ export function createAudioLevelAnalyser(
     }
 
     audioCtx = new AudioCtxClass();
-    const source = audioCtx.createMediaStreamSource(stream);
-    const analyser = audioCtx.createAnalyser();
+
+    // En Chromium, reanudar AudioContext si inicia suspendido
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume().catch(() => {});
+    }
+
+    source = audioCtx.createMediaStreamSource(stream);
+    analyser = audioCtx.createAnalyser();
     analyser.fftSize = 256;
     analyser.smoothingTimeConstant = 0.5;
     source.connect(analyser);
@@ -95,6 +128,7 @@ export function createAudioLevelAnalyser(
     const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
     const updateVolume = () => {
+      if (!analyser) return;
       analyser.getByteFrequencyData(dataArray);
 
       // Calcular promedio de amplitudes
@@ -116,7 +150,7 @@ export function createAudioLevelAnalyser(
 
     animId = requestAnimationFrame(updateVolume);
   } catch {
-    // Si Web Audio API falla en algún dispositivo, se omite silenciosamente
+    // Si Web Audio API falla en algún dispositivo, se omite silenciosamente sin alterar la grabación
   }
 
   return {
@@ -124,6 +158,18 @@ export function createAudioLevelAnalyser(
       if (animId !== null) {
         cancelAnimationFrame(animId);
         animId = null;
+      }
+      if (source) {
+        try {
+          source.disconnect();
+        } catch {}
+        source = null;
+      }
+      if (analyser) {
+        try {
+          analyser.disconnect();
+        } catch {}
+        analyser = null;
       }
       if (audioCtx && audioCtx.state !== "closed") {
         try {
