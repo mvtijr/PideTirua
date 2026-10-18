@@ -10,7 +10,7 @@ import { GradientWave } from "@/components/ui/gradient-wave";
 import LocalCard from "@/components/LocalCard";
 import { ArrowRight, ChevronLeft, ChevronRight, Flame, Dices, Sparkles } from "lucide-react";
 import RecomendadorPlatosModal from "@/components/RecomendadorPlatosModal";
-import VoiceSearchInput from "@/components/VoiceSearchInput";
+import SearchInput from "@/components/SearchInput";
 
 interface DirectoryClientProps {
   locales: Local[];
@@ -336,9 +336,9 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             </div>
           </div>
 
-          {/* Buscador rápido en Header con soporte de voz */}
+          {/* Buscador rápido en Header */}
           <div className="hidden lg:flex items-center flex-1 max-w-xs xl:max-w-md mx-space-md">
-            <VoiceSearchInput
+            <SearchInput
               value={busqueda}
               onChange={setBusqueda}
               onClear={() => setBusqueda("")}
@@ -428,9 +428,9 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     </select>
                   </div>
 
-                  {/* Input Buscador con Reconocimiento de Voz */}
+                  {/* Input Buscador Rápido */}
                   <div className="flex-1">
-                    <VoiceSearchInput
+                    <SearchInput
                       value={busqueda}
                       onChange={setBusqueda}
                       onClear={() => setBusqueda("")}

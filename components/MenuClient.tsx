@@ -20,7 +20,6 @@ import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
 import ProductCard from "@/components/ProductCard";
 import FloatingCartBar from "@/components/FloatingCartBar";
 import CartDrawer from "@/components/CartDrawer";
-import VoiceOrderButton from "@/components/VoiceOrderButton";
 
 interface MenuClientProps {
   local: Local;
@@ -107,36 +106,6 @@ export default function MenuClient({ local }: MenuClientProps) {
 
   const handleVaciarCarrito = () => {
     setCarrito([]);
-  };
-
-  const todosLosProductos = useMemo(
-    () => local.categorias.flatMap((cat) => cat.productos),
-    [local.categorias]
-  );
-
-  const handleAgregarItemsVoz = (
-    itemsNuevos: Array<{ producto: Producto; cantidad: number; notas?: string }>
-  ) => {
-    if (localSuspendido) return;
-    setCarrito((prev) => {
-      let copia = [...prev];
-      for (const item of itemsNuevos) {
-        if (item.producto.disponible === false) continue;
-        const idx = copia.findIndex((c) => c.producto.id === item.producto.id);
-        if (idx >= 0) {
-          copia[idx] = {
-            ...copia[idx],
-            cantidad: copia[idx].cantidad + item.cantidad,
-          };
-        } else {
-          copia.push({
-            producto: item.producto,
-            cantidad: item.cantidad,
-          });
-        }
-      }
-      return copia;
-    });
   };
 
   const cantidadPorProducto = useMemo(() => {
@@ -576,16 +545,7 @@ export default function MenuClient({ local }: MenuClientProps) {
         </footer>
       </div>
 
-      {/* Asistente Garzón Virtual por Voz */}
-      {!localSuspendido && (
-        <VoiceOrderButton
-          localNombre={local.nombre}
-          menu={todosLosProductos}
-          onAgregarItems={handleAgregarItemsVoz}
-          onAbrirCarrito={() => setDrawerAbierto(true)}
-          tieneCarrito={totalUnidades > 0}
-        />
-      )}
+
 
       {/* Carrito flotante inferior */}
       <FloatingCartBar
