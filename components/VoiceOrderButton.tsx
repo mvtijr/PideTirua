@@ -15,8 +15,8 @@ import {
 } from "lucide-react";
 import { Producto } from "@/types/local";
 import {
-  getPersistentAudioStream,
-  mutePersistentAudioStream,
+  getFreshAudioStream,
+  stopAudioStream,
   getSupportedAudioMimeType,
   audioBlobToBase64,
   canUseWebSpeechAPI,
@@ -105,7 +105,10 @@ export default function VoiceOrderButton({
       }
       mediaRecorderRef.current = null;
     }
-    mutePersistentAudioStream();
+    if (mediaStreamRef.current) {
+      stopAudioStream(mediaStreamRef.current);
+      mediaStreamRef.current = null;
+    }
     setEscuchando(false);
   };
 
@@ -126,7 +129,7 @@ export default function VoiceOrderButton({
 
     let stream: MediaStream;
     try {
-      stream = await getPersistentAudioStream();
+      stream = await getFreshAudioStream();
       mediaStreamRef.current = stream;
     } catch (err: any) {
       if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
@@ -150,14 +153,14 @@ export default function VoiceOrderButton({
       };
 
       recorder.onstop = () => {
-        mutePersistentAudioStream();
+        stopAudioStream(stream);
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
         if (blob.size > 0) {
           audioBlobRef.current = { blob, mimeType };
         }
       };
 
-      recorder.start(250);
+      recorder.start(200);
       setEscuchando(true);
       setMensajeEstado("Te escucho... dime qué platos deseas pedir");
     } catch (err) {
@@ -225,7 +228,10 @@ export default function VoiceOrderButton({
         mediaRecorderRef.current.stop();
       } catch {}
     }
-    mutePersistentAudioStream();
+    if (mediaStreamRef.current) {
+      stopAudioStream(mediaStreamRef.current);
+      mediaStreamRef.current = null;
+    }
     setEscuchando(false);
   };
 

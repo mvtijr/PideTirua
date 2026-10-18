@@ -249,6 +249,17 @@ Responde ÚNICAMENTE en formato JSON plano:
       }
 
       const textoReconocido = String(parsed.texto_transcrito || "").trim();
+
+      if (!textoReconocido) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "No se detectó voz en el audio. Por favor habla más cerca del micrófono.",
+          },
+          { status: 400 }
+        );
+      }
+
       let localSlug = parsed.local_slug ? String(parsed.local_slug).trim() : null;
       let nombreLocal = parsed.nombre_local ? String(parsed.nombre_local).trim() : null;
 

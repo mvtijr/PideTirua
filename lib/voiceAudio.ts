@@ -1,9 +1,7 @@
 /**
- * Utilidades y gestión persistente de audio para reconocimiento de voz en PideTirúa
- * Soporta de manera optimizada Opera GX, Chrome, Safari, Firefox y dispositivos móviles.
+ * Utilidades y gestión de audio para reconocimiento de voz en PideTirúa
+ * Soporta Opera GX, Chrome, Safari, Firefox y dispositivos móviles.
  */
-
-let globalMediaStream: MediaStream | null = null;
 
 /**
  * Detecta si el navegador es Opera GX o una variante de Opera
@@ -31,29 +29,14 @@ export function canUseWebSpeechAPI(): boolean {
 }
 
 /**
- * Obtiene o reutiliza un MediaStream persistente.
- * Al NO destruir las pistas con track.stop(), el navegador (especialmente Opera GX)
- * NO vuelve a solicitar permisos de micrófono en grabaciones posteriores.
+ * Obtiene un nuevo MediaStream limpio desde el micrófono.
+ * Cada grabación recibe un stream fresco para evitar bugs de silencio en Chromium.
  */
-export async function getPersistentAudioStream(): Promise<MediaStream> {
+export async function getFreshAudioStream(): Promise<MediaStream> {
   if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) {
     throw new Error("Tu navegador no soporta captura de audio desde el micrófono.");
   }
 
-  // Si ya tenemos un stream vivo en memoria, reactivamos sus pistas sin volver a pedir permisos
-  if (globalMediaStream) {
-    const tracks = globalMediaStream.getAudioTracks();
-    const hayPistasVivas = tracks.some((t) => t.readyState === "live");
-
-    if (hayPistasVivas) {
-      tracks.forEach((track) => {
-        track.enabled = true; // Desmutear pista
-      });
-      return globalMediaStream;
-    }
-  }
-
-  // Si no hay stream o las pistas expiraron, solicitamos acceso con cancelación de eco y supresión de ruido
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
       echoCancellation: true,
@@ -62,27 +45,21 @@ export async function getPersistentAudioStream(): Promise<MediaStream> {
     },
   });
 
-  globalMediaStream = stream;
-
-  // Escuchar si el usuario desconecta el dispositivo de audio
-  stream.getAudioTracks().forEach((track) => {
-    track.onended = () => {
-      globalMediaStream = null;
-    };
-  });
-
   return stream;
 }
 
 /**
- * Silencia las pistas de audio sin destruirlas.
- * Esto detiene la entrada de sonido pero mantiene el permiso activo en el navegador.
+ * Detiene y libera todas las pistas de un MediaStream
  */
-export function mutePersistentAudioStream(): void {
-  if (!globalMediaStream) return;
+export function stopAudioStream(stream: MediaStream | null): void {
+  if (!stream) return;
   try {
-    globalMediaStream.getAudioTracks().forEach((track) => {
-      track.enabled = false;
+    stream.getTracks().forEach((track) => {
+      try {
+        track.stop();
+      } catch {
+        // Ignorar
+      }
     });
   } catch {
     // Ignorar
@@ -90,18 +67,75 @@ export function mutePersistentAudioStream(): void {
 }
 
 /**
- * Libera completamente el stream (por ejemplo al cerrar la pestaña o desinstalar)
+ * Crea un analizador de volumen de audio en tiempo real usando Web Audio API.
+ * Permite mostrar ecualizadores en vivo y verificar si el usuario realmente habló.
  */
-export function releasePersistentAudioStream(): void {
-  if (!globalMediaStream) return;
+export function createAudioLevelAnalyser(
+  stream: MediaStream,
+  onVolumeChange: (volumen: number) => void
+): { stop: () => void; getMaxVolume: () => number } {
+  let audioCtx: AudioContext | null = null;
+  let animId: number | null = null;
+  let maxVolume = 0;
+
   try {
-    globalMediaStream.getTracks().forEach((track) => {
-      track.stop();
-    });
+    const AudioCtxClass =
+      window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtxClass) {
+      return { stop: () => {}, getMaxVolume: () => 0 };
+    }
+
+    audioCtx = new AudioCtxClass();
+    const source = audioCtx.createMediaStreamSource(stream);
+    const analyser = audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    analyser.smoothingTimeConstant = 0.5;
+    source.connect(analyser);
+
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+    const updateVolume = () => {
+      analyser.getByteFrequencyData(dataArray);
+
+      // Calcular promedio de amplitudes
+      let sum = 0;
+      for (let i = 0; i < dataArray.length; i++) {
+        sum += dataArray[i];
+      }
+      const avg = sum / dataArray.length;
+      // Normalizar de 0 a 100
+      const normalized = Math.min(100, Math.round((avg / 128) * 100));
+
+      if (normalized > maxVolume) {
+        maxVolume = normalized;
+      }
+
+      onVolumeChange(normalized);
+      animId = requestAnimationFrame(updateVolume);
+    };
+
+    animId = requestAnimationFrame(updateVolume);
   } catch {
-    // Ignorar
+    // Si Web Audio API falla en algún dispositivo, se omite silenciosamente
   }
-  globalMediaStream = null;
+
+  return {
+    stop: () => {
+      if (animId !== null) {
+        cancelAnimationFrame(animId);
+        animId = null;
+      }
+      if (audioCtx && audioCtx.state !== "closed") {
+        try {
+          audioCtx.close();
+        } catch {
+          // Ignorar
+        }
+        audioCtx = null;
+      }
+    },
+    getMaxVolume: () => maxVolume,
+  };
 }
 
 /**

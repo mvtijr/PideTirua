@@ -20,8 +20,9 @@ import {
 import { Local, Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import {
-  getPersistentAudioStream,
-  mutePersistentAudioStream,
+  getFreshAudioStream,
+  stopAudioStream,
+  createAudioLevelAnalyser,
   getSupportedAudioMimeType,
   audioBlobToBase64,
   canUseWebSpeechAPI,
@@ -146,13 +147,24 @@ export default function VoiceSearchInput({
   const [dropdownAbierto, setDropdownAbierto] = useState(false);
   const [montado, setMontado] = useState(false);
 
+  // Estados para ecualizador en vivo y cuenta regresiva visible
+  const [volumenVoz, setVolumenVoz] = useState(0);
+  const [matchPendiente, setMatchPendiente] = useState<{
+    slug: string;
+    nombre: string;
+    texto: string;
+  } | null>(null);
+  const [tiempoRestanteMs, setTiempoRestanteMs] = useState(2500);
+
   const contenedorRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const mediaStreamRef = useRef<MediaStream | null>(null);
+  const analyserRef = useRef<{ stop: () => void; getMaxVolume: () => number } | null>(null);
   const transcripcionCapturadaRef = useRef<string>("");
   const autoStopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const cuentaRegresivaIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setMontado(true);
@@ -184,6 +196,18 @@ export default function VoiceSearchInput({
       clearTimeout(autoStopTimeoutRef.current);
       autoStopTimeoutRef.current = null;
     }
+    if (cuentaRegresivaIntervalRef.current) {
+      clearInterval(cuentaRegresivaIntervalRef.current);
+      cuentaRegresivaIntervalRef.current = null;
+    }
+    if (analyserRef.current) {
+      try {
+        analyserRef.current.stop();
+      } catch {
+        // Ignorar
+      }
+      analyserRef.current = null;
+    }
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -194,7 +218,6 @@ export default function VoiceSearchInput({
     }
     if (mediaRecorderRef.current) {
       try {
-        // Desconectar handlers para evitar llamadas cruzadas asíncronas
         mediaRecorderRef.current.onstop = null;
         mediaRecorderRef.current.ondataavailable = null;
         if (mediaRecorderRef.current.state !== "inactive") {
@@ -205,13 +228,42 @@ export default function VoiceSearchInput({
       }
       mediaRecorderRef.current = null;
     }
-    // Muteamos el stream persistente SIN destruirlo para preservar los permisos en Opera GX / Chrome
-    mutePersistentAudioStream();
+    if (mediaStreamRef.current) {
+      stopAudioStream(mediaStreamRef.current);
+      mediaStreamRef.current = null;
+    }
     setEscuchando(false);
+    setVolumenVoz(0);
   };
 
   /**
-   * Ejecuta la redirección inmediata a la carta del local o filtra el directorio sin apretar botones
+   * Navegación inmediata manual al presionar "Ir ahora"
+   */
+  const ejecutarNavegacionInmediata = (slug: string) => {
+    if (cuentaRegresivaIntervalRef.current) {
+      clearInterval(cuentaRegresivaIntervalRef.current);
+      cuentaRegresivaIntervalRef.current = null;
+    }
+    setModalVozAbierto(false);
+    setDropdownAbierto(false);
+    setMatchPendiente(null);
+    router.push(`/${slug}`);
+  };
+
+  /**
+   * Cancelar la redirección en curso si el usuario prefiere quedarse o corregir
+   */
+  const cancelarRedireccion = () => {
+    if (cuentaRegresivaIntervalRef.current) {
+      clearInterval(cuentaRegresivaIntervalRef.current);
+      cuentaRegresivaIntervalRef.current = null;
+    }
+    setMatchPendiente(null);
+    setRedirigiendoA(null);
+  };
+
+  /**
+   * Procesa la frase y activa la cuenta regresiva visible de 2.5 segundos con confirmación clara
    */
   const procesarResultadoYRedirigir = (
     texto: string,
@@ -222,6 +274,8 @@ export default function VoiceSearchInput({
     const textoLimpio = texto.trim();
     if (!textoLimpio) return;
 
+    setTranscripcionVoz(textoLimpio);
+
     // Verificar si corresponde a un local específico
     const match =
       localSlugForzado
@@ -229,27 +283,50 @@ export default function VoiceSearchInput({
         : clasificarLocalCliente(textoLimpio, locales);
 
     if (match) {
-      // REDIRECCIÓN INMEDIATA AL LOCAL SIN TOCAR BOTÓN
-      setRedirigiendoA(match.nombre);
+      // Activar cuenta regresiva visible de 2.5 segundos para que el usuario pueda leer
+      setMatchPendiente({
+        slug: match.slug,
+        nombre: match.nombre,
+        texto: textoLimpio,
+      });
+      setTiempoRestanteMs(2500);
       setErrorVoz(null);
 
-      setTimeout(() => {
-        setModalVozAbierto(false);
-        setDropdownAbierto(false);
-        router.push(`/${match.slug}`);
-      }, 500);
+      if (cuentaRegresivaIntervalRef.current) {
+        clearInterval(cuentaRegresivaIntervalRef.current);
+      }
+
+      const inicio = Date.now();
+      const duracionTotal = 2500;
+
+      cuentaRegresivaIntervalRef.current = setInterval(() => {
+        const transcurrido = Date.now() - inicio;
+        const restante = Math.max(0, duracionTotal - transcurrido);
+        setTiempoRestanteMs(restante);
+
+        if (restante <= 0) {
+          if (cuentaRegresivaIntervalRef.current) {
+            clearInterval(cuentaRegresivaIntervalRef.current);
+            cuentaRegresivaIntervalRef.current = null;
+          }
+          setModalVozAbierto(false);
+          setDropdownAbierto(false);
+          setMatchPendiente(null);
+          router.push(`/${match.slug}`);
+        }
+      }, 100);
+
       return;
     }
 
     // Si es búsqueda comunal general (ej: "abiertos", "comida rápida")
-    onChange(textoLimpio);
-    setRedirigiendoA("Resultados de Tirúa");
-
+    setRedirigiendoA("Filtrando en Directorio...");
     setTimeout(() => {
+      onChange(textoLimpio);
       setModalVozAbierto(false);
       setDropdownAbierto(false);
       onSubmit?.();
-    }, 450);
+    }, 1500);
   };
 
   /**
@@ -305,7 +382,7 @@ export default function VoiceSearchInput({
   };
 
   /**
-   * Inicia la captura de voz con stream persistente (no vuelve a pedir permisos en Opera GX)
+   * Inicia la captura de voz con un stream fresco para garantizar audio en cada intento
    */
   const abrirModalVoz = () => {
     setModalVozAbierto(true);
@@ -313,6 +390,7 @@ export default function VoiceSearchInput({
     transcripcionCapturadaRef.current = "";
     setErrorVoz(null);
     setRedirigiendoA(null);
+    setMatchPendiente(null);
     iniciarGrabacionDual();
   };
 
@@ -320,26 +398,33 @@ export default function VoiceSearchInput({
     detenerTodoAudio();
     setErrorVoz(null);
     setRedirigiendoA(null);
+    setMatchPendiente(null);
     setProcesandoIa(false);
+    setVolumenVoz(0);
     transcripcionCapturadaRef.current = "";
     audioChunksRef.current = [];
 
-    // 1. Obtener o reutilizar el stream persistente (evita pedir permisos repetidamente en Opera GX)
+    // 1. Obtener stream fresco de audio para garantizar buffers limpios en cada intento
     let stream: MediaStream;
     try {
-      stream = await getPersistentAudioStream();
+      stream = await getFreshAudioStream();
       mediaStreamRef.current = stream;
     } catch (err: any) {
       console.warn("Error accediendo al micrófono:", err);
       if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
         setErrorVoz(
-          "Permiso de micrófono no otorgado. En Opera GX o Chrome, haz clic en el icono del candado en la barra de direcciones y selecciona 'Permitir'."
+          "Permiso de micrófono no otorgado. En Opera GX o Chrome, haz clic en el icono del candado 🔒 en la barra de direcciones y selecciona 'Permitir'."
         );
       } else {
         setErrorVoz("No se pudo iniciar el micrófono en tu dispositivo.");
       }
       return;
     }
+
+    // Iniciar analizador de volumen en vivo
+    analyserRef.current = createAudioLevelAnalyser(stream, (vol) => {
+      setVolumenVoz(vol);
+    });
 
     const mimeType = getSupportedAudioMimeType();
 
@@ -354,8 +439,10 @@ export default function VoiceSearchInput({
       };
 
       recorder.onstop = () => {
-        // Silenciar pistas para privacidad sin revocar el permiso del navegador
-        mutePersistentAudioStream();
+        if (analyserRef.current) {
+          analyserRef.current.stop();
+        }
+        stopAudioStream(stream);
 
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         if (audioBlob.size > 0 && recorder === mediaRecorderRef.current) {
@@ -363,7 +450,7 @@ export default function VoiceSearchInput({
         }
       };
 
-      recorder.start(250);
+      recorder.start(200);
       setEscuchando(true);
 
       // Auto-detener después de 4.5 segundos si el usuario no tocó antes el botón de detener
@@ -379,8 +466,8 @@ export default function VoiceSearchInput({
       return;
     }
 
-    // 2. Ejecutar Web Speech API SOLO si el navegador lo soporta de forma confiable (Chrome, Safari, Edge)
-    // En Opera GX está deshabilitado para evitar conflictos de hardware y errores de red
+    // 2. Ejecutar Web Speech API SOLO en navegadores compatibles (Chrome, Safari, Edge)
+    // En Opera GX está deshabilitado para evitar conflictos de hardware
     if (canUseWebSpeechAPI()) {
       try {
         const SpeechRecognition =
@@ -746,15 +833,62 @@ export default function VoiceSearchInput({
 
               {/* Contenido Central con scroll si es pantalla compacta */}
               <div className="p-5 sm:p-6 overflow-y-auto flex flex-col items-center text-center space-y-4">
-                {/* Banner de Redirección Automática si ya se reconoció el local */}
-                {redirigiendoA ? (
-                  <div className="w-full rounded-2xl border border-emerald-500/40 bg-emerald-500/20 p-4 text-center animate-in zoom-in-95 duration-200">
-                    <div className="flex items-center justify-center gap-2 text-emerald-300 font-black text-sm sm:text-base">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
-                      <span>¡Entendido! Te llevamos a {redirigiendoA}...</span>
+                {/* 1. VISTA DE LOCAL RECONOCIDO CON CUENTA REGRESIVA VISIBLE (2.5 SEGUNDOS) */}
+                {matchPendiente ? (
+                  <div className="w-full space-y-4 animate-in zoom-in-95 duration-200">
+                    {/* Tarjeta de lo que dijo el usuario */}
+                    <div className="w-full rounded-2xl bg-amber-500/10 border border-amber-500/30 p-4 text-left">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block mb-1">
+                        Lo que dijiste:
+                      </span>
+                      <p className="text-base sm:text-lg font-extrabold text-amber-200 italic">
+                        &ldquo;{matchPendiente.texto}&rdquo;
+                      </p>
                     </div>
-                    <p className="text-xs text-emerald-200/80 mt-1">
-                      Abriendo su carta digital de forma inmediata...
+
+                    {/* Tarjeta del Local Encontrado */}
+                    <div className="w-full rounded-2xl bg-gradient-to-br from-emerald-950/60 via-slate-900 to-emerald-900/40 border-2 border-emerald-500/50 p-5 text-left shadow-xl space-y-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 shrink-0 shadow-inner">
+                          <Store className="h-6 w-6" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-400">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Restaurante Encontrado
+                          </span>
+                          <h4 className="text-base sm:text-lg font-black text-white truncate">
+                            {matchPendiente.nombre}
+                          </h4>
+                          <p className="text-xs text-emerald-300/80 font-medium mt-0.5">
+                            Abriendo carta en {(tiempoRestanteMs / 1000).toFixed(1)} segundos...
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Barra de Progreso de Cuenta Regresiva */}
+                      <div className="w-full h-2 bg-slate-950/80 rounded-full overflow-hidden border border-white/10">
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all ease-linear duration-100"
+                          style={{
+                            width: `${Math.max(0, Math.min(100, (tiempoRestanteMs / 2500) * 100))}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-400">
+                      Puedes esperar o pulsar <strong>&quot;Ir ahora mismo&quot;</strong> si estás listo.
+                    </p>
+                  </div>
+                ) : redirigiendoA ? (
+                  <div className="w-full rounded-2xl border border-emerald-500/40 bg-emerald-500/20 p-5 text-center animate-in zoom-in-95 duration-200 space-y-2">
+                    <div className="flex items-center justify-center gap-2 text-emerald-300 font-black text-base">
+                      <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                      <span>{redirigiendoA}</span>
+                    </div>
+                    <p className="text-xs text-emerald-200/80">
+                      Aplicando búsqueda en el directorio de Tirúa...
                     </p>
                   </div>
                 ) : (
@@ -791,17 +925,43 @@ export default function VoiceSearchInput({
                       </button>
                     </div>
 
+                    {/* Ecualizador de Voz en Tiempo Real */}
+                    {escuchando && (
+                      <div className="flex flex-col items-center gap-1.5 my-1 animate-in fade-in duration-150">
+                        <div className="flex items-center justify-center gap-1.5 h-7">
+                          {[35, 60, 95, 75, 45, 80, 50].map((factor, i) => {
+                            const h = Math.max(
+                              6,
+                              Math.min(26, Math.round((volumenVoz / 100) * factor * 1.3))
+                            );
+                            return (
+                              <span
+                                key={i}
+                                className={`w-1.5 rounded-full transition-all duration-75 ${
+                                  volumenVoz > 10 ? "bg-emerald-400 shadow-sm" : "bg-rose-400"
+                                }`}
+                                style={{ height: `${h}px` }}
+                              />
+                            );
+                          })}
+                        </div>
+                        <span className="text-[11px] font-bold text-slate-300">
+                          {volumenVoz > 12 ? "🟢 Escuchando tu voz..." : "🔴 Te escuchamos... habla ahora"}
+                        </span>
+                      </div>
+                    )}
+
                     {/* Mensaje de Estado */}
                     <div>
                       <p className="text-sm font-extrabold text-white">
                         {procesandoIa
                           ? "🤖 Procesando tu voz con IA..."
                           : escuchando
-                          ? "🔴 Te escuchamos... Di tu restaurante o plato"
+                          ? "Di el restaurante o comida que deseas"
                           : "Toca el micrófono para comenzar a hablar"}
                       </p>
                       <p className="text-xs text-slate-400 mt-1">
-                        Al decirlo, <strong>te redirigiremos de inmediato a su carta digital</strong> sin tener que apretar botones.
+                        Verás lo que dijiste y la carta que abriremos antes de redirigirte.
                       </p>
                     </div>
 
@@ -809,7 +969,7 @@ export default function VoiceSearchInput({
                     <div className="w-full rounded-2xl border border-white/10 bg-black/40 p-4 min-h-[4.5rem] flex items-center justify-center text-left">
                       {transcripcionVoz ? (
                         <p className="text-sm sm:text-base font-bold text-amber-300 italic">
-                          "{transcripcionVoz}"
+                          &ldquo;{transcripcionVoz}&rdquo;
                         </p>
                       ) : (
                         <p className="text-xs text-slate-500 italic">
@@ -830,10 +990,10 @@ export default function VoiceSearchInput({
                         <button
                           type="button"
                           onClick={iniciarGrabacionDual}
-                          className="w-full py-2 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                          className="w-full py-2.5 px-3 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-98"
                         >
                           <Mic className="h-3.5 w-3.5" />
-                          <span>Reintentar hablar al micrófono</span>
+                          <span>Hablar de nuevo</span>
                         </button>
                       </div>
                     )}
@@ -841,7 +1001,7 @@ export default function VoiceSearchInput({
                     {/* Chips Rápidos de Redirección Inmediata (1 Toque) */}
                     <div className="w-full pt-1">
                       <span className="block text-[11px] font-bold text-slate-400 mb-2 text-left">
-                        O toca un acceso directo para ir de inmediato:
+                        O toca un acceso directo:
                       </span>
                       <div className="flex flex-wrap gap-1.5">
                         {[
@@ -872,7 +1032,7 @@ export default function VoiceSearchInput({
 
                     {/* Tip para permisos en Opera GX / Chrome */}
                     <p className="text-[10px] text-slate-400/90 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-left w-full">
-                      💡 <strong>Tip Opera GX:</strong> Al permitir el micrófono, selecciona <em>&quot;Permitir en todas las visitas&quot;</em> o <em>&quot;Recordar&quot;</em> para que el navegador no te pida confirmación cada vez.
+                      🔒 <strong>Tip Opera GX:</strong> Si te pide permiso, haz clic en el candado de la barra superior y selecciona <em>&quot;Permitir&quot;</em> en Micrófono para guardarlo permanentemente.
                     </p>
                   </>
                 )}
@@ -880,45 +1040,67 @@ export default function VoiceSearchInput({
 
               {/* Acciones Inferiores */}
               <div className="border-t border-white/10 bg-slate-950/60 p-4 flex items-center gap-2.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => {
-                    detenerTodoAudio();
-                    setModalVozAbierto(false);
-                  }}
-                  className="flex-1 rounded-2xl border border-white/20 bg-white/5 py-3 text-xs font-bold text-white hover:bg-white/10 transition"
-                >
-                  Cancelar
-                </button>
-
-                {escuchando ? (
-                  <button
-                    type="button"
-                    onClick={terminarYProcesarManual}
-                    className="flex-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-emerald-400 hover:to-teal-400 active:scale-95 flex items-center justify-center gap-1.5"
-                  >
-                    <span>Listo, ir al local</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </button>
+                {matchPendiente ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={cancelarRedireccion}
+                      className="flex-1 rounded-2xl border border-white/20 bg-white/5 py-3 text-xs font-bold text-white hover:bg-white/10 transition"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => ejecutarNavegacionInmediata(matchPendiente.slug)}
+                      className="flex-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-emerald-400 hover:to-teal-400 active:scale-95 flex items-center justify-center gap-1.5"
+                    >
+                      <span>Ir ahora mismo</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </>
                 ) : (
-                  <button
-                    type="button"
-                    disabled={!transcripcionVoz.trim() || procesandoIa}
-                    onClick={() => procesarResultadoYRedirigir(transcripcionVoz)}
-                    className="flex-1 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-amber-400 hover:to-orange-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
-                  >
-                    {procesandoIa ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Analizando...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Ir al local</span>
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        detenerTodoAudio();
+                        setModalVozAbierto(false);
+                      }}
+                      className="flex-1 rounded-2xl border border-white/20 bg-white/5 py-3 text-xs font-bold text-white hover:bg-white/10 transition"
+                    >
+                      Cerrar
+                    </button>
+
+                    {escuchando ? (
+                      <button
+                        type="button"
+                        onClick={terminarYProcesarManual}
+                        className="flex-1 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-emerald-400 hover:to-teal-400 active:scale-95 flex items-center justify-center gap-1.5"
+                      >
+                        <span>Listo, buscar ahora</span>
                         <ArrowRight className="h-4 w-4" />
-                      </>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={!transcripcionVoz.trim() || procesandoIa}
+                        onClick={() => procesarResultadoYRedirigir(transcripcionVoz)}
+                        className="flex-1 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-amber-400 hover:to-orange-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
+                      >
+                        {procesandoIa ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Analizando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Buscar</span>
+                            <ArrowRight className="h-4 w-4" />
+                          </>
+                        )}
+                      </button>
                     )}
-                  </button>
+                  </>
                 )}
               </div>
             </div>
