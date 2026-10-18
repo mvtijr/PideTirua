@@ -186,18 +186,22 @@ export default function VoiceSearchInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Limpiar recursos de audio al desmontar
-  useEffect(() => {
-    return () => {
-      liberarMicrofonoYRecursos();
-    };
-  }, []);
+  const cancelarSintesisVoz = () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        // Ignorar
+      }
+    }
+  };
 
   /**
    * Detiene la grabación activa y el análisis sin destruir el MediaStream subyacente
    * para permitir grabaciones sucesivas instantáneas sin pedir permisos de nuevo.
    */
   const detenerGrabacionActiva = () => {
+    cancelarSintesisVoz();
     if (autoStopTimeoutRef.current) {
       clearTimeout(autoStopTimeoutRef.current);
       autoStopTimeoutRef.current = null;
@@ -249,6 +253,18 @@ export default function VoiceSearchInput({
       mediaStreamRef.current = null;
     }
   };
+
+  // Limpiar recursos de audio y reconocimiento al desmontar
+  useEffect(() => {
+    return () => {
+      try {
+        recognitionRef.current?.abort();
+      } catch {}
+      recognitionRef.current = null;
+      cancelarSintesisVoz();
+      liberarMicrofonoYRecursos();
+    };
+  }, []);
 
   const cerrarModal = () => {
     liberarMicrofonoYRecursos();
@@ -417,6 +433,15 @@ export default function VoiceSearchInput({
   };
 
   const iniciarGrabacionDual = async () => {
+    // 1. Cancelar cualquier síntesis de voz en reproducción y abortar reconocimiento zombi previo
+    cancelarSintesisVoz();
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch {}
+      recognitionRef.current = null;
+    }
+
     detenerGrabacionActiva();
     if (cuentaRegresivaIntervalRef.current) {
       clearInterval(cuentaRegresivaIntervalRef.current);
@@ -430,7 +455,92 @@ export default function VoiceSearchInput({
     transcripcionCapturadaRef.current = "";
     audioChunksRef.current = [];
 
-    // Reutilizar el stream existente si sigue activo, o pedir uno nuevo si no lo está
+    // 2. Web Speech API nativa (Chrome, Edge, Safari, Android)
+    if (canUseWebSpeechAPI()) {
+      try {
+        const SpeechRecognition =
+          (window as any).SpeechRecognition ||
+          (window as any).webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+          const recognition = new SpeechRecognition();
+          recognition.lang = "es-CL"; // Español de Chile
+          recognition.continuous = false; // Detenerse al terminar la frase
+          recognition.interimResults = false;
+
+          recognition.onstart = () => {
+            setEscuchando(true);
+            setProcesandoIa(false);
+            setErrorVoz(null);
+          };
+
+          recognition.onresult = (event: any) => {
+            let capturado = "";
+            if (event.results && event.results.length > 0) {
+              capturado = event.results[0][0]?.transcript || "";
+            }
+            const textoFinal = capturado.trim();
+            if (textoFinal) {
+              setTranscripcionVoz(textoFinal);
+              transcripcionCapturadaRef.current = textoFinal;
+              setProcesandoIa(true);
+              detenerGrabacionActiva();
+              procesarResultadoYRedirigir(textoFinal);
+            }
+          };
+
+          recognition.onerror = (event: any) => {
+            const errorType = event?.error;
+            console.warn("SpeechRecognition error:", errorType);
+            setEscuchando(false);
+            setProcesandoIa(false);
+
+            if (errorType === "no-speech" || errorType === "aborted") {
+              // Ignorar limpiamente sin congelar la interfaz ni alarmar al usuario
+              return;
+            }
+
+            if (errorType === "not-allowed" || errorType === "permission-denied") {
+              setErrorVoz(
+                "Permiso de micrófono no otorgado. En la barra de direcciones, haz clic en el candado 🔒 y selecciona 'Permitir'."
+              );
+            } else {
+              setErrorVoz("No pudimos captar tu voz. Toca el micrófono para intentar de nuevo.");
+            }
+          };
+
+          recognition.onend = () => {
+            // VITAL: Resetear siempre escuchando y limpiar la referencia
+            setEscuchando(false);
+            recognitionRef.current = null;
+          };
+
+          recognitionRef.current = recognition;
+          recognition.start();
+
+          // Iniciar analizador de volumen en vivo de forma no bloqueante para el ecualizador
+          getOrCreateLiveAudioStream(mediaStreamRef.current)
+            .then((stream) => {
+              mediaStreamRef.current = stream;
+              analyserRef.current = createAudioLevelAnalyser(stream, (vol) => {
+                setVolumenVoz(vol);
+              });
+            })
+            .catch(() => {
+              // Si falla el analizador visual, el reconocimiento de voz nativo continúa funcionando
+            });
+
+          return; // No requerimos MediaRecorder si Web Speech API está activa
+        }
+      } catch (err) {
+        console.warn("Fallo al iniciar Web Speech API, usando fallback MediaRecorder:", err);
+        setEscuchando(false);
+        setProcesandoIa(false);
+        recognitionRef.current = null;
+      }
+    }
+
+    // 3. Fallback con MediaRecorder para Opera GX y navegadores sin Web Speech API
     let stream: MediaStream;
     try {
       stream = await getOrCreateLiveAudioStream(mediaStreamRef.current);
@@ -444,6 +554,8 @@ export default function VoiceSearchInput({
       } else {
         setErrorVoz("No se pudo iniciar el micrófono en tu dispositivo.");
       }
+      setEscuchando(false);
+      setProcesandoIa(false);
       return;
     }
 
@@ -469,7 +581,8 @@ export default function VoiceSearchInput({
           analyserRef.current.stop();
           analyserRef.current = null;
         }
-        // NOTA: NO detenemos stream aquí para permitir múltiples intentos en el mismo modal
+        setEscuchando(false);
+        // NOTA: NO destruimos el stream aquí para permitir múltiples grabaciones en el mismo modal
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         if (audioBlob.size >= 400 && recorder === mediaRecorderRef.current) {
           procesarAudioConGemini(audioBlob, mimeType);
@@ -482,6 +595,7 @@ export default function VoiceSearchInput({
 
       recorder.start(150);
       setEscuchando(true);
+      setProcesandoIa(false);
 
       // Auto-detener después de 4.8 segundos si el usuario no tocó antes el botón de detener
       autoStopTimeoutRef.current = setTimeout(() => {
@@ -493,68 +607,14 @@ export default function VoiceSearchInput({
     } catch (err) {
       console.error("Error al instanciar MediaRecorder:", err);
       setErrorVoz("No se pudo iniciar la grabación en tu navegador.");
+      setEscuchando(false);
+      setProcesandoIa(false);
       return;
-    }
-
-    // Web Speech API en navegadores nativos compatibles (Chrome, Safari, Edge)
-    if (canUseWebSpeechAPI()) {
-      try {
-        const SpeechRecognition =
-          (window as any).SpeechRecognition ||
-          (window as any).webkitSpeechRecognition;
-
-        if (SpeechRecognition) {
-          const recognition = new SpeechRecognition();
-          recognition.lang = "es-CL";
-          recognition.interimResults = true;
-          recognition.continuous = false;
-
-          recognition.onresult = (event: any) => {
-            let final = "";
-            let interim = "";
-            for (let i = 0; i < event.results.length; i++) {
-              if (event.results[i].isFinal) {
-                final += event.results[i][0].transcript;
-              } else {
-                interim += event.results[i][0].transcript;
-              }
-            }
-            const capturado = (final || interim).trim();
-            if (capturado) {
-              setTranscripcionVoz(capturado);
-              transcripcionCapturadaRef.current = capturado;
-
-              const match = clasificarLocalCliente(capturado, locales);
-              if (match) {
-                detenerGrabacionActiva();
-                procesarResultadoYRedirigir(capturado, match.slug, match.nombre);
-              }
-            }
-          };
-
-          recognition.onerror = () => {
-            try {
-              recognition.abort();
-            } catch {
-              // Ignorar
-            }
-            recognitionRef.current = null;
-          };
-
-          recognition.onend = () => {
-            recognitionRef.current = null;
-          };
-
-          recognitionRef.current = recognition;
-          recognition.start();
-        }
-      } catch {
-        // Ignorar fallos de Web Speech API
-      }
     }
   };
 
   const terminarYProcesarManual = () => {
+    cancelarSintesisVoz();
     if (autoStopTimeoutRef.current) {
       clearTimeout(autoStopTimeoutRef.current);
       autoStopTimeoutRef.current = null;
@@ -563,8 +623,11 @@ export default function VoiceSearchInput({
       try {
         recognitionRef.current.stop();
       } catch {
-        // Ignorar
+        try {
+          recognitionRef.current.abort();
+        } catch {}
       }
+      recognitionRef.current = null;
     }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       try {

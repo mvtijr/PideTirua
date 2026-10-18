@@ -86,7 +86,18 @@ export default function VoiceOrderButton({
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const audioBlobRef = useRef<{ blob: Blob; mimeType: string } | null>(null);
 
+  const cancelarSintesisVoz = () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        // Ignorar
+      }
+    }
+  };
+
   const detenerGrabacionActiva = () => {
+    cancelarSintesisVoz();
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -120,11 +131,27 @@ export default function VoiceOrderButton({
 
   useEffect(() => {
     return () => {
+      try {
+        recognitionRef.current?.abort();
+      } catch {}
+      recognitionRef.current = null;
+      cancelarSintesisVoz();
       liberarMicrofonoYRecursos();
     };
   }, []);
 
   const iniciarEscucha = async () => {
+    // 1. Cancelar cualquier síntesis de voz en reproducción para no bloquear el canal de audio
+    cancelarSintesisVoz();
+
+    // 2. Abortar cualquier reconocimiento zombi previo antes de iniciar uno fresco
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch {}
+      recognitionRef.current = null;
+    }
+
     detenerGrabacionActiva();
     setTranscripcion("");
     setErrorVoz(null);
@@ -133,6 +160,78 @@ export default function VoiceOrderButton({
     audioChunksRef.current = [];
     audioBlobRef.current = null;
 
+    // 3. Web Speech API nativa (Chrome, Edge, Safari, Android)
+    if (canUseWebSpeechAPI()) {
+      try {
+        const SpeechRecognition =
+          (window as any).SpeechRecognition ||
+          (window as any).webkitSpeechRecognition;
+
+        if (SpeechRecognition) {
+          const recognition = new SpeechRecognition();
+          recognition.lang = "es-CL"; // Español de Chile
+          recognition.continuous = false; // Detenerse al terminar la frase
+          recognition.interimResults = false;
+
+          recognition.onstart = () => {
+            setEscuchando(true);
+            setProcesandoIa(false);
+            setMensajeEstado("Te escucho... dime qué deseas pedir");
+            setErrorVoz(null);
+          };
+
+          recognition.onresult = (event: any) => {
+            let capturado = "";
+            if (event.results && event.results.length > 0) {
+              capturado = event.results[0][0]?.transcript || "";
+            }
+            const textoFinal = capturado.trim();
+            if (textoFinal) {
+              setTranscripcion(textoFinal);
+              setProcesandoIa(true);
+              setMensajeEstado("Garzón virtual analizando tu pedido con IA...");
+              // Enviar directamente con el texto capturado
+              procesarComandaConIa(textoFinal);
+            }
+          };
+
+          recognition.onerror = (event: any) => {
+            const errorType = event?.error;
+            console.warn("SpeechRecognition error:", errorType);
+            setEscuchando(false);
+            setProcesandoIa(false);
+
+            if (errorType === "no-speech" || errorType === "aborted") {
+              // Ignorar limpiamente sin congelar la interfaz ni alarmar al usuario
+              return;
+            }
+
+            if (errorType === "not-allowed" || errorType === "permission-denied") {
+              setErrorVoz("Permiso de micrófono no otorgado. Habilítalo en tu navegador.");
+            } else {
+              setErrorVoz("No logramos captar el audio. Toca el micrófono para intentar de nuevo.");
+            }
+          };
+
+          recognition.onend = () => {
+            // VITAL: Resetear siempre escuchando y limpiar la referencia
+            setEscuchando(false);
+            recognitionRef.current = null;
+          };
+
+          recognitionRef.current = recognition;
+          recognition.start();
+          return; // No requerimos MediaRecorder si Web Speech API está activa
+        }
+      } catch (err) {
+        console.warn("Fallo al iniciar Web Speech API, usando fallback MediaRecorder:", err);
+        setEscuchando(false);
+        setProcesandoIa(false);
+        recognitionRef.current = null;
+      }
+    }
+
+    // 4. Fallback con MediaRecorder para Opera GX y navegadores sin Web Speech API
     let stream: MediaStream;
     try {
       stream = await getOrCreateLiveAudioStream(mediaStreamRef.current);
@@ -143,6 +242,8 @@ export default function VoiceOrderButton({
       } else {
         setErrorVoz("No se pudo iniciar el micrófono en tu dispositivo.");
       }
+      setEscuchando(false);
+      setProcesandoIa(false);
       return;
     }
 
@@ -159,75 +260,36 @@ export default function VoiceOrderButton({
       };
 
       recorder.onstop = () => {
-        // Mantener stream vivo en mediaStreamRef.current para pedidos sucesivos
+        setEscuchando(false);
         const blob = new Blob(audioChunksRef.current, { type: mimeType });
-        if (blob.size > 0) {
+        if (blob.size >= 400 && recorder === mediaRecorderRef.current) {
           audioBlobRef.current = { blob, mimeType };
+          procesarComandaConIa(undefined, blob, mimeType);
+        } else if (recorder === mediaRecorderRef.current) {
+          setProcesandoIa(false);
         }
       };
 
       recorder.start(150);
       setEscuchando(true);
+      setProcesandoIa(false);
       setMensajeEstado("Te escucho... dime qué platos deseas pedir");
     } catch (err) {
       console.error("Error al iniciar MediaRecorder:", err);
       setErrorVoz("No se pudo iniciar la grabación en tu dispositivo.");
+      setEscuchando(false);
+      setProcesandoIa(false);
       return;
-    }
-
-    if (canUseWebSpeechAPI()) {
-      try {
-        const SpeechRecognition =
-          (window as any).SpeechRecognition ||
-          (window as any).webkitSpeechRecognition;
-
-        if (SpeechRecognition) {
-          const recognition = new SpeechRecognition();
-          recognition.lang = "es-CL";
-          recognition.interimResults = true;
-          recognition.continuous = false;
-
-          recognition.onresult = (event: any) => {
-            let final = "";
-            let interim = "";
-            for (let i = 0; i < event.results.length; i++) {
-              if (event.results[i].isFinal) {
-                final += event.results[i][0].transcript;
-              } else {
-                interim += event.results[i][0].transcript;
-              }
-            }
-            const capturado = (final || interim).trim();
-            if (capturado) {
-              setTranscripcion(capturado);
-            }
-          };
-
-          recognition.onerror = () => {
-            try {
-              recognition.abort();
-            } catch {}
-            recognitionRef.current = null;
-          };
-
-          recognition.onend = () => {
-            recognitionRef.current = null;
-          };
-
-          recognitionRef.current = recognition;
-          recognition.start();
-        }
-      } catch {
-        // Ignorar
-      }
     }
   };
 
   const detenerEscucha = () => {
+    cancelarSintesisVoz();
     if (recognitionRef.current) {
       try {
-        recognitionRef.current.stop();
+        recognitionRef.current.abort();
       } catch {}
+      recognitionRef.current = null;
     }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       try {
@@ -235,22 +297,30 @@ export default function VoiceOrderButton({
       } catch {}
     }
     setEscuchando(false);
+    setProcesandoIa(false);
   };
 
-  const procesarComandaConIa = async () => {
+  const procesarComandaConIa = async (
+    textoDirecto?: string,
+    blobDirecto?: Blob,
+    mimeDirecto?: string
+  ) => {
     detenerEscucha();
 
-    // Pequeño retardo para asegurar que el blob de MediaRecorder esté listo
-    await new Promise((r) => setTimeout(r, 200));
+    // Pequeño retardo si viene desde MediaRecorder para asegurar disponibilidad
+    if (!textoDirecto && !blobDirecto) {
+      await new Promise((r) => setTimeout(r, 200));
+    }
 
-    const textoLimpio = transcripcion.trim();
+    const textoLimpio = (textoDirecto || transcripcion).trim();
     let audioBase64 = "";
-    let mimeType = "audio/webm";
+    let mimeType = mimeDirecto || "audio/webm";
 
-    if (audioBlobRef.current) {
+    const targetBlob = blobDirecto || audioBlobRef.current?.blob;
+    if (targetBlob && !textoLimpio) {
       try {
-        audioBase64 = await audioBlobToBase64(audioBlobRef.current.blob);
-        mimeType = audioBlobRef.current.mimeType;
+        audioBase64 = await audioBlobToBase64(targetBlob);
+        mimeType = mimeDirecto || audioBlobRef.current?.mimeType || "audio/webm";
       } catch (err) {
         console.error("Error convirtiendo audio a base64:", err);
       }
@@ -258,6 +328,8 @@ export default function VoiceOrderButton({
 
     if (!textoLimpio && !audioBase64) {
       setErrorVoz("Por favor habla al micrófono antes de enviar tu comanda.");
+      setEscuchando(false);
+      setProcesandoIa(false);
       return;
     }
 
@@ -512,7 +584,7 @@ export default function VoiceOrderButton({
               <button
                 type="button"
                 disabled={!transcripcion.trim() || procesandoIa}
-                onClick={procesarComandaConIa}
+                onClick={() => procesarComandaConIa()}
                 className="flex-1 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 py-3 text-xs font-black text-slate-950 shadow-md transition hover:from-amber-400 hover:to-orange-400 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
               >
                 {procesandoIa ? (
