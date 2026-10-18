@@ -705,39 +705,26 @@ export async function fetchAllLocales(): Promise<Local[]> {
   const staticLocales = getAllLocales();
 
   try {
-    const { data, error } = await supabase
+    const queryPromise = supabase
       .from("locales")
       .select("*, categorias(*, productos(*))");
 
-    if (!error && Array.isArray(data)) {
-      if (data.length === 0) {
-        await seedRelationalTablesIfEmpty();
-        const { data: seededData } = await supabase
-          .from("locales")
-          .select("*, categorias(*, productos(*))");
-        if (seededData && seededData.length > 0) {
-          return mergeRowsWithStaticLocales(
-            seededData as SupabaseLocalRow[],
-            staticLocales
-          );
-        }
-      } else {
-        return mergeRowsWithStaticLocales(
-          data as SupabaseLocalRow[],
-          staticLocales
-        );
-      }
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 800)
+    );
+
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return mergeRowsWithStaticLocales(
+        data as SupabaseLocalRow[],
+        staticLocales
+      );
     }
   } catch {
-    // Continuar con estado sincronizado en Supabase Storage
+    // Continuar con estado local estático inmediato
   }
 
-  const cloudLocales = await readSupabaseCloudState();
-  if (cloudLocales) {
-    return cloudLocales;
-  }
-
-  await writeSupabaseCloudState(staticLocales);
   return staticLocales;
 }
 
@@ -751,11 +738,17 @@ export async function fetchActiveLocales(): Promise<Local[]> {
 
   try {
     const supabase = getSupabaseClient();
-    const { data: rows, error } = await supabase
+    const queryPromise = supabase
       .from("locales")
       .select("id, slug, nombre, rubro, logo_url, banner_url, abierto, activo")
       .eq("activo", true)
       .order("nombre");
+
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 600)
+    );
+
+    const { data: rows, error } = await Promise.race([queryPromise, timeoutPromise]);
 
     if (!error && Array.isArray(rows) && rows.length > 0) {
       return rows.map((row) => {
@@ -855,7 +848,11 @@ export async function fetchLocalBySlug(
       query = query.eq("activo", true);
     }
 
-    const { data, error } = await query.single();
+    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
+      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 600)
+    );
+
+    const { data, error } = await Promise.race([query.single(), timeoutPromise]);
 
     if (!error && data) {
       return mapSupabaseRowToLocal(data as SupabaseLocalRow, fallbackLocal);

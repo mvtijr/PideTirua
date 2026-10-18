@@ -23,11 +23,22 @@ export function getSupabaseClient(): SupabaseClient {
         autoRefreshToken: false,
       },
       global: {
-        fetch: (url, options = {}) =>
-          fetch(url, {
+        fetch: (url, options = {}) => {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 800);
+
+          if (options.signal) {
+            options.signal.addEventListener("abort", () => controller.abort());
+          }
+
+          return fetch(url, {
             ...options,
-            cache: "no-store",
-          }),
+            signal: controller.signal,
+            next: { revalidate: 60 },
+          }).finally(() => {
+            clearTimeout(timeoutId);
+          });
+        },
       },
     });
   }
