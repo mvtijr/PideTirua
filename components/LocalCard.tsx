@@ -49,10 +49,10 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
     <article
       ref={cardRef}
       id={`local-${local.slug}`}
-      className="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group"
+      className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-orange-300/80"
     >
       {/* Imagen o Video & Badges Flotantes */}
-      <div className="relative aspect-video w-full overflow-hidden bg-[#171614]">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-stone-900">
         {videoSrc ? (
           <>
             <img
@@ -88,36 +88,32 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
           <img
             src={bannerSrc}
             alt={`Portada de ${local.nombre}`}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
           />
         )}
-        <div className="absolute inset-0 z-20 bg-gradient-to-t from-primary/70 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />
 
-        <div className="absolute top-space-sm left-space-sm right-space-sm z-30 flex items-center justify-between gap-1">
-          <div className="flex flex-wrap items-center gap-1">
+        <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between gap-1">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span
-              className={`${
-                local.sector === "Quidico"
-                  ? "bg-secondary text-on-secondary"
-                  : "bg-primary text-on-primary"
-              } font-label-sm text-label-sm px-space-sm py-0.5 rounded-full font-bold`}
+              className="inline-flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold text-white border border-white/20"
             >
-              {local.ubicacion}
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  local.abierto ? "bg-emerald-400 animate-pulse" : "bg-rose-500"
+                }`}
+              />
+              <span>{local.abierto ? "Abierto" : "Cerrado"}</span>
             </span>
-            <span
-              className={`font-label-sm text-label-sm px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1 shadow-sm backdrop-blur-md ${
-                local.abierto
-                  ? "bg-emerald-600/95 text-white border border-emerald-400/40"
-                  : "bg-rose-600/95 text-white border border-rose-400/40"
-              }`}
-            >
-              <span>{local.abierto ? "🟢 Abierto" : "🔴 Cerrado"}</span>
+
+            <span className="rounded-full bg-white/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-900 shadow-xs">
+              {local.ubicacion}
             </span>
           </div>
 
           <div className="flex items-center gap-1">
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-black/55 px-2 py-0.5 text-[11px] font-bold text-amber-300 backdrop-blur-md">
+            <span className="inline-flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold text-amber-300 border border-white/20">
               <span
                 className="material-symbols-outlined text-xs text-amber-400"
                 style={{ fontVariationSettings: "'FILL' 1" }}
@@ -131,7 +127,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
                 type="button"
                 onClick={() => onOpenQr(local)}
                 title={`Ver código QR de ${local.nombre}`}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-surface-container-lowest/90 text-primary shadow transition hover:bg-white"
+                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-stone-900 shadow transition hover:bg-stone-100"
               >
                 <span className="material-symbols-outlined text-sm">
                   qr_code_2
@@ -141,81 +137,64 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
           </div>
         </div>
 
-        <div className="absolute bottom-space-sm left-space-sm right-space-sm z-30 flex items-center justify-between text-white">
-          <span className="font-label-sm text-label-sm bg-black/40 backdrop-blur-md px-space-sm py-0.5 rounded-md flex items-center gap-1">
+        <div className="absolute bottom-2.5 left-3 right-3 z-30 flex items-center justify-between text-white">
+          <span className="text-[11px] font-semibold bg-black/50 backdrop-blur-md px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-white/10">
             <span className="material-symbols-outlined text-xs">schedule</span>
             {local.tiempoEstimado}
           </span>
-          <span
-            className={`font-label-sm text-label-sm font-bold px-space-sm py-0.5 rounded-md ${
-              local.sector === "Quidico"
-                ? "bg-surface-container-lowest text-primary"
-                : "bg-tertiary-container text-on-tertiary"
-            }`}
-          >
-            {totalProductos} platos en carta
+          <span className="text-[11px] font-bold bg-[#EA580C]/90 backdrop-blur-md px-2.5 py-0.5 rounded-full text-white">
+            {totalProductos} platos
           </span>
         </div>
       </div>
 
       {/* Contenido del Comercio */}
-      <div className="p-space-md flex-1 flex flex-col justify-between space-y-space-sm">
+      <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2.5 mb-1.5">
             <img
               src={logoSrc}
               alt={`Logo ${local.nombre}`}
-              className="w-10 h-10 rounded-full object-cover border border-outline-variant/30 shadow-sm bg-white p-0.5 flex-shrink-0"
+              className="w-10 h-10 rounded-full object-cover border border-stone-200 shadow-sm bg-white p-0.5 flex-shrink-0"
               loading="lazy"
             />
             <div className="flex-1 min-w-0">
-              <span className="font-label-sm text-label-sm uppercase font-bold text-secondary block truncate">
+              <span className="text-[11px] font-black uppercase tracking-widest text-[#EA580C] block truncate">
                 {local.rubro}
               </span>
-              <span className="text-[11px] text-outline block">
-                Horario: {local.horario || local.horarioEntrega}
+              <span className="text-[11px] font-medium text-stone-500 block truncate">
+                {local.horario || local.horarioEntrega}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center justify-between gap-2 mt-1">
-            <h3 className="font-headline-sm text-headline-sm text-primary font-bold group-hover:text-secondary transition-colors truncate">
-              {local.nombre}
-            </h3>
-            <span
-              className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold border ${
-                local.abierto
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                  : "bg-rose-50 text-rose-700 border-rose-200"
-              }`}
-            >
-              {local.abierto ? "🟢 Abierto" : "🔴 Cerrado"}
-            </span>
-          </div>
-          <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-1">
+          <h3 className="font-display text-2xl font-bold tracking-wide text-stone-900 group-hover:text-[#EA580C] transition-colors line-clamp-1">
+            {local.nombre}
+          </h3>
+          <p className="font-body text-xs text-stone-600 line-clamp-2 mt-1 leading-relaxed">
             {local.descripcionCorta}
           </p>
         </div>
 
         {/* Micro Metadatos y Pedido Directo */}
-        <div className="space-y-space-xs pt-space-xs">
-          <div className="flex items-center gap-1 font-body-sm text-body-sm text-on-surface-variant">
-            <span className="material-symbols-outlined text-sm text-outline">
+        <div className="space-y-2 pt-1 border-t border-stone-100">
+          <div className="flex items-center gap-1 font-body text-xs text-stone-500">
+            <span className="material-symbols-outlined text-sm text-[#EA580C]">
               location_on
             </span>
             <span className="truncate">{local.direccionDetalle}</span>
           </div>
 
-          {/* Botones de Acción */}
-          <div className="grid grid-cols-2 gap-space-xs pt-space-xs">
+          {/* Botones de Acción Estilo Píldora */}
+          <div className="grid grid-cols-2 gap-2 pt-1">
             <Link
               href={`/${local.slug}`}
-              className="min-h-[44px] bg-surface-container hover:bg-surface-container-high text-primary font-label-md text-label-md font-bold py-2.5 px-space-sm rounded-xl flex items-center justify-center gap-1 transition-colors"
+              className="min-h-[42px] bg-stone-100 hover:bg-[#18181B] hover:text-white text-stone-900 font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1 transition-all"
             >
-              <span className="material-symbols-outlined text-base">
-                restaurant_menu
-              </span>
               <span>Ver Carta</span>
+              <span className="material-symbols-outlined text-sm">
+                arrow_forward
+              </span>
             </Link>
             <a
               href={`https://wa.me/${(
@@ -227,9 +206,9 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-h-[44px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-label-md text-label-md font-bold py-2.5 px-space-sm rounded-xl flex items-center justify-center gap-1 transition-colors shadow-sm"
+              className="min-h-[42px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1 transition-all shadow-sm"
             >
-              <span className="material-symbols-outlined text-base">chat</span>
+              <span className="material-symbols-outlined text-sm">chat</span>
               <span>WhatsApp</span>
             </a>
           </div>

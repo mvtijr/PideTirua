@@ -35,20 +35,32 @@ button,
 input,
 select,
 textarea,
+p,
+a,
+div,
+span:not(.material-symbols-outlined) {
+  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 h1,
 h2,
 h3,
 h4,
 h5,
 h6,
-p,
-a,
-div,
-span:not(.material-symbols-outlined) {
-  font-family: "Libre Baskerville", serif;
+.font-display,
+.font-heading {
+  font-family: "Bebas Neue", "Montserrat", sans-serif;
+  letter-spacing: 0.03em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+}
+
+.font-body {
+  font-family: "Montserrat", sans-serif;
 }
 
 .material-symbols-outlined {

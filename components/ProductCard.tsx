@@ -60,6 +60,17 @@ export default memo(function ProductCard({
       <div className="flex min-w-0 flex-1 flex-col justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-1.5">
+            {/* Indicador circular de estado (verde disponible / ámbar oferta / gris agotado) */}
+            <span
+              className={`w-2 h-2 rounded-full shrink-0 ${
+                !disponible
+                  ? "bg-slate-300"
+                  : tieneOferta
+                  ? "bg-amber-500 animate-pulse"
+                  : "bg-emerald-500"
+              }`}
+              title={!disponible ? "Agotado" : tieneOferta ? "En Oferta" : "Disponible"}
+            />
             {!disponible && (
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-300 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wide text-slate-700">
                 <Ban className="h-3 w-3 text-slate-600" />
@@ -90,7 +101,7 @@ export default memo(function ProductCard({
           </div>
 
           <h4
-            className={`mt-1 font-headline-sm text-base font-bold leading-snug ${
+            className={`mt-1 font-display text-lg sm:text-xl font-bold tracking-wide uppercase leading-tight ${
               !disponible
                 ? "text-slate-500 line-through decoration-slate-400"
                 : theme.cardTitle

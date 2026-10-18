@@ -293,10 +293,10 @@ export default function MenuClient({ local }: MenuClientProps) {
                     {local.calificacion.toFixed(1)}
                   </span>
                 </div>
-                <h1 className="mt-1 truncate text-xl font-extrabold leading-tight sm:text-2xl">
+                <h1 className="mt-1 truncate font-display tracking-wide uppercase text-2xl sm:text-3xl leading-tight">
                   {local.nombre}
                 </h1>
-                <p className={`truncate text-xs font-bold ${theme.rubroText}`}>
+                <p className={`truncate text-xs font-bold uppercase tracking-wider ${theme.rubroText}`}>
                   {local.rubro}
                 </p>
               </div>
@@ -467,7 +467,7 @@ export default function MenuClient({ local }: MenuClientProps) {
               >
                 <div className="mb-3 flex items-center justify-between">
                   <h2
-                    className={`text-lg font-extrabold tracking-tight ${theme.categoryTitle}`}
+                    className={`font-display text-2xl tracking-wide uppercase ${theme.categoryTitle}`}
                   >
                     {categoria.nombre}
                   </h2>
