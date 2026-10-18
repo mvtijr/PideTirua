@@ -1,7 +1,7 @@
 {
-  "name": "PideTirúa - Delivery & Comida Local",
+  "name": "PideTirúa - Comida Local y Cartas Digitales",
   "short_name": "PideTirúa",
-  "description": "Plataforma de delivery y menús digitales de la comuna de Tirúa",
+  "description": "Plataforma de pedidos con retiro en local y menús digitales de la comuna de Tirúa y Quidico",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

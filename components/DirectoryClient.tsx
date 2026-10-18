@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CategoriaFiltro, Local, SectorComuna } from "@/types/local";
 import { CATEGORIAS_DIRECTORIO } from "@/lib/locales";
 import { formatCLP } from "@/lib/formatters";
+import { getVideoPoster } from "@/lib/localTheme";
 import LocalCard from "@/components/LocalCard";
 import {
   ArrowRight,
@@ -18,7 +19,7 @@ import {
   Phone,
   MapPin,
   Clock,
-  CheckCircle2,
+  Store,
 } from "lucide-react";
 import RecomendadorPlatosModal from "@/components/RecomendadorPlatosModal";
 
@@ -70,7 +71,6 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       });
     });
 
-    // Seleccionamos hasta 8 platos representativos
     return listado.slice(0, 8);
   }, [locales]);
 
@@ -137,6 +137,93 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       left: direccion === "izq" ? -scrollAmount : scrollAmount,
       behavior: "smooth",
     });
+  };
+
+  // Estado y lógica del Coverflow 3D de Locales
+  const [indiceCoverflow, setIndiceCoverflow] = useState(0);
+  const [pausaCoverflow, setPausaCoverflow] = useState(false);
+  const [esPantallaMovil, setEsPantallaMovil] = useState(false);
+  const touchStartX = useRef(0);
+
+  useEffect(() => {
+    const checkViewport = () => {
+      setEsPantallaMovil(window.innerWidth < 768);
+    };
+    checkViewport();
+    window.addEventListener("resize", checkViewport);
+    return () => window.removeEventListener("resize", checkViewport);
+  }, []);
+
+  useEffect(() => {
+    if (pausaCoverflow || locales.length <= 1) return;
+    const timer = setInterval(() => {
+      setIndiceCoverflow((prev) => (prev + 1) % locales.length);
+    }, 4500);
+    return () => clearInterval(timer);
+  }, [pausaCoverflow, locales.length]);
+
+  const obtenerEstiloCoverflow = (idx: number) => {
+    const total = locales.length;
+    let offset = idx - indiceCoverflow;
+    if (offset > total / 2) offset -= total;
+    if (offset < -total / 2) offset += total;
+
+    if (offset === 0) {
+      return {
+        estilo: {
+          transform: "translate3d(0px, 0px, 0px) rotateY(0deg) scale(1)",
+          zIndex: 30,
+          opacity: 1,
+          boxShadow:
+            "0 25px 50px -12px rgba(234, 88, 12, 0.4), 0 0 0 2px rgba(255,255,255,0.9)",
+        },
+        nivelOscurecimiento: "opacity-0",
+      };
+    } else if (offset === 1) {
+      const tx = esPantallaMovil ? 165 : 265;
+      return {
+        estilo: {
+          transform: `translate3d(${tx}px, 0px, -110px) rotateY(-24deg) scale(0.86)`,
+          zIndex: 20,
+          opacity: 0.92,
+          boxShadow: "0 20px 35px -10px rgba(0,0,0,0.35)",
+        },
+        nivelOscurecimiento: "opacity-25",
+      };
+    } else if (offset === -1) {
+      const tx = esPantallaMovil ? -165 : -265;
+      return {
+        estilo: {
+          transform: `translate3d(${tx}px, 0px, -110px) rotateY(24deg) scale(0.86)`,
+          zIndex: 20,
+          opacity: 0.92,
+          boxShadow: "0 20px 35px -10px rgba(0,0,0,0.35)",
+        },
+        nivelOscurecimiento: "opacity-25",
+      };
+    } else if (offset >= 2) {
+      const tx = esPantallaMovil ? 260 : 440;
+      return {
+        estilo: {
+          transform: `translate3d(${tx}px, 0px, -220px) rotateY(-36deg) scale(0.74)`,
+          zIndex: 10,
+          opacity: 0.55,
+          boxShadow: "0 10px 25px -8px rgba(0,0,0,0.2)",
+        },
+        nivelOscurecimiento: "opacity-45",
+      };
+    } else {
+      const tx = esPantallaMovil ? -260 : -440;
+      return {
+        estilo: {
+          transform: `translate3d(${tx}px, 0px, -220px) rotateY(36deg) scale(0.74)`,
+          zIndex: 10,
+          opacity: 0.55,
+          boxShadow: "0 10px 25px -8px rgba(0,0,0,0.2)",
+        },
+        nivelOscurecimiento: "opacity-45",
+      };
+    }
   };
 
   // Filtrado de locales
@@ -222,6 +309,12 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               NUESTROS LOCALES
             </a>
             <a
+              href="#coverflow-locales"
+              className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#EA580C] transition-colors"
+            >
+              CARTAS 3D
+            </a>
+            <a
               href="#sectores-comuna"
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#EA580C] transition-colors"
             >
@@ -251,8 +344,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               onClick={scrollADirectorio}
               className="inline-flex items-center gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white text-[11px] font-black uppercase tracking-widest px-5 py-2.5 shadow-sm transition-all hover:scale-105 active:scale-95"
             >
-              <span className="material-symbols-outlined text-sm">delivery_dining</span>
-              <span>PEDIR AHORA</span>
+              <Store className="h-3.5 w-3.5" />
+              <span>PEDIR PARA RETIRO</span>
             </button>
           </div>
         </div>
@@ -272,7 +365,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </div>
 
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10 flex flex-col items-center text-center">
-          {/* Selector de Tamaños / Antojos estilo Crust Pizza */}
+          {/* Selector de Categorías y Antojos estilo Crust Pizza */}
           <div className="mb-6 flex flex-col items-center">
             <span className="text-[10px] font-black uppercase tracking-[0.25em] text-stone-500 mb-2">
               SELECCIONA CATEGORÍA O ANTOJO
@@ -328,7 +421,6 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
               {/* El Gran Plato Central Redondo */}
               <div className="relative group">
-                {/* Plato interactivo redondo */}
                 <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl ring-8 ring-white/95 border-4 border-stone-200 bg-stone-100 transition-transform duration-500 group-hover:scale-[1.02]">
                   <img
                     src={platoActualHero.imagen}
@@ -342,12 +434,12 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     href={`/${platoActualHero.localSlug}`}
                     className="absolute inset-x-8 bottom-8 sm:bottom-10 bg-[#18181B]/90 hover:bg-[#EA580C] text-white backdrop-blur-md rounded-full py-2.5 px-6 font-display text-lg uppercase tracking-wider transition-all shadow-xl flex items-center justify-center gap-2 hover:scale-105"
                   >
-                    <span>PEDIR ESTE PLATO</span>
+                    <span>PEDIR PARA RETIRO</span>
                     <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
 
-                {/* Badge Flotante Tiempo de Espera */}
+                {/* Badge Flotante Tiempo de Preparación */}
                 <div className="absolute -bottom-3 -right-2 bg-white rounded-full px-3.5 py-1.5 shadow-lg border border-stone-200 flex items-center gap-1.5 text-xs font-bold text-stone-800">
                   <Clock className="h-3.5 w-3.5 text-[#EA580C]" />
                   <span>{platoActualHero.tiempoEstimado}</span>
@@ -391,7 +483,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </div>
       </section>
 
-      {/* 3. BARRA DE BÚSQUEDA FLOTANTE ESTILO PÍLDORA (INSPIRADA EN CRUST PIZZA CO.) */}
+      {/* 3. BARRA DE BÚSQUEDA FLOTANTE ESTILO PÍLDORA */}
       <div className="relative z-30 max-w-2xl mx-auto px-4 -mt-4 sm:-mt-6 mb-12">
         <div className="flex items-center rounded-full bg-white shadow-2xl border border-stone-200/90 p-1.5 transition-all hover:border-orange-300">
           {/* Segmento Izquierdo con Marca en Terracota */}
@@ -436,7 +528,244 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </div>
       </div>
 
-      {/* 4. SELECTOR DE SECTORES / LOCALES ("VISIT ANY OF OUR LOCATIONS") */}
+      {/* 4. SECCIÓN COVERFLOW 3D DE LOCALES (CARTAS DIGITALES 3D) */}
+      <section
+        id="coverflow-locales"
+        className="relative w-full py-12 sm:py-16 overflow-hidden bg-[#FAF8F5] border-b border-stone-200/80"
+      >
+        <div className="relative z-10 max-w-[1240px] mx-auto px-4 sm:px-6 mb-6 text-center space-y-2">
+          <div className="inline-flex items-center gap-2 bg-white text-stone-900 border border-stone-200 shadow-xs px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            <span className="material-symbols-outlined text-sm text-[#EA580C]">
+              view_carousel
+            </span>
+            <span className="text-[#EA580C]">EXPERIENCIA 3D</span>
+            <span className="text-stone-400">•</span>
+            <span>TIRÚA CENTRO &amp; QUIDICO</span>
+          </div>
+          <h2 className="font-display text-4xl sm:text-5xl text-stone-900 uppercase tracking-wide">
+            CARTAS DIGITALES DE NUESTRA COMUNA
+          </h2>
+          <p className="font-body text-xs sm:text-sm text-stone-600 max-w-xl mx-auto">
+            Explora las cartas y videos de cada local para pedir con retiro directo por WhatsApp
+          </p>
+        </div>
+
+        <div
+          className="relative w-full max-w-6xl mx-auto px-4 overflow-hidden select-none py-6"
+          onMouseEnter={() => setPausaCoverflow(true)}
+          onMouseLeave={() => setPausaCoverflow(false)}
+          onTouchStart={(e) => {
+            touchStartX.current = e.changedTouches[0].screenX;
+            setPausaCoverflow(true);
+          }}
+          onTouchEnd={(e) => {
+            const diff = touchStartX.current - e.changedTouches[0].screenX;
+            if (Math.abs(diff) > 40) {
+              if (diff > 0) {
+                setIndiceCoverflow((prev) => (prev + 1) % locales.length);
+              } else {
+                setIndiceCoverflow(
+                  (prev) => (prev - 1 + locales.length) % locales.length
+                );
+              }
+            }
+            setPausaCoverflow(false);
+          }}
+        >
+          {/* Botón Izquierdo Flotante */}
+          <button
+            type="button"
+            aria-label="Local anterior"
+            onClick={() =>
+              setIndiceCoverflow(
+                (prev) => (prev - 1 + locales.length) % locales.length
+              )
+            }
+            className="absolute left-3 md:left-8 top-1/2 -translate-y-1/2 z-40 w-11 h-11 md:w-13 md:h-13 rounded-full bg-white/95 hover:bg-white text-stone-900 shadow-xl border border-stone-200 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          >
+            <ChevronLeft className="h-6 w-6 text-stone-900" />
+          </button>
+
+          {/* Botón Derecho Flotante */}
+          <button
+            type="button"
+            aria-label="Local siguiente"
+            onClick={() =>
+              setIndiceCoverflow((prev) => (prev + 1) % locales.length)
+            }
+            className="absolute right-3 md:right-8 top-1/2 -translate-y-1/2 z-40 w-11 h-11 md:w-13 md:h-13 rounded-full bg-white/95 hover:bg-white text-stone-900 shadow-xl border border-stone-200 flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+          >
+            <ChevronRight className="h-6 w-6 text-stone-900" />
+          </button>
+
+          {/* Pista Coverflow 3D mostrando los videos y LOGOS de cada local */}
+          <div className="coverflow-stage relative w-full h-[470px] md:h-[510px] flex items-center justify-center">
+            {locales.map((local, idx) => {
+              const { estilo, nivelOscurecimiento } = obtenerEstiloCoverflow(idx);
+              const esCentro = idx === indiceCoverflow;
+              return (
+                <div
+                  key={local.id}
+                  onClick={() => {
+                    if (!esCentro) {
+                      setIndiceCoverflow(idx);
+                    }
+                  }}
+                  style={estilo}
+                  className="coverflow-card absolute w-[280px] sm:w-[310px] md:w-[340px] h-[440px] md:h-[480px] rounded-3xl overflow-hidden cursor-pointer shadow-2xl bg-stone-900 border border-white/80"
+                >
+                  {/* Video de fondo y Logo del Comercio */}
+                  <div className="absolute inset-0 bg-[#171614] flex items-center justify-center p-8 pb-36">
+                    {(local.videoFondo || local.videoPortada) && (
+                      <>
+                        <img
+                          src={getVideoPoster(
+                            local.videoFondo || local.videoPortada,
+                            local.fotoPortada
+                          )}
+                          alt=""
+                          aria-hidden="true"
+                          decoding="async"
+                          className="pointer-events-none absolute inset-0 h-full w-full object-cover blur-md opacity-50"
+                        />
+                        <video
+                          src={local.videoFondo || local.videoPortada}
+                          poster={getVideoPoster(
+                            local.videoFondo || local.videoPortada,
+                            local.fotoPortada
+                          )}
+                          preload="metadata"
+                          autoPlay
+                          loop
+                          muted
+                          playsInline
+                          className="pointer-events-none absolute inset-x-0 top-10 w-full h-56 object-contain"
+                        />
+                      </>
+                    )}
+                    <div
+                      className={`relative z-10 ${
+                        local.videoFondo || local.videoPortada
+                          ? "w-32 h-32 md:w-36 md:h-36 mt-12"
+                          : "w-44 h-44 md:w-48 md:h-48"
+                      } rounded-full shadow-2xl border-4 border-white overflow-hidden flex items-center justify-center bg-white`}
+                    >
+                      <img
+                        src={local.logo_url || local.logo}
+                        alt={`Logo ${local.nombre}`}
+                        decoding="async"
+                        fetchPriority={esCentro ? "high" : "auto"}
+                        className="w-full h-full object-contain p-2"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Gradiente de contraste */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/95" />
+
+                  {/* Capa de atenuación para laterales */}
+                  <div
+                    className={`pointer-events-none absolute inset-0 bg-slate-950 transition-opacity duration-500 ${nivelOscurecimiento}`}
+                  />
+
+                  {/* Pill superior estilo Stories */}
+                  <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 pointer-events-none">
+                    <div className="flex items-center gap-2 bg-black/65 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/25 text-white shadow-lg min-w-0">
+                      <img
+                        src={local.logo_url || local.logo}
+                        alt={`Logo ${local.nombre}`}
+                        decoding="async"
+                        className="w-6 h-6 rounded-full object-cover border border-white/60 bg-white shadow-xs flex-shrink-0"
+                      />
+                      <div className="leading-tight truncate">
+                        <span className="block text-xs font-bold tracking-tight text-white truncate">
+                          {local.nombre}
+                        </span>
+                        <span className="block text-[10px] font-medium text-orange-200 truncate">
+                          {local.ubicacion}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="px-2.5 h-7 rounded-full bg-black/60 backdrop-blur-md border border-white/25 flex items-center justify-center gap-1 text-amber-300 shrink-0">
+                      <span
+                        className="material-symbols-outlined text-xs text-amber-400"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        star
+                      </span>
+                      <span className="text-xs font-bold text-white">
+                        {local.calificacion.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Badge de Estado */}
+                  <div className="absolute top-16 left-4 z-10 pointer-events-none">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[11px] font-bold shadow-md backdrop-blur-md border ${
+                        local.abierto
+                          ? "bg-emerald-600/95 text-white border-emerald-400/40"
+                          : "bg-rose-600/95 text-white border-rose-400/40"
+                      }`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          local.abierto ? "bg-emerald-300 animate-pulse" : "bg-rose-300"
+                        }`}
+                      />
+                      <span>{local.abierto ? "Abierto" : "Cerrado"}</span>
+                      <span>•</span>
+                      <span>{local.horario || local.tiempoEstimado}</span>
+                    </span>
+                  </div>
+
+                  {/* Pie de Card con Información y Botón */}
+                  <div className="absolute bottom-0 inset-x-0 p-5 text-white z-10 space-y-2">
+                    <span className="text-[11px] font-black uppercase tracking-widest text-[#EA580C] block drop-shadow-xs">
+                      {local.rubro}
+                    </span>
+                    <h3 className="font-display text-2xl font-bold leading-snug text-white drop-shadow-sm">
+                      {local.nombre}
+                    </h3>
+                    <p className="font-body text-xs leading-relaxed text-white/90 line-clamp-2">
+                      {local.descripcionCorta}
+                    </p>
+                    <div className="pt-2">
+                      <Link
+                        href={`/${local.slug}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="w-full bg-white text-stone-900 hover:bg-[#EA580C] hover:text-white font-body text-xs font-bold uppercase tracking-wider py-2.5 px-4 rounded-full flex items-center justify-center gap-1.5 shadow-lg transition-all"
+                      >
+                        <span>Ver Carta Digital</span>
+                        <ArrowRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Indicadores de Navegación Puntos */}
+          <div className="relative z-10 flex items-center justify-center gap-2 mt-4">
+            {locales.map((loc, idx) => (
+              <button
+                key={loc.id}
+                type="button"
+                aria-label={`Enfocar ${loc.nombre}`}
+                onClick={() => setIndiceCoverflow(idx)}
+                className={`transition-all rounded-full ${
+                  idx === indiceCoverflow
+                    ? "w-7 h-2.5 bg-[#EA580C] shadow-sm"
+                    : "w-2.5 h-2.5 bg-stone-300 hover:bg-stone-500"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. SELECTOR DE SECTORES / LOCALES ("VISIT ANY OF OUR LOCATIONS") */}
       <section id="sectores-comuna" className="py-12 sm:py-16 max-w-[1240px] mx-auto px-4 sm:px-6">
         <div className="text-center mb-8">
           <span className="text-[11px] font-black uppercase tracking-[0.25em] text-[#EA580C]">
@@ -485,23 +814,23 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </div>
         </div>
 
-        {/* Tarjeta de Local Seleccionado Dividida en 3 Columnas (Layout Crust Pizza) */}
+        {/* Tarjeta de Local Seleccionado Dividida en 3 Columnas */}
         {localSeleccionadoStepper && (
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm">
-            {/* Col 1: Repartidor e Ilustración */}
+            {/* Col 1: Información de Retiro y Consumo en Mesa */}
             <div className="md:col-span-4 flex flex-col items-center justify-center text-center p-5 bg-[#FAF8F5] rounded-2xl border border-stone-200/70">
               <div className="relative w-36 h-36 sm:w-44 sm:h-44 flex items-center justify-center">
                 <img
                   src="/logo-pidetirua.jpg"
-                  alt="Delivery PideTirúa"
+                  alt="Pide y Retira PideTirúa"
                   className="w-32 h-32 sm:w-36 sm:h-36 rounded-full object-contain shadow-md border-4 border-white bg-white"
                 />
               </div>
               <span className="mt-3 font-display text-lg uppercase tracking-wider text-stone-900">
-                DELIVERY A TU PUERTA
+                RETIRO EN LOCAL Y EN MESA
               </span>
               <span className="text-[11px] font-semibold text-stone-500">
-                {localSeleccionadoStepper.ubicacion} • Tirúa Comunal
+                {localSeleccionadoStepper.ubicacion} • Pide con anticipación
               </span>
             </div>
 
@@ -530,7 +859,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${localSeleccionadoStepper.abierto ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-                  <span className="font-bold">{localSeleccionadoStepper.abierto ? 'Abierto ahora' : 'Cerrado temporalmente'}</span>
+                  <span className="font-bold">{localSeleccionadoStepper.abierto ? 'Abierto hoy' : 'Cerrado temporalmente'}</span>
                 </div>
               </div>
 
@@ -543,7 +872,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   <ArrowRight className="h-3.5 w-3.5" />
                 </Link>
                 <a
-                  href={`https://wa.me/${(localSeleccionadoStepper.telefonoWhatsapp || localSeleccionadoStepper.telefono_whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${localSeleccionadoStepper.nombre}, quisiera hacer un pedido desde PideTirúa`)}`}
+                  href={`https://wa.me/${(localSeleccionadoStepper.telefonoWhatsapp || localSeleccionadoStepper.telefono_whatsapp || '').replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${localSeleccionadoStepper.nombre}, quisiera hacer un pedido con retiro desde PideTirúa`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 rounded-full bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-black uppercase tracking-wider px-4 py-2.5 transition shadow-sm"
@@ -579,7 +908,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
               <div className="relative z-10 text-center">
                 <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">
-                  Carta Digital QR lista en mesa
+                  Carta Digital QR lista en mesa y mostrador
                 </span>
               </div>
             </div>
@@ -587,7 +916,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         )}
       </section>
 
-      {/* 5. BANNER INTERACTIVO RECOMENDADOR IA (🎲 ¿QUÉ COMER HOY?) */}
+      {/* 6. BANNER INTERACTIVO RECOMENDADOR IA (🎲 ¿QUÉ COMER HOY?) */}
       <div className="max-w-[1240px] mx-auto px-4 sm:px-6 my-4">
         <button
           type="button"
@@ -621,7 +950,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </button>
       </div>
 
-      {/* 6. OFERTAS Y PROMOS DE HOY EN TIRÚA */}
+      {/* 7. OFERTAS Y PROMOS DE HOY EN TIRÚA */}
       {ofertasDelDia.length > 0 && (
         <section id="ofertas-hoy" className="py-12 max-w-[1240px] mx-auto px-4 sm:px-6">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-6">
@@ -634,7 +963,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 PROMOS ESPECIALES DE HOY EN TIRÚA
               </h2>
               <p className="font-body text-xs sm:text-sm text-stone-600">
-                Descuentos y platos exclusivos con entrega inmediata o retiro
+                Descuentos y platos exclusivos con retiro en local o consumo en mesa
               </p>
             </div>
 
@@ -721,20 +1050,20 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </section>
       )}
 
-      {/* 7. NUESTRO MENÚ / CATÁLOGO COMPLETO DE LOCALES Y PRODUCTOS */}
+      {/* 8. NUESTRO MENÚ / CATÁLOGO COMPLETO DE LOCALES Y PRODUCTOS */}
       <section
         id="directorio-locales"
         className="py-12 sm:py-16 max-w-[1240px] mx-auto px-4 sm:px-6 space-y-8 scroll-mt-24"
       >
         <div className="text-center max-w-xl mx-auto space-y-2">
           <span className="text-[11px] font-black uppercase tracking-[0.25em] text-[#EA580C]">
-            CARTA DIGITAL &amp; DELIVERY
+            CARTAS DIGITALES &amp; PEDIDOS CON RETIRO
           </span>
           <h2 className="font-display text-4xl sm:text-5xl uppercase tracking-wide text-[#18181B]">
             NUESTRO MENÚ Y LOCALES
           </h2>
           <p className="font-body text-xs sm:text-sm text-stone-600">
-            Explora las cartas digitales de Tirúa y Quidico. Pide directo al WhatsApp del local.
+            Explora las cartas digitales de Tirúa y Quidico. Pide directo al WhatsApp para retiro en local o consumo en mesa.
           </p>
         </div>
 
@@ -814,7 +1143,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         )}
       </section>
 
-      {/* 8. BLOQUE DE CONTRASTE OSCURO: SABORES DE NUESTRA TIERRA Y MAR */}
+      {/* 9. BLOQUE DE CONTRASTE OSCURO: SABORES DE NUESTRA TIERRA Y MAR */}
       <section id="historia-comuna" className="relative py-20 bg-[#18181B] text-white overflow-hidden mt-12">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
@@ -864,7 +1193,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 PideTirúa es la vitrina gastronómica comunal que une a los emprendedores de <strong>Tirúa Centro</strong> y la emblemática caleta de <strong>Quidico</strong>. Pescados y mariscos frescos de la costa, pollos asados al spiedo, papas fritas rústicas y sándwiches gigantes preparados por las manos de nuestra gente.
               </p>
               <p className="font-body text-xs sm:text-sm text-stone-400 leading-relaxed">
-                Cada pedido llega directo al WhatsApp de quien cocina, fortaleciendo el comercio local sin cobrar comisiones que encarezcan los platos.
+                Cada pedido llega directo al WhatsApp de quien cocina, fortaleciendo el comercio local sin cobrar comisiones abusivas.
               </p>
 
               <div className="pt-2">
@@ -882,20 +1211,20 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </div>
       </section>
 
-      {/* 9. BARRA DE 3 COLUMNAS INFORMATIVAS (ESTILO CRUST PIZZA CO.) */}
+      {/* 10. BARRA DE 3 COLUMNAS INFORMATIVAS */}
       <section className="bg-[#EAE6DF] border-y border-stone-300/60 py-10">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/70 border border-stone-300/40">
               <div className="w-11 h-11 rounded-full bg-[#EA580C]/10 text-[#EA580C] flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-2xl">chat</span>
+                <Store className="h-6 w-6" />
               </div>
               <div>
                 <h3 className="font-display text-xl text-stone-900 tracking-wide uppercase">
-                  DELIVERY DIRECTO
+                  PEDIDO CON RETIRO EN LOCAL
                 </h3>
                 <p className="font-body text-xs text-stone-600 mt-1 leading-relaxed">
-                  Tu comanda llega directo al WhatsApp del local sin comisiones extrañas ni intermediarios.
+                  Pide con anticipación desde tu celular y retira tu comida caliente y lista sin filas en el local.
                 </p>
               </div>
             </div>
@@ -923,7 +1252,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   ¿TIENES UN LOCAL?
                 </h3>
                 <p className="font-body text-xs text-stone-600 mt-1 leading-relaxed">
-                  Suma tu restaurante a PideTirúa y obtén tu carta digital QR para mesas y pedidos móviles.
+                  Suma tu restaurante a PideTirúa y obtén tu carta digital QR para pedidos en mesa y mostrador.
                 </p>
               </div>
             </div>
@@ -931,11 +1260,12 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </div>
       </section>
 
-      {/* 10. FOOTER ARTESANAL LIMPIO */}
+      {/* 11. FOOTER ARTESANAL */}
       <footer className="bg-[#FAF8F5] py-12 text-center text-stone-600">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 space-y-6">
           <div className="flex flex-wrap justify-center items-center gap-6 text-[11px] font-bold tracking-widest uppercase text-stone-700">
             <a href="#directorio-locales" className="hover:text-[#EA580C] transition">NUESTROS LOCALES</a>
+            <a href="#coverflow-locales" className="hover:text-[#EA580C] transition">CARTAS 3D</a>
             <a href="#sectores-comuna" className="hover:text-[#EA580C] transition">SECTORES</a>
             <a href="#ofertas-hoy" className="hover:text-[#EA580C] transition">OFERTAS DEL DÍA</a>
             <a href="#historia-comuna" className="hover:text-[#EA580C] transition">SABORES LOCALES</a>
@@ -954,7 +1284,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </div>
 
           <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
-            Plataforma comunal de menús digitales QR y pedidos directos a WhatsApp para locales gastronómicos de Tirúa y Quidico, Región del Biobío, Chile.
+            Plataforma comunal de cartas digitales QR y pedidos con retiro en local y en mesa para locales gastronómicos de Tirúa y Quidico, Región del Biobío, Chile.
           </p>
 
           <p className="text-[11px] text-stone-400">

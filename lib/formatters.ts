@@ -44,7 +44,7 @@ export function getPrecioEfectivoProducto(producto: Producto): number {
 }
 
 /**
- * Calcula subtotal y total general del pedido (sin costos de delivery).
+ * Calcula subtotal y total general del pedido (para retiro en local o consumo en mesa).
  */
 export function calcularTotalesCarrito(items: ItemCarrito[]) {
   const subtotal = items.reduce(

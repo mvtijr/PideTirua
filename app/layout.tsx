@@ -11,7 +11,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "PideTirúa — Sabores de nuestra tierra | Tirúa y Quidico",
   description:
-    "Plataforma de delivery y menús digitales de la comuna de Tirúa y Quidico (Región del Biobío, Chile). Explora cartas digitales por QR y realiza tu pedido directo al WhatsApp de cada local.",
+    "Plataforma de pedidos con retiro en local y cartas digitales QR de la comuna de Tirúa y Quidico (Región del Biobío, Chile). Revisa el menú digital y realiza tu pedido directo al WhatsApp de cada local.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
