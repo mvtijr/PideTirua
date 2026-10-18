@@ -39,6 +39,32 @@ interface PlatoSugerido {
   score: number;
 }
 
+function PlatoSugeridoImagen({
+  foto,
+  nombre,
+}: {
+  foto?: string;
+  nombre: string;
+}) {
+  const [error, setError] = useState(false);
+  if (!foto || error) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-slate-800 text-slate-500">
+        <Store className="h-8 w-8 text-amber-500/70" />
+      </div>
+    );
+  }
+  return (
+    <img
+      src={foto}
+      alt={nombre}
+      onError={() => setError(true)}
+      className="h-full w-full object-cover transition-transform group-hover:scale-105"
+      loading="lazy"
+    />
+  );
+}
+
 export default function RecomendadorPlatosModal({
   isOpen,
   onClose,
@@ -624,17 +650,10 @@ export default function RecomendadorPlatosModal({
 
                         {/* Foto del plato */}
                         <div className="relative h-24 w-full sm:w-24 shrink-0 overflow-hidden rounded-xl bg-slate-800">
-                          {foto ? (
-                            <img
-                              src={foto}
-                              alt={item.producto.nombre}
-                              className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center text-slate-600">
-                              <Store className="h-8 w-8" />
-                            </div>
-                          )}
+                          <PlatoSugeridoImagen
+                            foto={foto}
+                            nombre={item.producto.nombre}
+                          />
                           {item.producto.es_oferta && (
                             <span className="absolute top-1 right-1 flex items-center gap-0.5 rounded-full bg-rose-600 px-1.5 py-0.5 text-[9px] font-black text-white">
                               <Flame className="h-2.5 w-2.5" />

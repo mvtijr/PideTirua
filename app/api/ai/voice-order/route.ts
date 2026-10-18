@@ -29,6 +29,43 @@ function normalizeText(text: string): string {
 }
 
 /**
+ * Extrae y sanea exclusivamente el bloque JSON de una respuesta de IA,
+ * eliminando cualquier bloque markdown (```json ... ```) o texto conversacional accidental.
+ */
+function extraerJsonValido(texto: string): any | null {
+  if (!texto) return null;
+
+  // 1. Limpieza estándar de delimitadores markdown
+  const textoLimpio = texto
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/, "")
+    .replace(/```\s*$/, "")
+    .trim();
+
+  try {
+    return JSON.parse(textoLimpio);
+  } catch {
+    // 2. Extracción mediante regex buscando el primer objeto JSON entre llaves
+    const matchJson = texto.match(/\{[\s\S]*\}/);
+    if (matchJson) {
+      try {
+        return JSON.parse(matchJson[0]);
+      } catch {
+        // Ignorar
+      }
+    }
+  }
+
+  return null;
+}
+
+const FALLBACK_DEFAULT_VOICE = {
+  items_agregados: [] as ParsedVoiceItem[],
+  respuesta_audio:
+    "Disculpa, no logré entender tu pedido con claridad. Puedes tocar los platos en pantalla para agregarlos.",
+};
+
+/**
  * Fallback inteligente si Gemini falla o no hay conexión:
  * Mapeo por palabras clave y modismos chilenos habituales
  */
@@ -37,6 +74,7 @@ function fallbackVoiceOrderMatching(
   menu: MenuItemInput[]
 ): { items_agregados: ParsedVoiceItem[]; respuesta_audio: string } {
   const normTrans = normalizeText(transcripcion);
+  if (!normTrans) return FALLBACK_DEFAULT_VOICE;
 
   // Mapeo básico de cantidades en español
   const quantityWords: Record<string, number> = {
@@ -128,10 +166,7 @@ function fallbackVoiceOrderMatching(
     };
   }
 
-  return {
-    items_agregados: [],
-    respuesta_audio: "Disculpa, no encontré esos platos en la carta de este local. Por favor repite el nombre o selecciónalo en la pantalla.",
-  };
+  return FALLBACK_DEFAULT_VOICE;
 }
 
 export async function POST(req: NextRequest) {
@@ -142,7 +177,11 @@ export async function POST(req: NextRequest) {
     if (!allowed) {
       const waitMins = Math.ceil(retryAfterSeconds / 60);
       return NextResponse.json(
-        { error: `Límite alcanzado. Espera ${waitMins} minuto(s).` },
+        {
+          ok: false,
+          ...FALLBACK_DEFAULT_VOICE,
+          error: `Límite alcanzado. Espera ${waitMins} minuto(s).`,
+        },
         { status: 429 }
       );
     }
@@ -155,14 +194,22 @@ export async function POST(req: NextRequest) {
 
     if (!transcripcion && !audioBase64) {
       return NextResponse.json(
-        { error: "No se recibió ninguna transcripción de audio ni grabación." },
+        {
+          ok: false,
+          ...FALLBACK_DEFAULT_VOICE,
+          error: "No se recibió ninguna transcripción de audio ni grabación.",
+        },
         { status: 400 }
       );
     }
 
     if (menu.length === 0) {
       return NextResponse.json(
-        { error: "El menú del local está vacío o no fue provisto." },
+        {
+          ok: false,
+          ...FALLBACK_DEFAULT_VOICE,
+          error: "El menú del local está vacío o no fue provisto.",
+        },
         { status: 400 }
       );
     }
@@ -171,7 +218,7 @@ export async function POST(req: NextRequest) {
 
     // Si no hay API key de Gemini configurada, ejecutamos el matcher de respaldo con texto
     if (!apiKey) {
-      const fallback = fallbackVoiceOrderMatching(transcripcion || "pedido", menu);
+      const fallback = fallbackVoiceOrderMatching(transcripcion, menu);
       return NextResponse.json({ ok: true, ...fallback, isFallback: true });
     }
 
@@ -231,20 +278,17 @@ REGLAS ESTRICTAS:
       ]);
 
       const rawText = result.response.text().trim();
-      const cleanedJson = rawText
-        .replace(/^```json/i, "")
-        .replace(/^```/, "")
-        .replace(/```$/, "")
-        .trim();
+      const parsed = extraerJsonValido(rawText);
 
-      const parsed = JSON.parse(cleanedJson);
-
-      if (Array.isArray(parsed.items_agregados) && typeof parsed.respuesta_audio === "string") {
+      if (parsed && Array.isArray(parsed.items_agregados)) {
         return NextResponse.json({
           ok: true,
           texto_reconocido: parsed.texto_reconocido || transcripcion,
           items_agregados: parsed.items_agregados,
-          respuesta_audio: parsed.respuesta_audio,
+          respuesta_audio:
+            typeof parsed.respuesta_audio === "string" && parsed.respuesta_audio.trim()
+              ? parsed.respuesta_audio.trim()
+              : FALLBACK_DEFAULT_VOICE.respuesta_audio,
           isFallback: false,
         });
       }
@@ -252,14 +296,20 @@ REGLAS ESTRICTAS:
       console.warn("Gemini voice_order fallback activado:", err);
     }
 
-    // Fallback de contingencia si Gemini falla
+    // Fallback de contingencia si Gemini falla o produce salida no reconocible
     const fallback = fallbackVoiceOrderMatching(transcripcion, menu);
     return NextResponse.json({ ok: true, ...fallback, isFallback: true });
   } catch (error) {
-    console.error("Error en API voice-order:", error);
+    // Blindaje SRE: NUNCA devolver un Error 500 no capturado al usuario
+    console.error("Error protegido en API voice-order:", error);
     return NextResponse.json(
-      { error: "Error interno procesando la comanda por voz." },
-      { status: 500 }
+      {
+        ok: true,
+        ...FALLBACK_DEFAULT_VOICE,
+        isFallback: true,
+        error: "Error interno protegido",
+      },
+      { status: 200 }
     );
   }
 }

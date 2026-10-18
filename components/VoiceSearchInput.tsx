@@ -767,11 +767,21 @@ export default function VoiceSearchInput({
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         {item.producto.imagen_url || item.producto.imagen ? (
-                          <img
-                            src={item.producto.imagen_url || item.producto.imagen}
-                            alt={item.producto.nombre}
-                            className="h-9 w-9 rounded-lg object-cover shrink-0 bg-slate-100"
-                          />
+                          <div className="relative h-9 w-9 shrink-0">
+                            <img
+                              src={item.producto.imagen_url || item.producto.imagen}
+                              alt={item.producto.nombre}
+                              onError={(e) => {
+                                e.currentTarget.style.display = "none";
+                                const fallback = e.currentTarget.parentElement?.querySelector(".img-fallback");
+                                if (fallback) (fallback as HTMLElement).style.display = "flex";
+                              }}
+                              className="h-9 w-9 rounded-lg object-cover bg-slate-100"
+                            />
+                            <div className="img-fallback hidden h-9 w-9 rounded-lg bg-amber-100 items-center justify-center text-amber-700">
+                              <UtensilsCrossed className="h-4 w-4" />
+                            </div>
+                          </div>
                         ) : (
                           <div className="h-9 w-9 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
                             <UtensilsCrossed className="h-4 w-4" />

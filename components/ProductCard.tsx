@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Minus, Sparkles, Ban, Flame, Check } from "lucide-react";
+import { Plus, Minus, Sparkles, Ban, Flame, Check, UtensilsCrossed } from "lucide-react";
 import { Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import { getLocalTheme } from "@/lib/localTheme";
@@ -22,6 +22,7 @@ export default function ProductCard({
   localSlug,
 }: ProductCardProps) {
   const [agregadoFeedback, setAgregadoFeedback] = useState(false);
+  const [imagenError, setImagenError] = useState(false);
   const theme = getLocalTheme(localSlug);
   const disponible = producto.disponible !== false;
   const imagenSrc = producto.imagen_url || producto.imagen;
@@ -197,16 +198,26 @@ export default function ProductCard({
             <span>{producto.texto_promo || "OFERTA"}</span>
           </div>
         )}
-        <img
-          src={imagenSrc}
-          alt={producto.nombre}
-          className={`h-full w-full object-cover transition-transform duration-300 ${
-            !disponible
-              ? "grayscale opacity-60"
-              : "group-hover:scale-105"
-          }`}
-          loading="lazy"
-        />
+        {imagenError || !imagenSrc ? (
+          <div className="flex h-full w-full flex-col items-center justify-center bg-slate-100 text-slate-400 p-2 text-center border border-slate-200">
+            <UtensilsCrossed className="h-7 w-7 text-slate-400" />
+            <span className="mt-1 text-[9px] font-bold text-slate-500 uppercase tracking-tight line-clamp-1">
+              {producto.nombre}
+            </span>
+          </div>
+        ) : (
+          <img
+            src={imagenSrc}
+            alt={producto.nombre}
+            onError={() => setImagenError(true)}
+            className={`h-full w-full object-cover transition-transform duration-300 ${
+              !disponible
+                ? "grayscale opacity-60"
+                : "group-hover:scale-105"
+            }`}
+            loading="lazy"
+          />
+        )}
         {!disponible && (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-900/45 backdrop-blur-[1px]">
             <span className="rounded-full bg-slate-900/90 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow">

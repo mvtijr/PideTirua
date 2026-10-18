@@ -96,9 +96,11 @@ export default function CartDrawer({
   const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
   const [datosCopiados, setDatosCopiados] = useState(false);
   const [enviandoPedido, setEnviandoPedido] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Cargar datos previamente guardados del cliente desde localStorage
+  // Cargar datos previamente guardados del cliente desde localStorage tras montar
   useEffect(() => {
+    setIsMounted(true);
     try {
       const nombreGuardado = localStorage.getItem(LS_KEY_NOMBRE);
       const direccionGuardada = localStorage.getItem(LS_KEY_DIRECCION);
@@ -112,7 +114,7 @@ export default function CartDrawer({
     }
   }, []);
 
-  if (!abierto) return null;
+  if (!abierto || !isMounted) return null;
 
   const theme = getLocalTheme(local.slug);
 
@@ -264,9 +266,13 @@ export default function CartDrawer({
     if (enviandoPedido) return;
     setEnviandoPedido(true);
 
-    // Timeout de seguridad de 2.5s para no bloquear al cliente en conexiones 4G rurales inestables
+    // Timeout de resiliencia de máximo 3.5 segundos con AbortController para 4G rural inestable
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
+    const timeoutId = setTimeout(() => {
+      try {
+        controller.abort();
+      } catch {}
+    }, 3500);
 
     try {
       await fetch("/api/pedidos", {
@@ -276,10 +282,10 @@ export default function CartDrawer({
         signal: controller.signal,
         body: JSON.stringify(payloadPedido),
       });
-    } catch (err) {
-      // Plan de contingencia ante caída de señal 4G en Tirúa:
-      // Se registra advertencia pero JAMÁS se bloquea la orden del cliente hacia WhatsApp
-      console.warn("KDS sync fallback por red inestable:", err);
+    } catch {
+      // Si la llamada a Supabase falla o supera los 3.5s (por señal 4G inestable),
+      // se captura el error en silencio y se ABRE WHATSAPP DE TODAS FORMAS.
+      // El cliente nunca debe quedarse bloqueado sin poder enviar su comanda.
     } finally {
       clearTimeout(timeoutId);
     }

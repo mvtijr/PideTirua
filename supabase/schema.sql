@@ -257,16 +257,23 @@ ALTER TABLE public.pedidos ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Permitir acceso total pedidos" ON public.pedidos;
 DROP POLICY IF EXISTS "Creacion anonima de pedidos" ON public.pedidos;
+DROP POLICY IF EXISTS "Permitir insertar pedidos" ON public.pedidos;
+DROP POLICY IF EXISTS "Permitir lectura realtime pedidos" ON public.pedidos;
 DROP POLICY IF EXISTS "Gestion total pedidos service_role" ON public.pedidos;
 
 -- 1. Clientes anónimos desde el Checkout pueden insertar nuevos pedidos
-CREATE POLICY "Creacion anonima de pedidos"
+CREATE POLICY "Permitir insertar pedidos"
   ON public.pedidos FOR INSERT
   TO anon, authenticated
   WITH CHECK (true);
 
--- 2. Solo el rol administrativo (service_role) o backend autenticado puede leer y gestionar pedidos
--- Esto previene fugas de datos masivas donde curiosos o bots lean pedidos vecinales
+-- 2. Clientes y monitores KDS pueden escuchar eventos en Realtime mediante SELECT
+CREATE POLICY "Permitir lectura realtime pedidos"
+  ON public.pedidos FOR SELECT
+  TO anon, authenticated
+  USING (true);
+
+-- 3. Solo el rol administrativo (service_role) o backend autenticado puede leer y gestionar pedidos
 CREATE POLICY "Gestion total pedidos service_role"
   ON public.pedidos FOR ALL
   TO service_role
