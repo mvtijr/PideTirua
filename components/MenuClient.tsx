@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -77,22 +77,25 @@ export default function MenuClient({ local }: MenuClientProps) {
     }
   }, [carrito, hidratado, storageKey]);
 
-  const handleAgregarProducto = (producto: Producto) => {
-    if (producto.disponible === false || localSuspendido) return;
-    setCarrito((prev) => {
-      const existe = prev.find((item) => item.producto.id === producto.id);
-      if (existe) {
-        return prev.map((item) =>
-          item.producto.id === producto.id
-            ? { ...item, cantidad: item.cantidad + 1 }
-            : item
-        );
-      }
-      return [...prev, { producto, cantidad: 1 }];
-    });
-  };
+  const handleAgregarProducto = useCallback(
+    (producto: Producto) => {
+      if (producto.disponible === false || localSuspendido) return;
+      setCarrito((prev) => {
+        const existe = prev.find((item) => item.producto.id === producto.id);
+        if (existe) {
+          return prev.map((item) =>
+            item.producto.id === producto.id
+              ? { ...item, cantidad: item.cantidad + 1 }
+              : item
+          );
+        }
+        return [...prev, { producto, cantidad: 1 }];
+      });
+    },
+    [localSuspendido]
+  );
 
-  const handleDisminuirProducto = (productoId: string) => {
+  const handleDisminuirProducto = useCallback((productoId: string) => {
     setCarrito((prev) =>
       prev
         .map((item) =>
@@ -102,11 +105,11 @@ export default function MenuClient({ local }: MenuClientProps) {
         )
         .filter((item) => item.cantidad > 0)
     );
-  };
+  }, []);
 
-  const handleVaciarCarrito = () => {
+  const handleVaciarCarrito = useCallback(() => {
     setCarrito([]);
-  };
+  }, []);
 
   const cantidadPorProducto = useMemo(() => {
     const mapa = new Map<string, number>();
@@ -176,7 +179,7 @@ export default function MenuClient({ local }: MenuClientProps) {
           <video
             src={videoDeFondo}
             poster={posterFondo}
-            preload="auto"
+            preload="none"
             autoPlay
             loop
             muted
@@ -201,6 +204,7 @@ export default function MenuClient({ local }: MenuClientProps) {
             {bannerVideoUrl ? (
               <video
                 key={bannerVideoUrl}
+                preload="metadata"
                 autoPlay
                 loop
                 muted
@@ -215,6 +219,8 @@ export default function MenuClient({ local }: MenuClientProps) {
               <img
                 src={bannerPrincipal}
                 alt={local.nombre}
+                fetchPriority="high"
+                decoding="async"
                 className="absolute inset-0 w-full h-full object-cover"
               />
             )}
@@ -260,6 +266,8 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <img
                   src={logoPrincipal}
                   alt={`Logo ${local.nombre}`}
+                  loading="eager"
+                  decoding="async"
                   className="h-full w-full object-cover"
                 />
               </div>

@@ -930,7 +930,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                                 local.videoFondo || local.videoPortada,
                                 local.fotoPortada
                               )}
-                              preload="auto"
+                              preload="metadata"
                               autoPlay
                               loop
                               muted

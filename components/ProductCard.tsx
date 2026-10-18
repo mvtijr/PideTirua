@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Plus, Minus, Sparkles, Ban, Flame, Check, UtensilsCrossed } from "lucide-react";
 import { Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
@@ -14,7 +14,7 @@ interface ProductCardProps {
   localSlug: string;
 }
 
-export default function ProductCard({
+export default memo(function ProductCard({
   producto,
   cantidadEnCarrito,
   onAgregar,
@@ -216,6 +216,8 @@ export default function ProductCard({
                 : "group-hover:scale-105"
             }`}
             loading="lazy"
+            decoding="async"
+            sizes="(max-width: 768px) 100vw, 300px"
           />
         )}
         {!disponible && (
@@ -228,4 +230,4 @@ export default function ProductCard({
       </div>
     </div>
   );
-}
+});

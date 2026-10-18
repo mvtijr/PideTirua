@@ -7,8 +7,7 @@ import {
 } from "@/lib/locales";
 import MenuClient from "@/components/MenuClient";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+export const revalidate = 60; // Revalida cada 60 segundos en segundo plano (ISR)
 
 interface LocalMenuPageProps {
   params: Promise<{ slug: string }>;
@@ -25,7 +24,7 @@ export async function generateMetadata({
   params,
 }: LocalMenuPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const local = await fetchLocalBySlug(slug);
+  const local = await fetchLocalBySlug(slug, true);
 
   if (!local) {
     return {
@@ -41,7 +40,7 @@ export async function generateMetadata({
 
 export default async function LocalMenuPage({ params }: LocalMenuPageProps) {
   const { slug } = await params;
-  const local = await fetchLocalBySlug(slug);
+  const local = await fetchLocalBySlug(slug, true);
 
   if (!local) {
     notFound();

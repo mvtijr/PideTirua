@@ -750,15 +750,43 @@ export async function fetchActiveLocales(): Promise<Local[]> {
 }
 
 /**
- * Obtiene un local específico por su `slug` desde Supabase.
+ * Obtiene un local específico por su `slug` desde Supabase mediante una única
+ * consulta relacional consolidada (evitando waterfalls y reduciendo drásticamente el TTFB).
  */
 export async function fetchLocalBySlug(
-  slug: string
+  slug: string,
+  soloActivos: boolean = false
 ): Promise<Local | undefined> {
-  const locales = await fetchAllLocales();
-  return locales.find(
-    (local) => local.slug.toLowerCase() === slug.toLowerCase()
+  const cleanSlug = slug.toLowerCase().trim();
+  const staticLocales = getAllLocales();
+  const fallbackLocal = staticLocales.find(
+    (l) => l.slug.toLowerCase() === cleanSlug
   );
+
+  try {
+    const supabase = getSupabaseClient();
+    let query = supabase
+      .from("locales")
+      .select("*, categorias(*, productos(*))")
+      .eq("slug", cleanSlug);
+
+    if (soloActivos) {
+      query = query.eq("activo", true);
+    }
+
+    const { data, error } = await query.single();
+
+    if (!error && data) {
+      return mapSupabaseRowToLocal(data as SupabaseLocalRow, fallbackLocal);
+    }
+  } catch (err) {
+    console.warn(`Error al consultar local por slug (${cleanSlug}) en Supabase:`, err);
+  }
+
+  if (fallbackLocal && (!soloActivos || fallbackLocal.activo !== false)) {
+    return fallbackLocal;
+  }
+  return undefined;
 }
 
 /**
