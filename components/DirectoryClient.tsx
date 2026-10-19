@@ -22,6 +22,7 @@ import {
   Store,
 } from "lucide-react";
 import RecomendadorPlatosModal from "@/components/RecomendadorPlatosModal";
+import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
 interface DirectoryClientProps {
   locales: Local[];
@@ -366,6 +367,23 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
       {/* 2. HERO SECTION DE IMPACTO CON PLATO CENTRAL INTERACTIVO */}
       <section className="relative w-full pt-8 pb-16 sm:pb-20 overflow-hidden bg-[#FAF8F5]">
+        {/* Fondo con degradado y textura de ruido estática (Noise Grain sin consumo de GPU) */}
+        <GradientBackground
+          gradientType="radial-gradient"
+          gradientOrigin="top-middle"
+          gradientSize="140% 120%"
+          colors={[
+            { color: "rgba(254, 240, 218, 0.7)", stop: "0%" },
+            { color: "rgba(254, 215, 170, 0.4)", stop: "28%" },
+            { color: "rgba(250, 248, 245, 0.8)", stop: "65%" },
+            { color: "rgba(250, 248, 245, 1)", stop: "100%" },
+          ]}
+          noiseIntensity={0.65}
+          noisePatternAlpha={36}
+          noisePatternSize={90}
+          noisePatternRefreshInterval={0}
+        />
+
         {/* Elementos Culinarios Flotantes Decorativos en los bordes */}
         <div className="pointer-events-none absolute -top-6 -left-6 w-32 h-32 opacity-35 select-none hidden sm:block">
           <span className="text-5xl">🌿</span>
@@ -931,6 +949,22 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           onClick={() => setMostrarRecomendador(true)}
           className="group relative w-full overflow-hidden rounded-3xl border border-stone-300 bg-white p-5 sm:p-6 text-left shadow-sm transition-all duration-300 hover:shadow-lg hover:border-orange-300"
         >
+          {/* Fondo degradado cálido y textura de grano estática */}
+          <GradientBackground
+            gradientType="linear-gradient"
+            gradientOrigin="left-middle"
+            colors={[
+              { color: "rgba(255, 247, 237, 0.95)", stop: "0%" },
+              { color: "rgba(254, 237, 213, 0.75)", stop: "35%" },
+              { color: "rgba(254, 243, 199, 0.6)", stop: "70%" },
+              { color: "rgba(255, 255, 255, 0.95)", stop: "100%" },
+            ]}
+            noiseIntensity={0.6}
+            noisePatternAlpha={34}
+            noisePatternSize={85}
+            noisePatternRefreshInterval={0}
+          />
+
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-[#EA580C] group-hover:rotate-12 transition-transform duration-300">
@@ -1149,6 +1183,57 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             </button>
           </div>
         )}
+      </section>
+
+      {/* BANNER DECORATIVO EDITORIAL PIDETIRÚA CON DEGRADADO Y RUIDO ESTÁTICO */}
+      <section className="relative my-8 sm:my-12 max-w-[1240px] mx-auto px-4 sm:px-6">
+        <div className="relative overflow-hidden rounded-3xl border border-stone-300/80 shadow-md p-8 sm:p-12 text-center text-stone-900">
+          <GradientBackground
+            gradientType="radial-gradient"
+            gradientOrigin="bottom-middle"
+            gradientSize="135% 135%"
+            colors={[
+              { color: "rgba(254, 215, 170, 0.9)", stop: "0%" },
+              { color: "rgba(251, 146, 60, 0.45)", stop: "30%" },
+              { color: "rgba(254, 243, 199, 0.65)", stop: "65%" },
+              { color: "rgba(250, 248, 245, 0.98)", stop: "100%" },
+            ]}
+            noiseIntensity={0.65}
+            noisePatternAlpha={36}
+            noisePatternSize={90}
+            noisePatternRefreshInterval={0}
+          />
+          <div className="relative z-10 max-w-2xl mx-auto space-y-4">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-900 px-3.5 py-1 font-display text-xs uppercase tracking-widest text-white shadow-xs">
+              <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              Sabores Locales de Tirúa &amp; Quidico
+            </span>
+            <h2 className="font-display text-3xl sm:text-5xl uppercase tracking-wider text-stone-900 leading-tight">
+              Pide Directo a la Cocina sin Intermediarios
+            </h2>
+            <p className="font-body text-xs sm:text-sm text-stone-700 leading-relaxed font-medium">
+              Explora las cartas digitales de nuestra comuna, arma tu pedido con retiro en local o consumo en mesa, y comunícate en 1 toque directo al WhatsApp de tu local favorito.
+            </p>
+            <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={scrollADirectorio}
+                className="inline-flex items-center gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] px-6 py-3 font-display text-xs uppercase tracking-wider text-white shadow-sm transition-all hover:scale-105 active:scale-95"
+              >
+                <Store className="h-4 w-4" />
+                <span>Explorar Todos los Locales</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMostrarRecomendador(true)}
+                className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white/90 hover:bg-white px-5 py-3 font-display text-xs uppercase tracking-wider text-stone-800 shadow-xs transition active:scale-95"
+              >
+                <Dices className="h-4 w-4 text-[#EA580C]" />
+                <span>¿Qué comer hoy?</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* 9. BLOQUE DE CONTRASTE OSCURO: SABORES DE NUESTRA TIERRA Y MAR */}
