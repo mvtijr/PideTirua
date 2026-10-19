@@ -559,6 +559,23 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         id="coverflow-locales"
         className="relative w-full py-12 sm:py-16 overflow-hidden bg-[#FAF8F5] border-b border-stone-200/80"
       >
+        {/* Fondo sutil degradado y grano estático detrás de las cartas 3D */}
+        <GradientBackground
+          gradientType="radial-gradient"
+          gradientOrigin="center"
+          gradientSize="130% 120%"
+          colors={[
+            { color: "rgba(254, 240, 218, 0.5)", stop: "0%" },
+            { color: "rgba(254, 215, 170, 0.3)", stop: "35%" },
+            { color: "rgba(250, 248, 245, 0.8)", stop: "70%" },
+            { color: "rgba(250, 248, 245, 1)", stop: "100%" },
+          ]}
+          noiseIntensity={0.6}
+          noisePatternAlpha={30}
+          noisePatternSize={85}
+          noisePatternRefreshInterval={0}
+        />
+
         <div className="relative z-10 max-w-[1240px] mx-auto px-4 sm:px-6 mb-6 text-center space-y-2">
           <div className="inline-flex items-center gap-2 bg-white text-stone-900 border border-stone-200 shadow-xs px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
             <span className="material-symbols-outlined text-sm text-[#EA580C]">
@@ -1238,6 +1255,22 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
       {/* 9. BLOQUE DE CONTRASTE OSCURO: SABORES DE NUESTRA TIERRA Y MAR */}
       <section id="historia-comuna" className="relative py-20 bg-[#18181B] text-white overflow-hidden mt-12">
+        {/* Fondo con degradado carbón profundo y textura de ruido estática (Zero GPU loop) */}
+        <GradientBackground
+          gradientType="radial-gradient"
+          gradientOrigin="top-left"
+          gradientSize="140% 140%"
+          colors={[
+            { color: "rgba(45, 34, 28, 0.95)", stop: "0%" },
+            { color: "rgba(24, 24, 27, 0.98)", stop: "40%" },
+            { color: "rgba(18, 18, 18, 1)", stop: "100%" },
+          ]}
+          noiseIntensity={0.7}
+          noisePatternAlpha={36}
+          noisePatternSize={95}
+          noisePatternRefreshInterval={0}
+        />
+
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Izquierda: Collage Polaroid / Fotográfico */}

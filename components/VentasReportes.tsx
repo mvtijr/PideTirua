@@ -20,6 +20,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { Pedido } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
+import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
 interface VentasReportesProps {
   localSlug: string;
@@ -180,8 +181,26 @@ export default function VentasReportes({
   return (
     <section
       id="seccion-reportes-ventas"
-      className={`rounded-3xl border p-5 shadow-xl sm:p-6 ${panelCardBg}`}
+      className={`relative overflow-hidden rounded-3xl border p-5 shadow-xl sm:p-6 ${panelCardBg}`}
     >
+      {/* Fondo con degradado y textura de ruido estática (Zero GPU loop) */}
+      <GradientBackground
+        gradientType="radial-gradient"
+        gradientOrigin="top-left"
+        gradientSize="140% 120%"
+        colors={[
+          { color: "rgba(255, 247, 237, 0.7)", stop: "0%" },
+          { color: "rgba(254, 243, 199, 0.4)", stop: "35%" },
+          { color: "rgba(255, 255, 255, 0.95)", stop: "70%" },
+          { color: "rgba(255, 255, 255, 1)", stop: "100%" },
+        ]}
+        noiseIntensity={0.5}
+        noisePatternAlpha={26}
+        noisePatternSize={80}
+        noisePatternRefreshInterval={0}
+      />
+
+      <div className="relative z-10">
       {/* Encabezado del Reporte */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -463,6 +482,7 @@ export default function VentasReportes({
           </div>
         </div>
       )}
+      </div>
     </section>
   );
 }

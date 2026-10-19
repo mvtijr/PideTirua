@@ -45,6 +45,7 @@ import { formatCLP } from "@/lib/formatters";
 import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
 import KitchenMonitor from "@/components/KitchenMonitor";
 import VentasReportes from "@/components/VentasReportes";
+import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
 interface AdminLocalClientProps {
   initialLocal: Local;
@@ -1171,8 +1172,25 @@ export default function AdminLocalClient({
   if (!autenticado) {
     return (
       <div
-        className={`relative flex min-h-screen flex-col justify-between px-4 py-6 text-stone-900 ${brand.bgBase}`}
+        className={`relative flex min-h-screen flex-col justify-between px-4 py-6 text-stone-900 ${brand.bgBase} overflow-hidden`}
       >
+        {/* Fondo con degradado y textura de ruido estática (Zero GPU loop) */}
+        <GradientBackground
+          gradientType="radial-gradient"
+          gradientOrigin="center"
+          gradientSize="140% 140%"
+          colors={[
+            { color: "rgba(254, 240, 218, 0.65)", stop: "0%" },
+            { color: "rgba(254, 215, 170, 0.4)", stop: "35%" },
+            { color: "rgba(250, 248, 245, 0.8)", stop: "70%" },
+            { color: "rgba(250, 248, 245, 1)", stop: "100%" },
+          ]}
+          noiseIntensity={0.6}
+          noisePatternAlpha={34}
+          noisePatternSize={90}
+          noisePatternRefreshInterval={0}
+        />
+
         {/* Fondo ambiental sutil */}
         {posterFondo && (
           <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -1391,8 +1409,24 @@ export default function AdminLocalClient({
 
   return (
     <div
-      className={`relative min-h-screen pb-24 print:min-h-0 print:bg-white print:pb-0 ${brand.bgBase}`}
+      className={`relative min-h-screen pb-24 print:min-h-0 print:bg-white print:pb-0 ${brand.bgBase} overflow-hidden`}
     >
+      {/* Fondo ambiental con degradado suave y textura de ruido estática (Zero GPU loop) */}
+      <GradientBackground
+        gradientType="radial-gradient"
+        gradientOrigin="top-middle"
+        gradientSize="140% 110%"
+        colors={[
+          { color: "rgba(254, 240, 218, 0.45)", stop: "0%" },
+          { color: "rgba(250, 248, 245, 0.75)", stop: "40%" },
+          { color: "rgba(250, 248, 245, 1)", stop: "100%" },
+        ]}
+        noiseIntensity={0.5}
+        noisePatternAlpha={28}
+        noisePatternSize={85}
+        noisePatternRefreshInterval={0}
+      />
+
       {/* Fondo ambiental del negocio */}
       {posterFondo && (
         <div className="no-print pointer-events-none fixed inset-0 z-0 overflow-hidden">

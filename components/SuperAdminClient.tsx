@@ -38,6 +38,7 @@ import {
 import { Local, PlanComercial, SectorComuna } from "@/types/local";
 import { formatCLP, formatPhoneDisplay } from "@/lib/formatters";
 import { getSupabaseClient } from "@/lib/supabase";
+import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
 interface SuperAdminClientProps {
   initialLocales: Local[];
@@ -761,8 +762,25 @@ export default function SuperAdminClient({
   // ============================================================================
   if (!autenticado) {
     return (
-      <div className="flex min-h-screen flex-col justify-between bg-[#FAF8F5] px-4 py-8 text-stone-900">
-        <div className="mx-auto flex w-full max-w-md items-center justify-between">
+      <div className="relative flex min-h-screen flex-col justify-between bg-[#FAF8F5] px-4 py-8 text-stone-900 overflow-hidden">
+        {/* Fondo con degradado y textura de ruido estática (Zero GPU loop) */}
+        <GradientBackground
+          gradientType="radial-gradient"
+          gradientOrigin="top-middle"
+          gradientSize="140% 130%"
+          colors={[
+            { color: "rgba(254, 240, 218, 0.7)", stop: "0%" },
+            { color: "rgba(254, 215, 170, 0.45)", stop: "30%" },
+            { color: "rgba(250, 248, 245, 0.8)", stop: "65%" },
+            { color: "rgba(250, 248, 245, 1)", stop: "100%" },
+          ]}
+          noiseIntensity={0.65}
+          noisePatternAlpha={36}
+          noisePatternSize={90}
+          noisePatternRefreshInterval={0}
+        />
+
+        <div className="relative z-10 mx-auto flex w-full max-w-md items-center justify-between">
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-bold text-stone-700 shadow-xs backdrop-blur-md transition hover:bg-stone-100 hover:text-stone-900"
@@ -871,7 +889,23 @@ export default function SuperAdminClient({
   ).length;
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5] pb-24 text-stone-900">
+    <div className="relative min-h-screen bg-[#FAF8F5] pb-24 text-stone-900 overflow-hidden">
+      {/* Fondo con degradado suave y textura de ruido estática (Zero GPU loop) */}
+      <GradientBackground
+        gradientType="radial-gradient"
+        gradientOrigin="top-left"
+        gradientSize="140% 120%"
+        colors={[
+          { color: "rgba(254, 240, 218, 0.45)", stop: "0%" },
+          { color: "rgba(250, 248, 245, 0.75)", stop: "40%" },
+          { color: "rgba(250, 248, 245, 1)", stop: "100%" },
+        ]}
+        noiseIntensity={0.5}
+        noisePatternAlpha={28}
+        noisePatternSize={85}
+        noisePatternRefreshInterval={0}
+      />
+
       {/* Toast flotante */}
       {toastMensaje && (
         <div

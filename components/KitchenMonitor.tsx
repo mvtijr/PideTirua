@@ -21,6 +21,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { EstadoPedido, Pedido } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
+import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
 interface KitchenMonitorProps {
   localSlug: string;
@@ -346,9 +347,26 @@ export default function KitchenMonitor({
 
   return (
     <section
-      className={`no-print rounded-3xl border p-5 shadow-sm ${panelCardBg}`}
+      className={`no-print relative overflow-hidden rounded-3xl border p-5 shadow-sm ${panelCardBg}`}
     >
-      {/* Cabecera del Monitor de Cocina */}
+      {/* Fondo degradado suave con textura de ruido estática */}
+      <GradientBackground
+        gradientType="radial-gradient"
+        gradientOrigin="top-right"
+        gradientSize="140% 120%"
+        colors={[
+          { color: "rgba(255, 247, 237, 0.7)", stop: "0%" },
+          { color: "rgba(254, 243, 199, 0.4)", stop: "35%" },
+          { color: "rgba(255, 255, 255, 0.95)", stop: "70%" },
+          { color: "rgba(255, 255, 255, 1)", stop: "100%" },
+        ]}
+        noiseIntensity={0.5}
+        noisePatternAlpha={26}
+        noisePatternSize={80}
+        noisePatternRefreshInterval={0}
+      />
+
+      <div className="relative z-10 space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <span
@@ -704,6 +722,7 @@ export default function KitchenMonitor({
           })}
         </div>
       )}
+      </div>
     </section>
   );
 }

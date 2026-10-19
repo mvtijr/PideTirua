@@ -20,6 +20,7 @@ import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
 import ProductCard from "@/components/ProductCard";
 import FloatingCartBar from "@/components/FloatingCartBar";
 import CartDrawer from "@/components/CartDrawer";
+import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
 interface MenuClientProps {
   local: Local;
@@ -161,7 +162,23 @@ export default function MenuClient({ local }: MenuClientProps) {
   };
 
   return (
-    <div className={`relative min-h-screen pb-28 ${theme.pageBg}`}>
+    <div className={`relative min-h-screen pb-28 ${theme.pageBg} overflow-hidden`}>
+      {/* Fondo degradado ambiental con textura de ruido estática (Zero GPU loop) */}
+      <GradientBackground
+        gradientType="radial-gradient"
+        gradientOrigin="top-middle"
+        gradientSize="140% 110%"
+        colors={[
+          { color: "rgba(254, 240, 218, 0.4)", stop: "0%" },
+          { color: "rgba(250, 248, 245, 0.75)", stop: "40%" },
+          { color: "rgba(250, 248, 245, 1)", stop: "100%" },
+        ]}
+        noiseIntensity={0.5}
+        noisePatternAlpha={28}
+        noisePatternSize={85}
+        noisePatternRefreshInterval={0}
+      />
+
       {/* Video de fondo fijo a pantalla completa detrás de toda la carta digital (encuadre alejado y completo) */}
       {videoDeFondo && (
         <div
@@ -402,6 +419,43 @@ export default function MenuClient({ local }: MenuClientProps) {
             </div>
           </div>
         </header>
+
+        {/* Banner Decorativo Editorial de la Carta con Grano Estático */}
+        <div className="px-4 my-3">
+          <div className="relative overflow-hidden rounded-2xl border border-stone-200/90 p-3 shadow-xs">
+            <GradientBackground
+              gradientType="linear-gradient"
+              gradientOrigin="left-middle"
+              colors={[
+                { color: "rgba(255, 237, 213, 0.75)", stop: "0%" },
+                { color: "rgba(254, 243, 199, 0.55)", stop: "50%" },
+                { color: "rgba(255, 255, 255, 0.9)", stop: "100%" },
+              ]}
+              noiseIntensity={0.5}
+              noisePatternAlpha={28}
+              noisePatternSize={80}
+              noisePatternRefreshInterval={0}
+            />
+            <div className="relative z-10 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#EA580C] text-white shrink-0">
+                  <Store className="h-3.5 w-3.5" />
+                </span>
+                <div>
+                  <span className="block font-display text-xs uppercase tracking-wider text-stone-900 leading-none">
+                    Carta Digital Oficial • {local.nombre}
+                  </span>
+                  <span className="block text-[10px] font-semibold text-stone-600 mt-0.5">
+                    Retiro en local y consumo en mesa
+                  </span>
+                </div>
+              </div>
+              <span className="rounded-full bg-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-stone-700 shadow-2xs border border-stone-200 shrink-0">
+                Directo WhatsApp
+              </span>
+            </div>
+          </div>
+        </div>
 
         {/* Pestañas Sticky de Categorías + Buscador de Platos */}
         <div
