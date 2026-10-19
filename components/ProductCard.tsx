@@ -111,8 +111,8 @@ export default memo(function ProductCard({
           </h4>
 
           <p
-            className={`mt-1 line-clamp-2 font-body-sm text-xs leading-relaxed sm:text-sm ${
-              !disponible ? "text-slate-400" : "text-on-surface-variant"
+            className={`mt-1 line-clamp-2 font-body text-xs leading-relaxed sm:text-sm ${
+              !disponible ? "text-slate-400" : "text-stone-600"
             }`}
           >
             {producto.descripcion}
@@ -144,7 +144,7 @@ export default memo(function ProductCard({
             <button
               type="button"
               disabled
-              className="inline-flex min-h-[48px] cursor-not-allowed items-center gap-1.5 rounded-xl border border-slate-300 bg-slate-200/90 px-4 py-2 text-xs font-bold text-slate-500 shadow-none opacity-80"
+              className="inline-flex min-h-[44px] cursor-not-allowed items-center gap-1.5 rounded-full border border-slate-300 bg-slate-200/90 px-4 py-2 text-xs font-bold text-slate-500 shadow-none opacity-80"
             >
               <Ban className="h-4 w-4" />
               <span>Agotado</span>
@@ -153,7 +153,7 @@ export default memo(function ProductCard({
             <button
               type="button"
               onClick={handleAgregarClick}
-              className={`inline-flex min-h-[48px] min-w-[104px] items-center justify-center gap-1.5 rounded-xl px-4 py-3 text-xs sm:text-sm font-extrabold shadow-sm transition-all active:scale-95 ${
+              className={`inline-flex min-h-[44px] min-w-[104px] items-center justify-center gap-1.5 rounded-full px-4 py-2.5 text-xs sm:text-sm font-extrabold shadow-sm transition-all active:scale-95 ${
                 agregadoFeedback
                   ? "bg-emerald-600 text-white shadow-emerald-600/30 ring-2 ring-emerald-400 scale-105"
                   : theme.cardAddBtn
@@ -173,28 +173,28 @@ export default memo(function ProductCard({
             </button>
           ) : (
             <div
-              className={`inline-flex min-h-[48px] items-center gap-2 rounded-xl border bg-surface-container-lowest px-2 py-1 shadow-sm ${theme.cardCounterBox}`}
+              className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-stone-300 bg-white px-1.5 py-1 shadow-sm ${theme.cardCounterBox}`}
             >
               <button
                 type="button"
                 onClick={() => onDisminuir(producto.id)}
-                className={`flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg transition active:scale-90 ${theme.cardMinusBtn}`}
+                className={`flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 ${theme.cardMinusBtn}`}
                 aria-label={`Quitar una unidad de ${producto.nombre}`}
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-3.5 w-3.5" />
               </button>
               <span
-                className={`min-w-[1.75rem] text-center text-sm font-black ${theme.cardQtyText}`}
+                className={`min-w-[1.5rem] text-center text-sm font-black ${theme.cardQtyText}`}
               >
                 {cantidadEnCarrito}
               </span>
               <button
                 type="button"
                 onClick={handleAgregarClick}
-                className={`flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg transition active:scale-90 ${theme.cardPlusBtn}`}
+                className={`flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 ${theme.cardPlusBtn}`}
                 aria-label={`Agregar otra unidad de ${producto.nombre}`}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-3.5 w-3.5" />
               </button>
             </div>
           )}
@@ -202,7 +202,7 @@ export default memo(function ProductCard({
       </div>
 
       {/* Imagen del producto */}
-      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-xl bg-surface-container sm:h-32 sm:w-32">
+      <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-stone-100 sm:h-32 sm:w-32 border border-stone-200/80">
         {tieneOferta && disponible && (
           <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 rounded-lg bg-rose-600/95 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-md backdrop-blur-xs animate-pulse">
             <Flame className="h-3 w-3 fill-white text-white" />

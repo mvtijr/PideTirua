@@ -29,11 +29,11 @@ export default function FloatingCartBar({
         <button
           type="button"
           onClick={onOpenDrawer}
-          className={`flex w-full min-h-[56px] items-center justify-between rounded-2xl px-4 py-3.5 shadow-xl transition-all active:scale-[0.99] ${theme.floatingBtn}`}
+          className={`flex w-full min-h-[56px] items-center justify-between px-4 py-3.5 transition-all active:scale-[0.99] ${theme.floatingBtn}`}
         >
           <div className="flex items-center gap-3">
             <div
-              className={`relative flex h-10 w-10 items-center justify-center rounded-xl font-extrabold ${theme.floatingIconBox}`}
+              className={`relative flex h-10 w-10 items-center justify-center rounded-full font-extrabold ${theme.floatingIconBox}`}
             >
               <ShoppingBag className="h-5 w-5" />
               <span

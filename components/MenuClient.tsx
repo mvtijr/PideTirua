@@ -261,7 +261,7 @@ export default function MenuClient({ local }: MenuClientProps) {
             {/* Logo y título sobre la portada */}
             <div className="absolute bottom-4 left-4 right-4 flex items-end gap-3.5">
               <div
-                className={`h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 shadow-lg sm:h-20 sm:w-20 ${theme.logoBox}`}
+                className={`h-16 w-16 shrink-0 overflow-hidden shadow-lg sm:h-20 sm:w-20 ${theme.logoBox}`}
               >
                 <img
                   src={logoPrincipal}
@@ -271,7 +271,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                   className="h-full w-full object-cover"
                 />
               </div>
-              <div className="min-w-0 flex-1 text-on-primary">
+              <div className="min-w-0 flex-1 text-white">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold shadow-sm backdrop-blur-md border ${
@@ -283,7 +283,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                     }`}
                   >
                     {localSuspendido
-                      ? "⛔ Servicio Temporalmente Suspendido"
+                      ? "⛔ Servicio Suspendido"
                       : local.abierto
                       ? `🟢 Abierto • ${local.horario}`
                       : `🔴 Cerrado • Abre hoy a las ${horaApertura} hrs`}
@@ -310,26 +310,30 @@ export default function MenuClient({ local }: MenuClientProps) {
             </div>
           )}
 
-          {/* Ficha informativa del Local + Botón de Llamada Directa */}
+          {/* Ficha informativa del Local */}
           <div className={`border-b px-4 py-4 ${theme.infoSectionBg}`}>
-            {/* Cabecera compacta con Nombre, Dirección, Horario y Botón de Llamada Rápida */}
+            {/* Cabecera compacta con Estado, Ubicación y Botón de Llamada */}
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span
                     className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold border ${
                       localSuspendido
-                        ? "bg-rose-500/20 text-rose-300 border-rose-500/45"
+                        ? "bg-rose-50 text-rose-700 border-rose-200"
                         : local.abierto
-                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/35"
-                        : "bg-rose-500/15 text-rose-400 border-rose-500/35"
+                        ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                        : "bg-rose-50 text-rose-800 border-rose-200"
                     }`}
                   >
                     {localSuspendido
-                      ? "⛔ Servicio Temporalmente Suspendido"
+                      ? "⛔ Servicio Suspendido"
                       : local.abierto
                       ? `🟢 Abierto • ${local.horario}`
                       : `🔴 Cerrado • Abre hoy a las ${horaApertura} hrs`}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 border border-stone-200 px-2.5 py-0.5 text-xs font-bold text-stone-700">
+                    <MapPin className="h-3 w-3 text-[#EA580C]" />
+                    {local.ubicacion}
                   </span>
                 </div>
                 <p className={`mt-1.5 flex items-center gap-1.5 text-xs ${theme.infoSub}`}>
@@ -338,13 +342,15 @@ export default function MenuClient({ local }: MenuClientProps) {
                 </p>
               </div>
 
-              <a
-                href={`tel:+${telefonoDirecto}`}
-                className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/15 px-3.5 py-2 text-xs font-bold text-emerald-300 shadow-sm backdrop-blur-sm transition hover:bg-emerald-500/25 active:scale-95"
-              >
-                <Phone className="h-3.5 w-3.5 text-emerald-400" />
-                <span>Llamar al local</span>
-              </a>
+              {telefonoDirecto && (
+                <a
+                  href={`tel:+${telefonoDirecto}`}
+                  className={`inline-flex shrink-0 items-center gap-1.5 px-3.5 py-2 text-xs font-bold shadow-sm transition active:scale-95 ${theme.callBtn}`}
+                >
+                  <Phone className={`h-3.5 w-3.5 ${theme.callIcon}`} />
+                  <span>Llamar al local</span>
+                </a>
+              )}
             </div>
 
             <p
@@ -385,22 +391,14 @@ export default function MenuClient({ local }: MenuClientProps) {
               </div>
             </div>
 
-            {/* Acciones rápidas: Modalidades de atención y llamada directa */}
+            {/* Modalidades de atención exclusivas: Retiro en local y Consumo en mesa */}
             <div className="mt-3.5 flex items-center justify-between gap-3">
               <div
-                className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold ${theme.modalityBadge}`}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold ${theme.modalityBadge}`}
               >
                 <Store className={`h-4 w-4 ${theme.modalityIcon}`} />
                 <span>Retiro en local y Consumo en mesa</span>
               </div>
-
-              <a
-                href={`tel:+${telefonoDirecto}`}
-                className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition active:scale-95 ${theme.callBtn}`}
-              >
-                <Phone className={`h-3.5 w-3.5 ${theme.callIcon}`} />
-                <span>Llamar al local</span>
-              </a>
             </div>
           </div>
         </header>
@@ -421,7 +419,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                   key={categoria.id}
                   type="button"
                   onClick={() => irACategoria(categoria.id)}
-                  className={`filter-chip shrink-0 rounded-full px-4 py-1.5 text-xs font-bold transition-all ${
+                  className={`filter-chip shrink-0 px-4 py-1.5 text-xs font-bold transition-all ${
                     activa ? theme.tabActive : theme.tabInactive
                   }`}
                 >
@@ -434,19 +432,19 @@ export default function MenuClient({ local }: MenuClientProps) {
           {/* Buscador rápido dentro de la carta */}
           <div className="px-4 pb-2.5">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-outline" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
                 type="text"
                 value={busquedaPlato}
                 onChange={(e) => setBusquedaPlato(e.target.value)}
                 placeholder={`Buscar en la carta de ${local.nombre}...`}
-                className={`w-full rounded-xl border py-2 pl-9 pr-8 text-xs text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:outline-none ${theme.searchInput}`}
+                className={`w-full border py-2.5 pl-10 pr-9 text-xs focus:outline-none transition ${theme.searchInput}`}
               />
               {busquedaPlato && (
                 <button
                   type="button"
                   onClick={() => setBusquedaPlato("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-800 p-0.5"
                   aria-label="Limpiar filtro"
                 >
                   <X className="h-3.5 w-3.5" />

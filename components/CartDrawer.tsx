@@ -174,12 +174,12 @@ export default function CartDrawer({
   const placeholderUbicacion =
     tipoEntrega === "Consumo en mesa"
       ? "Ej: Mesa 4 (Terraza interior)"
-      : `Dirección o referencia en ${local.sector} / hora de retiro (opcional)`;
+      : "Ej: Retiro en 20 min / Retira Juan (opcional)";
 
   const labelUbicacion =
     tipoEntrega === "Consumo en mesa"
       ? "Número de mesa *"
-      : "Dirección o referencia de entrega / retiro (opcional)";
+      : "Hora o referencia para el retiro (opcional)";
 
   const handleEnviarWhatsApp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -327,7 +327,7 @@ export default function CartDrawer({
     >
       {/* Panel lateral / Drawer mobile-first */}
       <div
-        className="flex h-full w-full max-w-lg flex-col bg-surface-container-lowest shadow-2xl"
+        className="flex h-full w-full max-w-lg flex-col bg-[#FAF8F5] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabecera del Drawer */}
@@ -336,11 +336,11 @@ export default function CartDrawer({
         >
           <div>
             <span
-              className={`text-[11px] font-semibold uppercase tracking-wider ${theme.drawerHeaderSub}`}
+              className={`text-[11px] font-bold uppercase tracking-wider ${theme.drawerHeaderSub}`}
             >
               Pedido directo a WhatsApp
             </span>
-            <h2 className="text-lg font-extrabold leading-tight">
+            <h2 className="font-display text-2xl tracking-wide uppercase leading-tight text-stone-900">
               Tu Pedido en {local.nombre}
             </h2>
           </div>
@@ -537,11 +537,11 @@ export default function CartDrawer({
                     if (errorValidacion) setErrorValidacion(null);
                   }}
                   placeholder="Ej: Camila Nahuelpán"
-                  className="w-full rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/20"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
               </div>
 
-              {/* Mesa o Dirección / Referencia de Entrega */}
+              {/* Mesa o Referencia para Retiro */}
               <div>
                 <label
                   htmlFor="direccionOMesa"
@@ -559,7 +559,7 @@ export default function CartDrawer({
                     if (errorValidacion) setErrorValidacion(null);
                   }}
                   placeholder={placeholderUbicacion}
-                  className="w-full rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/20"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
               </div>
 
@@ -578,7 +578,7 @@ export default function CartDrawer({
                   value={telefonoCliente}
                   onChange={(e) => setTelefonoCliente(e.target.value)}
                   placeholder="Ej: +56 9 8765 4321"
-                  className="w-full rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/20"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
                 <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
                   <span>✓ Tus datos quedan guardados para tus próximos pedidos</span>
@@ -748,13 +748,13 @@ export default function CartDrawer({
                   value={notasAdicionales}
                   onChange={(e) => setNotasAdicionales(e.target.value)}
                   placeholder='Ej: "Sin cebolla", "Salsa soya extra", "Para llevar bien sellado"'
-                  className="w-full rounded-xl border border-outline-variant/50 bg-surface-container-low px-3.5 py-2.5 text-sm text-on-surface placeholder:text-outline focus:border-secondary focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/20"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
               </div>
             </div>
 
             {/* Vista previa opcional del mensaje de WhatsApp */}
-            <div className="rounded-xl border border-outline-variant/50 bg-surface-container-low p-3">
+            <div className="rounded-2xl border border-stone-200/90 bg-white p-3.5 shadow-xs">
               <button
                 type="button"
                 onClick={() => setMostrarVistaPrevia((prev) => !prev)}
@@ -771,7 +771,7 @@ export default function CartDrawer({
               </button>
               {mostrarVistaPrevia && (
                 <pre
-                  className={`mt-2.5 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg p-3 font-mono text-[11px] leading-relaxed ${theme.drawerPreviewBox}`}
+                  className={`mt-2.5 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-xl p-3 font-mono text-[11px] leading-relaxed ${theme.drawerPreviewBox}`}
                 >
                   {mensajePrevia}
                 </pre>
@@ -779,20 +779,20 @@ export default function CartDrawer({
             </div>
 
             {errorValidacion && (
-              <div className="flex items-start gap-2 rounded-xl border border-error/30 bg-error-container p-3 text-xs font-semibold text-on-error-container">
-                <AlertCircle className="h-4 w-4 shrink-0 text-error" />
+              <div className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800">
+                <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
                 <span>{errorValidacion}</span>
               </div>
             )}
           </div>
 
           {/* Resumen de Total y Botón de Checkout a WhatsApp */}
-          <div className="border-t border-outline-variant/40 bg-surface-container-low p-4 sm:px-6">
+          <div className="border-t border-stone-200/90 bg-white p-4 sm:px-6">
             <div
               className={`mb-3 flex items-center justify-between text-base font-extrabold ${theme.drawerLabel}`}
             >
               <span>Total a pagar</span>
-              <span className={`text-lg ${theme.drawerItemTotal}`}>
+              <span className={`text-xl ${theme.drawerItemTotal}`}>
                 {formatCLP(total)}
               </span>
             </div>
@@ -805,7 +805,7 @@ export default function CartDrawer({
                 local.activo === false ||
                 items.length === 0
               }
-              className="flex w-full min-h-[56px] items-center justify-center gap-2.5 rounded-2xl bg-[#25D366] px-5 py-4 text-base font-extrabold text-white shadow-lg shadow-[#25D366]/25 transition hover:bg-[#20bd5a] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:opacity-65 disabled:shadow-none"
+              className="flex w-full min-h-[56px] items-center justify-center gap-2.5 rounded-full bg-[#25D366] px-5 py-4 text-base font-extrabold uppercase tracking-wide text-white shadow-lg shadow-[#25D366]/25 transition hover:bg-[#20bd5a] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-stone-300 disabled:opacity-65 disabled:shadow-none"
             >
               {enviandoPedido ? (
                 <>
