@@ -265,7 +265,7 @@ function GradientBackground({
 
   return (
     <div 
-      className={`absolute inset-0 w-full h-full ${className}`}
+      className={`absolute inset-0 w-full h-full pointer-events-none select-none -z-0 ${className}`}
       style={gradientStyle}
     >
       {enableNoise && (

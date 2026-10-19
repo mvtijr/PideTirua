@@ -669,21 +669,43 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                           alt=""
                           aria-hidden="true"
                           decoding="async"
-                          className="pointer-events-none absolute inset-0 h-full w-full object-cover blur-md opacity-50"
+                          className="pointer-events-none absolute inset-0 h-full w-full object-cover blur-md opacity-50 select-none"
                         />
-                        <video
-                          src={local.videoFondo || local.videoPortada}
-                          poster={getVideoPoster(
-                            local.videoFondo || local.videoPortada,
-                            local.fotoPortada
-                          )}
-                          preload="metadata"
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          className="pointer-events-none absolute inset-x-0 top-10 w-full h-56 object-contain"
-                        />
+                        {esCentro ? (
+                          <video
+                            src={local.videoFondo || local.videoPortada}
+                            poster={getVideoPoster(
+                              local.videoFondo || local.videoPortada,
+                              local.fotoPortada
+                            )}
+                            preload="metadata"
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            controls={false}
+                            controlsList="nodownload nofullscreen noremoteplayback"
+                            disablePictureInPicture
+                            disableRemotePlayback
+                            tabIndex={-1}
+                            onCanPlay={(e) => {
+                              void (e.currentTarget as HTMLVideoElement)
+                                .play()
+                                .catch(() => {});
+                            }}
+                            className="pointer-events-none absolute inset-x-0 top-10 w-full h-56 object-contain select-none"
+                          />
+                        ) : (
+                          <img
+                            src={getVideoPoster(
+                              local.videoFondo || local.videoPortada,
+                              local.fotoPortada
+                            )}
+                            alt=""
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-x-0 top-10 w-full h-56 object-contain select-none"
+                          />
+                        )}
                       </>
                     )}
                     <div

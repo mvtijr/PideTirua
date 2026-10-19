@@ -966,7 +966,7 @@ export default function SuperAdminClient({
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-6 px-4 pt-6">
+      <main className="relative z-10 mx-auto max-w-5xl space-y-6 px-4 pt-6">
         {/* A) MÉTRICAS DEL NEGOCIO (ENCABEZADO) */}
         <section className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
           {/* Total de locales activos */}
@@ -1610,7 +1610,12 @@ export default function SuperAdminClient({
                           loop
                           muted
                           playsInline
-                          className="h-full w-full object-cover"
+                          controls={false}
+                          controlsList="nodownload nofullscreen noremoteplayback"
+                          disablePictureInPicture
+                          disableRemotePlayback
+                          tabIndex={-1}
+                          className="pointer-events-none select-none h-full w-full object-cover"
                         />
                       ) : (
                         <div className="flex flex-col items-center gap-1 text-center text-stone-400">

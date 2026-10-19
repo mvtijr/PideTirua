@@ -1445,7 +1445,12 @@ export default function AdminLocalClient({
               loop
               muted
               playsInline
-              className="absolute inset-0 h-full w-full object-contain blur-[3px] opacity-45"
+              controls={false}
+              controlsList="nodownload nofullscreen noremoteplayback"
+              disablePictureInPicture
+              disableRemotePlayback
+              tabIndex={-1}
+              className="pointer-events-none select-none absolute inset-0 h-full w-full object-contain blur-[3px] opacity-45"
             />
           )}
           <div
@@ -1476,7 +1481,7 @@ export default function AdminLocalClient({
             </span>
             <Link
               href="/superadmin"
-              className="inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-400 px-3 py-1 text-[11px] font-black text-slate-950 shadow-xs transition hover:bg-amber-300"
+              className="inline-flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-400 px-3 py-1 text-[11px] font-black text-stone-950 shadow-xs transition hover:bg-amber-300"
             >
               <ArrowLeft className="h-3 w-3" />
               <span>Volver a SuperAdmin</span>
@@ -1881,68 +1886,68 @@ export default function AdminLocalClient({
             {/* Vista Previa Visual del Flyer / Cartel de Mesa Listo para Imprimir */}
             <div
               id="printable-qr-flyer"
-              className="w-full max-w-md overflow-hidden rounded-3xl border-4 border-slate-900 bg-white p-6 text-center text-slate-900 shadow-2xl sm:p-8"
+              className="w-full max-w-md overflow-hidden rounded-3xl border-4 border-[#18181B] bg-white p-6 text-center text-[#18181B] shadow-2xl sm:p-8"
             >
               {/* Cinta / Título Superior */}
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 px-4 py-1.5 text-xs font-extrabold uppercase tracking-wider text-white">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#18181B] px-4 py-1.5 text-xs font-display uppercase tracking-wider text-white">
                 <Smartphone className="h-3.5 w-3.5 text-emerald-400" />
                 <span>¡Pide directo desde tu celular!</span>
               </div>
 
               {/* Logo, Nombre del Local Grande y su Rubro */}
               <div className="mt-4 flex flex-col items-center">
-                <div className="h-20 w-20 overflow-hidden rounded-2xl border-2 border-slate-200 bg-slate-900 p-1.5 shadow-md">
+                <div className="h-20 w-20 overflow-hidden rounded-2xl border-2 border-stone-200 bg-[#18181B] p-1.5 shadow-md">
                   <img
                     src={logoOficial}
                     alt={local.nombre}
                     className="h-full w-full rounded-xl object-contain"
                   />
                 </div>
-                <h3 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+                <h3 className="mt-3 text-3xl font-display uppercase tracking-wide text-stone-900 sm:text-4xl">
                   {local.nombre}
                 </h3>
-                <span className="mt-1 inline-block rounded-full bg-slate-100 px-3.5 py-1 text-xs font-extrabold uppercase tracking-wider text-slate-700">
+                <span className="mt-1 inline-block rounded-full bg-orange-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#EA580C]">
                   {local.rubro}
                 </span>
               </div>
 
               {/* Código QR en Alta Resolución */}
-              <div className="my-5 inline-flex flex-col items-center rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 shadow-inner">
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
+              <div className="my-5 inline-flex flex-col items-center rounded-3xl border-2 border-dashed border-stone-300 bg-[#FAF8F5] p-4 shadow-inner">
+                <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white p-2 shadow-sm">
                   <img
                     src={qrImageUrl}
                     alt={`Código QR de ${local.nombre}`}
                     className="h-56 w-56 object-contain sm:h-64 sm:w-64"
                   />
                 </div>
-                <span className="mt-2.5 font-mono text-[11px] font-bold text-slate-600">
+                <span className="mt-2.5 font-mono text-[11px] font-bold text-stone-600">
                   {urlPublicaLocal}
                 </span>
               </div>
 
               {/* Instrucciones al pie del QR en 3 pasos con iconos */}
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left">
-                <p className="mb-3 text-center text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+              <div className="rounded-2xl border border-stone-200 bg-[#FAF8F5] p-4 text-left">
+                <p className="mb-3 text-center text-[11px] font-extrabold uppercase tracking-wider text-stone-500">
                   ¿Cómo hacer tu pedido en 3 pasos?
                 </p>
-                <ol className="space-y-2.5 text-xs font-bold text-slate-800 sm:text-sm">
-                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
+                <ol className="space-y-2.5 text-xs font-bold text-stone-800 sm:text-sm">
+                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs border border-stone-100">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#18181B] text-white">
                       <Camera className="h-4 w-4" />
                     </span>
                     <span>
                       <strong>1.</strong> Abre la cámara de tu celular.
                     </span>
                   </li>
-                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-white">
+                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs border border-stone-100">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#18181B] text-white">
                       <QrCode className="h-4 w-4" />
                     </span>
                     <span>
                       <strong>2.</strong> Escanea este código QR.
                     </span>
                   </li>
-                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs">
+                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs border border-stone-100">
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#25D366] text-white">
                       <MessageCircle className="h-4 w-4" />
                     </span>
@@ -1954,7 +1959,7 @@ export default function AdminLocalClient({
                 </ol>
               </div>
 
-              <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-stone-400">
                 PideTirúa · Carta Digital &amp; Pedidos Directos
               </p>
             </div>
@@ -1972,7 +1977,7 @@ export default function AdminLocalClient({
               <Settings className="h-4 w-4" />
               Configuración Operativa
             </span>
-            <h2 className="mt-0.5 text-base font-extrabold text-white sm:text-lg">
+            <h2 className="mt-0.5 text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
               ⚙️ Ajustes Básicos y PIN de Seguridad
             </h2>
           </div>
@@ -2664,15 +2669,15 @@ export default function AdminLocalClient({
                       key={producto.id}
                       className={`rounded-2xl border p-3.5 transition-all ${
                         disponible
-                          ? "border-slate-200 bg-white text-slate-900 shadow-md"
-                          : "border-slate-300 bg-slate-100 text-slate-600 opacity-85"
+                          ? "border-stone-200/90 bg-white text-stone-900 shadow-sm"
+                          : "border-stone-200 bg-stone-100/70 text-stone-500 opacity-80"
                       }`}
                     >
                       {/* Fila superior: Miniatura con botón para cambiar foto + Switch [Disponible / Agotado] */}
                       <div className="mb-3 flex items-center justify-between gap-2.5">
                         <div className="flex min-w-0 items-center gap-3">
                           <label
-                            className="group relative h-14 w-14 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-xs"
+                            className="group relative h-14 w-14 shrink-0 cursor-pointer overflow-hidden rounded-xl border border-stone-200 bg-stone-100 shadow-xs"
                             title="Toca para subir o cambiar la foto de este plato"
                           >
                             <img
@@ -2711,16 +2716,16 @@ export default function AdminLocalClient({
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-1.5">
                               <span
-                                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold ${
+                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-extrabold ${
                                   disponible
-                                    ? "bg-emerald-100 text-emerald-800"
-                                    : "bg-slate-200 text-slate-700"
+                                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                                    : "bg-stone-200 text-stone-600 border border-stone-300"
                                 }`}
                               >
                                 {disponible ? "🟢 Disponible" : "⚪ Agotado"}
                               </span>
 
-                              <label className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[10px] font-bold text-slate-600 hover:bg-slate-100">
+                              <label className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-stone-200 bg-stone-50 px-2.5 py-0.5 text-[10px] font-bold text-stone-600 hover:bg-stone-100">
                                 <Camera className="h-3 w-3" />
                                 <span>Cambiar foto</span>
                                 <input
@@ -2741,7 +2746,7 @@ export default function AdminLocalClient({
                               </label>
                             </div>
 
-                            <p className="mt-1 text-xs font-extrabold text-slate-700">
+                            <p className="mt-1 text-sm font-display uppercase tracking-wider text-stone-900">
                               {formatCLP(producto.precio)}
                             </p>
                           </div>
@@ -2753,17 +2758,17 @@ export default function AdminLocalClient({
                             type="button"
                             disabled={guardandoId === `disp-${producto.id}`}
                             onClick={() => handleToggleDisponible(producto)}
-                            className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-3 py-2 text-xs font-extrabold transition active:scale-95 ${
+                            className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-bold transition active:scale-95 ${
                               disponible
                                 ? "border-emerald-300 bg-emerald-600 text-white shadow-xs hover:bg-emerald-500"
-                                : "border-slate-300 bg-slate-200 text-slate-700 hover:bg-slate-300"
+                                : "border-stone-300 bg-stone-200 text-stone-700 hover:bg-stone-300"
                             }`}
                           >
                             <div
                               className={`relative flex h-5 w-9 items-center rounded-full p-0.5 transition-colors ${
                                 disponible
-                                  ? "bg-emerald-900/40"
-                                  : "bg-slate-400"
+                                  ? "bg-emerald-950/40"
+                                  : "bg-stone-400"
                               }`}
                             >
                               <div
@@ -2780,7 +2785,7 @@ export default function AdminLocalClient({
                             type="button"
                             disabled={guardandoId === `del-${producto.id}`}
                             onClick={() => void handleEliminarProducto(producto)}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition hover:bg-rose-100 active:scale-95"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-600 transition hover:bg-rose-100 active:scale-95"
                             title="Eliminar plato de la carta"
                           >
                             {guardandoId === `del-${producto.id}` ? (
@@ -2795,7 +2800,7 @@ export default function AdminLocalClient({
                       {/* Fila inferior: Edición rápida de Nombre, Precio, Descripción y Etiqueta */}
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-12">
                         <div className="sm:col-span-7">
-                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-stone-500">
                             Nombre del plato
                           </label>
                           <input
@@ -2820,17 +2825,17 @@ export default function AdminLocalClient({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-bold text-slate-900 focus:border-slate-900 focus:bg-white focus:outline-none"
+                            className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-bold text-stone-900 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                           />
                         </div>
 
                         <div className="flex items-end gap-2 sm:col-span-5">
                           <div className="flex-1">
-                            <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                            <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-stone-500">
                               Precio (CLP)
                             </label>
                             <div className="relative">
-                              <DollarSign className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                              <DollarSign className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-stone-400" />
                               <input
                                 type="number"
                                 inputMode="numeric"
@@ -2854,7 +2859,7 @@ export default function AdminLocalClient({
                                     e.currentTarget.blur();
                                   }
                                 }}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pl-7 pr-2.5 text-xs font-extrabold text-slate-900 focus:border-slate-900 focus:bg-white focus:outline-none"
+                                className="w-full rounded-xl border border-stone-200 bg-stone-50 py-2 pl-7 pr-2.5 text-xs font-extrabold text-stone-900 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                               />
                             </div>
                           </div>
@@ -2868,10 +2873,10 @@ export default function AdminLocalClient({
                             onClick={() =>
                               void handleGuardarEdicionProducto(producto)
                             }
-                            className={`inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-xl px-3 text-xs font-extrabold transition ${
+                            className={`inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full px-3.5 text-xs font-display uppercase tracking-wider transition ${
                               hayCambiosSinGuardar
                                 ? `${brand.accentBg} shadow-xs active:scale-95`
-                                : "border border-slate-200 bg-slate-100 text-slate-400"
+                                : "border border-stone-200 bg-stone-100 text-stone-400"
                             }`}
                             title="Guardar cambios"
                           >
@@ -2886,7 +2891,7 @@ export default function AdminLocalClient({
 
                         <div className="sm:col-span-8">
                           <div className="mb-1 flex items-center justify-between">
-                            <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                            <label className="block text-[10px] font-bold uppercase tracking-wider text-stone-500">
                               Descripción
                             </label>
                             <button
@@ -2902,7 +2907,7 @@ export default function AdminLocalClient({
                                   producto.id
                                 )
                               }
-                              className="inline-flex items-center gap-1 rounded-md border border-amber-300 bg-amber-50 px-2 py-0.5 text-[10px] font-extrabold text-amber-800 transition hover:bg-amber-100 active:scale-95 disabled:opacity-40"
+                              className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-800 transition hover:bg-amber-100 active:scale-95 disabled:opacity-40"
                               title="Generar descripción apetitosa con Gemini"
                             >
                               {generandoDescripcionId === producto.id ? (
@@ -2940,12 +2945,12 @@ export default function AdminLocalClient({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-700 focus:border-slate-900 focus:bg-white focus:outline-none"
+                            className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs text-stone-700 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                           />
                         </div>
 
                         <div className="sm:col-span-4">
-                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                          <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-stone-500">
                             Etiqueta (opcional)
                           </label>
                           <input
@@ -2971,14 +2976,14 @@ export default function AdminLocalClient({
                                 e.currentTarget.blur();
                               }
                             }}
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 focus:border-slate-900 focus:bg-white focus:outline-none"
+                            className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs font-semibold text-stone-800 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                           />
                         </div>
 
                         {/* Control de Oferta del Día */}
-                        <div className="mt-1 rounded-xl border border-orange-200/90 bg-orange-50/70 p-2.5 sm:col-span-12">
+                        <div className="mt-1 rounded-2xl border border-amber-200/90 bg-amber-50/60 p-3 sm:col-span-12">
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-orange-950">
+                            <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-amber-950">
                               <input
                                 type="checkbox"
                                 checked={Boolean(editState.es_oferta)}
@@ -3001,14 +3006,14 @@ export default function AdminLocalClient({
                                     [producto.id]: updated,
                                   }));
                                 }}
-                                className="h-4 w-4 rounded border-orange-300 text-orange-600 focus:ring-orange-500"
+                                className="h-4 w-4 rounded border-amber-300 text-[#EA580C] focus:ring-[#EA580C]"
                               />
-                              <Flame className="h-3.5 w-3.5 text-orange-600" />
+                              <Flame className="h-3.5 w-3.5 text-[#EA580C]" />
                               <span>¿Activar como Oferta del Día?</span>
                             </label>
 
                             {editState.es_oferta && (
-                              <span className="rounded-full bg-orange-200/80 px-2 py-0.5 text-[10px] font-extrabold text-orange-800">
+                              <span className="rounded-full bg-amber-100 border border-amber-200 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-900">
                                 Visible en portada de Tirúa
                               </span>
                             )}
@@ -3017,11 +3022,11 @@ export default function AdminLocalClient({
                           {editState.es_oferta && (
                             <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
                               <div>
-                                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-orange-950">
+                                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-amber-950">
                                   Precio Oferta (CLP)
                                 </label>
                                 <div className="relative">
-                                  <DollarSign className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-orange-500" />
+                                  <DollarSign className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-amber-600" />
                                   <input
                                     type="number"
                                     inputMode="numeric"
@@ -3046,13 +3051,13 @@ export default function AdminLocalClient({
                                         e.currentTarget.blur();
                                       }
                                     }}
-                                    className="w-full rounded-xl border border-orange-300 bg-white py-1.5 pl-7 pr-2.5 text-xs font-black text-orange-950 focus:border-orange-600 focus:outline-none"
+                                    className="w-full rounded-xl border border-amber-300 bg-white py-1.5 pl-7 pr-2.5 text-xs font-black text-amber-950 focus:border-[#EA580C] focus:outline-none"
                                   />
                                 </div>
                               </div>
 
                               <div>
-                                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-orange-950">
+                                <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-amber-950">
                                   Etiqueta de Promo
                                 </label>
                                 <input
@@ -3078,7 +3083,7 @@ export default function AdminLocalClient({
                                       e.currentTarget.blur();
                                     }
                                   }}
-                                  className="w-full rounded-xl border border-orange-300 bg-white px-3 py-1.5 text-xs font-bold text-orange-950 placeholder:text-orange-400 focus:border-orange-600 focus:outline-none"
+                                  className="w-full rounded-xl border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-950 placeholder:text-amber-400 focus:border-[#EA580C] focus:outline-none"
                                 />
                               </div>
                             </div>
@@ -3098,23 +3103,23 @@ export default function AdminLocalClient({
 
       {/* MODAL IA: GENERADOR DE PUBLICACIÓN PARA REDES Y ESTADOS DE WHATSAPP */}
       {mostrarModalRedes && (
-        <div className="no-print fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="no-print fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#18181B]/80 backdrop-blur-md animate-in fade-in duration-200">
           <div
-            className={`relative w-full max-w-lg overflow-hidden rounded-3xl border shadow-2xl ${brand.panelCardBg} text-white flex flex-col max-h-[92vh]`}
+            className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-stone-200 bg-white text-stone-900 shadow-2xl flex flex-col max-h-[92vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Cabecera */}
-            <div className="p-5 pb-4 bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 flex items-start justify-between">
+            <div className="p-5 pb-4 bg-[#18181B] text-white flex items-start justify-between border-b border-stone-800">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md text-white shadow-inner">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-amber-400">
                   <Megaphone className="h-6 w-6" />
                 </div>
                 <div>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-400/20 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-300">
                     <Sparkles className="h-3 w-3" />
                     Marketing con Gemini IA
                   </span>
-                  <h3 className="mt-0.5 text-base sm:text-lg font-black text-white">
+                  <h3 className="mt-0.5 text-lg font-display uppercase tracking-wide text-white">
                     📢 Anuncio para Redes y Estados
                   </h3>
                 </div>
@@ -3123,7 +3128,7 @@ export default function AdminLocalClient({
               <button
                 type="button"
                 onClick={() => setMostrarModalRedes(false)}
-                className="rounded-full bg-black/20 p-2 text-white/80 hover:bg-black/40 hover:text-white transition active:scale-95"
+                className="rounded-full bg-white/10 p-2 text-white/80 hover:bg-white/20 hover:text-white transition active:scale-95"
                 aria-label="Cerrar modal"
               >
                 <X className="h-5 w-5" />
@@ -3131,15 +3136,15 @@ export default function AdminLocalClient({
             </div>
 
             {/* Cuerpo */}
-            <div className="p-5 space-y-4 overflow-y-auto">
-              <p className={`text-xs ${brand.subtitleText}`}>
+            <div className="p-5 space-y-4 overflow-y-auto bg-[#FAF8F5]">
+              <p className="text-xs text-stone-600">
                 Texto promocional optimizado con emojis y tu enlace directo a la carta para publicar en tus Estados de WhatsApp, Facebook o Instagram:
               </p>
 
               {generandoPostRedes ? (
-                <div className="flex flex-col items-center justify-center rounded-2xl border border-white/15 bg-black/30 p-8 text-center space-y-3">
-                  <Loader2 className={`h-8 w-8 animate-spin ${brand.accentText}`} />
-                  <p className="text-xs font-bold text-white/90">
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-stone-200 bg-white p-8 text-center space-y-3 shadow-xs">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#EA580C]" />
+                  <p className="text-xs font-bold text-stone-700">
                     Generando texto apetitoso y vendedor con IA...
                   </p>
                 </div>
@@ -3151,7 +3156,7 @@ export default function AdminLocalClient({
                       value={textoPostRedes}
                       onChange={(e) => setTextoPostRedes(e.target.value)}
                       placeholder="Escribe o genera un anuncio para tus redes sociales..."
-                      className="w-full rounded-2xl border border-white/20 bg-black/40 p-4 text-xs sm:text-sm font-medium leading-relaxed text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                      className="w-full rounded-2xl border border-stone-200 bg-white p-4 text-xs sm:text-sm font-medium leading-relaxed text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] shadow-xs"
                     />
                   </div>
 
@@ -3160,12 +3165,12 @@ export default function AdminLocalClient({
                     <button
                       type="button"
                       onClick={handleCopiarPostRedes}
-                      className="flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 py-3 px-4 text-xs font-black text-white transition hover:bg-white/20 active:scale-95"
+                      className="flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white py-3 px-4 text-xs font-display uppercase tracking-wider text-stone-800 shadow-xs transition hover:bg-stone-50 active:scale-95"
                     >
                       {postCopiado ? (
                         <>
-                          <Check className="h-4 w-4 text-emerald-400" />
-                          <span className="text-emerald-300">¡Copiado!</span>
+                          <Check className="h-4 w-4 text-emerald-600" />
+                          <span className="text-emerald-700">¡Copiado!</span>
                         </>
                       ) : (
                         <>
@@ -3178,7 +3183,7 @@ export default function AdminLocalClient({
                     <button
                       type="button"
                       onClick={handleCompartirEstadoWhatsapp}
-                      className="flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] py-3 px-4 text-xs font-black text-slate-950 shadow-md transition hover:bg-[#20ba59] active:scale-95"
+                      className="flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#20ba59] py-3 px-4 text-xs font-display uppercase tracking-wider text-white shadow-xs transition active:scale-95"
                     >
                       <MessageCircle className="h-4 w-4 shrink-0" />
                       <span>📲 Compartir en WhatsApp</span>
@@ -3189,21 +3194,21 @@ export default function AdminLocalClient({
             </div>
 
             {/* Pie del modal con botón regenerar */}
-            <div className="border-t border-white/10 bg-black/30 p-4 flex items-center justify-between gap-3">
+            <div className="border-t border-stone-200 bg-white p-4 flex items-center justify-between gap-3">
               <button
                 type="button"
                 disabled={generandoPostRedes}
                 onClick={handleGenerarPostRedes}
-                className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-300 hover:text-amber-200 transition disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 hover:text-amber-800 transition disabled:opacity-50"
               >
-                <Sparkles className="h-3.5 w-3.5" />
+                <Sparkles className="h-3.5 w-3.5 text-amber-600" />
                 <span>🔄 Generar otra versión</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setMostrarModalRedes(false)}
-                className="rounded-xl border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-white/20 transition"
+                className="rounded-full border border-stone-200 bg-stone-100 px-4 py-1.5 text-xs font-bold text-stone-700 hover:bg-stone-200 transition"
               >
                 Cerrar
               </button>

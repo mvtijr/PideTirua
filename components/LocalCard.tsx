@@ -72,7 +72,12 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
                 loop
                 muted
                 playsInline
-                className="relative z-10 w-full h-full object-contain"
+                controls={false}
+                controlsList="nodownload nofullscreen noremoteplayback"
+                disablePictureInPicture
+                disableRemotePlayback
+                tabIndex={-1}
+                className="pointer-events-none select-none relative z-10 w-full h-full object-contain"
               />
             ) : (
               <img

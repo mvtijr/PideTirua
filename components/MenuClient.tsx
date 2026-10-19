@@ -201,7 +201,12 @@ export default function MenuClient({ local }: MenuClientProps) {
             loop
             muted
             playsInline
-            className="absolute inset-0 h-full w-full object-contain blur-[2px]"
+            controls={false}
+            controlsList="nodownload nofullscreen noremoteplayback"
+            disablePictureInPicture
+            disableRemotePlayback
+            tabIndex={-1}
+            className="pointer-events-none select-none absolute inset-0 h-full w-full object-contain blur-[2px]"
           />
           <div
             className={`absolute inset-0 bg-gradient-to-b ${theme.videoOverlayGradient}`}
@@ -226,8 +231,13 @@ export default function MenuClient({ local }: MenuClientProps) {
                 loop
                 muted
                 playsInline
+                controls={false}
+                controlsList="nodownload nofullscreen noremoteplayback"
+                disablePictureInPicture
+                disableRemotePlayback
+                tabIndex={-1}
                 poster={local.banner_url || posterPortada || undefined}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="pointer-events-none select-none absolute inset-0 w-full h-full object-cover"
               >
                 <source src={bannerVideoUrl} type="video/mp4" />
                 <source src={bannerVideoUrl} type="video/webm" />
