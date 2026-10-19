@@ -794,7 +794,7 @@ export default function SuperAdminClient({
           </span>
         </div>
 
-        <div className="mx-auto my-auto w-full max-w-md rounded-3xl border border-stone-200/90 bg-white p-6 shadow-sm sm:p-8">
+        <div className="relative z-10 mx-auto my-auto w-full max-w-md rounded-3xl border border-stone-200/90 bg-white p-6 shadow-sm sm:p-8">
           <div className="text-center">
             <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-300 bg-amber-50 text-amber-700 shadow-xs">
               <Crown className="h-8 w-8" />
@@ -860,7 +860,7 @@ export default function SuperAdminClient({
           </form>
         </div>
 
-        <p className="text-center text-[11px] text-stone-400">
+        <p className="relative z-10 text-center text-[11px] text-stone-400">
           PideTirúa · Arquitectura Comercial SaaS conectada a Supabase
         </p>
       </div>
