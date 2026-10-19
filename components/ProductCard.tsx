@@ -10,6 +10,7 @@ interface ProductCardProps {
   producto: Producto;
   cantidadEnCarrito: number;
   onAgregar: (producto: Producto) => void;
+  onPersonalizar?: (producto: Producto) => void;
   onDisminuir: (productoId: string) => void;
   localSlug: string;
 }
@@ -18,6 +19,7 @@ export default memo(function ProductCard({
   producto,
   cantidadEnCarrito,
   onAgregar,
+  onPersonalizar,
   onDisminuir,
   localSlug,
 }: ProductCardProps) {
@@ -26,6 +28,9 @@ export default memo(function ProductCard({
   const theme = getLocalTheme(localSlug);
   const disponible = producto.disponible !== false;
   const imagenSrc = producto.imagen_url || producto.imagen;
+  const tieneOpciones = Boolean(
+    producto.opciones && producto.opciones.length > 0
+  );
   const tieneOferta =
     Boolean(producto.es_oferta) &&
     typeof producto.precio_oferta === "number" &&
@@ -33,7 +38,15 @@ export default memo(function ProductCard({
     producto.precio_oferta < producto.precio;
   const precioCobro = tieneOferta ? producto.precio_oferta! : producto.precio;
 
-  const handleAgregarClick = () => {
+  const handleAgregarClick = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!disponible) return;
+
+    if (tieneOpciones && onPersonalizar) {
+      onPersonalizar(producto);
+      return;
+    }
+
     onAgregar(producto);
     setAgregadoFeedback(true);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -48,7 +61,14 @@ export default memo(function ProductCard({
 
   return (
     <div
+      onClick={() => {
+        if (disponible && tieneOpciones && onPersonalizar) {
+          onPersonalizar(producto);
+        }
+      }}
       className={`group relative flex gap-3.5 rounded-2xl border p-3.5 transition-all sm:gap-4 sm:p-4 ${
+        tieneOpciones && disponible ? "cursor-pointer" : ""
+      } ${
         !disponible
           ? "border-slate-200 bg-slate-100 opacity-75"
           : cantidadEnCarrito > 0
@@ -81,6 +101,12 @@ export default memo(function ProductCard({
               <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-black text-rose-700 border border-rose-200">
                 <Flame className="h-3 w-3 text-rose-600 fill-rose-600" />
                 {producto.texto_promo || "Promo del Día"}
+              </span>
+            )}
+            {disponible && tieneOpciones && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-800 border border-amber-200">
+                <Sparkles className="h-3 w-3 text-amber-600" />
+                Personalizable
               </span>
             )}
             {disponible && producto.etiqueta && (
@@ -149,6 +175,35 @@ export default memo(function ProductCard({
               <Ban className="h-4 w-4" />
               <span>Agotado</span>
             </button>
+          ) : tieneOpciones ? (
+            cantidadEnCarrito === 0 ? (
+              <button
+                type="button"
+                onClick={handleAgregarClick}
+                className={`inline-flex min-h-[44px] min-w-[104px] items-center justify-center gap-1.5 rounded-full px-3.5 py-2.5 text-xs sm:text-sm font-extrabold shadow-sm transition-all active:scale-95 ${theme.cardAddBtn}`}
+              >
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Personalizar</span>
+              </button>
+            ) : (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 shadow-sm"
+              >
+                <span className="text-xs font-bold text-amber-900">
+                  {cantidadEnCarrito} agregado{cantidadEnCarrito > 1 ? "s" : ""}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleAgregarClick}
+                  className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-600 text-white font-bold transition active:scale-90 hover:bg-amber-700 shadow-sm"
+                  title="Agregar otra personalización"
+                  aria-label="Agregar otra personalización"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )
           ) : cantidadEnCarrito === 0 ? (
             <button
               type="button"
@@ -173,6 +228,7 @@ export default memo(function ProductCard({
             </button>
           ) : (
             <div
+              onClick={(e) => e.stopPropagation()}
               className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-stone-300 bg-white px-1.5 py-1 shadow-sm ${theme.cardCounterBox}`}
             >
               <button

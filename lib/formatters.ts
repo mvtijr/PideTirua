@@ -44,12 +44,27 @@ export function getPrecioEfectivoProducto(producto: Producto): number {
 }
 
 /**
+ * Obtiene el precio unitario total de un ítem en el carrito, sumando el precio
+ * base/oferta del plato más todos los extras/modificadores seleccionados.
+ */
+export function getPrecioUnitarioItem(item: ItemCarrito): number {
+  if (typeof item.precioUnitarioFinal === "number" && item.precioUnitarioFinal > 0) {
+    return item.precioUnitarioFinal;
+  }
+  const base = getPrecioEfectivoProducto(item.producto);
+  const extras = (item.opcionesSeleccionadas || []).reduce(
+    (acc, op) => acc + (Number(op.precio) || 0),
+    0
+  );
+  return base + extras;
+}
+
+/**
  * Calcula subtotal y total general del pedido (para retiro en local o consumo en mesa).
  */
 export function calcularTotalesCarrito(items: ItemCarrito[]) {
   const subtotal = items.reduce(
-    (acc, item) =>
-      acc + getPrecioEfectivoProducto(item.producto) * item.cantidad,
+    (acc, item) => acc + getPrecioUnitarioItem(item) * item.cantidad,
     0
   );
   const total = subtotal;
@@ -87,7 +102,7 @@ export function formatWhatsAppMessage({
 
   const detalleLineas = items
     .map((item) => {
-      const precioUnitario = getPrecioEfectivoProducto(item.producto);
+      const precioUnitario = getPrecioUnitarioItem(item);
       const enOferta =
         item.producto.es_oferta &&
         typeof item.producto.precio_oferta === "number" &&
@@ -95,9 +110,23 @@ export function formatWhatsAppMessage({
       const tagPromo = enOferta
         ? ` 🔥 _[PROMO: ${item.producto.texto_promo || "OFERTA"}]_`
         : "";
-      return `• *${item.cantidad}x* ${item.producto.nombre}${tagPromo} — ${formatCLP(
+      
+      let linea = `• *${item.cantidad}x* ${item.producto.nombre}${tagPromo} — ${formatCLP(
         precioUnitario * item.cantidad
       )} _(${formatCLP(precioUnitario)} c/u)_`;
+
+      if (item.opcionesSeleccionadas && item.opcionesSeleccionadas.length > 0) {
+        const extrasTexto = item.opcionesSeleccionadas
+          .map((op) =>
+            op.precio > 0
+              ? `${op.nombre} (+${formatCLP(op.precio)})`
+              : op.nombre
+          )
+          .join(", ");
+        linea += `\n   ↳ _Extras: [${extrasTexto}]_`;
+      }
+
+      return linea;
     })
     .join("\n");
 

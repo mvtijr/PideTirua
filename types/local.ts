@@ -13,6 +13,24 @@ export type MetodoPago = "Efectivo" | "Transferencia Bancaria";
 
 export type PlanComercial = "autogestionado" | "llave_en_mano";
 
+export interface ItemOpcion {
+  nombre: string;
+  precio: number; // En pesos chilenos (CLP), 0 = gratis
+}
+
+export interface GrupoOpcion {
+  id?: string;
+  titulo: string;
+  tipo: "unica" | "multiple"; // 'unica' (radio obligatorio) o 'multiple' (checkboxes opcionales)
+  items: ItemOpcion[];
+}
+
+export interface OpcionSeleccionada {
+  grupoTitulo: string;
+  nombre: string;
+  precio: number;
+}
+
 export interface Producto {
   id: string;
   categoria_id?: string;
@@ -27,6 +45,7 @@ export interface Producto {
   es_oferta?: boolean;
   precio_oferta?: number; // En pesos chilenos (CLP) rebajado
   texto_promo?: string; // Ej: "2x1", "20% OFF", "Promo del Día"
+  opciones?: GrupoOpcion[];
 }
 
 export interface CategoriaMenu {
@@ -34,6 +53,7 @@ export interface CategoriaMenu {
   local_id?: string;
   nombre: string;
   orden?: number;
+  activa?: boolean;
   productos: Producto[];
 }
 
@@ -52,6 +72,8 @@ export interface Local {
   horario: string;
   horarioEntrega: string;
   tiempoEstimado: string;
+  tiempo_estimado?: string;
+  mensaje_emergencia?: string | null;
   costoDelivery?: number;
   calificacion: number;
   descripcionCorta: string;
@@ -79,8 +101,11 @@ export interface Local {
 }
 
 export interface ItemCarrito {
+  id?: string; // Identificador único por combinación de producto y opciones
   producto: Producto;
   cantidad: number;
+  opcionesSeleccionadas?: OpcionSeleccionada[];
+  precioUnitarioFinal?: number;
 }
 
 export interface DatosCheckout {
@@ -104,6 +129,7 @@ export interface ItemPedidoGuardado {
   cantidad: number;
   precio: number;
   subtotal: number;
+  opciones?: OpcionSeleccionada[];
 }
 
 export interface Pedido {

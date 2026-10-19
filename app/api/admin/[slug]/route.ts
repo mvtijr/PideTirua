@@ -6,9 +6,11 @@ import {
   deleteCategoriaInSupabase,
   deleteProductoInSupabase,
   fetchLocalBySlug,
+  toggleCategoriaActivaInSupabase,
   updateLocalAbiertoInSupabase,
   updateLocalAjustesBasicosInSupabase,
   updateLocalDatosBancariosInSupabase,
+  updateLocalDemoraYEmergenciaInSupabase,
   updateProductoInSupabase,
   uploadPlatoFotoInSupabase,
   verifyLocalPinInSupabase,
@@ -221,6 +223,37 @@ export async function POST(
       return NextResponse.json(uploadRes);
     }
 
+    if (action === "update-demora-emergencia") {
+      const { tiempo_estimado, mensaje_emergencia } = body;
+      const result = await updateLocalDemoraYEmergenciaInSupabase(slug, {
+        tiempo_estimado:
+          typeof tiempo_estimado === "string" ? tiempo_estimado : undefined,
+        mensaje_emergencia:
+          mensaje_emergencia !== undefined
+            ? typeof mensaje_emergencia === "string" && mensaje_emergencia.trim()
+              ? mensaje_emergencia.trim()
+              : null
+            : undefined,
+      });
+      revalidatePath("/");
+      revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      return NextResponse.json(result);
+    }
+
+    if (action === "toggle-categoria-disponible") {
+      const { categoriaId, activa } = body;
+      const result = await toggleCategoriaActivaInSupabase(
+        slug,
+        String(categoriaId || ""),
+        Boolean(activa)
+      );
+      revalidatePath("/");
+      revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      return NextResponse.json(result);
+    }
+
     if (action === "create-producto") {
       const {
         categoriaId,
@@ -234,6 +267,7 @@ export async function POST(
         es_oferta,
         precio_oferta,
         texto_promo,
+        opciones,
       } = body;
 
       if (!nombre || typeof nombre !== "string" || !nombre.trim()) {
@@ -270,6 +304,7 @@ export async function POST(
             : undefined,
         texto_promo:
           typeof texto_promo === "string" ? texto_promo.trim() : undefined,
+        opciones: Array.isArray(opciones) ? opciones : undefined,
       });
 
       revalidatePath("/");
@@ -290,6 +325,7 @@ export async function POST(
         es_oferta,
         precio_oferta,
         texto_promo,
+        opciones,
       } = body;
       const result = await updateProductoInSupabase(slug, String(productoId), {
         ...(typeof nombre === "string" ? { nombre } : {}),
@@ -312,6 +348,9 @@ export async function POST(
               texto_promo:
                 typeof texto_promo === "string" ? texto_promo.trim() : null,
             }
+          : {}),
+        ...(opciones !== undefined
+          ? { opciones: Array.isArray(opciones) ? opciones : [] }
           : {}),
       });
       revalidatePath("/");

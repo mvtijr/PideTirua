@@ -2,6 +2,7 @@ import localesData from "@/data/locales.json";
 import {
   CategoriaFiltro,
   CategoriaMenu,
+  GrupoOpcion,
   Local,
   PlanComercial,
   Producto,
@@ -59,6 +60,7 @@ interface SupabaseProductoRow {
   es_oferta?: boolean | null;
   precio_oferta?: number | null;
   texto_promo?: string | null;
+  opciones?: GrupoOpcion[] | null;
   orden?: number | null;
 }
 
@@ -67,6 +69,7 @@ interface SupabaseCategoriaRow {
   local_id: string;
   nombre: string;
   orden: number;
+  activa?: boolean | null;
   productos?: SupabaseProductoRow[];
 }
 
@@ -97,6 +100,7 @@ interface SupabaseLocalRow {
   sector?: string | null;
   ubicacion?: string | null;
   tiempo_estimado?: string | null;
+  mensaje_emergencia?: string | null;
   calificacion?: number | null;
   descripcion_corta?: string | null;
   foto_portada?: string | null;
@@ -168,10 +172,14 @@ function normalizeStaticLocal(raw: Local): Local {
     direccionDetalle: raw.direccion || raw.direccionDetalle,
     telefono_whatsapp: raw.telefono_whatsapp || raw.telefonoWhatsapp,
     telefonoWhatsapp: raw.telefono_whatsapp || raw.telefonoWhatsapp,
+    tiempoEstimado: raw.tiempo_estimado || raw.tiempoEstimado || "20-30 min",
+    tiempo_estimado: raw.tiempo_estimado || raw.tiempoEstimado || "20-30 min",
+    mensaje_emergencia: raw.mensaje_emergencia ?? null,
     categorias: (raw.categorias || []).map((cat, idx) => ({
       ...cat,
       local_id: raw.id,
       orden: cat.orden ?? idx + 1,
+      activa: cat.activa !== false,
       productos: (cat.productos || []).map((prod) => ({
         ...prod,
         categoria_id: cat.id,
@@ -184,6 +192,7 @@ function normalizeStaticLocal(raw: Local): Local {
             ? prod.precio_oferta
             : undefined,
         texto_promo: prod.texto_promo?.trim() || undefined,
+        opciones: Array.isArray(prod.opciones) ? prod.opciones : [],
       })),
     })),
   };
@@ -315,6 +324,9 @@ function mapSupabaseRowToLocal(
                 p.texto_promo != null
                   ? String(p.texto_promo)
                   : fallbackProd?.texto_promo,
+              opciones: Array.isArray(p.opciones)
+                ? p.opciones
+                : fallbackProd?.opciones || [],
             };
           });
 
@@ -323,6 +335,7 @@ function mapSupabaseRowToLocal(
             local_id: row.id,
             nombre: cat.nombre,
             orden: cat.orden,
+            activa: cat.activa !== false,
             productos: productosMapeados,
           };
         })
@@ -387,7 +400,16 @@ function mapSupabaseRowToLocal(
       row.email_transferencia ?? base.email_transferencia ?? "",
     sector: (row.sector as Local["sector"]) || base.sector,
     ubicacion: row.ubicacion || row.sector || base.ubicacion,
-    tiempoEstimado: row.tiempo_estimado || base.tiempoEstimado,
+    tiempoEstimado: row.tiempo_estimado || base.tiempoEstimado || "20-30 min",
+    tiempo_estimado:
+      row.tiempo_estimado ||
+      base.tiempo_estimado ||
+      base.tiempoEstimado ||
+      "20-30 min",
+    mensaje_emergencia:
+      row.mensaje_emergencia !== undefined
+        ? row.mensaje_emergencia
+        : base.mensaje_emergencia ?? null,
     calificacion: Number(row.calificacion ?? base.calificacion),
     descripcionCorta: row.descripcion_corta || base.descripcionCorta,
     fotoPortada: bannerUrlFinal,
@@ -1050,6 +1072,129 @@ export async function deleteCategoriaInSupabase(
 }
 
 /**
+ * Actualiza el tiempo estimado de entrega/preparación y el mensaje de emergencia o contingencia del local.
+ */
+export async function updateLocalDemoraYEmergenciaInSupabase(
+  slug: string,
+  datos: {
+    tiempo_estimado?: string;
+    mensaje_emergencia?: string | null;
+  }
+): Promise<{ ok: boolean; local?: Local; error?: string }> {
+  const supabase = getSupabaseClient();
+  const updateRow: Record<string, unknown> = {};
+
+  if (datos.tiempo_estimado !== undefined) {
+    updateRow.tiempo_estimado = datos.tiempo_estimado.trim();
+  }
+  if (datos.mensaje_emergencia !== undefined) {
+    updateRow.mensaje_emergencia =
+      datos.mensaje_emergencia && datos.mensaje_emergencia.trim()
+        ? datos.mensaje_emergencia.trim()
+        : null;
+  }
+
+  if (Object.keys(updateRow).length > 0) {
+    const { error } = await supabase
+      .from("locales")
+      .update(updateRow)
+      .eq("slug", slug);
+
+    if (error && (error.code === "42703" || error.message?.includes("column"))) {
+      console.warn("Columna no encontrada al actualizar demora/emergencia en Supabase:", error.message);
+    }
+  }
+
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) => {
+    if (loc.slug.toLowerCase() !== slug.toLowerCase()) return loc;
+    const nuevoTiempo =
+      datos.tiempo_estimado !== undefined
+        ? datos.tiempo_estimado.trim()
+        : loc.tiempo_estimado || loc.tiempoEstimado;
+    const nuevoMensaje =
+      datos.mensaje_emergencia !== undefined
+        ? datos.mensaje_emergencia && datos.mensaje_emergencia.trim()
+          ? datos.mensaje_emergencia.trim()
+          : null
+        : loc.mensaje_emergencia ?? null;
+
+    return {
+      ...loc,
+      tiempoEstimado: nuevoTiempo,
+      tiempo_estimado: nuevoTiempo,
+      mensaje_emergencia: nuevoMensaje,
+    };
+  });
+
+  await writeSupabaseCloudState(actualizados);
+  const localActualizado = actualizados.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
+
+  return { ok: true, local: localActualizado };
+}
+
+/**
+ * Activa o pausa por completo una categoría de la carta (Pausador Masivo de Stock).
+ * Actualiza tanto la categoría como todos los productos de dicha categoría.
+ */
+export async function toggleCategoriaActivaInSupabase(
+  slug: string,
+  categoriaId: string,
+  activa: boolean
+): Promise<{ ok: boolean; local?: Local; error?: string }> {
+  const supabase = getSupabaseClient();
+
+  // 1. Intentar actualizar columna activa en tabla categorias
+  const { error: catErr } = await supabase
+    .from("categorias")
+    .update({ activa })
+    .eq("id", categoriaId);
+
+  if (catErr && (catErr.code === "42703" || catErr.message?.includes("column"))) {
+    console.warn("Columna activa no existe en tabla categorias de Supabase:", catErr.message);
+  }
+
+  // 2. Actualizar disponibilidad masiva de todos los productos de esa categoria
+  const { error: prodErr } = await supabase
+    .from("productos")
+    .update({ disponible: activa })
+    .eq("categoria_id", categoriaId);
+
+  if (prodErr) {
+    console.warn("Error actualizando disponibilidad de productos de categoría:", prodErr.message);
+  }
+
+  // 3. Actualizar memoria y cache cloud
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) => {
+    if (loc.slug.toLowerCase() !== slug.toLowerCase()) return loc;
+    return {
+      ...loc,
+      categorias: loc.categorias.map((cat) => {
+        if (cat.id !== categoriaId) return cat;
+        return {
+          ...cat,
+          activa,
+          productos: cat.productos.map((prod) => ({
+            ...prod,
+            disponible: activa,
+          })),
+        };
+      }),
+    };
+  });
+
+  await writeSupabaseCloudState(actualizados);
+  const localActualizado = actualizados.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
+
+  return { ok: true, local: localActualizado };
+}
+
+/**
  * Actualiza los datos bancarios de transferencia de un local en Supabase.
  */
 export async function updateLocalDatosBancariosInSupabase(
@@ -1107,6 +1252,7 @@ export async function updateProductoInSupabase(
     es_oferta?: boolean;
     precio_oferta?: number | null;
     texto_promo?: string | null;
+    opciones?: GrupoOpcion[];
   }
 ): Promise<{ ok: boolean; local?: Local }> {
   const supabase = getSupabaseClient();
@@ -1144,6 +1290,11 @@ export async function updateProductoInSupabase(
     updatePayload.texto_promo =
       cambios.texto_promo?.trim() ? cambios.texto_promo.trim() : null;
   }
+  if (cambios.opciones !== undefined) {
+    updatePayload.opciones = Array.isArray(cambios.opciones)
+      ? cambios.opciones
+      : [];
+  }
 
   if (Object.keys(updatePayload).length > 0) {
     const { error: updErr } = await supabase
@@ -1159,6 +1310,7 @@ export async function updateProductoInSupabase(
       delete safePayload.es_oferta;
       delete safePayload.precio_oferta;
       delete safePayload.texto_promo;
+      delete safePayload.opciones;
       if (Object.keys(safePayload).length > 0) {
         await supabase
           .from("productos")
@@ -1216,6 +1368,9 @@ export async function updateProductoInSupabase(
                   texto_promo: cambios.texto_promo?.trim() || undefined,
                 }
               : {}),
+            ...(cambios.opciones !== undefined
+              ? { opciones: cambios.opciones }
+              : {}),
             imagen: nuevaImagen,
             imagen_url: nuevaImagen,
           };
@@ -1250,6 +1405,7 @@ export async function createProductoInSupabase(
     es_oferta?: boolean;
     precio_oferta?: number;
     texto_promo?: string;
+    opciones?: GrupoOpcion[];
   }
 ): Promise<{ ok: boolean; local?: Local; error?: string }> {
   const supabase = getSupabaseClient();
@@ -1300,6 +1456,7 @@ export async function createProductoInSupabase(
       ? { precio_oferta: Math.round(datos.precio_oferta) }
       : {}),
     ...(datos.texto_promo?.trim() ? { texto_promo: datos.texto_promo.trim() } : {}),
+    opciones: Array.isArray(datos.opciones) ? datos.opciones : [],
   };
 
   const insertPayload: Record<string, unknown> = {
@@ -1315,6 +1472,7 @@ export async function createProductoInSupabase(
     es_oferta: Boolean(nuevoProducto.es_oferta),
     precio_oferta: nuevoProducto.precio_oferta ?? null,
     texto_promo: nuevoProducto.texto_promo ?? null,
+    opciones: nuevoProducto.opciones ?? [],
     orden: 99,
   };
 
@@ -1326,6 +1484,7 @@ export async function createProductoInSupabase(
     delete insertPayload.es_oferta;
     delete insertPayload.precio_oferta;
     delete insertPayload.texto_promo;
+    delete insertPayload.opciones;
     await supabase.from("productos").insert(insertPayload);
   }
 

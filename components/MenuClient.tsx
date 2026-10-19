@@ -13,13 +13,20 @@ import {
   QrCode,
   Store,
   UtensilsCrossed,
+  AlertTriangle,
+  Sparkles,
 } from "lucide-react";
-import { ItemCarrito, Local, Producto } from "@/types/local";
-import { formatPhoneDisplay } from "@/lib/formatters";
+import { ItemCarrito, Local, Producto, OpcionSeleccionada } from "@/types/local";
+import {
+  formatPhoneDisplay,
+  getPrecioEfectivoProducto,
+  getPrecioUnitarioItem,
+} from "@/lib/formatters";
 import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
 import ProductCard from "@/components/ProductCard";
 import FloatingCartBar from "@/components/FloatingCartBar";
 import CartDrawer from "@/components/CartDrawer";
+import ModalPersonalizarPlato from "@/components/ModalPersonalizarPlato";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
 interface MenuClientProps {
@@ -50,6 +57,8 @@ export default function MenuClient({ local }: MenuClientProps) {
   const [busquedaPlato, setBusquedaPlato] = useState("");
   const [drawerAbierto, setDrawerAbierto] = useState(false);
   const [mostrarQr, setMostrarQr] = useState(false);
+  const [platoParaPersonalizar, setPlatoParaPersonalizar] =
+    useState<Producto | null>(null);
 
   // Cargar carrito persistido por local en el navegador
   useEffect(() => {
@@ -81,30 +90,109 @@ export default function MenuClient({ local }: MenuClientProps) {
   const handleAgregarProducto = useCallback(
     (producto: Producto) => {
       if (producto.disponible === false || localSuspendido) return;
+
+      // Si el plato cuenta con modificadores o extras, abrir el modal de personalización
+      if (producto.opciones && producto.opciones.length > 0) {
+        setPlatoParaPersonalizar(producto);
+        return;
+      }
+
       setCarrito((prev) => {
-        const existe = prev.find((item) => item.producto.id === producto.id);
+        const existe = prev.find(
+          (item) =>
+            !item.opcionesSeleccionadas?.length &&
+            item.producto.id === producto.id
+        );
         if (existe) {
           return prev.map((item) =>
-            item.producto.id === producto.id
+            item === existe
               ? { ...item, cantidad: item.cantidad + 1 }
               : item
           );
         }
-        return [...prev, { producto, cantidad: 1 }];
+        return [
+          ...prev,
+          {
+            id: producto.id,
+            producto,
+            cantidad: 1,
+            precioUnitarioFinal: getPrecioEfectivoProducto(producto),
+          },
+        ];
       });
     },
     [localSuspendido]
   );
 
-  const handleDisminuirProducto = useCallback((productoId: string) => {
+  const handleConfirmarPersonalizacion = useCallback(
+    (
+      producto: Producto,
+      opcionesSeleccionadas: OpcionSeleccionada[],
+      cantidad: number
+    ) => {
+      if (producto.disponible === false || localSuspendido) return;
+
+      const extrasClave = (opcionesSeleccionadas || [])
+        .map((o) => `${o.grupoTitulo}:${o.nombre}`)
+        .sort()
+        .join("|");
+      const cartItemId = `${producto.id}${
+        extrasClave ? `-${extrasClave}` : ""
+      }`;
+
+      const precioBase = getPrecioEfectivoProducto(producto);
+      const precioExtras = (opcionesSeleccionadas || []).reduce(
+        (acc, op) => acc + (Number(op.precio) || 0),
+        0
+      );
+      const precioUnitarioFinal = precioBase + precioExtras;
+
+      setCarrito((prev) => {
+        const existe = prev.find(
+          (item) => (item.id || item.producto.id) === cartItemId
+        );
+        if (existe) {
+          return prev.map((item) =>
+            (item.id || item.producto.id) === cartItemId
+              ? { ...item, cantidad: item.cantidad + cantidad }
+              : item
+          );
+        }
+        return [
+          ...prev,
+          {
+            id: cartItemId,
+            producto,
+            cantidad,
+            opcionesSeleccionadas,
+            precioUnitarioFinal,
+          },
+        ];
+      });
+    },
+    [localSuspendido]
+  );
+
+  const handleDisminuirProducto = useCallback((itemId: string) => {
     setCarrito((prev) =>
       prev
         .map((item) =>
-          item.producto.id === productoId
+          (item.id || item.producto.id) === itemId
             ? { ...item, cantidad: item.cantidad - 1 }
             : item
         )
         .filter((item) => item.cantidad > 0)
+    );
+  }, []);
+
+  const handleIncrementarItem = useCallback((itemObj: ItemCarrito) => {
+    const targetId = itemObj.id || itemObj.producto.id;
+    setCarrito((prev) =>
+      prev.map((item) =>
+        (item.id || item.producto.id) === targetId
+          ? { ...item, cantidad: item.cantidad + 1 }
+          : item
+      )
     );
   }, []);
 
@@ -115,7 +203,8 @@ export default function MenuClient({ local }: MenuClientProps) {
   const cantidadPorProducto = useMemo(() => {
     const mapa = new Map<string, number>();
     for (const item of carrito) {
-      mapa.set(item.producto.id, item.cantidad);
+      const prevQty = mapa.get(item.producto.id) || 0;
+      mapa.set(item.producto.id, prevQty + item.cantidad);
     }
     return mapa;
   }, [carrito]);
@@ -128,7 +217,7 @@ export default function MenuClient({ local }: MenuClientProps) {
   const subtotal = useMemo(
     () =>
       carrito.reduce(
-        (acc, item) => acc + item.producto.precio * item.cantidad,
+        (acc, item) => acc + getPrecioUnitarioItem(item) * item.cantidad,
         0
       ),
     [carrito]
@@ -362,6 +451,10 @@ export default function MenuClient({ local }: MenuClientProps) {
                     <MapPin className="h-3 w-3 text-[#EA580C]" />
                     {local.ubicacion}
                   </span>
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-xs font-bold text-amber-900">
+                    <Clock className="h-3 w-3 text-amber-600" />
+                    <span>Tiempo est.: {local.tiempo_estimado || local.tiempoEstimado || "20-30 min"}</span>
+                  </span>
                 </div>
                 <p className={`mt-1.5 flex items-center gap-1.5 text-xs ${theme.infoSub}`}>
                   <MapPin className={`h-3.5 w-3.5 shrink-0 ${theme.infoIcon}`} />
@@ -412,7 +505,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                     Horario: {local.horario}
                   </span>
                   <p className={`text-[11px] ${theme.infoSub}`}>
-                    Preparación est.: {local.tiempoEstimado}
+                    Preparación est.: {local.tiempo_estimado || local.tiempoEstimado || "20-30 min"}
                   </p>
                 </div>
               </div>
@@ -429,6 +522,30 @@ export default function MenuClient({ local }: MenuClientProps) {
             </div>
           </div>
         </header>
+
+        {/* Banner de Aviso de Emergencia o Contingencia en Vivo */}
+        {local.mensaje_emergencia && local.mensaje_emergencia.trim() && (
+          <div className="px-4 mt-3">
+            <div
+              role="alert"
+              className="relative overflow-hidden rounded-2xl border-2 border-amber-500 bg-amber-50/95 p-4 text-amber-950 shadow-md backdrop-blur-xs animate-in fade-in duration-200"
+            >
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-500 text-white shadow-sm">
+                  <AlertTriangle className="h-5 w-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="inline-block rounded-md bg-amber-200/90 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-950">
+                    Aviso del Local en Vivo
+                  </span>
+                  <p className="mt-1 font-body text-xs sm:text-sm font-bold leading-snug text-amber-950">
+                    {local.mensaje_emergencia}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Banner Decorativo Editorial de la Carta con Grano Estático */}
         <div className="px-4 my-3">
@@ -478,6 +595,7 @@ export default function MenuClient({ local }: MenuClientProps) {
           >
             {local.categorias.map((categoria) => {
               const activa = categoriaActiva === categoria.id;
+              const pausada = categoria.activa === false;
               return (
                 <button
                   key={categoria.id}
@@ -485,9 +603,10 @@ export default function MenuClient({ local }: MenuClientProps) {
                   onClick={() => irACategoria(categoria.id)}
                   className={`filter-chip shrink-0 px-4 py-1.5 text-xs font-bold transition-all ${
                     activa ? theme.tabActive : theme.tabInactive
-                  }`}
+                  } ${pausada ? "opacity-60" : ""}`}
                 >
                   {categoria.nombre}
+                  {pausada ? " (Pausada)" : ""}
                 </button>
               );
             })}
@@ -521,42 +640,68 @@ export default function MenuClient({ local }: MenuClientProps) {
         {/* Listado de Categorías y Tarjetas de Producto */}
         <main className="space-y-8 px-4 py-5">
           {categoriasFiltradas.length > 0 ? (
-            categoriasFiltradas.map((categoria) => (
-              <section
-                key={categoria.id}
-                id={`seccion-${categoria.id}`}
-                className="scroll-mt-32"
-              >
-                <div className="mb-3 flex items-center justify-between">
-                  <h2
-                    className={`font-display text-2xl tracking-wide uppercase ${theme.categoryTitle}`}
-                  >
-                    {categoria.nombre}
-                  </h2>
-                  <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${theme.categoryCount}`}
-                  >
-                    {categoria.productos.length}{" "}
-                    {categoria.productos.length === 1 ? "opción" : "opciones"}
-                  </span>
-                </div>
+            categoriasFiltradas.map((categoria) => {
+              const pausada = categoria.activa === false;
+              return (
+                <section
+                  key={categoria.id}
+                  id={`seccion-${categoria.id}`}
+                  className="scroll-mt-32"
+                >
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <h2
+                        className={`font-display text-2xl tracking-wide uppercase ${
+                          pausada
+                            ? "text-stone-400 line-through decoration-stone-400"
+                            : theme.categoryTitle
+                        }`}
+                      >
+                        {categoria.nombre}
+                      </h2>
+                      {pausada && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 border border-slate-300 px-2 py-0.5 text-[10px] font-black uppercase text-slate-700">
+                          ⏸️ Pausada por hoy
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${theme.categoryCount}`}
+                    >
+                      {categoria.productos.length}{" "}
+                      {categoria.productos.length === 1 ? "opción" : "opciones"}
+                    </span>
+                  </div>
 
-                <div className="space-y-3">
-                  {categoria.productos.map((producto) => (
-                    <ProductCard
-                      key={producto.id}
-                      producto={producto}
-                      cantidadEnCarrito={
-                        cantidadPorProducto.get(producto.id) ?? 0
-                      }
-                      onAgregar={handleAgregarProducto}
-                      onDisminuir={handleDisminuirProducto}
-                      localSlug={local.slug}
-                    />
-                  ))}
-                </div>
-              </section>
-            ))
+                  {pausada && (
+                    <div className="mb-3 rounded-xl border border-slate-200 bg-slate-100/90 p-3 text-xs font-semibold text-slate-600">
+                      ⏸️ Esta sección se encuentra pausada por hoy por reposición de stock.
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    {categoria.productos.map((producto) => {
+                      const prodEfectivo = pausada
+                        ? { ...producto, disponible: false }
+                        : producto;
+                      return (
+                        <ProductCard
+                          key={producto.id}
+                          producto={prodEfectivo}
+                          cantidadEnCarrito={
+                            cantidadPorProducto.get(producto.id) ?? 0
+                          }
+                          onAgregar={handleAgregarProducto}
+                          onPersonalizar={setPlatoParaPersonalizar}
+                          onDisminuir={handleDisminuirProducto}
+                          localSlug={local.slug}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
+              );
+            })
           ) : (
             <div
               className={`rounded-2xl border border-dashed p-8 text-center ${theme.emptyStateBox}`}
@@ -632,8 +777,18 @@ export default function MenuClient({ local }: MenuClientProps) {
         local={local}
         items={carrito}
         onAgregar={handleAgregarProducto}
+        onIncrementarItem={handleIncrementarItem}
         onDisminuir={handleDisminuirProducto}
         onVaciar={handleVaciarCarrito}
+      />
+
+      {/* Modal de Personalización de Plato */}
+      <ModalPersonalizarPlato
+        isOpen={Boolean(platoParaPersonalizar)}
+        onClose={() => setPlatoParaPersonalizar(null)}
+        producto={platoParaPersonalizar}
+        localSlug={local.slug}
+        onConfirmar={handleConfirmarPersonalizacion}
       />
 
       {/* Modal de Código QR del Local */}

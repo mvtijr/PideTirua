@@ -37,6 +37,7 @@ import {
   formatPhoneDisplay,
   formatWhatsAppMessage,
   getPrecioEfectivoProducto,
+  getPrecioUnitarioItem,
 } from "@/lib/formatters";
 import { getLocalTheme } from "@/lib/localTheme";
 
@@ -46,7 +47,8 @@ interface CartDrawerProps {
   local: Local;
   items: ItemCarrito[];
   onAgregar: (producto: Producto) => void;
-  onDisminuir: (productoId: string) => void;
+  onIncrementarItem?: (item: ItemCarrito) => void;
+  onDisminuir: (itemId: string) => void;
   onVaciar: () => void;
 }
 
@@ -82,6 +84,7 @@ export default function CartDrawer({
   local,
   items,
   onAgregar,
+  onIncrementarItem,
   onDisminuir,
   onVaciar,
 }: CartDrawerProps) {
@@ -245,13 +248,14 @@ export default function CartDrawer({
       metodo_pago:
         metodoPago === "Transferencia Bancaria" ? "Transferencia" : "Efectivo",
       notas: notasCompletas,
-      items: items.map(({ producto, cantidad }) => {
-        const precioUnitario = getPrecioEfectivoProducto(producto);
+      items: items.map((item) => {
+        const precioUnitario = getPrecioUnitarioItem(item);
         return {
-          nombre: producto.nombre,
-          cantidad,
+          nombre: item.producto.nombre,
+          cantidad: item.cantidad,
           precio: precioUnitario,
-          subtotal: precioUnitario * cantidad,
+          subtotal: precioUnitario * item.cantidad,
+          opciones: item.opcionesSeleccionadas || [],
         };
       }),
       total,
@@ -405,70 +409,90 @@ export default function CartDrawer({
                 <div
                   className={`divide-y rounded-2xl border ${theme.drawerItemsBox}`}
                 >
-                  {items.map(({ producto, cantidad }) => (
-                    <div
-                      key={producto.id}
-                      className="flex items-center justify-between gap-3 p-3.5"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className={`truncate text-sm font-bold ${theme.drawerItemTitle}`}
-                        >
-                          {producto.nombre}
-                        </p>
-                        {(() => {
-                          const precioUnitario = getPrecioEfectivoProducto(producto);
-                          const esPromo =
-                            producto.es_oferta &&
-                            typeof producto.precio_oferta === "number" &&
-                            producto.precio_oferta > 0 &&
-                            producto.precio_oferta < producto.precio;
-                          return (
-                            <p className="text-xs font-medium text-on-surface-variant">
-                              {esPromo && (
-                                <span className="mr-1 text-[11px] text-slate-400 line-through">
-                                  {formatCLP(producto.precio)}
-                                </span>
-                              )}
-                              <span className={esPromo ? "font-bold text-rose-600" : ""}>
-                                {formatCLP(precioUnitario)} c/u
-                              </span>{" "}
-                              ·{" "}
-                              <strong className={theme.drawerItemTotal}>
-                                {formatCLP(precioUnitario * cantidad)}
-                              </strong>
-                            </p>
-                          );
-                        })()}
-                      </div>
+                  {items.map((item) => {
+                    const { producto, cantidad, opcionesSeleccionadas } = item;
+                    const itemKey = item.id || producto.id;
+                    const precioUnitario = getPrecioUnitarioItem(item);
+                    const esPromo =
+                      producto.es_oferta &&
+                      typeof producto.precio_oferta === "number" &&
+                      producto.precio_oferta > 0 &&
+                      producto.precio_oferta < producto.precio;
 
+                    return (
                       <div
-                        className={`flex items-center gap-2 rounded-xl border bg-white p-1 shadow-2xs ${theme.cardCounterBox}`}
+                        key={itemKey}
+                        className="flex items-center justify-between gap-3 p-3.5"
                       >
-                        <button
-                          type="button"
-                          onClick={() => onDisminuir(producto.id)}
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg active:scale-95 ${theme.cardMinusBtn}`}
-                          aria-label="Disminuir cantidad"
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={`truncate text-sm font-bold ${theme.drawerItemTitle}`}
+                          >
+                            {producto.nombre}
+                          </p>
+
+                          {opcionesSeleccionadas && opcionesSeleccionadas.length > 0 && (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {opcionesSeleccionadas.map((op, opIdx) => (
+                                <span
+                                  key={opIdx}
+                                  className="inline-flex items-center rounded-md bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-700 border border-stone-200"
+                                >
+                                  {op.nombre}
+                                  {op.precio > 0 ? ` (+${formatCLP(op.precio)})` : ""}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          <p className="mt-0.5 text-xs font-medium text-on-surface-variant">
+                            {esPromo && (
+                              <span className="mr-1 text-[11px] text-slate-400 line-through">
+                                {formatCLP(producto.precio)}
+                              </span>
+                            )}
+                            <span className={esPromo ? "font-bold text-rose-600" : ""}>
+                              {formatCLP(precioUnitario)} c/u
+                            </span>{" "}
+                            ·{" "}
+                            <strong className={theme.drawerItemTotal}>
+                              {formatCLP(precioUnitario * cantidad)}
+                            </strong>
+                          </p>
+                        </div>
+
+                        <div
+                          className={`flex items-center gap-2 rounded-xl border bg-white p-1 shadow-2xs ${theme.cardCounterBox}`}
                         >
-                          <Minus className="h-3.5 w-3.5" />
-                        </button>
-                        <span
-                          className={`min-w-[1.25rem] text-center text-sm font-extrabold ${theme.cardQtyText}`}
-                        >
-                          {cantidad}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => onAgregar(producto)}
-                          className={`flex h-7 w-7 items-center justify-center rounded-lg active:scale-95 ${theme.cardPlusBtn}`}
-                          aria-label="Aumentar cantidad"
-                        >
-                          <Plus className="h-3.5 w-3.5" />
-                        </button>
+                          <button
+                            type="button"
+                            onClick={() => onDisminuir(itemKey)}
+                            className={`flex h-7 w-7 items-center justify-center rounded-lg active:scale-95 ${theme.cardMinusBtn}`}
+                            aria-label="Disminuir cantidad"
+                          >
+                            <Minus className="h-3.5 w-3.5" />
+                          </button>
+                          <span
+                            className={`min-w-[1.25rem] text-center text-sm font-extrabold ${theme.cardQtyText}`}
+                          >
+                            {cantidad}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              onIncrementarItem
+                                ? onIncrementarItem(item)
+                                : onAgregar(producto)
+                            }
+                            className={`flex h-7 w-7 items-center justify-center rounded-lg active:scale-95 ${theme.cardPlusBtn}`}
+                            aria-label="Aumentar cantidad"
+                          >
+                            <Plus className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

@@ -39,12 +39,18 @@ import {
   Copy,
   Share2,
   Megaphone,
+  AlertTriangle,
+  Moon,
+  Receipt,
+  Plus,
 } from "lucide-react";
-import { Local, Producto } from "@/types/local";
+import { Local, Producto, GrupoOpcion } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
 import KitchenMonitor from "@/components/KitchenMonitor";
 import VentasReportes from "@/components/VentasReportes";
+import ModalCierreCaja from "@/components/ModalCierreCaja";
+import ModalGestionOpcionesPlato from "@/components/ModalGestionOpcionesPlato";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
 interface AdminLocalClientProps {
@@ -274,6 +280,26 @@ export default function AdminLocalClient({
   const [nuevoTextoPromo, setNuevoTextoPromo] = useState<string>("");
   const [creandoPlato, setCreandoPlato] = useState<boolean>(false);
   const [errorNuevoPlato, setErrorNuevoPlato] = useState<string | null>(null);
+
+  // Estados de Nuevas Herramientas Operativas:
+  // Módulo 1: Opciones y Extras para nuevo plato y edición
+  const [nuevasOpciones, setNuevasOpciones] = useState<GrupoOpcion[]>([]);
+  const [platoParaEditarOpciones, setPlatoParaEditarOpciones] =
+    useState<Producto | null>(null);
+
+  // Módulo 2: Cierre de Caja de Hoy
+  const [mostrarCierreCaja, setMostrarCierreCaja] = useState<boolean>(false);
+
+  // Módulo 3: Demora y Contingencia
+  const [tiempoEstimado, setTiempoEstimado] = useState<string>(
+    initialLocal.tiempo_estimado || initialLocal.tiempoEstimado || "20-30 min"
+  );
+  const [mensajeEmergencia, setMensajeEmergencia] = useState<string>(
+    initialLocal.mensaje_emergencia || ""
+  );
+  const [emergenciaActiva, setEmergenciaActiva] = useState<boolean>(
+    Boolean(initialLocal.mensaje_emergencia)
+  );
 
   const inputFotoNuevoRef = useRef<HTMLInputElement | null>(null);
 
@@ -869,6 +895,7 @@ export default function AdminLocalClient({
             nuevoEsOferta && nuevoTextoPromo.trim()
               ? nuevoTextoPromo.trim()
               : undefined,
+          opciones: nuevasOpciones,
         }),
       });
 
@@ -892,6 +919,7 @@ export default function AdminLocalClient({
       setNuevoEsOferta(false);
       setNuevoPrecioOferta("");
       setNuevoTextoPromo("");
+      setNuevasOpciones([]);
       setMostrarFormNuevo(false);
 
       if (nuevoEsOferta) {
@@ -903,6 +931,156 @@ export default function AdminLocalClient({
       setErrorNuevoPlato("Error de conexión al guardar el plato.");
     } finally {
       setCreandoPlato(false);
+    }
+  };
+
+  // Actualizar Tiempo Estimado (Módulo 3)
+  const handleActualizarTiempoEstimado = async (nuevoTiempo: string) => {
+    setTiempoEstimado(nuevoTiempo);
+    setLocal((prev) => ({
+      ...prev,
+      tiempoEstimado: nuevoTiempo,
+      tiempo_estimado: nuevoTiempo,
+    }));
+    setGuardandoId("tiempo-estimado");
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-demora-emergencia",
+          tiempo_estimado: nuevoTiempo,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+      }
+      mostrarToast(`Tiempo estimado actualizado a ${nuevoTiempo}`);
+    } catch {
+      mostrarToast("Error al guardar tiempo estimado");
+    } finally {
+      setGuardandoId(null);
+    }
+  };
+
+  // Guardar Aviso de Emergencia (Módulo 3)
+  const handleGuardarAvisoEmergencia = async (desactivar = false) => {
+    const textoFinal = desactivar ? null : mensajeEmergencia.trim() || null;
+    if (!desactivar && !textoFinal) {
+      mostrarToast("Escribe un aviso o selecciona una sugerencia rápida");
+      return;
+    }
+
+    setGuardandoId("aviso-emergencia");
+    if (desactivar) {
+      setEmergenciaActiva(false);
+      setMensajeEmergencia("");
+    }
+    setLocal((prev) => ({
+      ...prev,
+      mensaje_emergencia: textoFinal,
+    }));
+
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-demora-emergencia",
+          mensaje_emergencia: textoFinal,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+      }
+      mostrarToast(
+        desactivar
+          ? "Aviso de emergencia retirado de la carta"
+          : "Aviso de contingencia activado en vivo"
+      );
+    } catch {
+      mostrarToast("Error al guardar aviso de emergencia");
+    } finally {
+      setGuardandoId(null);
+    }
+  };
+
+  // Pausador Masivo de Categoría (Módulo 4)
+  const handleToggleCategoriaPausa = async (
+    categoriaId: string,
+    nuevaActiva: boolean
+  ) => {
+    setGuardandoId(`cat-pause-${categoriaId}`);
+    setLocal((prev) => ({
+      ...prev,
+      categorias: prev.categorias.map((cat) => {
+        if (cat.id !== categoriaId) return cat;
+        return {
+          ...cat,
+          activa: nuevaActiva,
+          productos: cat.productos.map((p) => ({
+            ...p,
+            disponible: nuevaActiva,
+          })),
+        };
+      }),
+    }));
+
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "toggle-categoria-disponible",
+          categoriaId,
+          activa: nuevaActiva,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+      }
+      mostrarToast(
+        nuevaActiva
+          ? "Categoría y platos reanudados"
+          : "Categoría pausada por hoy (stock agotado)"
+      );
+    } catch {
+      mostrarToast("Error al cambiar estado de categoría");
+    } finally {
+      setGuardandoId(null);
+    }
+  };
+
+  // Guardar Opciones / Extras de un Plato Existente (Módulo 1)
+  const handleGuardarOpcionesProducto = async (
+    productoId: string,
+    opciones: GrupoOpcion[]
+  ) => {
+    setGuardandoId(`opciones-${productoId}`);
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-producto",
+          productoId,
+          opciones,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+        mostrarToast("Personalización y extras guardados con éxito");
+      } else {
+        mostrarToast("Error al actualizar opciones del plato");
+      }
+    } catch {
+      mostrarToast("Error de conexión al guardar opciones");
+    } finally {
+      setGuardandoId(null);
     }
   };
 
@@ -1740,11 +1918,153 @@ export default function AdminLocalClient({
               </div>
             </div>
 
+            {/* MÓDULO 3: Control de Demora y Avisos de Contingencia en Vivo */}
+            <div className="mt-4 pt-4 border-t border-stone-200/90">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-stone-800 flex items-center gap-1.5">
+                  <Clock className="h-4 w-4 text-amber-600" />
+                  Tiempo Estimado de Espera
+                </span>
+                <span className="text-xs font-black text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                  {tiempoEstimado}
+                </span>
+              </div>
+              <p className="mt-1 text-[11px] text-stone-500">
+                Selecciona la demora actual para informar a tus clientes en la cabecera de la carta:
+              </p>
+              <div className="mt-2.5 grid grid-cols-3 gap-2">
+                {[
+                  { valor: "15-25 min", etiqueta: "⚡ 15-25 min", desc: "Rápido" },
+                  { valor: "30-45 min", etiqueta: "🟡 30-45 min", desc: "Normal" },
+                  { valor: "50-60 min", etiqueta: "🔥 50-60 min", desc: "Demorado" },
+                ].map((item) => {
+                  const activo = tiempoEstimado === item.valor;
+                  return (
+                    <button
+                      key={item.valor}
+                      type="button"
+                      disabled={guardandoId === "tiempo-estimado"}
+                      onClick={() => handleActualizarTiempoEstimado(item.valor)}
+                      className={`flex flex-col items-center justify-center rounded-2xl py-2.5 px-2 border text-xs font-extrabold transition-all active:scale-95 ${
+                        activo
+                          ? "border-amber-500 bg-amber-50 text-amber-950 shadow-xs ring-2 ring-amber-400"
+                          : "border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100"
+                      }`}
+                    >
+                      <span className="font-display tracking-wide">{item.etiqueta}</span>
+                      <span className="text-[10px] font-medium opacity-75">{item.desc}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Interruptor de Aviso de Emergencia o Contingencia */}
+            <div className="mt-4 pt-4 border-t border-stone-200/90">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <AlertTriangle className="h-4 w-4 text-amber-600" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-stone-800">
+                    Aviso de Emergencia o Contingencia
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const nuevo = !emergenciaActiva;
+                    setEmergenciaActiva(nuevo);
+                    if (!nuevo) {
+                      void handleGuardarAvisoEmergencia(true);
+                    }
+                  }}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    emergenciaActiva ? "bg-amber-600" : "bg-stone-300"
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                      emergenciaActiva ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {emergenciaActiva && (
+                <div className="mt-3 space-y-2.5 rounded-2xl border border-amber-200 bg-amber-50/70 p-3.5">
+                  <p className="text-[11px] font-semibold text-amber-950">
+                    Escribe un mensaje de advertencia que se mostrará en un banner destacado a todos los clientes:
+                  </p>
+                  <input
+                    type="text"
+                    value={mensajeEmergencia}
+                    onChange={(e) => setMensajeEmergencia(e.target.value)}
+                    placeholder="Ej: ⚠️ Corte de luz comunal: demoras de 45 min"
+                    className="w-full rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-stone-900 focus:outline-none focus:border-amber-600"
+                  />
+
+                  {/* Sugerencias Rápidas */}
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">
+                      Sugerencias de un toque:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {[
+                        "⚠️ Corte de luz comunal: demoras de 45 min",
+                        "⚠️ Solo atención por orden de llegada",
+                        "⚠️ Alta demanda: tiempo de espera extendido",
+                        "⚠️ Sin sistema Transbank: solo efectivo o CuentaRUT",
+                      ].map((sug) => (
+                        <button
+                          key={sug}
+                          type="button"
+                          onClick={() => setMensajeEmergencia(sug)}
+                          className="rounded-lg border border-amber-300 bg-white px-2 py-1 text-[10px] font-semibold text-amber-900 hover:bg-amber-100 transition active:scale-95 text-left"
+                        >
+                          {sug}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="button"
+                      disabled={guardandoId === "aviso-emergencia"}
+                      onClick={() => void handleGuardarAvisoEmergencia(false)}
+                      className="flex-1 rounded-full bg-amber-600 hover:bg-amber-700 text-white py-2 px-3 text-xs font-display uppercase tracking-wider shadow-xs transition active:scale-95 disabled:opacity-50 font-bold"
+                    >
+                      {guardandoId === "aviso-emergencia" ? "Guardando..." : "Publicar Aviso en Carta"}
+                    </button>
+                    {local.mensaje_emergencia && (
+                      <button
+                        type="button"
+                        onClick={() => void handleGuardarAvisoEmergencia(true)}
+                        className="rounded-full border border-stone-300 bg-white hover:bg-stone-100 text-stone-700 py-2 px-3 text-xs font-bold transition"
+                      >
+                        Desactivar
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* MÓDULO 2: Botón Cierre de Caja Diario y Cuadre de Turno */}
+            <button
+              type="button"
+              onClick={() => setMostrarCierreCaja(true)}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-amber-400 bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3.5 text-xs font-display uppercase tracking-wider text-stone-950 shadow-md transition hover:from-amber-400 hover:to-amber-500 active:scale-[0.99] sm:text-sm font-extrabold"
+            >
+              <Moon className="h-4 w-4 shrink-0 text-stone-950" />
+              <span>🌙 Cierre de Caja de Hoy</span>
+              <Receipt className="h-4 w-4 shrink-0 text-stone-950" />
+            </button>
+
             {/* Botón destacado rápido para abrir el Cartel QR para Mesas */}
             <button
               type="button"
               onClick={() => setMostrarCartelQr((prev) => !prev)}
-              className={`mt-3.5 flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-xs font-display uppercase tracking-wider shadow-sm transition active:scale-[0.99] sm:text-sm ${brand.accentBg}`}
+              className={`mt-3 flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-xs font-display uppercase tracking-wider shadow-sm transition active:scale-[0.99] sm:text-sm ${brand.accentBg}`}
             >
               <QrCode className="h-4 w-4 shrink-0" />
               <span>📱 Mi Cartel QR para Mesas</span>
@@ -2588,6 +2908,223 @@ export default function AdminLocalClient({
                 )}
               </div>
 
+              {/* ⚙️ Personalización y Extras del Plato (Módulo 1) */}
+              <div className="rounded-2xl border border-stone-200 bg-stone-50 p-3.5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-amber-600" />
+                    <div>
+                      <span className="block text-xs font-bold uppercase tracking-wider text-stone-900">
+                        ⚙️ Personalización y Extras del Plato
+                      </span>
+                      <span className="block text-[11px] font-medium text-stone-500">
+                        Permite a los clientes elegir salsas, aderezos o agregados
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setNuevasOpciones((prev) => [
+                        ...prev,
+                        {
+                          titulo: "",
+                          tipo: "unica",
+                          items: [{ nombre: "", precio: 0 }],
+                        },
+                      ])
+                    }
+                    className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-white px-2.5 py-1 text-[11px] font-bold text-amber-800 shadow-2xs hover:bg-amber-50 active:scale-95"
+                  >
+                    <Plus className="h-3 w-3" />
+                    <span>+ Añadir grupo</span>
+                  </button>
+                </div>
+
+                {nuevasOpciones.length > 0 && (
+                  <div className="space-y-3 pt-1">
+                    {nuevasOpciones.map((grupo, gIdx) => (
+                      <div
+                        key={gIdx}
+                        className="rounded-xl border border-stone-200 bg-white p-3 space-y-2.5 shadow-xs"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                            Grupo #{gIdx + 1}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setNuevasOpciones((prev) =>
+                                prev.filter((_, idx) => idx !== gIdx)
+                              )
+                            }
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:underline"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                            <span>Eliminar grupo</span>
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          <div>
+                            <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-stone-600">
+                              Título del grupo *
+                            </label>
+                            <input
+                              type="text"
+                              value={grupo.titulo}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setNuevasOpciones((prev) =>
+                                  prev.map((g, idx) =>
+                                    idx === gIdx ? { ...g, titulo: val } : g
+                                  )
+                                );
+                              }}
+                              placeholder="Ej: Elige tu salsa o Agregados"
+                              className="w-full rounded-lg border border-stone-200 bg-stone-50 px-2.5 py-1.5 text-xs font-bold text-stone-900 focus:bg-white focus:outline-none focus:border-amber-600"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-stone-600">
+                              Tipo de selección *
+                            </label>
+                            <select
+                              value={grupo.tipo}
+                              onChange={(e) => {
+                                const val = e.target.value as "unica" | "multiple";
+                                setNuevasOpciones((prev) =>
+                                  prev.map((g, idx) =>
+                                    idx === gIdx ? { ...g, tipo: val } : g
+                                  )
+                                );
+                              }}
+                              className="w-full rounded-lg border border-stone-200 bg-stone-50 px-2.5 py-1.5 text-xs font-bold text-stone-900 focus:bg-white focus:outline-none focus:border-amber-600"
+                            >
+                              <option value="unica">
+                                Una sola opción obligatoria (Radio)
+                              </option>
+                              <option value="multiple">
+                                Múltiples opciones opcionales (Checkboxes)
+                              </option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="space-y-1.5 pt-1 border-t border-stone-100">
+                          <label className="block text-[10px] font-black uppercase tracking-wider text-stone-400">
+                            Opciones / Extras:
+                          </label>
+                          {grupo.items.map((item, iIdx) => (
+                            <div key={iIdx} className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={item.nombre}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  setNuevasOpciones((prev) =>
+                                    prev.map((g, idx) =>
+                                      idx === gIdx
+                                        ? {
+                                            ...g,
+                                            items: g.items.map((it, itemIdx) =>
+                                              itemIdx === iIdx
+                                                ? { ...it, nombre: val }
+                                                : it
+                                            ),
+                                          }
+                                        : g
+                                    )
+                                  );
+                                }}
+                                placeholder="Nombre (ej: Mayo Casera)"
+                                className="flex-1 rounded-md border border-stone-200 bg-stone-50 px-2 py-1 text-xs font-semibold text-stone-900 focus:bg-white focus:outline-none"
+                              />
+                              <div className="relative w-24 shrink-0">
+                                <span className="pointer-events-none absolute left-1.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-stone-400">
+                                  +$
+                                </span>
+                                <input
+                                  type="number"
+                                  inputMode="numeric"
+                                  value={item.precio || ""}
+                                  onChange={(e) => {
+                                    const num = Math.max(
+                                      0,
+                                      Number(e.target.value.replace(/[^0-9]/g, "")) || 0
+                                    );
+                                    setNuevasOpciones((prev) =>
+                                      prev.map((g, idx) =>
+                                        idx === gIdx
+                                          ? {
+                                              ...g,
+                                              items: g.items.map((it, itemIdx) =>
+                                                itemIdx === iIdx
+                                                  ? { ...it, precio: num }
+                                                  : it
+                                              ),
+                                            }
+                                          : g
+                                      )
+                                    );
+                                  }}
+                                  placeholder="0 (Gratis)"
+                                  className="w-full rounded-md border border-stone-200 bg-stone-50 py-1 pl-5 pr-1 text-xs font-bold text-stone-900 focus:bg-white focus:outline-none"
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setNuevasOpciones((prev) =>
+                                    prev.map((g, idx) =>
+                                      idx === gIdx
+                                        ? {
+                                            ...g,
+                                            items: g.items.filter(
+                                              (_, itemIdx) => itemIdx !== iIdx
+                                            ),
+                                          }
+                                        : g
+                                    )
+                                  );
+                                }}
+                                className="flex h-6 w-6 items-center justify-center text-stone-400 hover:text-rose-600"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setNuevasOpciones((prev) =>
+                                prev.map((g, idx) =>
+                                  idx === gIdx
+                                    ? {
+                                        ...g,
+                                        items: [
+                                          ...g.items,
+                                          { nombre: "", precio: 0 },
+                                        ],
+                                      }
+                                    : g
+                                )
+                              );
+                            }}
+                            className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 hover:underline"
+                          >
+                            <Plus className="h-3 w-3" />
+                            <span>+ Añadir opción a este grupo</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {errorNuevoPlato && (
                 <p className="rounded-xl border border-rose-300 bg-rose-50 px-3 py-2 text-xs font-bold text-rose-700">
                   {errorNuevoPlato}
@@ -2622,16 +3159,51 @@ export default function AdminLocalClient({
               key={categoria.id}
               className={`rounded-3xl border p-4 shadow-xl sm:p-5 ${brand.panelCardBg}`}
             >
-              <div className="mb-3.5 flex items-center justify-between border-b border-stone-200 pb-2.5">
-                <h2 className="text-xl font-display uppercase tracking-wide text-stone-900">
-                  {categoria.nombre}
-                </h2>
-                <span
-                  className="rounded-full border border-stone-200 bg-stone-100 px-3 py-0.5 text-xs font-bold text-stone-600"
-                >
-                  {categoria.productos.length}{" "}
-                  {categoria.productos.length === 1 ? "plato" : "platos"}
-                </span>
+              <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2 border-b border-stone-200 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-display uppercase tracking-wide text-stone-900">
+                    {categoria.nombre}
+                  </h2>
+                  {categoria.activa === false && (
+                    <span className="rounded-full bg-slate-200 border border-slate-300 px-2 py-0.5 text-[10px] font-black uppercase text-slate-700">
+                      ⏸️ Pausada
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* MÓDULO 4: Switch Pausador Masivo de Categoría */}
+                  <button
+                    type="button"
+                    disabled={guardandoId === `cat-pause-${categoria.id}`}
+                    onClick={() =>
+                      handleToggleCategoriaPausa(
+                        categoria.id,
+                        categoria.activa !== false ? false : true
+                      )
+                    }
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition shadow-xs active:scale-95 ${
+                      categoria.activa !== false
+                        ? "bg-stone-100 text-stone-700 hover:bg-stone-200 border border-stone-300"
+                        : "bg-amber-600 text-white hover:bg-amber-700 border border-amber-600"
+                    }`}
+                  >
+                    {guardandoId === `cat-pause-${categoria.id}` ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : categoria.activa !== false ? (
+                      <span>⏸️ Pausar por hoy</span>
+                    ) : (
+                      <span>▶️ Reanudar categoría</span>
+                    )}
+                  </button>
+
+                  <span
+                    className="rounded-full border border-stone-200 bg-stone-100 px-3 py-0.5 text-xs font-bold text-stone-600"
+                  >
+                    {categoria.productos.length}{" "}
+                    {categoria.productos.length === 1 ? "plato" : "platos"}
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-3.5">
@@ -2746,9 +3318,31 @@ export default function AdminLocalClient({
                               </label>
                             </div>
 
-                            <p className="mt-1 text-sm font-display uppercase tracking-wider text-stone-900">
-                              {formatCLP(producto.precio)}
-                            </p>
+                            <div className="mt-1 flex flex-wrap items-center gap-2">
+                              <p className="text-sm font-display uppercase tracking-wider text-stone-900">
+                                {formatCLP(producto.precio)}
+                              </p>
+
+                              {/* Botón Gestión de Extras y Opciones (Módulo 1) */}
+                              <button
+                                type="button"
+                                onClick={() => setPlatoParaEditarOpciones(producto)}
+                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border transition active:scale-95 ${
+                                  producto.opciones && producto.opciones.length > 0
+                                    ? "bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100"
+                                    : "bg-stone-100 text-stone-600 border-stone-200 hover:bg-stone-200"
+                                }`}
+                              >
+                                <Sparkles className="h-3 w-3 text-amber-600" />
+                                <span>
+                                  {producto.opciones && producto.opciones.length > 0
+                                    ? `⚙️ Extras (${producto.opciones.length} grupo${
+                                        producto.opciones.length > 1 ? "s" : ""
+                                      })`
+                                    : "⚙️ Configurar Extras"}
+                                </span>
+                              </button>
+                            </div>
                           </div>
                         </div>
 
@@ -3216,6 +3810,23 @@ export default function AdminLocalClient({
           </div>
         </div>
       )}
+
+      {/* Modal de Cierre de Caja Diario (Módulo 2) */}
+      <ModalCierreCaja
+        isOpen={mostrarCierreCaja}
+        onClose={() => setMostrarCierreCaja(false)}
+        localSlug={local.slug}
+        localNombre={local.nombre}
+        telefonoWhatsapp={local.telefono_whatsapp || local.telefonoWhatsapp || ""}
+      />
+
+      {/* Modal de Gestión de Opciones y Extras (Módulo 1) */}
+      <ModalGestionOpcionesPlato
+        isOpen={Boolean(platoParaEditarOpciones)}
+        onClose={() => setPlatoParaEditarOpciones(null)}
+        producto={platoParaEditarOpciones}
+        onGuardar={handleGuardarOpcionesProducto}
+      />
     </div>
   );
 }
