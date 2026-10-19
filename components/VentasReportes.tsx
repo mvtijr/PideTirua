@@ -191,16 +191,16 @@ export default function VentasReportes({
             <BarChart3 className="h-4 w-4" />
             Métricas Comerciales en Tiempo Real
           </span>
-          <h2 className="mt-0.5 text-lg font-black text-white sm:text-xl flex items-center gap-2">
+          <h2 className="mt-0.5 text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl flex items-center gap-2">
             <span>📊 Mis Ventas y Reportes</span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[11px] font-black text-emerald-300 border border-emerald-400/30">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
               En Vivo
             </span>
           </h2>
           <p className={`mt-0.5 text-xs font-medium ${subtitleText}`}>
             Resumen de órdenes digitales de <strong>{localNombre}</strong> para{" "}
-            <span className="font-bold text-white">
+            <span className="font-bold text-stone-900">
               {nombreMes} {anioActual}
             </span>{" "}
             (excluye cancelados).
@@ -211,12 +211,12 @@ export default function VentasReportes({
           type="button"
           disabled={cargando || recargando}
           onClick={() => void handleRefrescar()}
-          className="inline-flex items-center gap-1.5 rounded-2xl border border-white/20 bg-white/10 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-white/20 active:scale-95 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3.5 py-2 text-xs font-bold text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95 disabled:opacity-50"
           title="Actualizar métricas"
         >
           <RefreshCw
             className={`h-3.5 w-3.5 ${
-              recargando || cargando ? "animate-spin text-emerald-400" : ""
+              recargando || cargando ? "animate-spin text-[#EA580C]" : ""
             }`}
           />
           <span className="hidden sm:inline">Actualizar</span>
@@ -224,8 +224,8 @@ export default function VentasReportes({
       </div>
 
       {cargando ? (
-        <div className="mt-6 flex flex-col items-center justify-center py-12 text-center text-white/70">
-          <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+        <div className="mt-6 flex flex-col items-center justify-center py-12 text-center text-stone-500">
+          <Loader2 className="h-8 w-8 animate-spin text-[#EA580C]" />
           <p className="mt-2 text-xs font-bold">Cargando reporte de ventas...</p>
         </div>
       ) : (
@@ -233,50 +233,50 @@ export default function VentasReportes({
           {/* A) Tarjetas Resumen del Mes Actual */}
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {/* 💰 Ventas del Mes */}
-            <div className="relative overflow-hidden rounded-2xl border border-emerald-500/35 bg-gradient-to-br from-emerald-950/60 via-slate-900/80 to-slate-950/90 p-4 shadow-lg backdrop-blur-md">
+            <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-4 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-300">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
                   Ventas del Mes
                 </span>
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
                   <DollarSign className="h-4 w-4" />
                 </div>
               </div>
               <div className="mt-2">
-                <p className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+                <p className="text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
                   {formatCLP(ventasDelMes)}
                 </p>
-                <span className="mt-0.5 block text-[11px] font-medium text-emerald-200/80">
+                <span className="mt-0.5 block text-[11px] font-medium text-stone-500">
                   {nombreMes} {anioActual} · CLP
                 </span>
               </div>
-              <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-emerald-400">
+              <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-emerald-700">
                 <TrendingUp className="h-3 w-3" />
                 <span>100% de recaudación directa</span>
               </div>
             </div>
 
             {/* 📦 Total de Pedidos */}
-            <div className="relative overflow-hidden rounded-2xl border border-amber-500/35 bg-gradient-to-br from-amber-950/50 via-slate-900/80 to-slate-950/90 p-4 shadow-lg backdrop-blur-md">
+            <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-4 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-amber-300">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">
                   Total de Pedidos
                 </span>
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
                   <Package className="h-4 w-4" />
                 </div>
               </div>
               <div className="mt-2">
-                <p className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+                <p className="text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
                   {totalPedidos}
                 </p>
-                <span className="mt-0.5 block text-[11px] font-medium text-amber-200/80">
+                <span className="mt-0.5 block text-[11px] font-medium text-stone-500">
                   {totalPedidos === 1
                     ? "1 orden recibida"
                     : `${totalPedidos} órdenes registradas`}
                 </span>
               </div>
-              <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-amber-300">
+              <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-amber-700">
                 <Sparkles className="h-3 w-3" />
                 <span>
                   {totalPlatosVendidos}{" "}
@@ -288,24 +288,24 @@ export default function VentasReportes({
             </div>
 
             {/* 🏷️ Ticket Promedio */}
-            <div className="relative overflow-hidden rounded-2xl border border-sky-500/35 bg-gradient-to-br from-sky-950/50 via-slate-900/80 to-slate-950/90 p-4 shadow-lg backdrop-blur-md">
+            <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-4 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-sky-300">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-sky-800">
                   Ticket Promedio
                 </span>
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-500/20 text-sky-400">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
                   <Receipt className="h-4 w-4" />
                 </div>
               </div>
               <div className="mt-2">
-                <p className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+                <p className="text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
                   {formatCLP(ticketPromedio)}
                 </p>
-                <span className="mt-0.5 block text-[11px] font-medium text-sky-200/80">
+                <span className="mt-0.5 block text-[11px] font-medium text-stone-500">
                   Venta media por pedido
                 </span>
               </div>
-              <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-sky-300">
+              <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-sky-700">
                 <Calendar className="h-3 w-3" />
                 <span>Consumo promedio en el local</span>
               </div>
@@ -313,14 +313,14 @@ export default function VentasReportes({
           </div>
 
           {/* B) Ranking "Top 3 Platos Más Vendidos" con Podio Visual */}
-          <div className="rounded-2xl border border-white/15 bg-slate-950/50 p-4 sm:p-5">
+          <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:p-5">
             <div className="flex items-center justify-between gap-2 mb-3.5">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/20 text-amber-400">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
                   <Trophy className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-white sm:text-base">
+                  <h3 className="text-base font-display uppercase tracking-wide text-stone-900">
                     🏆 Top 3 Platos Más Vendidos
                   </h3>
                   <span className={`text-[11px] font-medium ${subtitleText}`}>
@@ -330,16 +330,16 @@ export default function VentasReportes({
               </div>
 
               {rankingTop3.length > 0 && (
-                <span className="text-xs font-bold text-amber-300">
+                <span className="text-xs font-bold text-amber-800">
                   {rankingTop3.length} favoritos
                 </span>
               )}
             </div>
 
             {rankingTop3.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-white/20 bg-white/5 py-8 text-center text-white/70">
-                <Trophy className="mx-auto h-8 w-8 text-white/30" />
-                <p className="mt-2 text-xs font-bold text-white">
+              <div className="rounded-xl border border-dashed border-stone-300 bg-white py-8 text-center text-stone-500">
+                <Trophy className="mx-auto h-8 w-8 text-stone-300" />
+                <p className="mt-2 text-xs font-bold text-stone-700">
                   Aún no hay platos pedidos este mes
                 </p>
                 <p className={`mt-0.5 text-[11px] ${subtitleText}`}>
@@ -356,23 +356,23 @@ export default function VentasReportes({
                   const esBronce = lugar === 3;
 
                   const badgeColor = esOro
-                    ? "border-amber-400/50 bg-amber-500/20 text-amber-300"
+                    ? "border-amber-300 bg-amber-50 text-amber-800"
                     : esPlata
-                    ? "border-slate-300/50 bg-slate-400/20 text-slate-200"
-                    : "border-orange-500/50 bg-orange-600/20 text-orange-300";
+                    ? "border-stone-300 bg-stone-100 text-stone-700"
+                    : "border-orange-300 bg-orange-50 text-orange-800";
 
                   const cardBorder = esOro
-                    ? "border-amber-400/40 bg-gradient-to-b from-amber-950/40 via-slate-900/60 to-slate-950/80 shadow-md shadow-amber-500/10"
+                    ? "border-amber-300 bg-white shadow-xs"
                     : esPlata
-                    ? "border-slate-400/30 bg-gradient-to-b from-slate-800/40 via-slate-900/60 to-slate-950/80"
-                    : "border-orange-500/30 bg-gradient-to-b from-orange-950/40 via-slate-900/60 to-slate-950/80";
+                    ? "border-stone-200 bg-white shadow-xs"
+                    : "border-orange-200 bg-white shadow-xs";
 
                   const iconoMedalla = esOro ? (
-                    <Crown className="h-4 w-4 text-amber-400" />
+                    <Crown className="h-4 w-4 text-amber-600" />
                   ) : esPlata ? (
-                    <Medal className="h-4 w-4 text-slate-300" />
+                    <Medal className="h-4 w-4 text-stone-500" />
                   ) : (
-                    <Medal className="h-4 w-4 text-orange-400" />
+                    <Medal className="h-4 w-4 text-orange-600" />
                   );
 
                   const textoLugar =
@@ -396,22 +396,22 @@ export default function VentasReportes({
                             <span>{textoLugar}</span>
                           </span>
 
-                          <span className="text-[11px] font-extrabold text-white/90">
+                          <span className="text-[11px] font-extrabold text-stone-400">
                             #{lugar}
                           </span>
                         </div>
 
-                        <h4 className="mt-2.5 text-xs font-black text-white sm:text-sm line-clamp-2">
+                        <h4 className="mt-2.5 text-xs font-bold text-stone-900 sm:text-sm line-clamp-2">
                           {item.nombre}
                         </h4>
                       </div>
 
-                      <div className="mt-3.5 flex items-center justify-between border-t border-white/10 pt-2.5">
-                        <span className="text-[11px] font-bold text-white/70">
+                      <div className="mt-3.5 flex items-center justify-between border-t border-stone-100 pt-2.5">
+                        <span className="text-[11px] font-bold text-stone-500">
                           Unidades vendidas:
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-2 py-0.5 text-xs font-black text-white">
-                          <strong className="text-amber-300">
+                        <span className="inline-flex items-center gap-1 rounded-lg bg-stone-100 px-2 py-0.5 text-xs font-black text-stone-900">
+                          <strong className="text-[#EA580C]">
                             {item.cantidad}
                           </strong>{" "}
                           uds

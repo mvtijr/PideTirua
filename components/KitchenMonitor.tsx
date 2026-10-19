@@ -346,7 +346,7 @@ export default function KitchenMonitor({
 
   return (
     <section
-      className={`no-print rounded-3xl border p-5 shadow-xl ${panelCardBg}`}
+      className={`no-print rounded-3xl border p-5 shadow-sm ${panelCardBg}`}
     >
       {/* Cabecera del Monitor de Cocina */}
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -358,16 +358,16 @@ export default function KitchenMonitor({
             Sistema KDS en Tiempo Real
           </span>
           <div className="mt-0.5 flex items-center gap-2">
-            <h2 className="text-base font-extrabold text-white sm:text-lg">
+            <h2 className="text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
               👨‍🍳 Monitor de Cocina en Vivo
             </h2>
             {estadoConexion === "conectado" ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-extrabold text-emerald-300 border border-emerald-400/30">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 En vivo
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-extrabold text-amber-300 border border-amber-400/30">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200">
                 <RefreshCw className="h-2.5 w-2.5 animate-spin" />
                 Reconectando...
               </span>
@@ -386,10 +386,10 @@ export default function KitchenMonitor({
                 playKitchenDingDongChime();
               }
             }}
-            className={`inline-flex items-center gap-1.5 rounded-2xl border px-3.5 py-2 text-xs font-extrabold shadow-sm transition active:scale-95 ${
+            className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold shadow-xs transition active:scale-95 ${
               sonidoActivo
-                ? "border-emerald-400/60 bg-emerald-600 text-white hover:bg-emerald-500"
-                : "border-white/20 bg-white/10 text-white/75 hover:bg-white/20"
+                ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                : "border-stone-200 bg-stone-100 text-stone-600 hover:bg-stone-200"
             }`}
           >
             {sonidoActivo ? (
@@ -409,7 +409,7 @@ export default function KitchenMonitor({
             type="button"
             onClick={() => playKitchenDingDongChime()}
             title="Probar timbre Ding-Dong de cocina"
-            className="inline-flex items-center gap-1 rounded-2xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/20 active:scale-95"
+            className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-bold text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95"
           >
             <Volume2 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Probar timbre</span>
@@ -419,7 +419,7 @@ export default function KitchenMonitor({
             type="button"
             onClick={() => void cargarPedidos(false)}
             title="Actualizar comandas"
-            className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-white/20 bg-white/10 text-white transition hover:bg-white/20 active:scale-95"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${cargando ? "animate-spin" : ""}`}
@@ -435,19 +435,19 @@ export default function KitchenMonitor({
       </p>
 
       {/* Pestañas de Filtro: Activos vs Historial de hoy */}
-      <div className="mt-4 flex items-center justify-between gap-2 border-b border-white/15 pb-3">
+      <div className="mt-4 flex items-center justify-between gap-2 border-b border-stone-200 pb-3">
         <div className="grid w-full grid-cols-2 gap-2 sm:w-auto sm:flex">
           <button
             type="button"
             onClick={() => setFiltroVista("activos")}
-            className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-extrabold transition ${
+            className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-1.5 text-xs font-display uppercase tracking-wider transition ${
               filtroVista === "activos"
-                ? accentBg
-                : "border border-white/20 bg-white/10 text-white/80 hover:bg-white/15"
+                ? "bg-[#18181B] text-white shadow-xs"
+                : "border border-stone-200 bg-stone-100 text-stone-700 hover:bg-stone-200"
             }`}
           >
             <span>Activos</span>
-            <span className="rounded-full bg-black/25 px-2 py-0.5 text-[11px] font-black">
+            <span className="rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-sans font-black">
               {pedidosActivos.length}
             </span>
           </button>
@@ -455,21 +455,21 @@ export default function KitchenMonitor({
           <button
             type="button"
             onClick={() => setFiltroVista("historial")}
-            className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-xs font-extrabold transition ${
+            className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-1.5 text-xs font-display uppercase tracking-wider transition ${
               filtroVista === "historial"
-                ? accentBg
-                : "border border-white/20 bg-white/10 text-white/80 hover:bg-white/15"
+                ? "bg-[#18181B] text-white shadow-xs"
+                : "border border-stone-200 bg-stone-100 text-stone-700 hover:bg-stone-200"
             }`}
           >
             <span>Historial de hoy</span>
-            <span className="rounded-full bg-black/25 px-2 py-0.5 text-[11px] font-black">
+            <span className="rounded-full bg-black/20 px-2 py-0.5 text-[11px] font-sans font-black">
               {pedidosHistorialHoy.length}
             </span>
           </button>
         </div>
 
         {cantidadPendientes > 0 && (
-          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 border border-amber-300/50 px-3 py-1 text-xs font-extrabold text-amber-200 animate-pulse">
+          <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-300 px-3 py-1 text-xs font-bold text-amber-800 animate-pulse">
             🔔 {cantidadPendientes}{" "}
             {cantidadPendientes === 1 ? "pedido nuevo" : "pedidos nuevos"}
           </span>
@@ -482,9 +482,9 @@ export default function KitchenMonitor({
           <Loader2 className={`h-6 w-6 animate-spin ${accentText}`} />
         </div>
       ) : pedidosMostrados.length === 0 ? (
-        <div className="mt-4 rounded-2xl border border-dashed border-white/20 bg-black/25 p-6 text-center">
-          <ChefHat className="mx-auto h-8 w-8 text-white/40" />
-          <p className="mt-2 text-sm font-extrabold text-white">
+        <div className="mt-4 rounded-2xl border border-dashed border-stone-300 bg-stone-50 p-6 text-center">
+          <ChefHat className="mx-auto h-8 w-8 text-stone-400" />
+          <p className="mt-2 text-base font-display uppercase tracking-wide text-stone-900">
             {filtroVista === "activos"
               ? "No hay comandas activas en este momento"
               : "Aún no se registran pedidos en el historial de hoy"}

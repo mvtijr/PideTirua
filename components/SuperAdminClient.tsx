@@ -750,8 +750,8 @@ export default function SuperAdminClient({
 
   if (verificandoSesion) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 text-white">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-400" />
+      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F5] text-stone-900">
+        <Loader2 className="h-8 w-8 animate-spin text-[#EA580C]" />
       </div>
     );
   }
@@ -761,33 +761,33 @@ export default function SuperAdminClient({
   // ============================================================================
   if (!autenticado) {
     return (
-      <div className="flex min-h-screen flex-col justify-between bg-gradient-to-b from-slate-950 via-[#0F314A] to-slate-950 px-4 py-8 text-white">
+      <div className="flex min-h-screen flex-col justify-between bg-[#FAF8F5] px-4 py-8 text-stone-900">
         <div className="mx-auto flex w-full max-w-md items-center justify-between">
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-bold text-white backdrop-blur-md transition hover:bg-white/20"
+            className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-bold text-stone-700 shadow-xs backdrop-blur-md transition hover:bg-stone-100 hover:text-stone-900"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             <span>Ir al Portal Público</span>
           </Link>
-          <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/40 bg-amber-400/15 px-3 py-1 text-[11px] font-extrabold text-amber-300">
+          <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-[11px] font-bold text-amber-800">
             <ShieldCheck className="h-3.5 w-3.5" />
             SuperAdmin SaaS
           </span>
         </div>
 
-        <div className="mx-auto my-auto w-full max-w-md rounded-3xl border border-white/15 bg-slate-900/85 p-6 shadow-2xl backdrop-blur-xl sm:p-8">
+        <div className="mx-auto my-auto w-full max-w-md rounded-3xl border border-stone-200/90 bg-white p-6 shadow-sm sm:p-8">
           <div className="text-center">
-            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-400/40 bg-amber-500/15 text-amber-300 shadow-lg">
+            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl border border-amber-300 bg-amber-50 text-amber-700 shadow-xs">
               <Crown className="h-8 w-8" />
             </div>
-            <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-300">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-800">
               Centro de Control Comercial
             </span>
-            <h1 className="mt-1 text-2xl font-black tracking-tight text-white">
+            <h1 className="mt-1 text-3xl font-display uppercase tracking-wide text-stone-900">
               PideTirúa SuperAdmin
             </h1>
-            <p className="mt-1 text-xs text-slate-300">
+            <p className="mt-1 text-xs text-stone-500">
               Ingresa la Clave Maestra para administrar locales, planes
               (&ldquo;Autogestionado&rdquo; y &ldquo;Llave en Mano VIP&rdquo;) e
               identidad visual.
@@ -798,9 +798,9 @@ export default function SuperAdminClient({
             <div>
               <label
                 htmlFor="claveMaestra"
-                className="mb-1.5 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-slate-300"
+                className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700"
               >
-                <KeyRound className="h-3.5 w-3.5 text-amber-400" />
+                <KeyRound className="h-3.5 w-3.5 text-amber-600" />
                 Clave Maestra SuperAdmin
               </label>
               <input
@@ -812,12 +812,12 @@ export default function SuperAdminClient({
                   setErrorClave(null);
                 }}
                 placeholder="Ingresa tu Clave Maestra..."
-                className="w-full rounded-2xl border border-white/20 bg-black/40 px-4 py-3 text-sm font-bold text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
+                className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
               />
             </div>
 
             {errorClave && (
-              <p className="rounded-xl border border-rose-500/40 bg-rose-500/20 px-3.5 py-2 text-center text-xs font-bold text-rose-200">
+              <p className="rounded-xl border border-rose-300 bg-rose-50 px-3.5 py-2 text-center text-xs font-bold text-rose-700">
                 {errorClave}
               </p>
             )}
@@ -825,7 +825,7 @@ export default function SuperAdminClient({
             <button
               type="submit"
               disabled={!claveMaestra.trim() || validandoClave}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 py-3.5 text-sm font-black text-slate-950 shadow-lg transition hover:from-amber-300 hover:to-amber-400 active:scale-[0.99] disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#18181B] hover:bg-black py-3.5 text-sm font-display uppercase tracking-wider text-white shadow-sm transition active:scale-[0.99] disabled:opacity-50"
             >
               {validandoClave ? (
                 <>
@@ -842,7 +842,7 @@ export default function SuperAdminClient({
           </form>
         </div>
 
-        <p className="text-center text-[11px] text-slate-400">
+        <p className="text-center text-[11px] text-stone-400">
           PideTirúa · Arquitectura Comercial SaaS conectada a Supabase
         </p>
       </div>
@@ -871,7 +871,7 @@ export default function SuperAdminClient({
   ).length;
 
   return (
-    <div className="min-h-screen bg-slate-950 pb-24 text-white">
+    <div className="min-h-screen bg-[#FAF8F5] pb-24 text-stone-900">
       {/* Toast flotante */}
       {toastMensaje && (
         <div
@@ -885,17 +885,17 @@ export default function SuperAdminClient({
       )}
 
       {/* Cabecera Superior */}
-      <header className="sticky top-0 z-30 border-b border-white/15 bg-slate-900/90 backdrop-blur-xl shadow-lg">
+      <header className="sticky top-0 z-30 border-b border-stone-200/90 bg-[#FAF8F5]/95 backdrop-blur-xl shadow-xs">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3.5">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-400/40 bg-amber-500/15 text-amber-300">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-amber-300 bg-amber-50 text-amber-700 shadow-xs">
               <Crown className="h-6 w-6" />
             </div>
             <div>
-              <span className="block text-[10px] font-extrabold uppercase tracking-widest text-amber-300">
+              <span className="block text-[10px] font-extrabold uppercase tracking-widest text-amber-800">
                 Panel Maestro · Modelo SaaS
               </span>
-              <h1 className="text-base font-black text-white sm:text-xl">
+              <h1 className="text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
                 PideTirúa SuperAdmin
               </h1>
             </div>
@@ -905,7 +905,7 @@ export default function SuperAdminClient({
             <button
               type="button"
               onClick={() => setMostrarDatosCobro((prev) => !prev)}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-amber-400/40 bg-amber-500/15 px-3 py-2 text-xs font-extrabold text-amber-300 transition hover:bg-amber-400/25"
+              className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3.5 py-1.5 text-xs font-bold text-amber-800 transition hover:bg-amber-100 shadow-xs"
             >
               <CreditCard className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">💳 Mis Datos de Cobro</span>
@@ -914,7 +914,7 @@ export default function SuperAdminClient({
 
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-bold text-white transition hover:bg-white/20"
+              className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-bold text-stone-700 shadow-xs transition hover:bg-stone-100 hover:text-stone-900"
             >
               <ExternalLink className="h-3.5 w-3.5" />
               <span className="hidden sm:inline">Ver Portal</span>
@@ -923,7 +923,7 @@ export default function SuperAdminClient({
             <button
               type="button"
               onClick={handleLogoutSuperAdmin}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-500/15 px-3 py-2 text-xs font-bold text-rose-200 transition hover:bg-rose-600 hover:text-white"
+              className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-bold text-stone-700 shadow-xs transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 active:scale-95"
             >
               <LogOut className="h-3.5 w-3.5" />
               <span>Salir</span>
@@ -936,60 +936,60 @@ export default function SuperAdminClient({
         {/* A) MÉTRICAS DEL NEGOCIO (ENCABEZADO) */}
         <section className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
           {/* Total de locales activos */}
-          <div className="rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-emerald-950/60 to-slate-900 p-5 shadow-xl">
+          <div className="rounded-3xl border border-stone-200/90 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-emerald-300">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
                 Locales Activos
               </span>
-              <Store className="h-5 w-5 text-emerald-400" />
+              <Store className="h-5 w-5 text-emerald-600" />
             </div>
-            <p className="mt-2 text-3xl font-black text-white">
+            <p className="mt-2 text-3xl font-display uppercase tracking-wide text-stone-900 sm:text-4xl">
               {localesActivos.length}{" "}
-              <span className="text-sm font-bold text-slate-400">
+              <span className="text-sm font-sans font-bold text-stone-400">
                 / {locales.length} registrados
               </span>
             </p>
-            <p className="mt-1 text-xs text-emerald-200/80">
+            <p className="mt-1 text-xs text-stone-500">
               Visibles actualmente en el portal público
             </p>
           </div>
 
           {/* Ingreso mensual recurrente estimado (MRR) */}
-          <div className="rounded-3xl border border-amber-400/35 bg-gradient-to-br from-amber-950/50 to-slate-900 p-5 shadow-xl">
+          <div className="rounded-3xl border border-stone-200/90 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-amber-300">
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
                 Ingreso Mensual Estimado
               </span>
-              <TrendingUp className="h-5 w-5 text-amber-400" />
+              <TrendingUp className="h-5 w-5 text-amber-600" />
             </div>
-            <p className="mt-2 text-3xl font-black text-amber-300">
+            <p className="mt-2 text-3xl font-display uppercase tracking-wide text-[#EA580C] sm:text-4xl">
               {formatCLP(ingresoMensualRecurrente)}
-              <span className="text-xs font-bold text-amber-100/80"> /mes</span>
+              <span className="text-xs font-sans font-bold text-stone-400"> /mes</span>
             </p>
-            <p className="mt-1 text-xs text-amber-100/80">
+            <p className="mt-1 text-xs text-stone-500">
               Suma de planes con estado Activo
             </p>
           </div>
 
           {/* Distribución de clientes */}
-          <div className="rounded-3xl border border-sky-400/30 bg-gradient-to-br from-sky-950/50 to-slate-900 p-5 shadow-xl">
+          <div className="rounded-3xl border border-stone-200/90 bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-sky-300">
+              <span className="text-xs font-bold uppercase tracking-wider text-sky-800">
                 Distribución de Planes
               </span>
-              <Users className="h-5 w-5 text-sky-400" />
+              <Users className="h-5 w-5 text-sky-600" />
             </div>
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-xl border border-sky-400/40 bg-sky-500/20 px-3 py-1.5 text-xs font-black text-sky-200">
-                <Zap className="h-3.5 w-3.5 text-sky-300" />
+              <span className="inline-flex items-center gap-1 rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-bold text-sky-800">
+                <Zap className="h-3.5 w-3.5 text-sky-600" />
                 {totalAutogestionados} Autogestionados
               </span>
-              <span className="inline-flex items-center gap-1 rounded-xl border border-amber-400/40 bg-amber-500/20 px-3 py-1.5 text-xs font-black text-amber-200">
-                <Crown className="h-3.5 w-3.5 text-amber-300" />
+              <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">
+                <Crown className="h-3.5 w-3.5 text-amber-600" />
                 {totalLlaveEnMano} Llave en Mano
               </span>
             </div>
-            <p className="mt-2 text-xs text-sky-200/80">
+            <p className="mt-2 text-xs text-stone-500">
               [{totalAutogestionados} Autogestionados] | [{totalLlaveEnMano}{" "}
               Llave en Mano]
             </p>
@@ -997,17 +997,17 @@ export default function SuperAdminClient({
         </section>
 
         {/* APARTADO: 💳 MIS DATOS DE COBRO (SUPERADMIN) */}
-        <section className="rounded-3xl border border-emerald-500/30 bg-slate-900/90 p-5 shadow-xl sm:p-6">
+        <section className="rounded-3xl border border-stone-200/90 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-emerald-300">
+              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-emerald-800">
                 <CreditCard className="h-4 w-4" />
                 Facturación Mensual · 1 Clic
               </span>
-              <h2 className="mt-0.5 text-base font-black text-white sm:text-lg">
+              <h2 className="mt-0.5 text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
                 💳 Mis Datos de Cobro (SuperAdmin)
               </h2>
-              <p className="mt-0.5 text-xs text-slate-400">
+              <p className="mt-0.5 text-xs text-stone-500">
                 {datosCobro.nombre && datosCobro.rut && datosCobro.cuenta
                   ? `Configurado: ${datosCobro.banco} · CuentaRUT ${datosCobro.cuenta} · ${datosCobro.nombre} (${datosCobro.rut})`
                   : "Configura tus datos bancarios para que el botón '💬 Cobrar por WhatsApp' envíe siempre tus datos reales."}
@@ -1017,9 +1017,9 @@ export default function SuperAdminClient({
             <button
               type="button"
               onClick={() => setMostrarDatosCobro((prev) => !prev)}
-              className="inline-flex items-center gap-2 rounded-2xl border border-emerald-400/40 bg-emerald-500/15 px-4 py-2.5 text-xs font-extrabold text-emerald-200 transition hover:bg-emerald-500/25 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-100 px-4 py-2 text-xs font-bold text-stone-700 transition hover:bg-stone-200 active:scale-95 shadow-xs"
             >
-              <CreditCard className="h-4 w-4 text-emerald-400" />
+              <CreditCard className="h-4 w-4 text-stone-600" />
               <span>
                 {mostrarDatosCobro
                   ? "Ocultar Mis Datos de Cobro"
@@ -1031,11 +1031,11 @@ export default function SuperAdminClient({
           {mostrarDatosCobro && (
             <form
               onSubmit={handleGuardarDatosCobro}
-              className="mt-5 space-y-4 border-t border-white/15 pt-5"
+              className="mt-5 space-y-4 border-t border-stone-200 pt-5"
             >
               <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-300">
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                     Tu Nombre Completo *
                   </label>
                   <input
@@ -1048,12 +1048,12 @@ export default function SuperAdminClient({
                       }))
                     }
                     placeholder="Ej: Matías Rodríguez"
-                    className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-300">
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                     Tu RUT *
                   </label>
                   <input
@@ -1066,12 +1066,12 @@ export default function SuperAdminClient({
                       }))
                     }
                     placeholder="Ej: 19.876.543-2"
-                    className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 font-mono text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 font-mono text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-300">
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                     Tu Banco *
                   </label>
                   <input
@@ -1084,12 +1084,12 @@ export default function SuperAdminClient({
                       }))
                     }
                     placeholder="Ej: BancoEstado"
-                    className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-300">
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                     Tu N° de CuentaRUT *
                   </label>
                   <input
@@ -1102,12 +1102,12 @@ export default function SuperAdminClient({
                       }))
                     }
                     placeholder="Ej: 19876543"
-                    className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 font-mono text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 font-mono text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                   />
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-bold text-slate-300">
+                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                     Correo para comprobantes (opcional)
                   </label>
                   <input
@@ -1120,7 +1120,7 @@ export default function SuperAdminClient({
                       }))
                     }
                     placeholder="Ej: pagos@pidetirua.cl"
-                    className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                    className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                   />
                 </div>
               </div>
@@ -1128,7 +1128,7 @@ export default function SuperAdminClient({
               <div className="flex justify-end gap-2">
                 <button
                   type="submit"
-                  className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-5 py-2.5 text-xs font-black text-slate-950 shadow-lg transition hover:bg-emerald-400 active:scale-95"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#18181B] hover:bg-black px-5 py-2.5 text-xs font-display uppercase tracking-wider text-white shadow-xs transition active:scale-95"
                 >
                   <CheckCircle2 className="h-4 w-4" />
                   <span>Guardar Mis Datos de Cobro</span>
@@ -1139,14 +1139,14 @@ export default function SuperAdminClient({
         </section>
 
         {/* B) FORMULARIO "+ REGISTRAR NUEVO LOCAL" Y "EDITAR LOCAL" */}
-        <section className="rounded-3xl border border-white/15 bg-slate-900/90 p-5 shadow-2xl sm:p-6">
+        <section className="rounded-3xl border border-stone-200/90 bg-white p-5 shadow-xs sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-amber-300">
+              <span className="inline-flex items-center gap-1.5 text-xs font-display uppercase tracking-wider text-[#EA580C]">
                 <Sparkles className="h-4 w-4" />
                 Alta de Clientes e Identidad Visual
               </span>
-              <h2 className="mt-0.5 text-lg font-black text-white">
+              <h2 className="mt-0.5 text-lg font-display uppercase tracking-wide text-stone-900">
                 {mostrarFormulario
                   ? modoEdicionId
                     ? `Editar Local: ${formNombre || originalSlug}`
@@ -1159,7 +1159,7 @@ export default function SuperAdminClient({
               <button
                 type="button"
                 onClick={abrirFormularioNuevoLocal}
-                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 px-5 py-3 text-xs font-black text-slate-950 shadow-lg transition hover:from-amber-300 hover:to-amber-400 active:scale-95 sm:text-sm"
+                className="inline-flex items-center gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] px-5 py-2.5 text-xs font-display uppercase tracking-wider text-white shadow-xs transition active:scale-95 sm:text-sm"
               >
                 <PlusCircle className="h-4 w-4" />
                 <span>+ Registrar Nuevo Local</span>
@@ -1168,7 +1168,7 @@ export default function SuperAdminClient({
               <button
                 type="button"
                 onClick={() => setMostrarFormulario(false)}
-                className="inline-flex items-center gap-1.5 rounded-2xl border border-white/20 bg-white/10 px-4 py-2.5 text-xs font-extrabold text-white transition hover:bg-white/20"
+                className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-stone-100 hover:bg-stone-200 px-4 py-2 text-xs font-display uppercase tracking-wider text-stone-700 transition"
               >
                 <X className="h-4 w-4" />
                 <span>Cerrar formulario</span>
@@ -1179,16 +1179,16 @@ export default function SuperAdminClient({
           {mostrarFormulario && (
             <form
               onSubmit={handleGuardarLocal}
-              className="mt-5 space-y-5 border-t border-white/15 pt-5"
+              className="mt-5 space-y-6 border-t border-stone-200 pt-5"
             >
               {/* 1. Datos Básicos del Negocio */}
               <div>
-                <h3 className="mb-3 text-xs font-extrabold uppercase tracking-wider text-amber-300">
+                <h3 className="mb-3 text-xs font-display uppercase tracking-wider text-stone-900">
                   1. Datos Básicos del Negocio
                 </h3>
                 <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
                   <div>
-                    <label className="mb-1 block text-xs font-bold text-slate-300">
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                       Nombre comercial *
                     </label>
                     <input
@@ -1202,12 +1202,12 @@ export default function SuperAdminClient({
                         }
                       }}
                       placeholder="Ej: Cocinería Donde La Tía"
-                      className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-bold text-slate-300">
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                       Slug (URL pública: /[slug]) *
                     </label>
                     <input
@@ -1218,12 +1218,12 @@ export default function SuperAdminClient({
                         setFormSlug(slugifyTexto(e.target.value));
                       }}
                       placeholder="Ej: donde-la-tia"
-                      className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 font-mono text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 font-mono text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-bold text-slate-300">
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                       Rubro gastronómico *
                     </label>
                     <input
@@ -1231,12 +1231,12 @@ export default function SuperAdminClient({
                       value={formRubro}
                       onChange={(e) => setFormRubro(e.target.value)}
                       placeholder="Ej: Pescados y Mariscos, Sushi, Comida Rápida"
-                      className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-bold text-slate-300">
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                       Teléfono WhatsApp (+569...) *
                     </label>
                     <input
@@ -1244,12 +1244,12 @@ export default function SuperAdminClient({
                       value={formTelefono}
                       onChange={(e) => setFormTelefono(e.target.value)}
                       placeholder="Ej: 56912345678"
-                      className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-bold text-slate-300">
+                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                       Dirección comercial *
                     </label>
                     <input
@@ -1257,13 +1257,13 @@ export default function SuperAdminClient({
                       value={formDireccion}
                       onChange={(e) => setFormDireccion(e.target.value)}
                       placeholder="Ej: Av. Costanera 240, Tirúa Centro"
-                      className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 placeholder:text-slate-400 focus:outline-none"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3.5 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                     />
                   </div>
 
                   <div className="grid grid-cols-2 gap-2.5">
                     <div>
-                      <label className="mb-1 block text-xs font-bold text-slate-300">
+                      <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                         Sector
                       </label>
                       <select
@@ -1271,7 +1271,7 @@ export default function SuperAdminClient({
                         onChange={(e) =>
                           setFormSector(e.target.value as SectorComuna)
                         }
-                        className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none"
+                        className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                       >
                         <option value="Tirúa Centro">Tirúa Centro</option>
                         <option value="Quidico">Quidico</option>
@@ -1279,7 +1279,7 @@ export default function SuperAdminClient({
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-xs font-bold text-slate-300">
+                      <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                         PIN (4 dígitos) *
                       </label>
                       <input
@@ -1291,7 +1291,7 @@ export default function SuperAdminClient({
                           setFormPin(e.target.value.replace(/\D/g, "").slice(0, 4))
                         }
                         placeholder="1234"
-                        className="w-full rounded-xl border border-white/20 bg-white px-3 py-2.5 font-mono text-xs font-black text-slate-900 focus:outline-none"
+                        className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 font-mono text-xs font-bold text-stone-900 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                       />
                     </div>
                   </div>
@@ -1300,7 +1300,7 @@ export default function SuperAdminClient({
 
               {/* 2. Selector de Plan Comercial */}
               <div>
-                <h3 className="mb-2.5 text-xs font-extrabold uppercase tracking-wider text-amber-300">
+                <h3 className="mb-2.5 text-xs font-display uppercase tracking-wider text-stone-900">
                   2. Selector de Plan Comercial
                 </h3>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1313,23 +1313,23 @@ export default function SuperAdminClient({
                     }}
                     className={`flex items-start gap-3.5 rounded-2xl border-2 p-4 text-left transition ${
                       formPlan === "autogestionado"
-                        ? "border-sky-400 bg-sky-500/20 shadow-lg shadow-sky-950/40"
-                        : "border-white/15 bg-black/30 hover:border-white/30"
+                        ? "border-[#EA580C] bg-orange-50/50 shadow-xs"
+                        : "border-stone-200 bg-stone-50/60 hover:border-stone-300"
                     }`}
                   >
-                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/25 text-sky-300">
+                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-[#EA580C]">
                       <Zap className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-black text-white">
+                        <span className="font-display text-base uppercase tracking-wider text-stone-900">
                           Plan Autogestionado
                         </span>
-                        <span className="rounded-full bg-sky-400/25 px-2.5 py-0.5 text-xs font-black text-sky-200">
+                        <span className="rounded-full bg-stone-900 px-2.5 py-0.5 text-xs font-display tracking-wider text-white">
                           $15.000/mes
                         </span>
                       </div>
-                      <p className="mt-1 text-xs text-slate-300">
+                      <p className="mt-1 text-xs text-stone-600">
                         El dueño administra su carta, precios, fotos de platos y
                         monitor de cocina desde su celular con su PIN.
                       </p>
@@ -1345,23 +1345,23 @@ export default function SuperAdminClient({
                     }}
                     className={`flex items-start gap-3.5 rounded-2xl border-2 p-4 text-left transition ${
                       formPlan === "llave_en_mano"
-                        ? "border-amber-400 bg-amber-500/20 shadow-lg shadow-amber-950/40"
-                        : "border-white/15 bg-black/30 hover:border-white/30"
+                        ? "border-amber-500 bg-amber-50/50 shadow-xs"
+                        : "border-stone-200 bg-stone-50/60 hover:border-stone-300"
                     }`}
                   >
-                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/25 text-amber-300">
+                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
                       <Crown className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-black text-amber-200">
+                        <span className="font-display text-base uppercase tracking-wider text-stone-900">
                           Plan Llave en Mano VIP
                         </span>
-                        <span className="rounded-full bg-amber-400 px-2.5 py-0.5 text-xs font-black text-slate-950">
+                        <span className="rounded-full bg-amber-400 px-2.5 py-0.5 text-xs font-display tracking-wider text-stone-950">
                           $28.000/mes
                         </span>
                       </div>
-                      <p className="mt-1 text-xs text-slate-300">
+                      <p className="mt-1 text-xs text-stone-600">
                         Servicio asistido VIP: tú le gestionas cambios de carta,
                         precios y fotos en 1 clic cuando te escriba por
                         WhatsApp.
@@ -1371,10 +1371,10 @@ export default function SuperAdminClient({
                 </div>
 
                 {/* Día de cobro y Fecha del último pago */}
-                <div className="mt-3.5 grid grid-cols-1 gap-3.5 rounded-2xl border border-white/15 bg-black/30 p-4 sm:grid-cols-2">
+                <div className="mt-3.5 grid grid-cols-1 gap-3.5 rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1 flex items-center gap-1.5 text-xs font-bold text-slate-300">
-                      <Calendar className="h-3.5 w-3.5 text-amber-400" />
+                    <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-600">
+                      <Calendar className="h-3.5 w-3.5 text-[#EA580C]" />
                       Día de cobro mensual (1 al 31)
                     </label>
                     <input
@@ -1390,20 +1390,20 @@ export default function SuperAdminClient({
                             : 5
                         );
                       }}
-                      className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none"
+                      className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-xs font-bold text-stone-900 focus:border-[#EA580C] focus:outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="mb-1 flex items-center gap-1.5 text-xs font-bold text-slate-300">
-                      <Calendar className="h-3.5 w-3.5 text-emerald-400" />
+                    <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-600">
+                      <Calendar className="h-3.5 w-3.5 text-emerald-600" />
                       Fecha del último pago registrado
                     </label>
                     <input
                       type="date"
                       value={formFechaUltimoPago}
                       onChange={(e) => setFormFechaUltimoPago(e.target.value)}
-                      className="w-full rounded-xl border border-white/20 bg-white px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none"
+                      className="w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-xs font-bold text-stone-900 focus:border-[#EA580C] focus:outline-none"
                     />
                   </div>
                 </div>
@@ -1411,18 +1411,18 @@ export default function SuperAdminClient({
 
               {/* 3. Identidad Visual (Exclusivo del SuperAdmin) */}
               <div>
-                <h3 className="mb-2.5 text-xs font-extrabold uppercase tracking-wider text-amber-300">
+                <h3 className="mb-2.5 text-xs font-display uppercase tracking-wider text-stone-900">
                   3. Identidad Visual (Exclusivo del SuperAdmin — Bucket &apos;platos&apos;)
                 </h3>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   {/* Cargador de Logo */}
-                  <div className="rounded-2xl border border-white/15 bg-black/30 p-4">
-                    <span className="block text-xs font-extrabold text-white">
+                  <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
+                    <span className="block text-xs font-bold uppercase tracking-wider text-stone-700">
                       Logo Oficial del Negocio
                     </span>
                     <div className="mt-3 flex items-center gap-3.5">
-                      <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-white/25 bg-slate-900">
+                      <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-stone-300 bg-white shadow-xs">
                         {formLogoUrl ? (
                           <img
                             src={formLogoUrl}
@@ -1430,11 +1430,11 @@ export default function SuperAdminClient({
                             className="h-full w-full object-contain p-1"
                           />
                         ) : (
-                          <Camera className="h-6 w-6 text-slate-500" />
+                          <Camera className="h-6 w-6 text-stone-400" />
                         )}
                         {subiendoLogo && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-                            <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                            <Loader2 className="h-5 w-5 animate-spin text-white" />
                           </div>
                         )}
                       </div>
@@ -1455,7 +1455,7 @@ export default function SuperAdminClient({
                           type="button"
                           disabled={subiendoLogo}
                           onClick={() => inputLogoRef.current?.click()}
-                          className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-400 px-3.5 py-2 text-xs font-black text-slate-950 shadow transition hover:bg-amber-300"
+                          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#18181B] hover:bg-black px-3.5 py-2 text-xs font-display uppercase tracking-wider text-white shadow-xs transition"
                         >
                           <ImagePlus className="h-4 w-4" />
                           <span>
@@ -1469,19 +1469,19 @@ export default function SuperAdminClient({
                           value={formLogoUrl}
                           onChange={(e) => setFormLogoUrl(e.target.value)}
                           placeholder="O pega URL del logo..."
-                          className="w-full rounded-lg border border-white/15 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-900"
+                          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:outline-none"
                         />
                       </div>
                     </div>
                   </div>
 
                   {/* Cargador de Foto de Portada (Banner) */}
-                  <div className="rounded-2xl border border-white/15 bg-black/30 p-4">
-                    <span className="block text-xs font-extrabold text-white">
+                  <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4">
+                    <span className="block text-xs font-bold uppercase tracking-wider text-stone-700">
                       Foto de Portada (Banner HD)
                     </span>
                     <div className="mt-3 flex items-center gap-3.5">
-                      <div className="relative flex h-20 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-white/25 bg-slate-900">
+                      <div className="relative flex h-20 w-28 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-stone-300 bg-white shadow-xs">
                         {formBannerUrl ? (
                           <img
                             src={formBannerUrl}
@@ -1489,11 +1489,11 @@ export default function SuperAdminClient({
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <Camera className="h-6 w-6 text-slate-500" />
+                          <Camera className="h-6 w-6 text-stone-400" />
                         )}
                         {subiendoBanner && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-                            <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+                            <Loader2 className="h-5 w-5 animate-spin text-white" />
                           </div>
                         )}
                       </div>
@@ -1514,7 +1514,7 @@ export default function SuperAdminClient({
                           type="button"
                           disabled={subiendoBanner}
                           onClick={() => inputBannerRef.current?.click()}
-                          className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-amber-400 px-3.5 py-2 text-xs font-black text-slate-950 shadow transition hover:bg-amber-300"
+                          className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#18181B] hover:bg-black px-3.5 py-2 text-xs font-display uppercase tracking-wider text-white shadow-xs transition"
                         >
                           <ImagePlus className="h-4 w-4" />
                           <span>
@@ -1528,7 +1528,7 @@ export default function SuperAdminClient({
                           value={formBannerUrl}
                           onChange={(e) => setFormBannerUrl(e.target.value)}
                           placeholder="O pega URL del banner..."
-                          className="w-full rounded-lg border border-white/15 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-900"
+                          className="w-full rounded-xl border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:outline-none"
                         />
                       </div>
                     </div>
@@ -1536,10 +1536,10 @@ export default function SuperAdminClient({
                 </div>
 
                 {/* Cargador de Video de Portada (Opcional) */}
-                <div className="mt-4 rounded-2xl border border-amber-400/30 bg-black/35 p-4">
+                <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-white">
-                      <Video className="h-4 w-4 text-amber-400" />
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-800">
+                      <Video className="h-4 w-4 text-[#EA580C]" />
                       🎥 Video de Portada (Opcional)
                     </span>
                     {formBannerVideoUrl && (
@@ -1551,7 +1551,7 @@ export default function SuperAdminClient({
                             "🗑️ Video eliminado del formulario. Se usará la Foto de Portada estática."
                           );
                         }}
-                        className="inline-flex items-center gap-1.5 rounded-xl border border-rose-500/40 bg-rose-500/20 px-3 py-1.5 text-[11px] font-extrabold text-rose-200 transition hover:bg-rose-600 hover:text-white active:scale-95"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-3 py-1.5 text-[11px] font-bold text-rose-700 transition hover:bg-rose-100 active:scale-95"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         <span>🗑️ Eliminar Video</span>
@@ -1559,14 +1559,14 @@ export default function SuperAdminClient({
                     )}
                   </div>
 
-                  <p className="mt-1.5 rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-[11px] font-semibold text-amber-200">
+                  <p className="mt-1.5 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-900">
                     💡 Recomendación: Videos cortos de 5 a 10 segundos, formato
                     horizontal y peso menor a 15 MB para carga rápida en
                     celulares
                   </p>
 
                   <div className="mt-3 flex flex-col gap-3.5 sm:flex-row sm:items-center">
-                    <div className="relative flex h-24 w-44 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-white/25 bg-slate-900">
+                    <div className="relative flex h-24 w-44 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-stone-300 bg-white shadow-xs">
                       {formBannerVideoUrl ? (
                         <video
                           key={formBannerVideoUrl}
@@ -1579,16 +1579,16 @@ export default function SuperAdminClient({
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex flex-col items-center gap-1 text-center text-slate-400">
-                          <Video className="h-6 w-6 text-slate-500" />
-                          <span className="text-[10px] font-bold">
+                        <div className="flex flex-col items-center gap-1 text-center text-stone-400">
+                          <Video className="h-6 w-6 text-stone-400" />
+                          <span className="text-[10px] font-bold uppercase">
                             Sin video (usa imagen)
                           </span>
                         </div>
                       )}
                       {subiendoVideo && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/75 text-[10px] font-bold text-amber-300">
-                          <Loader2 className="h-5 w-5 animate-spin text-amber-400" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 text-[10px] font-bold text-white">
+                          <Loader2 className="h-5 w-5 animate-spin text-white" />
                           <span>Subiendo...</span>
                         </div>
                       )}
@@ -1610,7 +1610,7 @@ export default function SuperAdminClient({
                         type="button"
                         disabled={subiendoVideo}
                         onClick={() => inputVideoRef.current?.click()}
-                        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-4 py-2.5 text-xs font-black text-slate-950 shadow transition hover:from-amber-300 hover:to-amber-400 sm:w-auto"
+                        className="inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#EA580C] hover:bg-[#c2410c] px-4 py-2 text-xs font-display uppercase tracking-wider text-white shadow-xs transition sm:w-auto"
                       >
                         <Video className="h-4 w-4" />
                         <span>
@@ -1627,7 +1627,7 @@ export default function SuperAdminClient({
                         value={formBannerVideoUrl}
                         onChange={(e) => setFormBannerVideoUrl(e.target.value)}
                         placeholder="O pega URL del video (.mp4 / .webm)..."
-                        className="w-full rounded-lg border border-white/15 bg-white px-2.5 py-1.5 text-[11px] font-medium text-slate-900 placeholder:text-slate-400"
+                        className="w-full rounded-xl border border-stone-200 bg-white px-3 py-1.5 text-xs font-medium text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:outline-none"
                       />
                     </div>
                   </div>
@@ -1635,7 +1635,7 @@ export default function SuperAdminClient({
               </div>
 
               {errorForm && (
-                <p className="rounded-xl border border-rose-500/40 bg-rose-500/20 px-4 py-2.5 text-xs font-bold text-rose-200">
+                <p className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-2.5 text-xs font-bold text-rose-800">
                   {errorForm}
                 </p>
               )}
@@ -1644,7 +1644,7 @@ export default function SuperAdminClient({
                 <button
                   type="button"
                   onClick={() => setMostrarFormulario(false)}
-                  className="rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-xs font-bold text-white hover:bg-white/20"
+                  className="rounded-full border border-stone-200 bg-stone-100 hover:bg-stone-200 px-5 py-2.5 text-xs font-display uppercase tracking-wider text-stone-700 transition"
                 >
                   Cancelar
                 </button>
@@ -1656,7 +1656,7 @@ export default function SuperAdminClient({
                     subiendoBanner ||
                     subiendoVideo
                   }
-                  className="inline-flex items-center gap-2 rounded-2xl bg-emerald-500 px-6 py-3 text-xs font-black text-slate-950 shadow-lg transition hover:bg-emerald-400 disabled:opacity-50 sm:text-sm"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] px-6 py-2.5 text-xs font-display uppercase tracking-wider text-white shadow-xs transition disabled:opacity-50 sm:text-sm"
                 >
                   {guardandoForm ? (
                     <>
@@ -1681,11 +1681,11 @@ export default function SuperAdminClient({
 
         {/* C) LISTA DE NEGOCIOS Y HERRAMIENTAS DEL ADMINISTRADOR */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-black uppercase tracking-wider text-slate-200 sm:text-lg">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-base font-display uppercase tracking-wider text-stone-900 sm:text-lg">
               Negocios Registrados ({locales.length})
             </h2>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs font-medium text-stone-500">
               Acceso en 1 clic sin PIN para clientes Llave en Mano
             </span>
           </div>
@@ -1714,28 +1714,28 @@ export default function SuperAdminClient({
                   key={loc.id}
                   className={`overflow-hidden rounded-3xl border transition-all ${
                     activo
-                      ? "border-white/15 bg-slate-900/90 shadow-xl"
-                      : "border-rose-500/35 bg-slate-900/50 opacity-80"
+                      ? "border-stone-200/90 bg-white shadow-xs"
+                      : "border-rose-200 bg-rose-50/40 opacity-80"
                   }`}
                 >
                   {/* Mini Banner de Portada + Badge de Plan + Switch Activo/Suspendido */}
-                  <div className="relative h-28 w-full overflow-hidden bg-slate-800">
+                  <div className="relative h-28 w-full overflow-hidden bg-stone-100">
                     <img
                       src={bannerMostrar}
                       alt={loc.nombre}
-                      className="h-full w-full object-cover opacity-65"
+                      className="h-full w-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-stone-900/30 to-transparent" />
 
                     {/* Badge del Plan Comercial */}
                     <div className="absolute left-3.5 top-3 flex flex-wrap items-center gap-1.5">
                       {esVip ? (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-amber-300/60 bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-1 text-[11px] font-black text-slate-950 shadow-md">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 font-display text-[11px] uppercase tracking-wider text-stone-950 shadow-xs">
                           <Crown className="h-3.5 w-3.5" />
                           VIP Llave en Mano · {formatCLP(precioPlan)}/mes
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-sky-400/50 bg-sky-600/95 px-3 py-1 text-[11px] font-black text-white shadow-md">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-stone-900 px-3 py-1 font-display text-[11px] uppercase tracking-wider text-white shadow-xs">
                           <Zap className="h-3.5 w-3.5" />
                           Autogestionado · {formatCLP(precioPlan)}/mes
                         </span>
@@ -1748,10 +1748,10 @@ export default function SuperAdminClient({
                         type="button"
                         disabled={guardandoSlug === loc.slug}
                         onClick={() => void handleToggleActivo(loc)}
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-extrabold shadow-md transition active:scale-95 ${
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-display text-[11px] uppercase tracking-wider shadow-xs transition active:scale-95 ${
                           activo
-                            ? "border-emerald-300/50 bg-emerald-600 text-white hover:bg-emerald-500"
-                            : "border-rose-300/50 bg-rose-600 text-white hover:bg-rose-500"
+                            ? "border border-emerald-300 bg-emerald-600 text-white hover:bg-emerald-700"
+                            : "border border-rose-300 bg-rose-600 text-white hover:bg-rose-700"
                         }`}
                       >
                         <span>
@@ -1764,7 +1764,7 @@ export default function SuperAdminClient({
                   {/* Cuerpo de la Tarjeta del Negocio */}
                   <div className="p-4 sm:p-5">
                     <div className="flex items-start gap-3.5">
-                      <div className="-mt-10 h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-white/30 bg-slate-950 p-1 shadow-xl">
+                      <div className="-mt-10 h-16 w-16 shrink-0 overflow-hidden rounded-2xl border-2 border-white bg-white p-1 shadow-md">
                         <img
                           src={logoMostrar}
                           alt={loc.nombre}
@@ -1773,10 +1773,10 @@ export default function SuperAdminClient({
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <h3 className="truncate text-base font-black text-white sm:text-lg">
+                        <h3 className="truncate font-display text-lg uppercase tracking-wide text-stone-900 sm:text-xl">
                           {loc.nombre}
                         </h3>
-                        <p className="truncate text-xs font-bold text-amber-300">
+                        <p className="truncate text-xs font-bold uppercase tracking-wider text-[#EA580C]">
                           {loc.rubro}
                         </p>
                       </div>
@@ -1786,18 +1786,18 @@ export default function SuperAdminClient({
                     <div
                       className={`mt-3.5 rounded-2xl border p-3 ${
                         estadoCobro.alDia
-                          ? "border-emerald-500/35 bg-emerald-950/25"
-                          : "border-rose-500/50 bg-rose-950/35"
+                          ? "border-emerald-200 bg-emerald-50/60"
+                          : "border-rose-200 bg-rose-50/80"
                       }`}
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         {estadoCobro.alDia ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/40 bg-emerald-500/20 px-3 py-1 text-xs font-extrabold text-emerald-200">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
                             🟢 Al día (Vence el {estadoCobro.diaCobro} de este
                             mes)
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-400/50 bg-rose-600 px-3 py-1 text-xs font-black text-white shadow-sm">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-rose-600 px-3 py-1 text-xs font-bold text-white shadow-xs">
                             <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                             <span>
                               ⚠️ Pago Vencido ({formatCLP(precioPlan)} CLP)
@@ -1805,7 +1805,7 @@ export default function SuperAdminClient({
                           </span>
                         )}
 
-                        <span className="text-[11px] font-semibold text-slate-400">
+                        <span className="text-[11px] font-semibold text-stone-500">
                           Últ. pago: {estadoCobro.fechaUltimoPago}
                         </span>
                       </div>
@@ -1815,7 +1815,7 @@ export default function SuperAdminClient({
                           href={urlCobroWhatsApp}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#25D366] px-3 py-2 text-xs font-black text-white shadow-md transition hover:bg-[#20bd5a] active:scale-95"
+                          className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#25D366] hover:bg-[#20bd5a] px-3 py-2 text-xs font-display uppercase tracking-wider text-white shadow-xs transition active:scale-95"
                         >
                           <MessageCircle className="h-3.5 w-3.5 fill-white" />
                           <span>💬 Cobrar por WhatsApp</span>
@@ -1825,7 +1825,7 @@ export default function SuperAdminClient({
                           type="button"
                           disabled={registrandoPagoSlug === loc.slug}
                           onClick={() => void handleRegistrarPago(loc)}
-                          className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-emerald-400/40 bg-emerald-500/20 px-3 py-2 text-xs font-black text-emerald-200 transition hover:bg-emerald-500 hover:text-slate-950 active:scale-95 disabled:opacity-50"
+                          className="inline-flex items-center justify-center gap-1.5 rounded-full border border-emerald-300 bg-white hover:bg-emerald-50 px-3 py-2 text-xs font-display uppercase tracking-wider text-emerald-800 transition active:scale-95 disabled:opacity-50"
                         >
                           {registrandoPagoSlug === loc.slug ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1838,10 +1838,10 @@ export default function SuperAdminClient({
                     </div>
 
                     {/* Datos rápidos: Teléfono, Dirección y PIN de Acceso con botón 👁️ y edición inmediata */}
-                    <div className="mt-3 space-y-2.5 rounded-2xl border border-white/10 bg-black/30 p-3 text-xs">
+                    <div className="mt-3 space-y-2.5 rounded-2xl border border-stone-200 bg-stone-50 p-3 text-xs">
                       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                        <div className="flex items-center gap-1.5 text-slate-300">
-                          <Phone className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+                        <div className="flex items-center gap-1.5 text-stone-700">
+                          <Phone className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
                           <span className="truncate font-semibold">
                             {formatPhoneDisplay(
                               loc.telefono_whatsapp || loc.telefonoWhatsapp
@@ -1849,8 +1849,8 @@ export default function SuperAdminClient({
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-slate-400">
-                          <MapPin className="h-3.5 w-3.5 shrink-0 text-sky-400" />
+                        <div className="flex items-center gap-1.5 text-stone-500">
+                          <MapPin className="h-3.5 w-3.5 shrink-0 text-[#EA580C]" />
                           <span className="truncate">
                             {loc.direccion || loc.direccionDetalle}
                           </span>
@@ -1858,14 +1858,14 @@ export default function SuperAdminClient({
                       </div>
 
                       {/* Campo PIN de Acceso: Enmascarado (••••) con botón de ojo (👁️) y edición inmediata */}
-                      <div className="rounded-xl border border-amber-400/25 bg-slate-950/80 p-2.5">
+                      <div className="rounded-xl border border-stone-200 bg-white p-2.5">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div className="flex items-center gap-2">
-                            <KeyRound className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-                            <span className="font-bold text-slate-300">
-                              PIN de Acceso:
+                            <KeyRound className="h-3.5 w-3.5 shrink-0 text-stone-600" />
+                            <span className="font-bold uppercase tracking-wider text-stone-600 text-[11px]">
+                              PIN:
                             </span>
-                            <strong className="rounded-lg border border-white/15 bg-white/10 px-2.5 py-0.5 font-mono text-sm tracking-widest text-amber-300">
+                            <strong className="rounded-lg border border-stone-200 bg-stone-100 px-2.5 py-0.5 font-mono text-xs font-bold tracking-widest text-stone-900">
                               {pinVisiblePorSlug[loc.slug]
                                 ? loc.pin || "1234"
                                 : "••••"}
@@ -1888,16 +1888,16 @@ export default function SuperAdminClient({
                                   ? "Ocultar PIN"
                                   : "Revelar PIN"
                               }
-                              className="inline-flex items-center gap-1 rounded-lg border border-white/15 bg-white/10 px-2 py-1 text-[11px] font-bold text-slate-200 transition hover:bg-white/20 active:scale-95"
+                              className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-stone-50 hover:bg-stone-100 px-2.5 py-1 text-[11px] font-bold text-stone-700 transition active:scale-95"
                             >
                               {pinVisiblePorSlug[loc.slug] ? (
                                 <>
-                                  <EyeOff className="h-3.5 w-3.5 text-amber-300" />
+                                  <EyeOff className="h-3.5 w-3.5 text-stone-600" />
                                   <span>Ocultar</span>
                                 </>
                               ) : (
                                 <>
-                                  <Eye className="h-3.5 w-3.5 text-amber-300" />
+                                  <Eye className="h-3.5 w-3.5 text-stone-600" />
                                   <span>👁️ Ver</span>
                                 </>
                               )}
@@ -1919,7 +1919,7 @@ export default function SuperAdminClient({
                                 }));
                               }
                             }}
-                            className="inline-flex items-center gap-1 rounded-lg border border-amber-400/40 bg-amber-400/15 px-2.5 py-1 text-[11px] font-extrabold text-amber-300 transition hover:bg-amber-400/25 active:scale-95"
+                            className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-stone-50 hover:bg-stone-100 px-2.5 py-1 text-[11px] font-bold text-stone-700 transition active:scale-95"
                           >
                             <Edit3 className="h-3 w-3" />
                             <span>
@@ -1931,7 +1931,7 @@ export default function SuperAdminClient({
                         </div>
 
                         {pinEditandoPorSlug[loc.slug] && (
-                          <div className="mt-2.5 flex items-center gap-2 border-t border-white/10 pt-2.5">
+                          <div className="mt-2.5 flex items-center gap-2 border-t border-stone-100 pt-2.5">
                             <input
                               type="text"
                               inputMode="numeric"
@@ -1948,13 +1948,13 @@ export default function SuperAdminClient({
                                 }))
                               }
                               placeholder="Nuevo PIN (4 dígitos)"
-                              className="w-36 rounded-lg border border-white/20 bg-white px-2.5 py-1.5 font-mono text-xs font-black tracking-widest text-slate-900 focus:outline-none"
+                              className="w-36 rounded-xl border border-stone-200 bg-stone-50 px-2.5 py-1.5 font-mono text-xs font-bold tracking-widest text-stone-900 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                             />
                             <button
                               type="button"
                               disabled={guardandoPinSlug === loc.slug}
                               onClick={() => void handleGuardarPinRapido(loc)}
-                              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-black text-slate-950 shadow transition hover:bg-emerald-400 active:scale-95 disabled:opacity-50"
+                              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#18181B] hover:bg-black px-3 py-1.5 text-xs font-display uppercase tracking-wider text-white shadow-xs transition active:scale-95 disabled:opacity-50"
                             >
                               {guardandoPinSlug === loc.slug ? (
                                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1973,7 +1973,7 @@ export default function SuperAdminClient({
                       {/* Acceso Directo en 1 clic ("Gestionar Carta" sin PIN) */}
                       <Link
                         href={`/admin/${loc.slug}?superadmin=true`}
-                        className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-2.5 text-xs font-black text-slate-950 shadow-md transition hover:from-amber-300 hover:to-amber-400 active:scale-95"
+                        className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#EA580C] hover:bg-[#c2410c] px-3.5 py-2.5 text-xs font-display uppercase tracking-wider text-white shadow-xs transition active:scale-95"
                       >
                         <Crown className="h-3.5 w-3.5 shrink-0" />
                         <span>Gestionar Carta (1 Clic)</span>
@@ -1983,7 +1983,7 @@ export default function SuperAdminClient({
                       <button
                         type="button"
                         onClick={() => abrirFormularioEditarLocal(loc)}
-                        className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3.5 py-2.5 text-xs font-extrabold text-white transition hover:bg-white/20 active:scale-95"
+                        className="inline-flex items-center justify-center gap-1.5 rounded-full border border-stone-200 bg-stone-100 hover:bg-stone-200 px-3.5 py-2.5 text-xs font-display uppercase tracking-wider text-stone-800 transition active:scale-95"
                       >
                         <Edit3 className="h-3.5 w-3.5" />
                         <span>Editar Local</span>
@@ -1992,7 +1992,7 @@ export default function SuperAdminClient({
                       {/* Ver carta pública */}
                       <Link
                         href={`/${loc.slug}`}
-                        className="inline-flex items-center justify-center rounded-xl border border-white/15 bg-black/35 p-2.5 text-slate-300 transition hover:bg-white/10 hover:text-white"
+                        className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-stone-100 hover:bg-stone-200 p-2.5 text-stone-600 transition"
                         title="Ver menú público"
                       >
                         <ExternalLink className="h-4 w-4" />

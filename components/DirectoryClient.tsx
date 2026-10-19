@@ -358,7 +358,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               className="inline-flex items-center gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white text-[11px] font-black uppercase tracking-widest px-5 py-2.5 shadow-sm transition-all hover:scale-105 active:scale-95"
             >
               <Store className="h-3.5 w-3.5" />
-              <span>PEDIR PARA RETIRO</span>
+              <span>VER LOCALES</span>
             </button>
           </div>
         </div>
@@ -432,24 +432,19 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 ))}
               </div>
 
-              {/* El Gran Plato Central Redondo */}
-              <div className="relative group">
-                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl ring-8 ring-white/95 border-4 border-stone-200 bg-stone-100 transition-transform duration-500 group-hover:scale-[1.02]">
+              {/* El Gran Plato Central Redondo (Clickable hacia el local) */}
+              <Link
+                href={`/${platoActualHero.localSlug}`}
+                className="relative group block cursor-pointer transition-transform hover:scale-[1.02]"
+                title={`Ver carta de ${platoActualHero.localNombre}`}
+              >
+                <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl ring-8 ring-white/95 border-4 border-stone-200 bg-stone-100">
                   <img
                     src={platoActualHero.imagen}
                     alt={platoActualHero.nombre}
                     className="w-full h-full object-cover transition-opacity duration-300"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
-
-                  {/* Botón flotante central de acción */}
-                  <Link
-                    href={`/${platoActualHero.localSlug}`}
-                    className="absolute inset-x-8 bottom-8 sm:bottom-10 bg-[#18181B]/90 hover:bg-[#EA580C] text-white backdrop-blur-md rounded-full py-2.5 px-6 font-display text-lg uppercase tracking-wider transition-all shadow-xl flex items-center justify-center gap-2 hover:scale-105"
-                  >
-                    <span>PEDIR PARA RETIRO</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
                 </div>
 
                 {/* Badge Flotante Tiempo de Preparación */}
@@ -457,7 +452,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   <Clock className="h-3.5 w-3.5 text-[#EA580C]" />
                   <span>{platoActualHero.tiempoEstimado}</span>
                 </div>
-              </div>
+              </Link>
 
               {/* Selector de puntos interactivos debajo del plato */}
               <div className="flex items-center gap-2 mt-6">

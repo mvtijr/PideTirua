@@ -19,6 +19,7 @@
     overscroll-behavior: none;
     overscroll-behavior-y: none;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-x pan-y;
   }
 
   /* Ocultar barra de scroll en móviles para mantener la pantalla 100% estática y limpia */
