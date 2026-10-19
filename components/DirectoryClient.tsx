@@ -267,6 +267,14 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
     });
   }, [locales, busqueda, categoriaActiva, sectorActivo]);
 
+  const scrollHaciaId = (id: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   const scrollADirectorio = () => {
     const el = document.getElementById("directorio-locales");
     if (el) {
@@ -304,18 +312,21 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           <nav className="hidden lg:flex items-center gap-7">
             <a
               href="#directorio-locales"
+              onClick={scrollHaciaId("directorio-locales")}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#EA580C] transition-colors"
             >
               NUESTROS LOCALES
             </a>
             <a
               href="#coverflow-locales"
+              onClick={scrollHaciaId("coverflow-locales")}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#EA580C] transition-colors"
             >
               CARTAS 3D
             </a>
             <a
               href="#sectores-comuna"
+              onClick={scrollHaciaId("sectores-comuna")}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#EA580C] transition-colors"
             >
               SECTORES
@@ -323,6 +334,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             {ofertasDelDia.length > 0 && (
               <a
                 href="#ofertas-hoy"
+                onClick={scrollHaciaId("ofertas-hoy")}
                 className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#EA580C] transition-colors flex items-center gap-1"
               >
                 <span>OFERTAS DEL DÍA</span>
@@ -331,6 +343,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             )}
             <a
               href="#historia-comuna"
+              onClick={scrollHaciaId("historia-comuna")}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#EA580C] transition-colors"
             >
               SABORES LOCALES
@@ -1264,11 +1277,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       <footer className="bg-[#FAF8F5] py-12 text-center text-stone-600">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 space-y-6">
           <div className="flex flex-wrap justify-center items-center gap-6 text-[11px] font-bold tracking-widest uppercase text-stone-700">
-            <a href="#directorio-locales" className="hover:text-[#EA580C] transition">NUESTROS LOCALES</a>
-            <a href="#coverflow-locales" className="hover:text-[#EA580C] transition">CARTAS 3D</a>
-            <a href="#sectores-comuna" className="hover:text-[#EA580C] transition">SECTORES</a>
-            <a href="#ofertas-hoy" className="hover:text-[#EA580C] transition">OFERTAS DEL DÍA</a>
-            <a href="#historia-comuna" className="hover:text-[#EA580C] transition">SABORES LOCALES</a>
+            <a href="#directorio-locales" onClick={scrollHaciaId("directorio-locales")} className="hover:text-[#EA580C] transition">NUESTROS LOCALES</a>
+            <a href="#coverflow-locales" onClick={scrollHaciaId("coverflow-locales")} className="hover:text-[#EA580C] transition">CARTAS 3D</a>
+            <a href="#sectores-comuna" onClick={scrollHaciaId("sectores-comuna")} className="hover:text-[#EA580C] transition">SECTORES</a>
+            <a href="#ofertas-hoy" onClick={scrollHaciaId("ofertas-hoy")} className="hover:text-[#EA580C] transition">OFERTAS DEL DÍA</a>
+            <a href="#historia-comuna" onClick={scrollHaciaId("historia-comuna")} className="hover:text-[#EA580C] transition">SABORES LOCALES</a>
             <Link href="/superadmin" className="hover:text-[#EA580C] transition">PANEL ADMIN</Link>
           </div>
 

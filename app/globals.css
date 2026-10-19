@@ -8,25 +8,35 @@
     margin: 0;
     padding: 0;
   }
-  body {
-    overscroll-behavior: none;
-  }
 }
 
+/* Scrollbar visible, elegante y arrastrable con el mouse en desktop */
 ::-webkit-scrollbar {
-  display: none;
+  width: 10px;
+  height: 10px;
 }
 
+::-webkit-scrollbar-track {
+  background: #FAF8F5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D6D3D1;
+  border-radius: 9999px;
+  border: 2px solid #FAF8F5;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #EA580C;
+}
+
+/* Ocultar barra de desplazamiento ÚNICAMENTE en componentes con .no-scrollbar (carruseles horizontales) */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-html {
-  scroll-behavior: smooth;
 }
 
 html,
