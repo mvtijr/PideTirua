@@ -553,7 +553,7 @@ export default function KitchenMonitor({
           </p>
         </div>
       ) : (
-        <div className="mt-4 space-y-3.5">
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {pedidosMostrados.map((pedido) => {
             const codigoCorto = pedido.id.slice(0, 4).toUpperCase();
             const esPendiente = pedido.estado === "pendiente";

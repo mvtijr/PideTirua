@@ -43,6 +43,8 @@ import {
   Moon,
   Receipt,
   Plus,
+  ChefHat,
+  Utensils,
 } from "lucide-react";
 import { Local, Producto, GrupoOpcion } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
@@ -260,8 +262,8 @@ export default function AdminLocalClient({
 
   // Pestaña o sección activa en el panel admin
   const [pestanaActiva, setPestañaActiva] = useState<
-    "todas" | "reportes" | "cocina" | "carta"
-  >("todas");
+    "todas" | "reportes" | "cocina" | "carta" | "ajustes"
+  >("carta");
 
   // Estado del formulario "Subir Nuevo Plato"
   const [mostrarFormNuevo, setMostrarFormNuevo] = useState<boolean>(false);
@@ -1652,7 +1654,7 @@ export default function AdminLocalClient({
       {/* Barra superior especial si se accedió desde el Panel SuperAdmin */}
       {esSuperAdmin && (
         <div className="no-print relative z-40 border-b border-amber-400/35 bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/20 px-4 py-2 text-amber-200 backdrop-blur-md">
-          <div className="mx-auto flex max-w-xl flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-2 px-4 sm:px-6 lg:px-8 text-xs">
             <span className="inline-flex items-center gap-1.5 font-extrabold text-amber-300">
               <Crown className="h-4 w-4 shrink-0" />
               Modo SuperAdmin · Gestionando Carta de {local.nombre}
@@ -1668,11 +1670,11 @@ export default function AdminLocalClient({
         </div>
       )}
 
-      {/* Cabecera Fija Mobile-First con la paleta del local */}
+      {/* Cabecera Fija de Escritorio con la paleta del local */}
       <header
         className={`no-print sticky top-0 z-30 border-b backdrop-blur-xl shadow-xs ${brand.headerBg}`}
       >
-        <div className="mx-auto flex max-w-xl items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <div
               className="h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-stone-200 bg-white p-0.5 shadow-xs"
@@ -1700,6 +1702,15 @@ export default function AdminLocalClient({
                     Autogestionado
                   </span>
                 )}
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                    local.abierto
+                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                      : "bg-rose-100 text-rose-800 border border-rose-300"
+                  }`}
+                >
+                  {local.abierto ? "🟢 En línea" : "🔴 Cerrado"}
+                </span>
               </div>
               <h1 className="truncate text-lg sm:text-xl font-display uppercase tracking-wide text-stone-900">
                 {local.nombre}
@@ -1710,11 +1721,12 @@ export default function AdminLocalClient({
           <div className="flex shrink-0 items-center gap-2">
             <Link
               href={`/${local.slug}`}
-              className="inline-flex items-center gap-1 rounded-full px-3.5 py-1.5 text-xs font-bold text-white bg-[#18181B] hover:bg-black shadow-xs transition"
-              title="Ver carta pública"
+              target="_blank"
+              className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold text-white bg-[#18181B] hover:bg-black shadow-xs transition"
+              title="Abrir carta pública del cliente"
             >
               <ExternalLink className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Ver Carta</span>
+              <span className="hidden sm:inline">Ver Carta Pública</span>
             </Link>
 
             <button
@@ -1723,28 +1735,28 @@ export default function AdminLocalClient({
               className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-bold text-stone-700 transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 active:scale-95 shadow-xs"
             >
               <LogOut className="h-3.5 w-3.5" />
-              <span>Cerrar Sesión</span>
+              <span className="hidden sm:inline">Cerrar Sesión</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-xl space-y-6 px-4 pt-5 print:max-w-none print:space-y-0 print:p-0">
-        {/* PREVISUALIZACIÓN DE IDENTIDAD VISUAL (SOLO LECTURA PARA EL DUEÑO) */}
+      <main className="relative z-10 mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8 pt-6 pb-16 print:max-w-none print:space-y-0 print:p-0">
+        {/* PREVISUALIZACIÓN DE IDENTIDAD VISUAL / HERO DE ESCRITORIO */}
         <section
           className={`no-print overflow-hidden rounded-3xl border shadow-sm ${brand.panelCardBg}`}
         >
-          <div className="relative h-28 w-full overflow-hidden bg-stone-900 sm:h-32">
+          <div className="relative h-32 w-full overflow-hidden bg-stone-900 sm:h-44 md:h-52">
             <img
               src={bannerOficial}
               alt={`Portada de ${local.nombre}`}
               className="h-full w-full object-cover opacity-85"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-            <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
+            <div className="absolute bottom-4 left-4 right-4 sm:left-6 sm:right-6 flex flex-wrap items-end justify-between gap-3">
+              <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                 <div
-                  className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl border-2 border-white/60 bg-white p-1 shadow-md"
+                  className="h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-2xl border-2 border-white/80 bg-white p-1 shadow-md"
                 >
                   <img
                     src={logoOficial}
@@ -1753,339 +1765,792 @@ export default function AdminLocalClient({
                   />
                 </div>
                 <div className="min-w-0">
-                  <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/55 px-2.5 py-0.5 text-[10px] font-bold text-white/90 backdrop-blur-xs">
-                    <ShieldCheck className="h-3 w-3 text-emerald-400" />
-                    Identidad Visual Oficial
-                  </span>
-                  <p className="mt-0.5 truncate text-sm font-black text-white">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/60 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold text-white/95 backdrop-blur-xs">
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                      Panel Administrativo Oficial
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] sm:text-xs font-black uppercase tracking-wider ${
+                        local.abierto
+                          ? "bg-emerald-500 text-slate-950 shadow-xs"
+                          : "bg-rose-500 text-white shadow-xs"
+                      }`}
+                    >
+                      {local.abierto ? "🟢 Local Abierto" : "🔴 Local Cerrado"}
+                    </span>
+                  </div>
+                  <h1 className="mt-1 truncate text-xl sm:text-2xl md:text-3xl font-display uppercase tracking-wide text-white drop-shadow-sm">
                     {local.nombre}
+                  </h1>
+                  <p className="hidden sm:block text-xs font-semibold text-white/85">
+                    {local.rubro} · {local.ubicacion} · Horario: {local.horario} · Tel: {local.telefono_whatsapp || local.telefonoWhatsapp || "No configurado"}
                   </p>
                 </div>
               </div>
               {esSuperAdmin && (
                 <Link
                   href="/superadmin"
-                  className="shrink-0 rounded-full border border-amber-400/50 bg-amber-400 px-3 py-1.5 text-[10px] font-black uppercase text-stone-950 shadow-xs transition hover:bg-amber-300"
+                  className="shrink-0 rounded-full border border-amber-400/50 bg-amber-400 px-3.5 py-2 text-xs font-black uppercase text-stone-950 shadow-xs transition hover:bg-amber-300"
                 >
-                  Cambiar Logo/Banner
+                  Cambiar Logo/Banner en SuperAdmin
                 </Link>
               )}
             </div>
           </div>
-          <div className="flex items-center justify-between gap-2 px-4 py-2.5 text-[11px] text-stone-500">
+          <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 text-xs text-stone-500 bg-stone-50/50 border-t border-stone-200/60">
             <span>
               🎨 El Logo y la Foto de Portada son administrados por{" "}
-              <strong>PideTirúa</strong> para garantizar máxima calidad visual.
+              <strong>PideTirúa</strong> para garantizar máxima calidad visual en computadores y celulares.
+            </span>
+            <span className="font-semibold text-stone-600">
+              Tiempo estimado de retiro: <strong>{local.tiempo_estimado || "20-30 min"}</strong>
             </span>
           </div>
         </section>
 
-        {/* NAVEGACIÓN DESTACADA POR PESTAÑAS DEL PANEL ADMIN */}
-        <div className="no-print -mt-1 flex items-center gap-1.5 overflow-x-auto rounded-full border border-stone-200/90 bg-white p-1.5 shadow-sm scrollbar-none">
-          <button
-            type="button"
-            onClick={() => setPestañaActiva("todas")}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
-              pestanaActiva === "todas"
-                ? "bg-[#18181B] text-white shadow-xs"
-                : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
-            }`}
-          >
-            <span>👁️ Ver Todo</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setPestañaActiva("reportes")}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
-              pestanaActiva === "reportes"
-                ? "bg-emerald-600 text-white shadow-xs"
-                : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
-            }`}
-          >
-            <BarChart3 className="h-3.5 w-3.5" />
-            <span>📊 Ventas</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setPestañaActiva("cocina")}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
-              pestanaActiva === "cocina"
-                ? "bg-amber-500 text-stone-950 shadow-xs"
-                : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
-            }`}
-          >
-            <span>👨‍🍳 Cocina</span>
-          </button>
-
+        {/* NAVEGACIÓN MODERNA DE ESCRITORIO POR PESTAÑAS */}
+        <div className="no-print flex items-center gap-2 overflow-x-auto rounded-2xl border border-stone-200/90 bg-white p-2 shadow-sm scrollbar-none">
           <button
             type="button"
             onClick={() => setPestañaActiva("carta")}
-            className={`flex flex-1 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
+            className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "carta"
                 ? "bg-[#18181B] text-white shadow-xs"
                 : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
             }`}
           >
-            <span>🍽️ Carta</span>
+            <Utensils className="h-4 w-4" />
+            <span>🍽️ Carta & Platos</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPestañaActiva("cocina")}
+            className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
+              pestanaActiva === "cocina"
+                ? "bg-amber-500 text-stone-950 shadow-xs"
+                : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
+            }`}
+          >
+            <ChefHat className="h-4 w-4" />
+            <span>👨‍🍳 Monitor Cocina</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPestañaActiva("reportes")}
+            className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
+              pestanaActiva === "reportes"
+                ? "bg-emerald-600 text-white shadow-xs"
+                : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
+            }`}
+          >
+            <BarChart3 className="h-4 w-4" />
+            <span>📊 Ventas & Métricas</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPestañaActiva("ajustes")}
+            className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
+              pestanaActiva === "ajustes"
+                ? "bg-indigo-600 text-white shadow-xs"
+                : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
+            }`}
+          >
+            <Settings className="h-4 w-4" />
+            <span>⚙️ Ajustes & Local</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPestañaActiva("todas")}
+            className={`flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
+              pestanaActiva === "todas"
+                ? "bg-stone-800 text-white shadow-xs"
+                : "text-stone-500 hover:text-stone-900 hover:bg-stone-100"
+            }`}
+            title="Mostrar todas las secciones organizadas en una sola página"
+          >
+            <span>👁️ Ver Todo</span>
           </button>
         </div>
 
-        {/* 1. CONTROL MAESTRO: Switch grande para estado Abierto / Cerrado */}
-        {(pestanaActiva === "carta" || pestanaActiva === "todas") && (
-          <section
-            className={`no-print rounded-3xl border p-5 shadow-sm ${brand.panelCardBg}`}
-          >
-            <div className="flex items-center justify-between gap-2">
-              <span
-                className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
-              >
-                <Store className="h-4 w-4" />
-                Control Maestro del Local
-              </span>
-              <span className={`text-xs font-semibold ${brand.subtitleText}`}>
-                Horario: {local.horario}
-              </span>
-            </div>
-
-            <p className={`mt-1 text-xs ${brand.subtitleText}`}>
-              Toca el interruptor para abrir o cerrar la recepción de pedidos en
-              tu carta digital al instante:
-            </p>
-
-            <button
-              type="button"
-              disabled={guardandoId === "local-abierto"}
-              onClick={handleToggleAbierto}
-              className={`mt-4 flex w-full items-center justify-between rounded-2xl border-2 px-5 py-4 text-left shadow-md transition-all active:scale-[0.99] ${
-                local.abierto
-                  ? "border-emerald-400 bg-emerald-600 text-white shadow-emerald-900/20 hover:bg-emerald-500"
-                  : "border-rose-400 bg-rose-600 text-white shadow-rose-900/20 hover:bg-rose-500"
-              }`}
-            >
-              <div>
-                <span className="block text-[11px] font-bold uppercase tracking-wider text-white/85">
-                  Estado actual en vivo
-                </span>
-                <span className="mt-0.5 block text-lg font-black sm:text-xl">
-                  {local.abierto ? "🟢 Local Abierto" : "🔴 Local Cerrado"}
-                </span>
-                <span className="mt-0.5 block text-xs font-medium text-white/90">
-                  {local.abierto
-                    ? "Recibiendo pedidos por WhatsApp"
-                    : "Carrito bloqueado · Solo lectura de carta"}
-                </span>
-              </div>
-
-              <div className="flex flex-col items-end gap-1">
-                <div
-                  className={`relative flex h-9 w-16 items-center rounded-full p-1 transition-colors ${
-                    local.abierto ? "bg-emerald-950/45" : "bg-rose-950/45"
-                  }`}
-                >
-                  <div
-                    className={`h-7 w-7 rounded-full bg-white shadow-md transition-transform ${
-                      local.abierto ? "translate-x-7" : "translate-x-0"
-                    }`}
-                  />
+        {/* PESTAÑA: AJUSTES & OPERACIÓN DEL LOCAL (2 COLUMNAS EN ESCRITORIO) */}
+        {(pestanaActiva === "ajustes" || pestanaActiva === "todas") && (
+          <div className="space-y-6">
+            <div className="no-print flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200/90 bg-white p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700">
+                  <Settings className="h-5 w-5" />
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
-                  {guardandoId === "local-abierto"
-                    ? "Guardando..."
-                    : "Tocar para cambiar"}
-                </span>
-              </div>
-            </button>
-
-            {/* Resumen rápido de platos y botón rápido para Cartel QR */}
-            <div className="mt-4 grid grid-cols-2 gap-2.5 text-center">
-              <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-2.5">
-                <span className="block text-xl font-display text-emerald-800">
-                  {productosDisponibles}
-                </span>
-                <span className="text-[11px] font-bold text-emerald-700">
-                  Platos Disponibles
-                </span>
-              </div>
-              <div className="rounded-2xl border border-stone-200 bg-stone-50 p-2.5">
-                <span className="block text-xl font-display text-stone-800">
-                  {totalProductos - productosDisponibles}
-                </span>
-                <span className={`text-[11px] font-bold ${brand.subtitleText}`}>
-                  Platos Agotados
-                </span>
-              </div>
-            </div>
-
-            {/* MÓDULO 3: Control de Demora y Avisos de Contingencia en Vivo */}
-            <div className="mt-4 pt-4 border-t border-stone-200/90">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-stone-800 flex items-center gap-1.5">
-                  <Clock className="h-4 w-4 text-amber-600" />
-                  Tiempo Estimado de Espera
-                </span>
-                <span className="text-xs font-black text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
-                  {tiempoEstimado}
-                </span>
-              </div>
-              <p className="mt-1 text-[11px] text-stone-500">
-                Selecciona la demora actual para informar a tus clientes en la cabecera de la carta:
-              </p>
-              <div className="mt-2.5 grid grid-cols-3 gap-2">
-                {[
-                  { valor: "15-25 min", etiqueta: "⚡ 15-25 min", desc: "Rápido" },
-                  { valor: "30-45 min", etiqueta: "🟡 30-45 min", desc: "Normal" },
-                  { valor: "50-60 min", etiqueta: "🔥 50-60 min", desc: "Demorado" },
-                ].map((item) => {
-                  const activo = tiempoEstimado === item.valor;
-                  return (
-                    <button
-                      key={item.valor}
-                      type="button"
-                      disabled={guardandoId === "tiempo-estimado"}
-                      onClick={() => handleActualizarTiempoEstimado(item.valor)}
-                      className={`flex flex-col items-center justify-center rounded-2xl py-2.5 px-2 border text-xs font-extrabold transition-all active:scale-95 ${
-                        activo
-                          ? "border-amber-500 bg-amber-50 text-amber-950 shadow-xs ring-2 ring-amber-400"
-                          : "border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100"
-                      }`}
-                    >
-                      <span className="font-display tracking-wide">{item.etiqueta}</span>
-                      <span className="text-[10px] font-medium opacity-75">{item.desc}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Interruptor de Aviso de Emergencia o Contingencia */}
-            <div className="mt-4 pt-4 border-t border-stone-200/90">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <AlertTriangle className="h-4 w-4 text-amber-600" />
-                  <span className="text-xs font-bold uppercase tracking-wider text-stone-800">
-                    Aviso de Emergencia o Contingencia
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const nuevo = !emergenciaActiva;
-                    setEmergenciaActiva(nuevo);
-                    if (!nuevo) {
-                      void handleGuardarAvisoEmergencia(true);
-                    }
-                  }}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    emergenciaActiva ? "bg-amber-600" : "bg-stone-300"
-                  }`}
-                >
-                  <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
-                      emergenciaActiva ? "translate-x-5" : "translate-x-0"
-                    }`}
-                  />
-                </button>
-              </div>
-
-              {emergenciaActiva && (
-                <div className="mt-3 space-y-2.5 rounded-2xl border border-amber-200 bg-amber-50/70 p-3.5">
-                  <p className="text-[11px] font-semibold text-amber-950">
-                    Escribe un mensaje de advertencia que se mostrará en un banner destacado a todos los clientes:
+                <div>
+                  <h2 className="text-base sm:text-lg font-display uppercase tracking-wide text-stone-900">
+                    ⚙️ Configuración &amp; Operación del Local
+                  </h2>
+                  <p className={`text-xs ${brand.subtitleText}`}>
+                    Control de apertura, tiempo estimado de retiro, WhatsApp, datos de pago y cartel QR para mesas.
                   </p>
-                  <input
-                    type="text"
-                    value={mensajeEmergencia}
-                    onChange={(e) => setMensajeEmergencia(e.target.value)}
-                    placeholder="Ej: ⚠️ Corte de luz comunal: demoras de 45 min"
-                    className="w-full rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-stone-900 focus:outline-none focus:border-amber-600"
-                  />
+                </div>
+              </div>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-extrabold uppercase ${
+                  local.abierto
+                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                    : "bg-rose-100 text-rose-800 border border-rose-300"
+                }`}
+              >
+                {local.abierto ? "🟢 Local Abierto" : "🔴 Local Cerrado"}
+              </span>
+            </div>
 
-                  {/* Sugerencias Rápidas */}
-                  <div className="space-y-1">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">
-                      Sugerencias de un toque:
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              {/* Columna Izquierda: Control Maestro y Ajustes Básicos */}
+              <div className="space-y-6">
+                {/* 1. CONTROL MAESTRO: Switch grande para estado Abierto / Cerrado */}
+                <section
+                  className={`no-print rounded-3xl border p-5 shadow-sm ${brand.panelCardBg}`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+                    >
+                      <Store className="h-4 w-4" />
+                      Control Maestro del Local
                     </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {[
-                        "⚠️ Corte de luz comunal: demoras de 45 min",
-                        "⚠️ Solo atención por orden de llegada",
-                        "⚠️ Alta demanda: tiempo de espera extendido",
-                        "⚠️ Sin sistema Transbank: solo efectivo o CuentaRUT",
-                      ].map((sug) => (
-                        <button
-                          key={sug}
-                          type="button"
-                          onClick={() => setMensajeEmergencia(sug)}
-                          className="rounded-lg border border-amber-300 bg-white px-2 py-1 text-[10px] font-semibold text-amber-900 hover:bg-amber-100 transition active:scale-95 text-left"
-                        >
-                          {sug}
-                        </button>
-                      ))}
+                    <span className={`text-xs font-semibold ${brand.subtitleText}`}>
+                      Horario: {local.horario}
+                    </span>
+                  </div>
+
+                  <p className={`mt-1 text-xs ${brand.subtitleText}`}>
+                    Toca el interruptor para abrir o cerrar la recepción de pedidos en tu carta digital al instante:
+                  </p>
+
+                  <button
+                    type="button"
+                    disabled={guardandoId === "local-abierto"}
+                    onClick={handleToggleAbierto}
+                    className={`mt-4 flex w-full items-center justify-between rounded-2xl border-2 px-5 py-4 text-left shadow-md transition-all active:scale-[0.99] ${
+                      local.abierto
+                        ? "border-emerald-400 bg-emerald-600 text-white shadow-emerald-900/20 hover:bg-emerald-500"
+                        : "border-rose-400 bg-rose-600 text-white shadow-rose-900/20 hover:bg-rose-500"
+                    }`}
+                  >
+                    <div>
+                      <span className="block text-[11px] font-bold uppercase tracking-wider text-white/85">
+                        Estado actual en vivo
+                      </span>
+                      <span className="mt-0.5 block text-lg font-black sm:text-xl">
+                        {local.abierto ? "🟢 Local Abierto" : "🔴 Local Cerrado"}
+                      </span>
+                      <span className="mt-0.5 block text-xs font-medium text-white/90">
+                        {local.abierto
+                          ? "Recibiendo pedidos por WhatsApp"
+                          : "Carrito bloqueado · Solo lectura de carta"}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col items-end gap-1">
+                      <div
+                        className={`relative flex h-9 w-16 items-center rounded-full p-1 transition-colors ${
+                          local.abierto ? "bg-emerald-950/45" : "bg-rose-950/45"
+                        }`}
+                      >
+                        <div
+                          className={`h-7 w-7 rounded-full bg-white shadow-md transition-transform ${
+                            local.abierto ? "translate-x-7" : "translate-x-0"
+                          }`}
+                        />
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-white/90">
+                        {guardandoId === "local-abierto"
+                          ? "Guardando..."
+                          : "Tocar para cambiar"}
+                      </span>
+                    </div>
+                  </button>
+
+                  {/* Resumen rápido de platos */}
+                  <div className="mt-4 grid grid-cols-2 gap-2.5 text-center">
+                    <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-2.5">
+                      <span className="block text-xl font-display text-emerald-800">
+                        {productosDisponibles}
+                      </span>
+                      <span className="text-[11px] font-bold text-emerald-700">
+                        Platos Disponibles
+                      </span>
+                    </div>
+                    <div className="rounded-2xl border border-stone-200 bg-stone-50 p-2.5">
+                      <span className="block text-xl font-display text-stone-800">
+                        {totalProductos - productosDisponibles}
+                      </span>
+                      <span className={`text-[11px] font-bold ${brand.subtitleText}`}>
+                        Platos Agotados
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      type="button"
-                      disabled={guardandoId === "aviso-emergencia"}
-                      onClick={() => void handleGuardarAvisoEmergencia(false)}
-                      className="flex-1 rounded-full bg-amber-600 hover:bg-amber-700 text-white py-2 px-3 text-xs font-display uppercase tracking-wider shadow-xs transition active:scale-95 disabled:opacity-50 font-bold"
-                    >
-                      {guardandoId === "aviso-emergencia" ? "Guardando..." : "Publicar Aviso en Carta"}
-                    </button>
-                    {local.mensaje_emergencia && (
+                  {/* MÓDULO 3: Control de Demora y Avisos de Contingencia en Vivo */}
+                  <div className="mt-4 pt-4 border-t border-stone-200/90">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold uppercase tracking-wider text-stone-800 flex items-center gap-1.5">
+                        <Clock className="h-4 w-4 text-amber-600" />
+                        Tiempo Estimado de Espera
+                      </span>
+                      <span className="text-xs font-black text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                        {tiempoEstimado}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-stone-500">
+                      Selecciona la demora actual para informar a tus clientes en la cabecera de la carta:
+                    </p>
+                    <div className="mt-2.5 grid grid-cols-3 gap-2">
+                      {[
+                        { valor: "15-25 min", etiqueta: "⚡ 15-25 min", desc: "Rápido" },
+                        { valor: "30-45 min", etiqueta: "🟡 30-45 min", desc: "Normal" },
+                        { valor: "50-60 min", etiqueta: "🔥 50-60 min", desc: "Demorado" },
+                      ].map((item) => {
+                        const activo = tiempoEstimado === item.valor;
+                        return (
+                          <button
+                            key={item.valor}
+                            type="button"
+                            disabled={guardandoId === "tiempo-estimado"}
+                            onClick={() => handleActualizarTiempoEstimado(item.valor)}
+                            className={`flex flex-col items-center justify-center rounded-2xl py-2.5 px-2 border text-xs font-extrabold transition-all active:scale-95 ${
+                              activo
+                                ? "border-amber-500 bg-amber-50 text-amber-950 shadow-xs ring-2 ring-amber-400"
+                                : "border-stone-200 bg-stone-50 text-stone-600 hover:bg-stone-100"
+                            }`}
+                          >
+                            <span className="font-display tracking-wide">{item.etiqueta}</span>
+                            <span className="text-[10px] font-medium opacity-75">{item.desc}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Interruptor de Aviso de Emergencia o Contingencia */}
+                  <div className="mt-4 pt-4 border-t border-stone-200/90">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <AlertTriangle className="h-4 w-4 text-amber-600" />
+                        <span className="text-xs font-bold uppercase tracking-wider text-stone-800">
+                          Aviso de Emergencia o Contingencia
+                        </span>
+                      </div>
                       <button
                         type="button"
-                        onClick={() => void handleGuardarAvisoEmergencia(true)}
-                        className="rounded-full border border-stone-300 bg-white hover:bg-stone-100 text-stone-700 py-2 px-3 text-xs font-bold transition"
+                        onClick={() => {
+                          const nuevo = !emergenciaActiva;
+                          setEmergenciaActiva(nuevo);
+                          if (!nuevo) {
+                            void handleGuardarAvisoEmergencia(true);
+                          }
+                        }}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          emergenciaActiva ? "bg-amber-600" : "bg-stone-300"
+                        }`}
                       >
-                        Desactivar
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                            emergenciaActiva ? "translate-x-5" : "translate-x-0"
+                          }`}
+                        />
                       </button>
+                    </div>
+
+                    {emergenciaActiva && (
+                      <div className="mt-3 space-y-2.5 rounded-2xl border border-amber-200 bg-amber-50/70 p-3.5">
+                        <p className="text-[11px] font-semibold text-amber-950">
+                          Escribe un mensaje de advertencia que se mostrará en un banner destacado a todos los clientes:
+                        </p>
+                        <input
+                          type="text"
+                          value={mensajeEmergencia}
+                          onChange={(e) => setMensajeEmergencia(e.target.value)}
+                          placeholder="Ej: ⚠️ Corte de luz comunal: demoras de 45 min"
+                          className="w-full rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-bold text-stone-900 focus:outline-none focus:border-amber-600"
+                        />
+
+                        {/* Sugerencias Rápidas */}
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">
+                            Sugerencias de un toque:
+                          </span>
+                          <div className="flex flex-wrap gap-1.5">
+                            {[
+                              "⚠️ Corte de luz comunal: demoras de 45 min",
+                              "⚠️ Solo atención por orden de llegada",
+                              "⚠️ Alta demanda: tiempo de espera extendido",
+                              "⚠️ Sin sistema Transbank: solo efectivo o CuentaRUT",
+                            ].map((sug) => (
+                              <button
+                                key={sug}
+                                type="button"
+                                onClick={() => setMensajeEmergencia(sug)}
+                                className="rounded-lg border border-amber-300 bg-white px-2 py-1 text-[10px] font-semibold text-amber-900 hover:bg-amber-100 transition active:scale-95 text-left"
+                              >
+                                {sug}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="flex gap-2 pt-1">
+                          <button
+                            type="button"
+                            disabled={guardandoId === "aviso-emergencia"}
+                            onClick={() => void handleGuardarAvisoEmergencia(false)}
+                            className="flex-1 rounded-full bg-amber-600 hover:bg-amber-700 text-white py-2 px-3 text-xs font-display uppercase tracking-wider shadow-xs transition active:scale-95 disabled:opacity-50 font-bold"
+                          >
+                            {guardandoId === "aviso-emergencia" ? "Guardando..." : "Publicar Aviso en Carta"}
+                          </button>
+                          {local.mensaje_emergencia && (
+                            <button
+                              type="button"
+                              onClick={() => void handleGuardarAvisoEmergencia(true)}
+                              className="rounded-full border border-stone-300 bg-white hover:bg-stone-100 text-stone-700 py-2 px-3 text-xs font-bold transition"
+                            >
+                              Desactivar
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     )}
                   </div>
-                </div>
-              )}
+
+                  {/* MÓDULO 2: Botón Cierre de Caja Diario y Cuadre de Turno */}
+                  <button
+                    type="button"
+                    onClick={() => setMostrarCierreCaja(true)}
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-amber-400 bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3.5 text-xs font-display uppercase tracking-wider text-stone-950 shadow-md transition hover:from-amber-400 hover:to-amber-500 active:scale-[0.99] sm:text-sm font-extrabold"
+                  >
+                    <Moon className="h-4 w-4 shrink-0 text-stone-950" />
+                    <span>🌙 Cierre de Caja de Hoy</span>
+                    <Receipt className="h-4 w-4 shrink-0 text-stone-950" />
+                  </button>
+
+                  {/* Botón destacado para Generar Publicación para Redes / Estados con IA */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMostrarModalRedes(true);
+                      if (!textoPostRedes) {
+                        void handleGenerarPostRedes();
+                      }
+                    }}
+                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-3 text-xs font-bold text-amber-900 shadow-sm transition hover:bg-amber-100 active:scale-[0.99] sm:text-sm"
+                  >
+                    <Megaphone className="h-4 w-4 shrink-0 text-amber-600" />
+                    <span>📢 Generar Publicación para Redes / Estados con IA</span>
+                    <Sparkles className="h-3.5 w-3.5 text-amber-600" />
+                  </button>
+                </section>
+
+                {/* 2.5 AJUSTES BÁSICOS Y SEGURIDAD DEL LOCAL (WhatsApp, Horario, Dirección y PIN) */}
+                <section
+                  className={`no-print rounded-3xl border p-5 shadow-sm ${brand.panelCardBg}`}
+                >
+                  <div>
+                    <span
+                      className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+                    >
+                      <Settings className="h-4 w-4" />
+                      Configuración Operativa
+                    </span>
+                    <h2 className="mt-0.5 text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
+                      ⚙️ Ajustes Básicos y PIN de Seguridad
+                    </h2>
+                  </div>
+
+                  <p className={`mt-1 text-xs ${brand.subtitleText}`}>
+                    Actualiza tu número de recepción de pedidos por WhatsApp, horario de atención, dirección o tu clave PIN de 4 dígitos:
+                  </p>
+
+                  <form
+                    onSubmit={handleGuardarAjustesBasicos}
+                    className="mt-4 space-y-3 border-t border-stone-200 pt-4"
+                  >
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
+                          <Phone className="h-3.5 w-3.5 text-emerald-600" />
+                          Teléfono WhatsApp (+569...)
+                        </label>
+                        <input
+                          type="text"
+                          value={telefonoWhatsapp}
+                          onChange={(e) => setTelefonoWhatsapp(e.target.value)}
+                          placeholder="Ej: 56987654321"
+                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
+                          <Clock className="h-3.5 w-3.5 text-sky-600" />
+                          Horario de atención
+                        </label>
+                        <input
+                          type="text"
+                          value={horarioAtencion}
+                          onChange={(e) => setHorarioAtencion(e.target.value)}
+                          placeholder="Ej: 12:30 a 22:30 hrs"
+                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
+                          <MapPin className="h-3.5 w-3.5 text-amber-600" />
+                          Dirección del local
+                        </label>
+                        <input
+                          type="text"
+                          value={direccionLocal}
+                          onChange={(e) => setDireccionLocal(e.target.value)}
+                          placeholder="Ej: Av. Costanera 240, Tirúa"
+                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
+                          <KeyRound className="h-3.5 w-3.5 text-rose-600" />
+                          PIN de Seguridad (4 dígitos)
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={4}
+                          value={nuevoPinSeguridad}
+                          onChange={(e) =>
+                            setNuevoPinSeguridad(
+                              e.target.value.replace(/\D/g, "").slice(0, 4)
+                            )
+                          }
+                          placeholder="Ej: 1234"
+                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 font-mono text-xs font-extrabold tracking-widest text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={guardandoAjustes}
+                      className={`mt-2 flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-xs font-display uppercase tracking-wider shadow-sm transition active:scale-[0.99] disabled:opacity-50 sm:text-sm ${brand.accentBg}`}
+                    >
+                      {guardandoAjustes ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Guardando ajustes...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-4 w-4" />
+                          <span>Guardar ajustes básicos y PIN</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </section>
+              </div>
+
+              {/* Columna Derecha: Datos Bancarios y Cartel QR */}
+              <div className="space-y-6">
+                {/* 3. DATOS PARA TRANSFERENCIA BANCARIA */}
+                <section
+                  className={`no-print rounded-3xl border p-5 shadow-sm ${brand.panelCardBg}`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+                      >
+                        <CreditCard className="h-4 w-4" />
+                        Pagos del Cliente en Checkout
+                      </span>
+                      <h2 className="mt-0.5 text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
+                        💳 Datos para Transferencia Bancaria
+                      </h2>
+                    </div>
+                  </div>
+
+                  <p className={`mt-1 text-xs ${brand.subtitleText}`}>
+                    Estos datos se mostrarán automáticamente cuando un cliente elija pagar con <strong>Transferencia Bancaria</strong> en el carrito:
+                  </p>
+
+                  <form
+                    onSubmit={handleGuardarDatosBancarios}
+                    className="mt-4 space-y-3 border-t border-stone-200 pt-4"
+                  >
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                          Banco
+                        </label>
+                        <input
+                          type="text"
+                          value={banco}
+                          onChange={(e) => setBanco(e.target.value)}
+                          placeholder="Ej: BancoEstado, Banco de Chile..."
+                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                          Tipo de cuenta
+                        </label>
+                        <input
+                          type="text"
+                          value={tipoCuenta}
+                          onChange={(e) => setTipoCuenta(e.target.value)}
+                          placeholder="Ej: CuentaRUT / Cuenta Vista / Corriente"
+                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                          N° de cuenta
+                        </label>
+                        <input
+                          type="text"
+                          value={numeroCuenta}
+                          onChange={(e) => setNumeroCuenta(e.target.value)}
+                          placeholder="Ej: 18234567"
+                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                          RUT del titular
+                        </label>
+                        <input
+                          type="text"
+                          value={rutTitular}
+                          onChange={(e) => setRutTitular(e.target.value)}
+                          placeholder="Ej: 18.234.567-8"
+                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                          Nombre del titular
+                        </label>
+                        <input
+                          type="text"
+                          value={nombreTitular}
+                          onChange={(e) => setNombreTitular(e.target.value)}
+                          placeholder="Ej: Juan Pérez"
+                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                          Correo de confirmación
+                        </label>
+                        <input
+                          type="email"
+                          value={emailTransferencia}
+                          onChange={(e) => setEmailTransferencia(e.target.value)}
+                          placeholder="Ej: contacto@local.cl"
+                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={guardandoBancos}
+                      className={`mt-2 flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-xs font-display uppercase tracking-wider shadow-sm transition active:scale-[0.99] disabled:opacity-50 sm:text-sm ${brand.accentBg}`}
+                    >
+                      {guardandoBancos ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span>Guardando datos bancarios...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-4 w-4" />
+                          <span>Guardar datos bancarios</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </section>
+
+                {/* 2. GENERADOR DE CARTEL QR LISTO PARA IMPRIMIR */}
+                <section
+                  className={`rounded-3xl border p-5 shadow-sm print:border-none print:bg-transparent print:p-0 print:shadow-none ${brand.panelCardBg}`}
+                >
+                  <div className="no-print flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+                      >
+                        <QrCode className="h-4 w-4" />
+                        Código QR de Carta Digital
+                      </span>
+                      <h2 className="mt-0.5 text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
+                        📱 Mi Cartel QR para Mesas
+                      </h2>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setMostrarCartelQr((prev) => !prev)}
+                      className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold shadow-xs transition active:scale-95 ${
+                        mostrarCartelQr
+                          ? "border border-stone-200 bg-stone-100 text-stone-700 hover:bg-stone-200"
+                          : brand.accentBg
+                      }`}
+                    >
+                      {mostrarCartelQr ? (
+                        <>
+                          <X className="h-4 w-4" />
+                          <span>Ocultar Cartel</span>
+                        </>
+                      ) : (
+                        <>
+                          <QrCode className="h-4 w-4" />
+                          <span>Ver Cartel</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {!mostrarCartelQr && (
+                    <p className={`no-print mt-2 text-xs ${brand.subtitleText}`}>
+                      Genera e imprime el cartel con código QR oficial de <strong>{local.nombre}</strong> para poner en tus mesas o mostrador.
+                    </p>
+                  )}
+
+                  {/* Contenedor del Cartel QR (siempre disponible para @media print) */}
+                  <div
+                    id="printable-qr-flyer-wrapper"
+                    className={`${
+                      mostrarCartelQr ? "mt-5 flex flex-col items-center" : "hidden"
+                    }`}
+                  >
+                    {/* Botones de Acción (No se imprimen) */}
+                    <div className="no-print mb-5 grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2">
+                      <button
+                        type="button"
+                        onClick={handleImprimirCartel}
+                        className={`flex items-center justify-center gap-2 rounded-full px-4 py-3.5 text-xs font-display uppercase tracking-wider shadow-sm transition active:scale-95 sm:text-sm ${brand.accentBg}`}
+                      >
+                        <Printer className="h-4 w-4 shrink-0" />
+                        <span>🖨️ Imprimir Cartel</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={descargandoQr}
+                        onClick={() => void handleDescargarQrPng()}
+                        className="flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-3.5 text-xs font-bold text-stone-800 shadow-sm transition hover:bg-stone-50 active:scale-95 disabled:opacity-50 sm:text-sm"
+                      >
+                        {descargandoQr ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Download className="h-4 w-4 shrink-0" />
+                        )}
+                        <span>⬇️ Descargar solo QR (PNG)</span>
+                      </button>
+                    </div>
+
+                    {/* Vista Previa Visual del Flyer / Cartel de Mesa Listo para Imprimir */}
+                    <div
+                      id="printable-qr-flyer"
+                      className="w-full max-w-md overflow-hidden rounded-3xl border-4 border-[#18181B] bg-white p-6 text-center text-[#18181B] shadow-2xl sm:p-8"
+                    >
+                      {/* Cinta / Título Superior */}
+                      <div className="inline-flex items-center gap-1.5 rounded-full bg-[#18181B] px-4 py-1.5 text-xs font-display uppercase tracking-wider text-white">
+                        <Smartphone className="h-3.5 w-3.5 text-emerald-400" />
+                        <span>¡Pide directo desde tu celular!</span>
+                      </div>
+
+                      {/* Logo, Nombre del Local Grande y su Rubro */}
+                      <div className="mt-4 flex flex-col items-center">
+                        <div className="h-20 w-20 overflow-hidden rounded-2xl border-2 border-stone-200 bg-[#18181B] p-1.5 shadow-md">
+                          <img
+                            src={logoOficial}
+                            alt={local.nombre}
+                            className="h-full w-full rounded-xl object-contain"
+                          />
+                        </div>
+                        <h3 className="mt-3 text-3xl font-display uppercase tracking-wide text-stone-900 sm:text-4xl">
+                          {local.nombre}
+                        </h3>
+                        <span className="mt-1 inline-block rounded-full bg-orange-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#EA580C]">
+                          {local.rubro}
+                        </span>
+                      </div>
+
+                      {/* Código QR en Alta Resolución */}
+                      <div className="my-5 inline-flex flex-col items-center rounded-3xl border-2 border-dashed border-stone-300 bg-[#FAF8F5] p-4 shadow-inner">
+                        <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white p-2 shadow-sm">
+                          <img
+                            src={qrImageUrl}
+                            alt={`Código QR de ${local.nombre}`}
+                            className="h-56 w-56 object-contain sm:h-64 sm:w-64"
+                          />
+                        </div>
+                        <span className="mt-2.5 font-mono text-[11px] font-bold text-stone-600">
+                          {urlPublicaLocal}
+                        </span>
+                      </div>
+
+                      {/* Instrucciones al pie del QR en 3 pasos con iconos */}
+                      <div className="rounded-2xl border border-stone-200 bg-[#FAF8F5] p-4 text-left">
+                        <p className="mb-3 text-center text-[11px] font-extrabold uppercase tracking-wider text-stone-500">
+                          ¿Cómo hacer tu pedido en 3 pasos?
+                        </p>
+                        <ol className="space-y-2.5 text-xs font-bold text-stone-800 sm:text-sm">
+                          <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs border border-stone-100">
+                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#18181B] text-white">
+                              <Camera className="h-4 w-4" />
+                            </span>
+                            <span>
+                              <strong>1.</strong> Abre la cámara de tu celular.
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs border border-stone-100">
+                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#18181B] text-white">
+                              <QrCode className="h-4 w-4" />
+                            </span>
+                            <span>
+                              <strong>2.</strong> Escanea este código QR.
+                            </span>
+                          </li>
+                          <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs border border-stone-100">
+                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#25D366] text-white">
+                              <MessageCircle className="h-4 w-4" />
+                            </span>
+                            <span>
+                              <strong>3.</strong> Revisa la carta y envía tu pedido a WhatsApp.
+                            </span>
+                          </li>
+                        </ol>
+                      </div>
+
+                      <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-stone-400">
+                        PideTirúa · Carta Digital &amp; Pedidos Directos
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              </div>
             </div>
-
-            {/* MÓDULO 2: Botón Cierre de Caja Diario y Cuadre de Turno */}
-            <button
-              type="button"
-              onClick={() => setMostrarCierreCaja(true)}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border border-amber-400 bg-gradient-to-r from-amber-500 to-amber-600 px-4 py-3.5 text-xs font-display uppercase tracking-wider text-stone-950 shadow-md transition hover:from-amber-400 hover:to-amber-500 active:scale-[0.99] sm:text-sm font-extrabold"
-            >
-              <Moon className="h-4 w-4 shrink-0 text-stone-950" />
-              <span>🌙 Cierre de Caja de Hoy</span>
-              <Receipt className="h-4 w-4 shrink-0 text-stone-950" />
-            </button>
-
-            {/* Botón destacado rápido para abrir el Cartel QR para Mesas */}
-            <button
-              type="button"
-              onClick={() => setMostrarCartelQr((prev) => !prev)}
-              className={`mt-3 flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-xs font-display uppercase tracking-wider shadow-sm transition active:scale-[0.99] sm:text-sm ${brand.accentBg}`}
-            >
-              <QrCode className="h-4 w-4 shrink-0" />
-              <span>📱 Mi Cartel QR para Mesas</span>
-            </button>
-
-            {/* Botón destacado para Generar Publicación para Redes / Estados con IA */}
-            <button
-              type="button"
-              onClick={() => {
-                setMostrarModalRedes(true);
-                if (!textoPostRedes) {
-                  void handleGenerarPostRedes();
-                }
-              }}
-              className="mt-2.5 flex w-full items-center justify-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-4 py-3 text-xs font-bold text-amber-900 shadow-sm transition hover:bg-amber-100 active:scale-[0.99] sm:text-sm"
-            >
-              <Megaphone className="h-4 w-4 shrink-0 text-amber-600" />
-              <span>📢 Generar Publicación para Redes / Estados con IA</span>
-              <Sparkles className="h-3.5 w-3.5 text-amber-600" />
-            </button>
-          </section>
+          </div>
         )}
 
         {/* 1.25 REPORTE DE VENTAS Y MÉTRICAS PARA EL DUEÑO */}
@@ -2120,408 +2585,9 @@ export default function AdminLocalClient({
           />
         </div>
 
-        {/* SECCIONES DE GESTIÓN DE CARTA Y OPERACIÓN */}
+        {/* 2. GESTIÓN DE CARTA Y MENÚ */}
         {(pestanaActiva === "carta" || pestanaActiva === "todas") && (
-          <>
-            {/* 2. GENERADOR DE CARTEL QR LISTO PARA IMPRIMIR */}
-            <section
-          className={`rounded-3xl border p-5 shadow-xl print:border-none print:bg-transparent print:p-0 print:shadow-none ${brand.panelCardBg}`}
-        >
-          <div className="no-print flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <span
-                className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
-              >
-                <QrCode className="h-4 w-4" />
-                Código QR de Carta Digital
-              </span>
-              <h2 className="mt-0.5 text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
-                📱 Mi Cartel QR para Mesas
-              </h2>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setMostrarCartelQr((prev) => !prev)}
-              className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold shadow-xs transition active:scale-95 ${
-                mostrarCartelQr
-                  ? "border border-stone-200 bg-stone-100 text-stone-700 hover:bg-stone-200"
-                  : brand.accentBg
-              }`}
-            >
-              {mostrarCartelQr ? (
-                <>
-                  <X className="h-4 w-4" />
-                  <span>Ocultar Cartel</span>
-                </>
-              ) : (
-                <>
-                  <QrCode className="h-4 w-4" />
-                  <span>📱 Mi Cartel QR para Mesas</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {!mostrarCartelQr && (
-            <p className={`no-print mt-2 text-xs ${brand.subtitleText}`}>
-              Genera e imprime el cartel con código QR oficial de{" "}
-              <strong>{local.nombre}</strong> para poner en tus mesas o mostrador.
-            </p>
-          )}
-
-          {/* Contenedor del Cartel QR (siempre disponible para @media print) */}
-          <div
-            id="printable-qr-flyer-wrapper"
-            className={`${
-              mostrarCartelQr ? "mt-5 flex flex-col items-center" : "hidden"
-            }`}
-          >
-            {/* Botones de Acción (No se imprimen) */}
-            <div className="no-print mb-5 grid w-full grid-cols-1 gap-2.5 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={handleImprimirCartel}
-                className={`flex items-center justify-center gap-2 rounded-full px-4 py-3.5 text-xs font-display uppercase tracking-wider shadow-sm transition active:scale-95 sm:text-sm ${brand.accentBg}`}
-              >
-                <Printer className="h-4 w-4 shrink-0" />
-                <span>🖨️ Imprimir Cartel</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={descargandoQr}
-                onClick={() => void handleDescargarQrPng()}
-                className="flex items-center justify-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-3.5 text-xs font-bold text-stone-800 shadow-sm transition hover:bg-stone-50 active:scale-95 disabled:opacity-50 sm:text-sm"
-              >
-                {descargandoQr ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Download className="h-4 w-4 shrink-0" />
-                )}
-                <span>⬇️ Descargar solo QR (PNG)</span>
-              </button>
-            </div>
-
-            {/* Vista Previa Visual del Flyer / Cartel de Mesa Listo para Imprimir */}
-            <div
-              id="printable-qr-flyer"
-              className="w-full max-w-md overflow-hidden rounded-3xl border-4 border-[#18181B] bg-white p-6 text-center text-[#18181B] shadow-2xl sm:p-8"
-            >
-              {/* Cinta / Título Superior */}
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-[#18181B] px-4 py-1.5 text-xs font-display uppercase tracking-wider text-white">
-                <Smartphone className="h-3.5 w-3.5 text-emerald-400" />
-                <span>¡Pide directo desde tu celular!</span>
-              </div>
-
-              {/* Logo, Nombre del Local Grande y su Rubro */}
-              <div className="mt-4 flex flex-col items-center">
-                <div className="h-20 w-20 overflow-hidden rounded-2xl border-2 border-stone-200 bg-[#18181B] p-1.5 shadow-md">
-                  <img
-                    src={logoOficial}
-                    alt={local.nombre}
-                    className="h-full w-full rounded-xl object-contain"
-                  />
-                </div>
-                <h3 className="mt-3 text-3xl font-display uppercase tracking-wide text-stone-900 sm:text-4xl">
-                  {local.nombre}
-                </h3>
-                <span className="mt-1 inline-block rounded-full bg-orange-50 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#EA580C]">
-                  {local.rubro}
-                </span>
-              </div>
-
-              {/* Código QR en Alta Resolución */}
-              <div className="my-5 inline-flex flex-col items-center rounded-3xl border-2 border-dashed border-stone-300 bg-[#FAF8F5] p-4 shadow-inner">
-                <div className="overflow-hidden rounded-2xl border border-stone-200 bg-white p-2 shadow-sm">
-                  <img
-                    src={qrImageUrl}
-                    alt={`Código QR de ${local.nombre}`}
-                    className="h-56 w-56 object-contain sm:h-64 sm:w-64"
-                  />
-                </div>
-                <span className="mt-2.5 font-mono text-[11px] font-bold text-stone-600">
-                  {urlPublicaLocal}
-                </span>
-              </div>
-
-              {/* Instrucciones al pie del QR en 3 pasos con iconos */}
-              <div className="rounded-2xl border border-stone-200 bg-[#FAF8F5] p-4 text-left">
-                <p className="mb-3 text-center text-[11px] font-extrabold uppercase tracking-wider text-stone-500">
-                  ¿Cómo hacer tu pedido en 3 pasos?
-                </p>
-                <ol className="space-y-2.5 text-xs font-bold text-stone-800 sm:text-sm">
-                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs border border-stone-100">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#18181B] text-white">
-                      <Camera className="h-4 w-4" />
-                    </span>
-                    <span>
-                      <strong>1.</strong> Abre la cámara de tu celular.
-                    </span>
-                  </li>
-                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs border border-stone-100">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#18181B] text-white">
-                      <QrCode className="h-4 w-4" />
-                    </span>
-                    <span>
-                      <strong>2.</strong> Escanea este código QR.
-                    </span>
-                  </li>
-                  <li className="flex items-center gap-3 rounded-xl bg-white px-3 py-2 shadow-2xs border border-stone-100">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#25D366] text-white">
-                      <MessageCircle className="h-4 w-4" />
-                    </span>
-                    <span>
-                      <strong>3.</strong> Revisa la carta y envía tu pedido a
-                      WhatsApp.
-                    </span>
-                  </li>
-                </ol>
-              </div>
-
-              <p className="mt-4 text-[10px] font-bold uppercase tracking-widest text-stone-400">
-                PideTirúa · Carta Digital &amp; Pedidos Directos
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* 2.5 AJUSTES BÁSICOS Y SEGURIDAD DEL LOCAL (WhatsApp, Horario, Dirección y PIN) */}
-        <section
-          className={`no-print rounded-3xl border p-5 shadow-xl ${brand.panelCardBg}`}
-        >
-          <div>
-            <span
-              className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
-            >
-              <Settings className="h-4 w-4" />
-              Configuración Operativa
-            </span>
-            <h2 className="mt-0.5 text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
-              ⚙️ Ajustes Básicos y PIN de Seguridad
-            </h2>
-          </div>
-
-          <p className={`mt-1 text-xs ${brand.subtitleText}`}>
-            Actualiza tu número de recepción de pedidos por WhatsApp, horario de
-            atención, dirección o tu clave PIN de 4 dígitos:
-          </p>
-
-          <form
-            onSubmit={handleGuardarAjustesBasicos}
-            className="mt-4 space-y-3 border-t border-stone-200 pt-4"
-          >
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
-                  <Phone className="h-3.5 w-3.5 text-emerald-600" />
-                  Teléfono WhatsApp (+569...)
-                </label>
-                <input
-                  type="text"
-                  value={telefonoWhatsapp}
-                  onChange={(e) => setTelefonoWhatsapp(e.target.value)}
-                  placeholder="Ej: 56987654321"
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
-                  <Clock className="h-3.5 w-3.5 text-sky-600" />
-                  Horario de atención
-                </label>
-                <input
-                  type="text"
-                  value={horarioAtencion}
-                  onChange={(e) => setHorarioAtencion(e.target.value)}
-                  placeholder="Ej: 12:30 a 22:30 hrs"
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
-                  <MapPin className="h-3.5 w-3.5 text-amber-600" />
-                  Dirección del local
-                </label>
-                <input
-                  type="text"
-                  value={direccionLocal}
-                  onChange={(e) => setDireccionLocal(e.target.value)}
-                  placeholder="Ej: Av. Costanera 240, Tirúa"
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
-                  <KeyRound className="h-3.5 w-3.5 text-rose-600" />
-                  PIN de Seguridad (4 dígitos)
-                </label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={4}
-                  value={nuevoPinSeguridad}
-                  onChange={(e) =>
-                    setNuevoPinSeguridad(
-                      e.target.value.replace(/\D/g, "").slice(0, 4)
-                    )
-                  }
-                  placeholder="Ej: 1234"
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 font-mono text-xs font-extrabold tracking-widest text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={guardandoAjustes}
-              className={`mt-2 flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-xs font-display uppercase tracking-wider shadow-sm transition active:scale-[0.99] disabled:opacity-50 sm:text-sm ${brand.accentBg}`}
-            >
-              {guardandoAjustes ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Guardando ajustes...</span>
-                </>
-              ) : (
-                <>
-                  <Check className="h-4 w-4" />
-                  <span>Guardar ajustes básicos y PIN</span>
-                </>
-              )}
-            </button>
-          </form>
-        </section>
-
-        {/* 3. DATOS PARA TRANSFERENCIA BANCARIA */}
-        <section
-          className={`no-print rounded-3xl border p-5 shadow-sm ${brand.panelCardBg}`}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <div>
-              <span
-                className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
-              >
-                <CreditCard className="h-4 w-4" />
-                Pagos del Cliente en Checkout
-              </span>
-              <h2 className="mt-0.5 text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
-                💳 Datos para Transferencia Bancaria
-              </h2>
-            </div>
-          </div>
-
-          <p className={`mt-1 text-xs ${brand.subtitleText}`}>
-            Estos datos se mostrarán automáticamente cuando un cliente elija
-            pagar con <strong>Transferencia Bancaria</strong> en el carrito:
-          </p>
-
-          <form
-            onSubmit={handleGuardarDatosBancarios}
-            className="mt-4 space-y-3 border-t border-stone-200 pt-4"
-          >
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
-                  Banco
-                </label>
-                <input
-                  type="text"
-                  value={banco}
-                  onChange={(e) => setBanco(e.target.value)}
-                  placeholder="Ej: BancoEstado, Banco de Chile..."
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
-                  Tipo de cuenta
-                </label>
-                <input
-                  type="text"
-                  value={tipoCuenta}
-                  onChange={(e) => setTipoCuenta(e.target.value)}
-                  placeholder="Ej: CuentaRUT / Cuenta Vista / Corriente"
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
-                  N° de cuenta
-                </label>
-                <input
-                  type="text"
-                  value={numeroCuenta}
-                  onChange={(e) => setNumeroCuenta(e.target.value)}
-                  placeholder="Ej: 18234567"
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
-                  RUT del titular
-                </label>
-                <input
-                  type="text"
-                  value={rutTitular}
-                  onChange={(e) => setRutTitular(e.target.value)}
-                  placeholder="Ej: 18.234.567-8"
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
-                  Nombre del titular
-                </label>
-                <input
-                  type="text"
-                  value={nombreTitular}
-                  onChange={(e) => setNombreTitular(e.target.value)}
-                  placeholder="Ej: Juan Pérez"
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
-                  Correo de confirmación
-                </label>
-                <input
-                  type="email"
-                  value={emailTransferencia}
-                  onChange={(e) => setEmailTransferencia(e.target.value)}
-                  placeholder="Ej: contacto@local.cl"
-                  className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 text-xs font-bold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={guardandoBancos}
-              className={`mt-2 flex w-full items-center justify-center gap-2 rounded-full py-3.5 text-xs font-display uppercase tracking-wider shadow-sm transition active:scale-[0.99] disabled:opacity-50 sm:text-sm ${brand.accentBg}`}
-            >
-              {guardandoBancos ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Guardando datos bancarios...</span>
-                </>
-              ) : (
-                <>
-                  <Check className="h-4 w-4" />
-                  <span>Guardar datos bancarios</span>
-                </>
-              )}
-            </button>
-          </form>
-        </section>
-
+          <div className="space-y-6">
         {/* 3.5 GESTIÓN DE CATEGORÍAS DE LA CARTA */}
         <section
           className={`no-print rounded-3xl border p-5 shadow-sm ${brand.panelCardBg}`}
@@ -3206,7 +3272,7 @@ export default function AdminLocalClient({
                 </div>
               </div>
 
-              <div className="space-y-3.5">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {categoria.productos.map((producto) => {
                   const disponible = producto.disponible !== false;
                   const editState = ediciones[producto.id] ?? {
@@ -3691,7 +3757,7 @@ export default function AdminLocalClient({
             </section>
           ))}
           </div>
-          </>
+        </div>
         )}
       </main>
 
