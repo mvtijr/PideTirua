@@ -115,6 +115,8 @@ export interface DatosCheckout {
   direccionOMesa: string;
   metodoPago: MetodoPago;
   notasAdicionales: string;
+  horaRetiroTipo?: "inmediato" | "programado";
+  horaRetiroValor?: string;
 }
 
 export type EstadoPedido =
@@ -137,6 +139,8 @@ export interface Pedido {
   created_at: string;
   local_slug: string;
   cliente_nombre: string;
+  cliente_telefono?: string;
+  hora_retiro?: string;
   tipo_entrega: string;
   direccion_mesa: string;
   metodo_pago: string;

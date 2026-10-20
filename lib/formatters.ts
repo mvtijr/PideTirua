@@ -130,6 +130,12 @@ export function formatWhatsAppMessage({
     })
     .join("\n");
 
+  const tiempoEstimadoLocal = local.tiempo_estimado?.trim() || "20-30 min";
+  const lineaHorario =
+    datos.horaRetiroTipo === "programado" && datos.horaRetiroValor?.trim()
+      ? `⏰ *Horario programado:* Retiro a las ${datos.horaRetiroValor.trim()} hrs`
+      : `🕒 *Horario:* Lo antes posible (${tiempoEstimadoLocal})`;
+
   const lineasMensaje = [
     `🌊 *¡Hola ${local.nombre}!*`,
     `Te envío un nuevo pedido desde *PideTirúa* 📲`,
@@ -145,6 +151,7 @@ export function formatWhatsAppMessage({
       ? [`📞 *Teléfono:* ${datos.telefonoCliente.trim()}`]
       : []),
     `${emojiModalidad} *Modalidad:* ${datos.tipoEntrega}`,
+    lineaHorario,
     `${etiquetaUbicacion} ${valorUbicacion}`,
     `💳 *Método de pago:* ${datos.metodoPago}`,
   ];

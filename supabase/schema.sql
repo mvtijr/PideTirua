@@ -240,6 +240,8 @@ CREATE TABLE IF NOT EXISTS public.pedidos (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   local_slug TEXT NOT NULL,
   cliente_nombre TEXT NOT NULL,
+  cliente_telefono TEXT NULL,
+  hora_retiro TEXT NOT NULL DEFAULT 'lo_antes_posible',
   tipo_entrega TEXT NOT NULL,
   direccion_mesa TEXT NOT NULL DEFAULT '',
   metodo_pago TEXT NOT NULL,
@@ -249,6 +251,10 @@ CREATE TABLE IF NOT EXISTS public.pedidos (
   estado TEXT NOT NULL DEFAULT 'pendiente'
     CHECK (estado IN ('pendiente', 'preparando', 'listo', 'entregado', 'cancelado'))
 );
+
+-- Asegurar columnas si la tabla ya existía
+ALTER TABLE public.pedidos ADD COLUMN IF NOT EXISTS cliente_telefono TEXT NULL;
+ALTER TABLE public.pedidos ADD COLUMN IF NOT EXISTS hora_retiro TEXT NOT NULL DEFAULT 'lo_antes_posible';
 
 CREATE INDEX IF NOT EXISTS idx_pedidos_local_slug_created
   ON public.pedidos(local_slug, created_at DESC);

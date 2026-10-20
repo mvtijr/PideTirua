@@ -71,6 +71,8 @@ export async function POST(req: NextRequest) {
     const {
       local_slug,
       cliente_nombre,
+      cliente_telefono,
+      hora_retiro,
       tipo_entrega,
       direccion_mesa,
       metodo_pago,
@@ -111,6 +113,8 @@ export async function POST(req: NextRequest) {
     }
 
     const clienteLimpio = sanitizeString(cliente_nombre, 80) || "Cliente";
+    const clienteTelefonoLimpio = sanitizeString(cliente_telefono, 40);
+    const horaRetiroLimpia = sanitizeString(hora_retiro, 40) || "lo_antes_posible";
     const tipoEntregaLimpio =
       tipo_entrega === "Consumo en mesa" || tipo_entrega === "Mesa"
         ? "Mesa"
@@ -126,6 +130,8 @@ export async function POST(req: NextRequest) {
     const result = await crearPedidoEnSupabase({
       local_slug: slugLimpio,
       cliente_nombre: clienteLimpio,
+      cliente_telefono: clienteTelefonoLimpio || undefined,
+      hora_retiro: horaRetiroLimpia,
       tipo_entrega: tipoEntregaLimpio,
       direccion_mesa: direccionLimpia,
       metodo_pago: metodoPagoLimpio,

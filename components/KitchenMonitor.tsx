@@ -17,6 +17,7 @@ import {
   Utensils,
   Store,
   PackageCheck,
+  MessageCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { EstadoPedido, Pedido } from "@/types/local";
@@ -329,6 +330,45 @@ export default function KitchenMonitor({
     }
   };
 
+  const handleAvisarListoPorWhatsApp = async (pedido: Pedido) => {
+    // 1. Extraer teléfono del pedido o de las notas
+    let rawTel = pedido.cliente_telefono || "";
+    if (!rawTel && pedido.notas) {
+      const match = pedido.notas.match(/(?:Tel|Teléfono|WhatsApp):\s*([+\d\s\-()]+)/i);
+      if (match && match[1]) {
+        rawTel = match[1];
+      }
+    }
+
+    const telNumeros = rawTel.replace(/\D/g, "");
+    if (telNumeros) {
+      // Formato para Chile: anteponer 56 si tiene 9 dígitos empezando en 9
+      const telefonoFinal =
+        telNumeros.length === 9 && telNumeros.startsWith("9")
+          ? `56${telNumeros}`
+          : telNumeros;
+
+      const mensaje = `¡Hola ${pedido.cliente_nombre}! 👋 Tu pedido en ${localNombre} ya está caliente, empacado y listo para que pases a retirarlo. ¡Te esperamos!`;
+      const urlWa = `https://wa.me/${telefonoFinal}?text=${encodeURIComponent(mensaje)}`;
+
+      try {
+        window.open(urlWa, "_blank", "noopener,noreferrer");
+      } catch {
+        window.location.href = urlWa;
+      }
+    } else {
+      onNotify?.(`El pedido de ${pedido.cliente_nombre} no registra teléfono.`);
+    }
+
+    // 2. Al mismo tiempo, actualiza automáticamente el estado del pedido en Supabase a 'listo'
+    if (pedido.estado !== "listo") {
+      await handleCambiarEstado(pedido, "listo");
+    }
+
+    // 3. Muestra una notificación toast
+    onNotify?.("Cliente notificado y pedido marcado como listo");
+  };
+
   const pedidosActivos = pedidos.filter(
     (p) =>
       p.estado === "pendiente" ||
@@ -557,9 +597,16 @@ export default function KitchenMonitor({
                       #{codigoCorto}
                     </span>
                     <div>
-                      <h3 className="text-sm font-black text-slate-950 sm:text-base">
-                        {pedido.cliente_nombre}
-                      </h3>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="text-sm font-black text-slate-950 sm:text-base">
+                          {pedido.cliente_nombre}
+                        </h3>
+                        {pedido.cliente_telefono && (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-700">
+                            📞 {pedido.cliente_telefono}
+                          </span>
+                        )}
+                      </div>
                       <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-500">
                         <Clock className="h-3 w-3" />
                         Llegó a las {formatHoraPedido(pedido.created_at)} hrs
@@ -573,6 +620,26 @@ export default function KitchenMonitor({
                     {textoEstado}
                   </span>
                 </div>
+
+                {/* Resalte de Hora de Retiro: Programado vs Inmediato */}
+                {pedido.hora_retiro && pedido.hora_retiro !== "lo_antes_posible" ? (
+                  <div className="mt-3 flex items-center justify-between gap-2 rounded-xl border-2 border-amber-500 bg-amber-400 px-3.5 py-2 text-xs font-black text-slate-950 shadow-sm animate-pulse">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 shrink-0 text-slate-950" />
+                      <span className="tracking-wide uppercase text-xs sm:text-sm">
+                        ⏰ RETIRO A LAS: {pedido.hora_retiro} HRS
+                      </span>
+                    </div>
+                    <span className="rounded-md bg-slate-950 px-2 py-0.5 text-[10px] font-black uppercase text-amber-300 shrink-0">
+                      Horario Programado
+                    </span>
+                  </div>
+                ) : (
+                  <div className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+                    <Clock className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                    <span>Horario de retiro: <strong>Lo antes posible</strong></span>
+                  </div>
+                )}
 
                 {/* Metadatos: Entrega, Ubicación/Mesa y Pago */}
                 <div className="mt-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
@@ -654,62 +721,76 @@ export default function KitchenMonitor({
                   </div>
                 )}
 
-                {/* Botones de Acción Rápida para avanzar estado */}
+                {/* Botones de Acción Rápida para avanzar estado y Notificador WhatsApp */}
                 {!esEntregado ? (
-                  <div className="mt-3.5">
-                    {esPendiente && (
-                      <button
-                        type="button"
-                        disabled={actualizandoId === pedido.id}
-                        onClick={() =>
-                          void handleCambiarEstado(pedido, "preparando")
-                        }
-                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-3 text-xs font-black text-slate-950 shadow-md transition hover:bg-amber-400 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
-                      >
-                        {actualizandoId === pedido.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <span>🍳 Empezar Preparación</span>
-                        )}
-                      </button>
-                    )}
+                  <div className="mt-3.5 space-y-2">
+                    {/* Botón de Notificación Directa en 1 Clic */}
+                    <button
+                      type="button"
+                      disabled={actualizandoId === pedido.id}
+                      onClick={() => void handleAvisarListoPorWhatsApp(pedido)}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-emerald-500 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
+                      title="Avisar al cliente por WhatsApp que su pedido está listo y marcar estado como listo"
+                    >
+                      <MessageCircle className="h-4 w-4 shrink-0" />
+                      <span>📲 Avisar Listo por WhatsApp</span>
+                    </button>
 
-                    {esPreparando && (
-                      <button
-                        type="button"
-                        disabled={actualizandoId === pedido.id}
-                        onClick={() =>
-                          void handleCambiarEstado(pedido, "listo")
-                        }
-                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-xs font-black text-white shadow-md transition hover:bg-emerald-500 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
-                      >
-                        {actualizandoId === pedido.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <span>✅ Marcar Listo</span>
-                        )}
-                      </button>
-                    )}
+                    <div className="grid grid-cols-1 gap-2">
+                      {esPendiente && (
+                        <button
+                          type="button"
+                          disabled={actualizandoId === pedido.id}
+                          onClick={() =>
+                            void handleCambiarEstado(pedido, "preparando")
+                          }
+                          className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-black text-slate-950 shadow-md transition hover:bg-amber-400 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
+                        >
+                          {actualizandoId === pedido.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <span>🍳 Empezar Preparación</span>
+                          )}
+                        </button>
+                      )}
 
-                    {esListo && (
-                      <button
-                        type="button"
-                        disabled={actualizandoId === pedido.id}
-                        onClick={() =>
-                          void handleCambiarEstado(pedido, "entregado")
-                        }
-                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-xs font-black text-white shadow-md transition hover:bg-slate-800 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
-                      >
-                        {actualizandoId === pedido.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <PackageCheck className="h-4 w-4" />
-                            <span>📦 Marcar Entregado</span>
-                          </>
-                        )}
-                      </button>
-                    )}
+                      {esPreparando && (
+                        <button
+                          type="button"
+                          disabled={actualizandoId === pedido.id}
+                          onClick={() =>
+                            void handleCambiarEstado(pedido, "listo")
+                          }
+                          className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-black text-stone-700 shadow-sm transition hover:bg-stone-50 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
+                        >
+                          {actualizandoId === pedido.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <span>✅ Marcar Listo (solo sistema)</span>
+                          )}
+                        </button>
+                      )}
+
+                      {esListo && (
+                        <button
+                          type="button"
+                          disabled={actualizandoId === pedido.id}
+                          onClick={() =>
+                            void handleCambiarEstado(pedido, "entregado")
+                          }
+                          className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-slate-800 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
+                        >
+                          {actualizandoId === pedido.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <PackageCheck className="h-4 w-4" />
+                              <span>📦 Marcar Entregado</span>
+                            </>
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ) : (
                   <div className="mt-3 flex items-center justify-center gap-1.5 rounded-xl bg-slate-100 py-2 text-xs font-bold text-slate-600">

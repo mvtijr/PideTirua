@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   Landmark,
   Loader2,
+  Clock,
 } from "lucide-react";
 import {
   DatosCheckout,
@@ -95,6 +96,8 @@ export default function CartDrawer({
   const [direccionOMesa, setDireccionOMesa] = useState("");
   const [metodoPago, setMetodoPago] = useState<MetodoPago>("Efectivo");
   const [notasAdicionales, setNotasAdicionales] = useState("");
+  const [horaRetiroTipo, setHoraRetiroTipo] = useState<"inmediato" | "programado">("inmediato");
+  const [horaRetiroValor, setHoraRetiroValor] = useState("");
   const [mostrarVistaPrevia, setMostrarVistaPrevia] = useState(false);
   const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
   const [datosCopiados, setDatosCopiados] = useState(false);
@@ -163,6 +166,17 @@ export default function CartDrawer({
     }
   };
 
+  const handleSeleccionarProgramado = () => {
+    setHoraRetiroTipo("programado");
+    if (!horaRetiroValor) {
+      const ahora = new Date();
+      ahora.setMinutes(ahora.getMinutes() + 35);
+      const hh = String(ahora.getHours()).padStart(2, "0");
+      const mm = String(ahora.getMinutes()).padStart(2, "0");
+      setHoraRetiroValor(`${hh}:${mm}`);
+    }
+  };
+
   const datosCheckout: DatosCheckout = {
     nombreCliente,
     telefonoCliente,
@@ -170,6 +184,8 @@ export default function CartDrawer({
     direccionOMesa,
     metodoPago,
     notasAdicionales,
+    horaRetiroTipo,
+    horaRetiroValor,
   };
 
   const { total, totalUnidades } = calcularTotalesCarrito(items);
@@ -229,8 +245,16 @@ export default function CartDrawer({
       // Ignorar errores de escritura en localStorage
     }
 
+    const horaRetiroFinal =
+      horaRetiroTipo === "programado" && horaRetiroValor.trim()
+        ? horaRetiroValor.trim()
+        : "lo_antes_posible";
+
     const notasCompletas = [
       telefonoCliente.trim() ? `Tel: ${telefonoCliente.trim()}` : "",
+      horaRetiroTipo === "programado" && horaRetiroValor.trim()
+        ? `Retiro programado: ${horaRetiroValor.trim()} hrs`
+        : "",
       notasAdicionales.trim(),
     ]
       .filter(Boolean)
@@ -239,6 +263,8 @@ export default function CartDrawer({
     const payloadPedido = {
       local_slug: local.slug,
       cliente_nombre: nombreCliente.trim(),
+      cliente_telefono: telefonoCliente.trim() || undefined,
+      hora_retiro: horaRetiroFinal,
       tipo_entrega: tipoEntrega === "Consumo en mesa" ? "Mesa" : "Retiro",
       direccion_mesa:
         direccionOMesa.trim() ||
@@ -565,28 +591,6 @@ export default function CartDrawer({
                 />
               </div>
 
-              {/* Mesa o Referencia para Retiro */}
-              <div>
-                <label
-                  htmlFor="direccionOMesa"
-                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
-                >
-                  <MapPin className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
-                  {labelUbicacion}
-                </label>
-                <input
-                  id="direccionOMesa"
-                  type="text"
-                  value={direccionOMesa}
-                  onChange={(e) => {
-                    setDireccionOMesa(e.target.value);
-                    if (errorValidacion) setErrorValidacion(null);
-                  }}
-                  placeholder={placeholderUbicacion}
-                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
-                />
-              </div>
-
               {/* Teléfono de contacto (opcional) */}
               <div>
                 <label
@@ -607,6 +611,87 @@ export default function CartDrawer({
                 <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
                   <span>✓ Tus datos quedan guardados para tus próximos pedidos</span>
                 </p>
+              </div>
+
+              {/* Programación de Hora de Retiro */}
+              <div className="rounded-2xl border border-stone-200/90 bg-stone-50/80 p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className={`flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}>
+                    <Clock className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
+                    ¿Cuándo pasas a retirar tu pedido?
+                  </span>
+                  {horaRetiroTipo === "inmediato" && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-extrabold text-amber-900 border border-amber-300">
+                      ~{local.tiempo_estimado || "20-30 min"}
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setHoraRetiroTipo("inmediato")}
+                    className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 px-3 text-xs font-black transition active:scale-[0.98] ${
+                      horaRetiroTipo === "inmediato"
+                        ? "border-[#EA580C] bg-[#EA580C] text-white shadow-xs"
+                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
+                    }`}
+                  >
+                    <span>⚡ Lo antes posible</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleSeleccionarProgramado}
+                    className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 px-3 text-xs font-black transition active:scale-[0.98] ${
+                      horaRetiroTipo === "programado"
+                        ? "border-[#EA580C] bg-[#EA580C] text-white shadow-xs"
+                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
+                    }`}
+                  >
+                    <span>🕒 Programar hora</span>
+                  </button>
+                </div>
+
+                {horaRetiroTipo === "programado" && (
+                  <div className="pt-1 space-y-1.5">
+                    <label htmlFor="horaRetiroInput" className="sr-only">
+                      Hora estimada de retiro
+                    </label>
+                    <input
+                      id="horaRetiroInput"
+                      type="time"
+                      value={horaRetiroValor}
+                      onChange={(e) => setHoraRetiroValor(e.target.value)}
+                      className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 font-mono text-sm font-bold text-stone-900 shadow-xs focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20"
+                    />
+                    <p className="text-[11px] font-medium text-stone-500">
+                      Indica la hora aproximada en que vendrás a buscar tu comida
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Mesa o Referencia para Retiro */}
+              <div>
+                <label
+                  htmlFor="direccionOMesa"
+                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
+                >
+                  <MapPin className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
+                  {labelUbicacion}
+                </label>
+                <input
+                  id="direccionOMesa"
+                  type="text"
+                  value={direccionOMesa}
+                  onChange={(e) => {
+                    setDireccionOMesa(e.target.value);
+                    if (errorValidacion) setErrorValidacion(null);
+                  }}
+                  placeholder={placeholderUbicacion}
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
+                />
               </div>
 
               {/* Método de pago */}
