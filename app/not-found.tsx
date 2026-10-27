@@ -3,7 +3,7 @@ import { ArrowLeft, Store, Compass } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 text-center selection:bg-amber-500 selection:text-slate-950">
+    <main className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4 sm:p-6 text-center selection:bg-orange-600 selection:text-white">
       {/* Halo de luz decorativo */}
       <div className="absolute top-1/4 -z-10 h-64 w-64 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 

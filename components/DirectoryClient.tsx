@@ -156,7 +156,12 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
   }, []);
 
   useEffect(() => {
-    if (pausaCoverflow || locales.length <= 1) return;
+    // Si el usuario prefiere movimiento reducido, pausar rotación automática
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (prefersReducedMotion || pausaCoverflow || locales.length <= 1) return;
     const timer = setInterval(() => {
       setIndiceCoverflow((prev) => (prev + 1) % locales.length);
     }, 4500);
@@ -597,6 +602,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           className="relative w-full max-w-6xl mx-auto px-4 overflow-hidden select-none py-6"
           onMouseEnter={() => setPausaCoverflow(true)}
           onMouseLeave={() => setPausaCoverflow(false)}
+          onFocusCapture={() => setPausaCoverflow(true)}
+          onBlurCapture={() => setPausaCoverflow(false)}
           onTouchStart={(e) => {
             touchStartX.current = e.changedTouches[0].screenX;
             setPausaCoverflow(true);
@@ -960,7 +967,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               </div>
 
               <div className="relative z-10 flex flex-col items-center justify-center my-auto text-center">
-                <div className="w-12 h-12 rounded-full bg-[#EA580C] text-white flex items-center justify-center shadow-lg animate-bounce">
+                <div className="w-12 h-12 rounded-full bg-[#EA580C] text-white flex items-center justify-center shadow-lg shadow-orange-500/25 transition-transform duration-300 hover:scale-105">
                   <span className="material-symbols-outlined text-2xl">pin_drop</span>
                 </div>
                 <span className="font-display text-xl text-stone-900 tracking-wide mt-2">

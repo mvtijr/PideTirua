@@ -17,14 +17,14 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-4 sm:p-6 text-center selection:bg-amber-500 selection:text-slate-950">
+    <main className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-4 sm:p-6 text-center selection:bg-orange-600 selection:text-white">
       {/* Halo de luz de advertencia suave */}
       <div className="absolute top-1/4 -z-10 h-64 w-64 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md space-y-6 rounded-3xl border border-white/10 bg-slate-900/80 p-6 sm:p-8 shadow-2xl backdrop-blur-md">
         {/* Icono de Alerta */}
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-rose-500/20 border border-rose-500/30 text-rose-400 shadow-inner">
-          <AlertTriangle className="h-10 w-10 animate-bounce" />
+          <AlertTriangle className="h-10 w-10 transition-transform duration-300 hover:scale-110" />
         </div>
 
         <div className="space-y-2">

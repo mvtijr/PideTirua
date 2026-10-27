@@ -61,6 +61,15 @@ export default memo(function ProductCard({
 
   return (
     <div
+      role={tieneOpciones && disponible ? "button" : undefined}
+      tabIndex={tieneOpciones && disponible ? 0 : undefined}
+      aria-label={tieneOpciones && disponible ? `Personalizar plato: ${producto.nombre}` : undefined}
+      onKeyDown={(e) => {
+        if ((e.key === "Enter" || e.key === " ") && disponible && tieneOpciones && onPersonalizar) {
+          e.preventDefault();
+          onPersonalizar(producto);
+        }
+      }}
       onClick={() => {
         if (disponible && tieneOpciones && onPersonalizar) {
           onPersonalizar(producto);
@@ -196,11 +205,11 @@ export default memo(function ProductCard({
                 <button
                   type="button"
                   onClick={handleAgregarClick}
-                  className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-600 text-white font-bold transition active:scale-90 hover:bg-amber-700 shadow-sm"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-600 text-white font-bold transition active:scale-90 hover:bg-amber-700 shadow-sm"
                   title="Agregar otra personalización"
                   aria-label="Agregar otra personalización"
                 >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus className="h-4 w-4" />
                 </button>
               </div>
             )
@@ -216,7 +225,7 @@ export default memo(function ProductCard({
             >
               {agregadoFeedback ? (
                 <>
-                  <Check className="h-4 w-4 animate-bounce" />
+                  <Check className="h-4 w-4 transition-transform duration-200 scale-110 text-white" />
                   <span>¡Agregado!</span>
                 </>
               ) : (
@@ -229,28 +238,28 @@ export default memo(function ProductCard({
           ) : (
             <div
               onClick={(e) => e.stopPropagation()}
-              className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-stone-300 bg-white px-1.5 py-1 shadow-sm ${theme.cardCounterBox}`}
+              className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-stone-300 bg-white px-2 py-1 shadow-sm ${theme.cardCounterBox}`}
             >
               <button
                 type="button"
                 onClick={() => onDisminuir(producto.id)}
-                className={`flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 ${theme.cardMinusBtn}`}
+                className={`flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full transition active:scale-90 ${theme.cardMinusBtn}`}
                 aria-label={`Quitar una unidad de ${producto.nombre}`}
               >
-                <Minus className="h-3.5 w-3.5" />
+                <Minus className="h-4 w-4" />
               </button>
               <span
-                className={`min-w-[1.5rem] text-center text-sm font-black ${theme.cardQtyText}`}
+                className={`min-w-[1.75rem] text-center text-sm font-black ${theme.cardQtyText}`}
               >
                 {cantidadEnCarrito}
               </span>
               <button
                 type="button"
                 onClick={handleAgregarClick}
-                className={`flex h-9 w-9 items-center justify-center rounded-full transition active:scale-90 ${theme.cardPlusBtn}`}
+                className={`flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-full transition active:scale-90 ${theme.cardPlusBtn}`}
                 aria-label={`Agregar otra unidad de ${producto.nombre}`}
               >
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="h-4 w-4" />
               </button>
             </div>
           )}

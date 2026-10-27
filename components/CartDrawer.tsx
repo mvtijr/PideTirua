@@ -120,6 +120,30 @@ export default function CartDrawer({
     }
   }, []);
 
+  // Manejador de tecla Escape para cerrar el carrito
+  useEffect(() => {
+    if (!abierto) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [abierto, onClose]);
+
+  // Bloquear scroll del body cuando el carrito está abierto
+  useEffect(() => {
+    if (abierto) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [abierto]);
+
   if (!abierto || !isMounted) return null;
 
   const theme = getLocalTheme(local.slug);
@@ -352,6 +376,9 @@ export default function CartDrawer({
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="cart-drawer-title"
       className="fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-xs transition-opacity"
       onClick={onClose}
     >
@@ -370,7 +397,10 @@ export default function CartDrawer({
             >
               Pedido directo a WhatsApp
             </span>
-            <h2 className="font-display text-2xl tracking-wide uppercase leading-tight text-stone-900">
+            <h2
+              id="cart-drawer-title"
+              className="font-display text-2xl tracking-wide uppercase leading-tight text-stone-900"
+            >
               Tu Pedido en {local.nombre}
             </h2>
           </div>

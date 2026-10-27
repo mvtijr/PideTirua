@@ -1069,10 +1069,11 @@ export default function SuperAdminClient({
             >
               <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                  <label htmlFor="dc-nombre" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                     Tu Nombre Completo *
                   </label>
                   <input
+                    id="dc-nombre"
                     type="text"
                     value={datosCobro.nombre}
                     onChange={(e) =>
@@ -1087,10 +1088,11 @@ export default function SuperAdminClient({
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                  <label htmlFor="dc-rut" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                     Tu RUT *
                   </label>
                   <input
+                    id="dc-rut"
                     type="text"
                     value={datosCobro.rut}
                     onChange={(e) =>
@@ -1105,10 +1107,11 @@ export default function SuperAdminClient({
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                  <label htmlFor="dc-banco" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                     Tu Banco *
                   </label>
                   <input
+                    id="dc-banco"
                     type="text"
                     value={datosCobro.banco}
                     onChange={(e) =>
@@ -1123,10 +1126,11 @@ export default function SuperAdminClient({
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                  <label htmlFor="dc-cuenta" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                     Tu N° de CuentaRUT *
                   </label>
                   <input
+                    id="dc-cuenta"
                     type="text"
                     value={datosCobro.cuenta}
                     onChange={(e) =>
@@ -1141,10 +1145,11 @@ export default function SuperAdminClient({
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                  <label htmlFor="dc-correo" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                     Correo para comprobantes (opcional)
                   </label>
                   <input
+                    id="dc-correo"
                     type="email"
                     value={datosCobro.correo}
                     onChange={(e) =>
@@ -1222,10 +1227,11 @@ export default function SuperAdminClient({
                 </h3>
                 <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
                   <div>
-                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
+                    <label htmlFor="fn-nombre" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                       Nombre comercial *
                     </label>
                     <input
+                      id="fn-nombre"
                       type="text"
                       value={formNombre}
                       onChange={(e) => {
@@ -1241,10 +1247,11 @@ export default function SuperAdminClient({
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
+                    <label htmlFor="fn-slug" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                       Slug (URL pública: /[slug]) *
                     </label>
                     <input
+                      id="fn-slug"
                       type="text"
                       value={formSlug}
                       onChange={(e) => {
@@ -1257,10 +1264,11 @@ export default function SuperAdminClient({
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
+                    <label htmlFor="fn-rubro" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                       Rubro gastronómico *
                     </label>
                     <input
+                      id="fn-rubro"
                       type="text"
                       value={formRubro}
                       onChange={(e) => setFormRubro(e.target.value)}
@@ -1270,10 +1278,11 @@ export default function SuperAdminClient({
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
+                    <label htmlFor="fn-telefono" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                       Teléfono WhatsApp (+569...) *
                     </label>
                     <input
+                      id="fn-telefono"
                       type="text"
                       value={formTelefono}
                       onChange={(e) => setFormTelefono(e.target.value)}
@@ -1283,10 +1292,11 @@ export default function SuperAdminClient({
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
+                    <label htmlFor="fn-direccion" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                       Dirección comercial *
                     </label>
                     <input
+                      id="fn-direccion"
                       type="text"
                       value={formDireccion}
                       onChange={(e) => setFormDireccion(e.target.value)}
@@ -1297,10 +1307,11 @@ export default function SuperAdminClient({
 
                   <div className="grid grid-cols-2 gap-2.5">
                     <div>
-                      <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
+                      <label htmlFor="fn-sector" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                         Sector
                       </label>
                       <select
+                        id="fn-sector"
                         value={formSector}
                         onChange={(e) =>
                           setFormSector(e.target.value as SectorComuna)
@@ -1313,10 +1324,11 @@ export default function SuperAdminClient({
                     </div>
 
                     <div>
-                      <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
+                      <label htmlFor="fn-pin" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
                         PIN (4 dígitos) *
                       </label>
                       <input
+                        id="fn-pin"
                         type="text"
                         inputMode="numeric"
                         maxLength={4}

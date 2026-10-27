@@ -16,7 +16,7 @@ function Noise({
   patternSize = 100,
   patternScaleX = 1, // How much to scale the noise pattern tiling horizontally
   patternScaleY = 1, // How much to scale the noise pattern tiling vertically
-  patternRefreshInterval = 1,
+  patternRefreshInterval = 0, // Default to static noise (0 = zero CPU overhead)
   patternAlpha = 50,
   intensity = 1,
 }: NoiseProps) {
@@ -27,6 +27,13 @@ function Noise({
   useEffect(() => {
     const canvas = grainRef.current;
     if (!canvas) return;
+
+    // Check prefers-reduced-motion
+    const prefersReducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const effectiveRefreshInterval = prefersReducedMotion ? 0 : patternRefreshInterval;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -111,7 +118,7 @@ function Noise({
     const loop = () => {
       // Only update and draw if dimensions are valid
       if (canvasCssSizeRef.current.width > 0 && canvasCssSizeRef.current.height > 0) {
-        if (frame % patternRefreshInterval === 0) {
+        if (frame % effectiveRefreshInterval === 0) {
           updatePattern();
           drawGrain();
         }
@@ -122,9 +129,9 @@ function Noise({
 
     window.addEventListener('resize', resize);
     resize(); // Initial setup: size canvas and draw first frame if needed
-    if (patternRefreshInterval > 0) { // Start loop only if refresh is meaningful
+    if (effectiveRefreshInterval > 0) { // Start loop only if refresh is meaningful
       loop();
-    } else { // if refresh interval is 0 or less, draw once
+    } else { // if refresh interval is 0 or less, draw once statically
       updatePattern();
       drawGrain();
     }
@@ -198,7 +205,7 @@ function GradientBackground({
   noisePatternSize = 100,
   noisePatternScaleX = 1,
   noisePatternScaleY = 1,
-  noisePatternRefreshInterval = 1,
+  noisePatternRefreshInterval = 0, // Default to static grain (0 = zero continuous CPU draw)
   noisePatternAlpha = 50,
   noiseIntensity = 1,
   

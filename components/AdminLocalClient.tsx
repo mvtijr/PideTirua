@@ -2177,11 +2177,12 @@ export default function AdminLocalClient({
                   >
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
-                        <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
+                        <label htmlFor="al-telefono" className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
                           <Phone className="h-3.5 w-3.5 text-emerald-600" />
                           Teléfono WhatsApp (+569...)
                         </label>
                         <input
+                          id="al-telefono"
                           type="text"
                           value={telefonoWhatsapp}
                           onChange={(e) => setTelefonoWhatsapp(e.target.value)}
@@ -2191,11 +2192,12 @@ export default function AdminLocalClient({
                       </div>
 
                       <div>
-                        <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
+                        <label htmlFor="al-horario" className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
                           <Clock className="h-3.5 w-3.5 text-sky-600" />
                           Horario de atención
                         </label>
                         <input
+                          id="al-horario"
                           type="text"
                           value={horarioAtencion}
                           onChange={(e) => setHorarioAtencion(e.target.value)}
@@ -2205,11 +2207,12 @@ export default function AdminLocalClient({
                       </div>
 
                       <div>
-                        <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
+                        <label htmlFor="al-direccion" className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
                           <MapPin className="h-3.5 w-3.5 text-amber-600" />
                           Dirección del local
                         </label>
                         <input
+                          id="al-direccion"
                           type="text"
                           value={direccionLocal}
                           onChange={(e) => setDireccionLocal(e.target.value)}
@@ -2219,11 +2222,12 @@ export default function AdminLocalClient({
                       </div>
 
                       <div>
-                        <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
+                        <label htmlFor="al-pin" className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
                           <KeyRound className="h-3.5 w-3.5 text-rose-600" />
                           PIN de Seguridad (4 dígitos)
                         </label>
                         <input
+                          id="al-pin"
                           type="text"
                           inputMode="numeric"
                           maxLength={4}
@@ -2290,10 +2294,11 @@ export default function AdminLocalClient({
                   >
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
-                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                        <label htmlFor="banco-nombre" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                           Banco
                         </label>
                         <input
+                          id="banco-nombre"
                           type="text"
                           value={banco}
                           onChange={(e) => setBanco(e.target.value)}
@@ -2303,10 +2308,11 @@ export default function AdminLocalClient({
                       </div>
 
                       <div>
-                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                        <label htmlFor="banco-tipo" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                           Tipo de cuenta
                         </label>
                         <input
+                          id="banco-tipo"
                           type="text"
                           value={tipoCuenta}
                           onChange={(e) => setTipoCuenta(e.target.value)}
@@ -2316,10 +2322,11 @@ export default function AdminLocalClient({
                       </div>
 
                       <div>
-                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                        <label htmlFor="banco-numero" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                           N° de cuenta
                         </label>
                         <input
+                          id="banco-numero"
                           type="text"
                           value={numeroCuenta}
                           onChange={(e) => setNumeroCuenta(e.target.value)}
@@ -2329,10 +2336,11 @@ export default function AdminLocalClient({
                       </div>
 
                       <div>
-                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                        <label htmlFor="banco-rut" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                           RUT del titular
                         </label>
                         <input
+                          id="banco-rut"
                           type="text"
                           value={rutTitular}
                           onChange={(e) => setRutTitular(e.target.value)}
@@ -2342,10 +2350,11 @@ export default function AdminLocalClient({
                       </div>
 
                       <div>
-                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                        <label htmlFor="banco-titular" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                           Nombre del titular
                         </label>
                         <input
+                          id="banco-titular"
                           type="text"
                           value={nombreTitular}
                           onChange={(e) => setNombreTitular(e.target.value)}
@@ -2355,10 +2364,11 @@ export default function AdminLocalClient({
                       </div>
 
                       <div>
-                        <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
+                        <label htmlFor="banco-email" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-700">
                           Correo de confirmación
                         </label>
                         <input
+                          id="banco-email"
                           type="email"
                           value={emailTransferencia}
                           onChange={(e) => setEmailTransferencia(e.target.value)}

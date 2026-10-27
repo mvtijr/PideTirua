@@ -621,6 +621,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 value={busquedaPlato}
                 onChange={(e) => setBusquedaPlato(e.target.value)}
                 placeholder={`Buscar en la carta de ${local.nombre}...`}
+                aria-label={`Buscar platos en la carta de ${local.nombre}`}
                 className={`w-full border py-2.5 pl-10 pr-9 text-xs focus:outline-none transition ${theme.searchInput}`}
               />
               {busquedaPlato && (
