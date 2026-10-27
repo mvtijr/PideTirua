@@ -251,6 +251,14 @@ export default function CartDrawer({
       return;
     }
 
+    const telLimpio = telefonoCliente.replace(/\D/g, "");
+    if (!telLimpio || telLimpio.length < 8) {
+      setErrorValidacion(
+        "Por favor ingresa un número de teléfono / WhatsApp válido (mínimo 8 dígitos) para notificarte cuando tu pedido esté listo."
+      );
+      return;
+    }
+
     if (tipoEntrega === "Consumo en mesa" && !direccionOMesa.trim()) {
       setErrorValidacion("Por favor indica tu número de mesa.");
       return;
@@ -621,25 +629,32 @@ export default function CartDrawer({
                 />
               </div>
 
-              {/* Teléfono de contacto (opcional) */}
+              {/* Teléfono de contacto / WhatsApp (obligatorio) */}
               <div>
                 <label
                   htmlFor="telefonoCliente"
                   className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
                 >
                   <Phone className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
-                  Teléfono de contacto (opcional)
+                  Teléfono / WhatsApp *
                 </label>
                 <input
                   id="telefonoCliente"
                   type="tel"
+                  required
                   value={telefonoCliente}
-                  onChange={(e) => setTelefonoCliente(e.target.value)}
-                  placeholder="Ej: +56 9 8765 4321"
+                  onChange={(e) => {
+                    setTelefonoCliente(e.target.value);
+                    if (errorValidacion) setErrorValidacion(null);
+                  }}
+                  placeholder="Ej: +56 9 8765 4321 o 987654321"
                   className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
-                <p className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
-                  <span>✓ Tus datos quedan guardados para tus próximos pedidos</span>
+                <p className="mt-1 text-[11px] text-stone-500">
+                  El local usará este número para avisarte por WhatsApp en el momento exacto en que tu pedido esté listo para retirar.
+                </p>
+                <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
+                  <span>✓ Tus datos quedan guardados en tu celular para tus próximos pedidos</span>
                 </p>
               </div>
 
