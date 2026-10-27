@@ -157,12 +157,12 @@ export default memo(function ProductCard({
         <div className="mt-3 flex items-center justify-between gap-2">
           <div className="flex flex-col">
             {tieneOferta && disponible && (
-              <span className="text-xs font-bold text-slate-400 line-through decoration-rose-400">
+              <span className="text-xs font-bold text-slate-400 line-through decoration-rose-400 tabular-nums">
                 {formatCLP(producto.precio)}
               </span>
             )}
             <span
-              className={`text-base font-extrabold tracking-tight sm:text-lg ${
+              className={`text-base font-extrabold tracking-tight sm:text-lg tabular-nums ${
                 !disponible
                   ? "text-slate-400"
                   : tieneOferta

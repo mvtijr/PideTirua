@@ -74,6 +74,24 @@
   }
 }
 
+/* Indicador de foco accesible y refinado alineado con la paleta de la marca */
+:focus-visible {
+  outline: 2px solid #EA580C;
+  outline-offset: 2px;
+}
+
+/* Números tabulares para alineación perfecta de precios, cantidades y cronómetros */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  -webkit-font-feature-settings: "tnum";
+  font-feature-settings: "tnum";
+}
+
+/* Inset seguro para dispositivos móviles con barra de gestos inferior (iPhone/PWA) */
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+}
+
 html,
 body,
 button,

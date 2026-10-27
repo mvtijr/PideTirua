@@ -23,13 +23,13 @@ export default function FloatingCartBar({
 
   return (
     <div
-      className={`fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t p-3 sm:p-4 pointer-events-none ${theme.floatingGradient}`}
+      className={`fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t p-3 sm:p-4 pointer-events-none safe-bottom ${theme.floatingGradient}`}
     >
       <div className="mx-auto max-w-xl pointer-events-auto">
         <button
           type="button"
           onClick={onOpenDrawer}
-          className={`flex w-full min-h-[56px] items-center justify-between px-4 py-3.5 transition-all active:scale-[0.99] ${theme.floatingBtn}`}
+          className={`flex w-full min-h-[56px] items-center justify-between px-4 py-3.5 transition-all active:scale-[0.99] shadow-xl ${theme.floatingBtn}`}
         >
           <div className="flex items-center gap-3">
             <div
@@ -37,7 +37,7 @@ export default function FloatingCartBar({
             >
               <ShoppingBag className="h-5 w-5" />
               <span
-                className={`-right-1.5 -top-1.5 absolute flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-xs font-black shadow ${theme.floatingCountBadge}`}
+                className={`-right-1.5 -top-1.5 absolute flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-xs font-black shadow tabular-nums ${theme.floatingCountBadge}`}
               >
                 {totalUnidades}
               </span>
@@ -61,7 +61,7 @@ export default function FloatingCartBar({
               >
                 Total parcial
               </span>
-              <span className="text-base font-black sm:text-lg">
+              <span className="text-base font-black sm:text-lg tabular-nums">
                 {formatCLP(subtotal)}
               </span>
             </div>

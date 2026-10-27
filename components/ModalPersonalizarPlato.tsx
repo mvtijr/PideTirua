@@ -153,7 +153,12 @@ export default function ModalPersonalizarPlato({
       />
 
       {/* Contenedor Modal / Bottom Sheet */}
-      <div className="relative w-full max-h-[92vh] sm:max-h-[85vh] sm:max-w-lg flex flex-col rounded-t-[28px] sm:rounded-3xl bg-stone-50 border border-stone-200/90 shadow-2xl z-10 overflow-hidden animate-in slide-in-from-bottom duration-300">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-personalizar-title"
+        className="relative w-full max-h-[92vh] sm:max-h-[85vh] sm:max-w-lg flex flex-col rounded-t-[28px] sm:rounded-3xl bg-stone-50 border border-stone-200/90 shadow-2xl z-10 overflow-hidden animate-in slide-in-from-bottom duration-300"
+      >
         {/* Cabecera del Modal */}
         <div className="sticky top-0 z-20 flex items-center justify-between border-b border-stone-200 bg-white/95 px-5 py-3.5 backdrop-blur-md">
           <div className="flex items-center gap-2">
@@ -193,7 +198,10 @@ export default function ModalPersonalizarPlato({
               )}
             </div>
             <div className="flex flex-1 flex-col justify-center min-w-0">
-              <h3 className="font-display text-lg font-bold tracking-wide uppercase text-stone-900 truncate">
+              <h3
+                id="modal-personalizar-title"
+                className="font-display text-lg font-bold tracking-wide uppercase text-stone-900 truncate"
+              >
                 {producto.nombre}
               </h3>
               {producto.descripcion && (
@@ -293,7 +301,7 @@ export default function ModalPersonalizarPlato({
                         </div>
 
                         <span
-                          className={`text-xs font-bold shrink-0 ml-2 ${
+                          className={`text-xs font-bold shrink-0 ml-2 tabular-nums ${
                             itemPrecio > 0 ? "text-amber-700" : "text-stone-400"
                           }`}
                         >
@@ -311,7 +319,7 @@ export default function ModalPersonalizarPlato({
         </div>
 
         {/* Barra Inferior Fija de Cantidad y Agregar */}
-        <div className="sticky bottom-0 z-20 border-t border-stone-200 bg-white px-5 py-4 shadow-lg backdrop-blur-md">
+        <div className="sticky bottom-0 z-20 border-t border-stone-200 bg-white px-5 py-4 shadow-lg backdrop-blur-md safe-bottom">
           <div className="flex items-center gap-4">
             {/* Control de Cantidad */}
             <div className="flex items-center rounded-full border border-stone-300 bg-stone-100 p-1">
@@ -324,7 +332,7 @@ export default function ModalPersonalizarPlato({
               >
                 <Minus className="h-4 w-4" />
               </button>
-              <span className="w-9 text-center font-display text-lg font-bold text-stone-900">
+              <span className="w-9 text-center font-display text-lg font-bold text-stone-900 tabular-nums">
                 {cantidad}
               </span>
               <button
@@ -345,7 +353,7 @@ export default function ModalPersonalizarPlato({
             >
               <span>Agregar al pedido</span>
               <span className="opacity-60">•</span>
-              <span className="font-mono text-sm tracking-normal">
+              <span className="font-mono text-sm tracking-normal tabular-nums">
                 {formatCLP(precioTotal)}
               </span>
             </button>

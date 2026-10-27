@@ -501,7 +501,7 @@ export default function CartDrawer({
                             </div>
                           )}
 
-                          <p className="mt-0.5 text-xs font-medium text-on-surface-variant">
+                          <p className="mt-0.5 text-xs font-medium text-on-surface-variant tabular-nums">
                             {esPromo && (
                               <span className="mr-1 text-[11px] text-slate-400 line-through">
                                 {formatCLP(producto.precio)}
@@ -926,12 +926,12 @@ export default function CartDrawer({
           </div>
 
           {/* Resumen de Total y Botón de Checkout a WhatsApp */}
-          <div className="border-t border-stone-200/90 bg-white p-4 sm:px-6">
+          <div className="border-t border-stone-200/90 bg-white p-4 sm:px-6 safe-bottom">
             <div
               className={`mb-3 flex items-center justify-between text-base font-extrabold ${theme.drawerLabel}`}
             >
               <span>Total a pagar</span>
-              <span className={`text-xl ${theme.drawerItemTotal}`}>
+              <span className={`text-xl tabular-nums ${theme.drawerItemTotal}`}>
                 {formatCLP(total)}
               </span>
             </div>
