@@ -22,6 +22,24 @@ const STORAGE_BUCKET = "pidetirua-db";
 const STORAGE_STATE_FILE = "locales-state.json";
 const PLATOS_IMAGES_BUCKET = "platos";
 
+/**
+ * Obtiene el cliente de Supabase adecuado para operaciones de servidor o cliente.
+ * Si se ejecuta en el servidor (API routes, Server Components, mutaciones), utiliza
+ * el cliente administrativo (service_role) para tener permisos plenos de escritura
+ * y omitir restricciones RLS. Si se ejecuta en el cliente, utiliza getSupabaseClient().
+ */
+async function getEffectiveSupabaseClient() {
+  if (typeof window === "undefined") {
+    try {
+      const { getSupabaseAdminClient } = await import("@/lib/supabase-server");
+      return getSupabaseAdminClient();
+    } catch {
+      return getSupabaseClient();
+    }
+  }
+  return getSupabaseClient();
+}
+
 import { timingSafeCompare } from "@/lib/security";
 
 export function verifySuperAdminKey(inputKey: string): boolean {
@@ -435,7 +453,7 @@ function mapSupabaseRowToLocal(
  * inserta automáticamente los locales, categorías y productos iniciales.
  */
 async function seedRelationalTablesIfEmpty(): Promise<void> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
   const initialLocales = getAllLocales();
 
   const localesRows = initialLocales.map((loc) => ({
@@ -536,7 +554,7 @@ async function seedRelationalTablesIfEmpty(): Promise<void> {
 
 async function readSupabaseCloudState(): Promise<Local[] | null> {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = await getEffectiveSupabaseClient();
     const { data, error } = await supabase.storage
       .from(STORAGE_BUCKET)
       .download(STORAGE_STATE_FILE);
@@ -575,7 +593,7 @@ export async function ensurePlatosBucketVideoSupport(): Promise<{
   error?: string;
 }> {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = await getEffectiveSupabaseClient();
     const { data: buckets } = await supabase.storage.listBuckets();
     const existsPlatos = buckets?.some((b) => b.name === PLATOS_IMAGES_BUCKET);
     if (!existsPlatos) {
@@ -602,7 +620,7 @@ export async function ensurePlatosBucketVideoSupport(): Promise<{
 
 async function writeSupabaseCloudState(locales: Local[]): Promise<void> {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = await getEffectiveSupabaseClient();
     const { data: buckets } = await supabase.storage.listBuckets();
     const existsDb = buckets?.some((b) => b.name === STORAGE_BUCKET);
     if (!existsDb) {
@@ -642,7 +660,7 @@ export async function uploadPlatoFotoInSupabase(
   fileName = "plato.jpg"
 ): Promise<{ ok: boolean; url?: string; error?: string }> {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = await getEffectiveSupabaseClient();
 
     await ensurePlatosBucketVideoSupport();
 
@@ -723,7 +741,7 @@ function mergeRowsWithStaticLocales(
  * Obtiene todos los locales (incluyendo activos y suspendidos) con sus categorías y productos desde Supabase.
  */
 export async function fetchAllLocales(): Promise<Local[]> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
   const staticLocales = getAllLocales();
 
   try {
@@ -732,7 +750,7 @@ export async function fetchAllLocales(): Promise<Local[]> {
       .select("*, categorias(*, productos(*))");
 
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
-      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 800)
+      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 6000)
     );
 
     const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
@@ -759,7 +777,7 @@ export async function fetchActiveLocales(): Promise<Local[]> {
   const staticLocales = getAllLocales();
 
   try {
-    const supabase = getSupabaseClient();
+    const supabase = await getEffectiveSupabaseClient();
     const queryPromise = supabase
       .from("locales")
       .select("id, slug, nombre, rubro, logo_url, banner_url, abierto, activo")
@@ -767,7 +785,7 @@ export async function fetchActiveLocales(): Promise<Local[]> {
       .order("nombre");
 
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
-      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 600)
+      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 6000)
     );
 
     const { data: rows, error } = await Promise.race([queryPromise, timeoutPromise]);
@@ -860,7 +878,7 @@ export async function fetchLocalBySlug(
   );
 
   try {
-    const supabase = getSupabaseClient();
+    const supabase = await getEffectiveSupabaseClient();
     let query = supabase
       .from("locales")
       .select("*, categorias(*, productos(*))")
@@ -871,7 +889,7 @@ export async function fetchLocalBySlug(
     }
 
     const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
-      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 600)
+      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 6000)
     );
 
     const { data, error } = await Promise.race([query.single(), timeoutPromise]);
@@ -896,7 +914,7 @@ export async function updateLocalAbiertoInSupabase(
   slug: string,
   abierto: boolean
 ): Promise<{ ok: boolean; local?: Local }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
 
   await supabase.from("locales").update({ abierto }).eq("slug", slug);
 
@@ -926,7 +944,7 @@ export async function updateLocalAjustesBasicosInSupabase(
     pin?: string;
   }
 ): Promise<{ ok: boolean; local?: Local; error?: string }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
 
   const updateRow: Record<string, unknown> = {};
   if (typeof ajustes.telefono_whatsapp === "string" && ajustes.telefono_whatsapp.trim()) {
@@ -995,7 +1013,7 @@ export async function createCategoriaInSupabase(
   slug: string,
   nombreCategoria: string
 ): Promise<{ ok: boolean; local?: Local; error?: string }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
   const locales = await fetchAllLocales();
   const localObj = locales.find(
     (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
@@ -1051,7 +1069,7 @@ export async function deleteCategoriaInSupabase(
   slug: string,
   categoriaId: string
 ): Promise<{ ok: boolean; local?: Local; error?: string }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
   await supabase.from("categorias").delete().eq("id", categoriaId);
 
   const locales = await fetchAllLocales();
@@ -1081,7 +1099,7 @@ export async function updateLocalDemoraYEmergenciaInSupabase(
     mensaje_emergencia?: string | null;
   }
 ): Promise<{ ok: boolean; local?: Local; error?: string }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
   const updateRow: Record<string, unknown> = {};
 
   if (datos.tiempo_estimado !== undefined) {
@@ -1144,7 +1162,7 @@ export async function toggleCategoriaActivaInSupabase(
   categoriaId: string,
   activa: boolean
 ): Promise<{ ok: boolean; local?: Local; error?: string }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
 
   // 1. Intentar actualizar columna activa en tabla categorias
   const { error: catErr } = await supabase
@@ -1208,7 +1226,7 @@ export async function updateLocalDatosBancariosInSupabase(
     email_transferencia: string;
   }
 ): Promise<{ ok: boolean; local?: Local }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
 
   const payload = {
     banco: datos.banco.trim(),
@@ -1255,7 +1273,7 @@ export async function updateProductoInSupabase(
     opciones?: GrupoOpcion[];
   }
 ): Promise<{ ok: boolean; local?: Local }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
 
   const updatePayload: Record<string, unknown> = {};
   if (typeof cambios.nombre === "string") {
@@ -1408,7 +1426,7 @@ export async function createProductoInSupabase(
     opciones?: GrupoOpcion[];
   }
 ): Promise<{ ok: boolean; local?: Local; error?: string }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
   const locales = await fetchAllLocales();
   const localObj = locales.find(
     (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
@@ -1533,7 +1551,7 @@ export async function deleteProductoInSupabase(
   slug: string,
   productoId: string
 ): Promise<{ ok: boolean; local?: Local }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
 
   await supabase.from("productos").delete().eq("id", productoId);
 
@@ -1578,7 +1596,7 @@ export async function toggleLocalActivoBySuperAdminInSupabase(
   slug: string,
   activo: boolean
 ): Promise<{ ok: boolean; locales?: Local[]; error?: string }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
   const { error } = await supabase
     .from("locales")
     .update({ activo })
@@ -1612,7 +1630,7 @@ export async function updateLocalPinBySuperAdminInSupabase(
     };
   }
 
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
   const { error } = await supabase
     .from("locales")
     .update({ pin: pinLimpio })
@@ -1656,7 +1674,7 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
   dia_cobro?: number;
   fecha_ultimo_pago?: string;
 }): Promise<{ ok: boolean; locales?: Local[]; local?: Local; error?: string }> {
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
   const todos = await fetchAllLocales();
 
   const slugLimpio = input.slug
@@ -1814,7 +1832,7 @@ export async function registerLocalPagoBySuperAdminInSupabase(
       ? fechaPago.trim()
       : getTodayDateISO();
 
-  const supabase = getSupabaseClient();
+  const supabase = await getEffectiveSupabaseClient();
   const { error } = await supabase
     .from("locales")
     .update({ fecha_ultimo_pago: fechaFinal })

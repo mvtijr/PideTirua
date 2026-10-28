@@ -92,13 +92,25 @@ export async function crearPedidoEnSupabase(
 ): Promise<{ ok: boolean; pedido?: Pedido; error?: string }> {
   try {
     const supabase = getSupabaseAdminClient();
+
+    // Empaquetar teléfono y hora de retiro en notas para que nunca se pierdan si la tabla no tiene las columnas
+    const notasConMetadatos = [
+      input.cliente_telefono?.trim() ? `Tel: ${input.cliente_telefono.trim()}` : "",
+      input.hora_retiro?.trim() && input.hora_retiro !== "lo_antes_posible"
+        ? `Retiro programado: ${input.hora_retiro.trim()} hrs`
+        : "",
+      input.notas?.trim(),
+    ]
+      .filter(Boolean)
+      .join(" | ");
+
     const payloadBase: Record<string, unknown> = {
       local_slug: input.local_slug.trim(),
       cliente_nombre: input.cliente_nombre.trim() || "Cliente",
       tipo_entrega: input.tipo_entrega.trim(),
       direccion_mesa: input.direccion_mesa.trim(),
       metodo_pago: input.metodo_pago.trim(),
-      notas: input.notas.trim(),
+      notas: notasConMetadatos,
       items: input.items,
       total: Math.round(Number(input.total) || 0),
       estado: "pendiente",
@@ -116,9 +128,17 @@ export async function crearPedidoEnSupabase(
       .select("*")
       .single();
 
-    // Fallback de resiliencia si la base de datos remota aún no ha corrido la migración de columnas (código 42703)
-    if (error && (error.code === "42703" || error.message?.includes("column"))) {
-      console.warn("Columna no encontrada en pedidos, reintentando inserción con payload base:", error.message);
+    // Fallback de resiliencia si la base de datos remota aún no ha corrido la migración de columnas (código 42703 o PGRST204)
+    if (
+      error &&
+      (error.code === "42703" ||
+        error.code === "PGRST204" ||
+        error.message?.includes("column"))
+    ) {
+      console.warn(
+        "Columna no encontrada en pedidos, reintentando inserción con payload base preservando teléfono en notas:",
+        error.message
+      );
       const retry = await supabase
         .from("pedidos")
         .insert(payloadBase)
@@ -136,9 +156,21 @@ export async function crearPedidoEnSupabase(
       };
     }
 
+    const pedidoNormalizado = normalizePedidoRow(data as Record<string, unknown>);
+    if (!pedidoNormalizado.cliente_telefono && input.cliente_telefono?.trim()) {
+      pedidoNormalizado.cliente_telefono = input.cliente_telefono.trim();
+    }
+    if (
+      pedidoNormalizado.hora_retiro === "lo_antes_posible" &&
+      input.hora_retiro?.trim() &&
+      input.hora_retiro !== "lo_antes_posible"
+    ) {
+      pedidoNormalizado.hora_retiro = input.hora_retiro.trim();
+    }
+
     return {
       ok: true,
-      pedido: normalizePedidoRow(data as Record<string, unknown>),
+      pedido: pedidoNormalizado,
     };
   } catch (err) {
     console.error("Excepción al crear pedido:", err);

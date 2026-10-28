@@ -382,6 +382,9 @@ export default function AdminLocalClient({
   useEffect(() => {
     if (initialAuthenticated || initialSuperAdmin) {
       setAutenticado(true);
+      try {
+        document.cookie = `pidetirua_admin_${initialLocal.slug}=authenticated; path=/; max-age=604800; SameSite=Lax`;
+      } catch {}
       if (initialSuperAdmin) setEsSuperAdmin(true);
       setVerificandoSesion(false);
       return;
@@ -402,6 +405,7 @@ export default function AdminLocalClient({
       const guardado = localStorage.getItem(sessionKey);
       if (guardado === "authenticated") {
         setAutenticado(true);
+        document.cookie = `pidetirua_admin_${initialLocal.slug}=authenticated; path=/; max-age=604800; SameSite=Lax`;
       }
     } catch {
       // Ignorar errores de acceso a localStorage

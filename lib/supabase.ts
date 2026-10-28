@@ -22,24 +22,6 @@ export function getSupabaseClient(): SupabaseClient {
         persistSession: false,
         autoRefreshToken: false,
       },
-      global: {
-        fetch: (url, options = {}) => {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 800);
-
-          if (options.signal) {
-            options.signal.addEventListener("abort", () => controller.abort());
-          }
-
-          return fetch(url, {
-            ...options,
-            signal: controller.signal,
-            next: { revalidate: 60 },
-          }).finally(() => {
-            clearTimeout(timeoutId);
-          });
-        },
-      },
     });
   }
   return supabaseInstance;

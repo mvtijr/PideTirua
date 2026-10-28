@@ -4,14 +4,7 @@ if (typeof window !== "undefined") {
   throw new Error("lib/supabase-server.ts no puede ser importado en el cliente.");
 }
 
-const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ||
-  "https://bjyixtdzfabpmjftfkvw.supabase.co";
-
-const SUPABASE_SERVICE_ROLE_KEY =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-  "";
+const DEFAULT_URL = "https://bjyixtdzfabpmjftfkvw.supabase.co";
 
 let supabaseAdminInstance: SupabaseClient | null = null;
 
@@ -21,16 +14,23 @@ let supabaseAdminInstance: SupabaseClient | null = null;
  * NUNCA se expone ni se empaqueta en el bundle del cliente.
  */
 export function getSupabaseAdminClient(): SupabaseClient {
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_URL;
+
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    "";
+
   if (!supabaseAdminInstance) {
-    if (!SUPABASE_SERVICE_ROLE_KEY) {
+    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
       console.warn(
         "ADVERTENCIA DE SEGURIDAD: SUPABASE_SERVICE_ROLE_KEY no está configurada. Operando con fallback anónimo."
       );
     }
-
     supabaseAdminInstance = createClient(
-      SUPABASE_URL,
-      SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
+      supabaseUrl,
+      serviceRoleKey,
       {
         auth: {
           persistSession: false,
