@@ -218,21 +218,22 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </nav>
 
           {/* Acciones Superiores */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => setMostrarRecomendador(true)}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white hover:border-orange-300 hover:bg-orange-50/50 text-stone-800 text-[11px] font-bold uppercase tracking-wider px-3.5 py-2 transition"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-stone-300 bg-white hover:border-orange-300 hover:bg-orange-50/50 text-stone-800 text-[11px] font-bold uppercase tracking-wider px-2.5 sm:px-3.5 py-2 transition"
               title="¿No sabes qué comer? Descúbrelo con el recomendador"
+              aria-label="¿No sabes qué comer? Descúbrelo con el recomendador"
             >
               <Dices className="h-3.5 w-3.5 text-[#EA580C]" />
-              <span>¿Qué comer?</span>
+              <span className="hidden xs:inline">¿Qué comer?</span>
             </button>
 
             <button
               type="button"
               onClick={scrollADirectorio}
-              className="inline-flex items-center gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white text-[11px] font-black uppercase tracking-widest px-4 sm:px-5 py-2.5 shadow-sm transition-all hover:scale-105 active:scale-95"
+              className="inline-flex min-h-[40px] items-center gap-1.5 sm:gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white text-[10px] sm:text-[11px] font-black uppercase tracking-widest px-3 sm:px-5 py-2 sm:py-2.5 shadow-sm transition-all hover:scale-105 active:scale-95"
             >
               <Store className="h-3.5 w-3.5" />
               <span>VER LOCALES</span>
@@ -291,7 +292,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 placeholder="Busca por plato, local o especialidad (ej: completos, mariscos, sushi)..."
-                className="w-full bg-transparent text-xs sm:text-sm text-stone-900 placeholder:text-stone-400 font-medium focus:outline-none py-2"
+                className="w-full bg-transparent text-base sm:text-sm text-stone-900 placeholder:text-stone-400 font-medium focus:outline-none py-2"
               />
               {busqueda && (
                 <button

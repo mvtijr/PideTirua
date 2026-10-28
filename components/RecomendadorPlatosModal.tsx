@@ -598,11 +598,11 @@ export default function RecomendadorPlatosModal({
                     name="antojoManual"
                     type="text"
                     placeholder="Ej: Empanadas, cazuela, churrasco, handroll, mariscos..."
-                    className="flex-1 rounded-xl border border-white/20 bg-black/40 px-3.5 py-2.5 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
+                    className="flex-1 rounded-xl border border-white/20 bg-black/40 px-3.5 py-2.5 text-base sm:text-sm text-white placeholder:text-slate-500 focus:border-amber-400 focus:outline-none"
                   />
                   <button
                     type="submit"
-                    className="rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-2.5 text-xs font-black text-slate-950 transition hover:from-amber-400 hover:to-orange-400 active:scale-95 shrink-0"
+                    className="flex min-h-[44px] items-center justify-center rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-2.5 text-xs font-black text-slate-950 transition hover:from-amber-400 hover:to-orange-400 active:scale-95 shrink-0"
                   >
                     Buscar plato
                   </button>

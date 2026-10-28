@@ -194,7 +194,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
           <div className="grid grid-cols-2 gap-2 pt-1">
             <Link
               href={`/${local.slug}`}
-              className="min-h-[42px] bg-stone-100 hover:bg-[#18181B] hover:text-white text-stone-900 font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1 transition-all"
+              className="min-h-[44px] bg-stone-100 hover:bg-[#18181B] hover:text-white text-stone-900 font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1 transition-all"
             >
               <span>Ver Carta</span>
               <span className="material-symbols-outlined text-sm">
@@ -211,7 +211,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-h-[42px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1 transition-all shadow-sm"
+              className="min-h-[44px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1 transition-all shadow-sm"
             >
               <span className="material-symbols-outlined text-sm">chat</span>
               <span>WhatsApp</span>

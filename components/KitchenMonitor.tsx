@@ -498,7 +498,7 @@ export default function KitchenMonitor({
           <button
             type="button"
             onClick={() => setFiltroVista("activos")}
-            className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-1.5 text-xs font-display uppercase tracking-wider transition ${
+            className={`inline-flex min-h-[44px] sm:min-h-[36px] items-center justify-center gap-2 rounded-full px-4 py-2 sm:py-1.5 text-xs font-display uppercase tracking-wider transition ${
               filtroVista === "activos"
                 ? "bg-[#18181B] text-white shadow-xs"
                 : "border border-stone-200 bg-stone-100 text-stone-700 hover:bg-stone-200"
@@ -513,7 +513,7 @@ export default function KitchenMonitor({
           <button
             type="button"
             onClick={() => setFiltroVista("historial")}
-            className={`inline-flex items-center justify-center gap-2 rounded-full px-4 py-1.5 text-xs font-display uppercase tracking-wider transition ${
+            className={`inline-flex min-h-[44px] sm:min-h-[36px] items-center justify-center gap-2 rounded-full px-4 py-2 sm:py-1.5 text-xs font-display uppercase tracking-wider transition ${
               filtroVista === "historial"
                 ? "bg-[#18181B] text-white shadow-xs"
                 : "border border-stone-200 bg-stone-100 text-stone-700 hover:bg-stone-200"
@@ -729,7 +729,7 @@ export default function KitchenMonitor({
                       type="button"
                       disabled={actualizandoId === pedido.id}
                       onClick={() => void handleAvisarListoPorWhatsApp(pedido)}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-emerald-500 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
+                      className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-emerald-500 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
                       title="Avisar al cliente por WhatsApp que su pedido está listo y marcar estado como listo"
                     >
                       <MessageCircle className="h-4 w-4 shrink-0" />
@@ -744,7 +744,7 @@ export default function KitchenMonitor({
                           onClick={() =>
                             void handleCambiarEstado(pedido, "preparando")
                           }
-                          className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-black text-slate-950 shadow-md transition hover:bg-amber-400 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
+                          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-black text-slate-950 shadow-md transition hover:bg-amber-400 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
                         >
                           {actualizandoId === pedido.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -761,7 +761,7 @@ export default function KitchenMonitor({
                           onClick={() =>
                             void handleCambiarEstado(pedido, "listo")
                           }
-                          className="flex w-full items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-black text-stone-700 shadow-sm transition hover:bg-stone-50 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
+                          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-stone-300 bg-white px-4 py-2.5 text-xs font-black text-stone-700 shadow-sm transition hover:bg-stone-50 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
                         >
                           {actualizandoId === pedido.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -778,7 +778,7 @@ export default function KitchenMonitor({
                           onClick={() =>
                             void handleCambiarEstado(pedido, "entregado")
                           }
-                          className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-slate-800 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
+                          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-black text-white shadow-md transition hover:bg-slate-800 active:scale-[0.99] disabled:opacity-50 sm:text-sm"
                         >
                           {actualizandoId === pedido.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />

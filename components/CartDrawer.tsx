@@ -1169,7 +1169,7 @@ export default function CartDrawer({
                     if (errorValidacion) setErrorValidacion(null);
                   }}
                   placeholder="Ej: Camila Nahuelpán"
-                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
               </div>
 
@@ -1192,7 +1192,7 @@ export default function CartDrawer({
                     if (errorValidacion) setErrorValidacion(null);
                   }}
                   placeholder="Ej: +56 9 8765 4321 o 987654321"
-                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
                 <p className="mt-1 text-[11px] text-stone-500">
                   El local usará este número para avisarte por WhatsApp en el momento exacto en que tu pedido esté listo para retirar.
@@ -1252,7 +1252,7 @@ export default function CartDrawer({
                       type="time"
                       value={horaRetiroValor}
                       onChange={(e) => setHoraRetiroValor(e.target.value)}
-                      className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 font-mono text-sm font-bold text-stone-900 shadow-xs focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20"
+                      className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm font-bold text-stone-900 shadow-xs focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20"
                     />
                     <p className="text-[11px] font-medium text-stone-500">
                       Indica la hora aproximada en que vendrás a buscar tu comida
@@ -1279,7 +1279,7 @@ export default function CartDrawer({
                     if (errorValidacion) setErrorValidacion(null);
                   }}
                   placeholder={placeholderUbicacion}
-                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
               </div>
 
@@ -1446,7 +1446,7 @@ export default function CartDrawer({
                   value={notasAdicionales}
                   onChange={(e) => setNotasAdicionales(e.target.value)}
                   placeholder='Ej: "Sin cebolla", "Salsa soya extra", "Para llevar bien sellado"'
-                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
               </div>
             </div>

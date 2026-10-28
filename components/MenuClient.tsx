@@ -831,7 +831,9 @@ export default function MenuClient({ local }: MenuClientProps) {
         <aside
           role="status"
           aria-live="polite"
-          className="fixed bottom-24 right-4 left-4 sm:left-auto sm:right-6 sm:w-84 z-30 animate-in slide-in-from-bottom duration-300"
+          className={`fixed right-4 left-4 sm:left-auto sm:right-6 sm:w-84 z-30 transition-all duration-300 animate-in slide-in-from-bottom ${
+            totalUnidades > 0 ? "bottom-24 sm:bottom-28" : "bottom-4 sm:bottom-6 safe-bottom"
+          }`}
         >
           <button
             type="button"

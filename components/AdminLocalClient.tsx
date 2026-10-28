@@ -1473,7 +1473,7 @@ export default function AdminLocalClient({
               }}
               placeholder={segundosBloqueo > 0 ? "Bloqueado temporalmente" : "Escribe tu PIN de 4 dígitos"}
               aria-label="PIN de 4 dígitos"
-              className="mt-3 w-52 rounded-xl border border-stone-200 bg-stone-50 px-3 py-1.5 text-center text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
+              className="mt-3 w-52 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-center text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white disabled:opacity-40 disabled:cursor-not-allowed"
             />
 
             {segundosBloqueo > 0 ? (
@@ -1826,7 +1826,7 @@ export default function AdminLocalClient({
             aria-selected={pestanaActiva === "carta"}
             aria-controls="panel-carta"
             onClick={() => setPestañaActiva("carta")}
-            className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
+            className={`flex min-h-[44px] flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "carta"
                 ? "bg-[#18181B] text-white shadow-xs"
                 : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
@@ -1843,7 +1843,7 @@ export default function AdminLocalClient({
             aria-selected={pestanaActiva === "cocina"}
             aria-controls="panel-cocina"
             onClick={() => setPestañaActiva("cocina")}
-            className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
+            className={`flex min-h-[44px] flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "cocina"
                 ? "bg-amber-500 text-stone-950 shadow-xs"
                 : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
@@ -1860,7 +1860,7 @@ export default function AdminLocalClient({
             aria-selected={pestanaActiva === "reportes"}
             aria-controls="panel-reportes"
             onClick={() => setPestañaActiva("reportes")}
-            className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
+            className={`flex min-h-[44px] flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "reportes"
                 ? "bg-emerald-600 text-white shadow-xs"
                 : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
@@ -1877,7 +1877,7 @@ export default function AdminLocalClient({
             aria-selected={pestanaActiva === "ajustes"}
             aria-controls="panel-ajustes"
             onClick={() => setPestañaActiva("ajustes")}
-            className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
+            className={`flex min-h-[44px] flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "ajustes"
                 ? "bg-indigo-600 text-white shadow-xs"
                 : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
@@ -1894,7 +1894,7 @@ export default function AdminLocalClient({
             aria-selected={pestanaActiva === "todas"}
             aria-controls="panel-ajustes panel-reportes panel-cocina panel-carta"
             onClick={() => setPestañaActiva("todas")}
-            className={`flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
+            className={`flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "todas"
                 ? "bg-stone-800 text-white shadow-xs"
                 : "text-stone-500 hover:text-stone-900 hover:bg-stone-100"

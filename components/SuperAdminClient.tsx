@@ -830,7 +830,7 @@ export default function SuperAdminClient({
                   setErrorClave(null);
                 }}
                 placeholder="Ingresa tu Clave Maestra..."
-                className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
+                className="w-full rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 text-base sm:text-sm font-bold text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none"
               />
             </div>
 
@@ -843,7 +843,7 @@ export default function SuperAdminClient({
             <button
               type="submit"
               disabled={!claveMaestra.trim() || validandoClave}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#18181B] hover:bg-black py-3.5 text-sm font-display uppercase tracking-wider text-white shadow-sm transition active:scale-[0.99] disabled:opacity-50"
+              className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-[#18181B] hover:bg-black py-3.5 text-sm font-display uppercase tracking-wider text-white shadow-sm transition active:scale-[0.99] disabled:opacity-50"
             >
               {validandoClave ? (
                 <>

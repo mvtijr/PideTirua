@@ -287,7 +287,7 @@ export default function ModalPersonalizarPlato({
                             ? handleToggleUnica(gIdx, item.nombre)
                             : handleToggleMultiple(gIdx, item.nombre)
                         }
-                        className={`w-full flex items-center justify-between rounded-xl px-3.5 py-2.5 text-left border transition-all ${
+                        className={`w-full flex min-h-[44px] items-center justify-between rounded-xl px-3.5 py-2.5 text-left border transition-all ${
                           estaSeleccionado
                             ? "border-amber-500 bg-amber-50/70 shadow-sm"
                             : "border-stone-200 hover:border-stone-300 bg-stone-50/50 hover:bg-stone-50"
