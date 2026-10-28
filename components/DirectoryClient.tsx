@@ -435,7 +435,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               <h2 className="font-display text-3xl sm:text-4xl uppercase tracking-wide text-[#18181B]">
                 RESTAURANTES Y PICADAS
               </h2>
-              <span className="rounded-full bg-stone-200 px-2.5 py-0.5 text-xs font-black text-stone-800">
+              <span className="tabular-nums rounded-full bg-stone-200 px-2.5 py-0.5 text-xs font-black text-stone-800">
                 {localesFiltrados.length}
               </span>
             </div>
@@ -462,7 +462,9 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   soloAbiertos ? "bg-white animate-pulse" : "bg-emerald-500"
                 }`}
               />
-              <span>Abiertos Ahora ({cantidadAbiertos})</span>
+              <span>
+                Abiertos Ahora (<span className="tabular-nums">{cantidadAbiertos}</span>)
+              </span>
             </button>
 
             {/* Filtro por Sector Territorial (Píldoras Segmentadas) */}

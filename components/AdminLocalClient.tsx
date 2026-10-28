@@ -1810,9 +1810,17 @@ export default function AdminLocalClient({
         </section>
 
         {/* NAVEGACIÓN MODERNA DE ESCRITORIO POR PESTAÑAS */}
-        <div className="no-print flex items-center gap-2 overflow-x-auto rounded-2xl border border-stone-200/90 bg-white p-2 shadow-sm scrollbar-none">
+        <div
+          role="tablist"
+          aria-label="Secciones del panel de administración"
+          className="no-print flex items-center gap-2 overflow-x-auto rounded-2xl border border-stone-200/90 bg-white p-2 shadow-sm scrollbar-none"
+        >
           <button
             type="button"
+            role="tab"
+            id="tab-carta"
+            aria-selected={pestanaActiva === "carta"}
+            aria-controls="panel-carta"
             onClick={() => setPestañaActiva("carta")}
             className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "carta"
@@ -1826,6 +1834,10 @@ export default function AdminLocalClient({
 
           <button
             type="button"
+            role="tab"
+            id="tab-cocina"
+            aria-selected={pestanaActiva === "cocina"}
+            aria-controls="panel-cocina"
             onClick={() => setPestañaActiva("cocina")}
             className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "cocina"
@@ -1839,6 +1851,10 @@ export default function AdminLocalClient({
 
           <button
             type="button"
+            role="tab"
+            id="tab-reportes"
+            aria-selected={pestanaActiva === "reportes"}
+            aria-controls="panel-reportes"
             onClick={() => setPestañaActiva("reportes")}
             className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "reportes"
@@ -1852,6 +1868,10 @@ export default function AdminLocalClient({
 
           <button
             type="button"
+            role="tab"
+            id="tab-ajustes"
+            aria-selected={pestanaActiva === "ajustes"}
+            aria-controls="panel-ajustes"
             onClick={() => setPestañaActiva("ajustes")}
             className={`flex flex-1 min-w-[140px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "ajustes"
@@ -1865,6 +1885,10 @@ export default function AdminLocalClient({
 
           <button
             type="button"
+            role="tab"
+            id="tab-todas"
+            aria-selected={pestanaActiva === "todas"}
+            aria-controls="panel-ajustes panel-reportes panel-cocina panel-carta"
             onClick={() => setPestañaActiva("todas")}
             className={`flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2.5 text-xs font-display uppercase tracking-wider transition active:scale-95 ${
               pestanaActiva === "todas"
@@ -1879,7 +1903,12 @@ export default function AdminLocalClient({
 
         {/* PESTAÑA: AJUSTES & OPERACIÓN DEL LOCAL (2 COLUMNAS EN ESCRITORIO) */}
         {(pestanaActiva === "ajustes" || pestanaActiva === "todas") && (
-          <div className="space-y-6">
+          <div
+            role="tabpanel"
+            id="panel-ajustes"
+            aria-labelledby="tab-ajustes"
+            className="space-y-6"
+          >
             <div className="no-print flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-stone-200/90 bg-white p-4 shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-100 text-indigo-700">
@@ -2565,19 +2594,28 @@ export default function AdminLocalClient({
 
         {/* 1.25 REPORTE DE VENTAS Y MÉTRICAS PARA EL DUEÑO */}
         {(pestanaActiva === "reportes" || pestanaActiva === "todas") && (
-          <VentasReportes
-            localSlug={local.slug}
-            localNombre={local.nombre}
-            accentBg={brand.accentBg}
-            accentText={brand.accentText}
-            panelCardBg={brand.panelCardBg}
-            subtitleText={brand.subtitleText}
-            onNotify={mostrarToast}
-          />
+          <div
+            role="tabpanel"
+            id="panel-reportes"
+            aria-labelledby="tab-reportes"
+          >
+            <VentasReportes
+              localSlug={local.slug}
+              localNombre={local.nombre}
+              accentBg={brand.accentBg}
+              accentText={brand.accentText}
+              panelCardBg={brand.panelCardBg}
+              subtitleText={brand.subtitleText}
+              onNotify={mostrarToast}
+            />
+          </div>
         )}
 
         {/* 1.5 MONITOR DE COCINA EN TIEMPO REAL CON ALERTA SONORA (KDS) */}
         <div
+          role="tabpanel"
+          id="panel-cocina"
+          aria-labelledby="tab-cocina"
           className={
             pestanaActiva === "cocina" || pestanaActiva === "todas"
               ? "block"
@@ -2597,7 +2635,12 @@ export default function AdminLocalClient({
 
         {/* 2. GESTIÓN DE CARTA Y MENÚ */}
         {(pestanaActiva === "carta" || pestanaActiva === "todas") && (
-          <div className="space-y-6">
+          <div
+            role="tabpanel"
+            id="panel-carta"
+            aria-labelledby="tab-carta"
+            className="space-y-6"
+          >
         {/* 3.5 GESTIÓN DE CATEGORÍAS DE LA CARTA */}
         <section
           className={`no-print rounded-3xl border p-5 shadow-sm ${brand.panelCardBg}`}

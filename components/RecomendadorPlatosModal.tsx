@@ -81,6 +81,28 @@ export default function RecomendadorPlatosModal({
     setMontado(true);
   }, []);
 
+  // Bloquear scroll de fondo cuando el modal esté abierto
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
+  // Cerrar con tecla Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        reiniciar();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   const reiniciar = () => {
     setPaso(1);
     setConQuien(null);
@@ -303,6 +325,9 @@ export default function RecomendadorPlatosModal({
     <div
       className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200"
       onClick={handleCerrar}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="recomendador-modal-title"
     >
       <div
         className="relative w-full max-w-lg my-auto overflow-hidden rounded-3xl border border-white/20 bg-slate-900 text-white shadow-2xl flex flex-col max-h-[92vh] shrink-0"
@@ -319,7 +344,10 @@ export default function RecomendadorPlatosModal({
                 <Sparkles className="h-3 w-3" />
                 Asistente Gastronómico
               </span>
-              <h2 className="mt-1 text-lg font-black tracking-tight text-white sm:text-xl">
+              <h2
+                id="recomendador-modal-title"
+                className="mt-1 text-lg font-black tracking-tight text-white sm:text-xl"
+              >
                 🎲 ¿Indeciso? Te ayudamos en 2 toques
               </h2>
             </div>
@@ -339,7 +367,7 @@ export default function RecomendadorPlatosModal({
         <div className="flex items-center justify-between border-b border-white/10 bg-slate-950/50 px-5 py-2.5 text-xs font-bold text-white/70">
           <div className="flex items-center gap-2">
             <span
-              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-black ${
+              className={`tabular-nums flex h-6 w-6 items-center justify-center rounded-full text-xs font-black ${
                 paso === 1
                   ? "bg-amber-500 text-slate-950"
                   : "bg-emerald-500 text-white"
@@ -352,7 +380,7 @@ export default function RecomendadorPlatosModal({
             </span>
             <ChevronRight className="h-3.5 w-3.5 text-white/30" />
             <span
-              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-black ${
+              className={`tabular-nums flex h-6 w-6 items-center justify-center rounded-full text-xs font-black ${
                 paso === 2
                   ? "bg-amber-500 text-slate-950"
                   : paso === 3
@@ -367,7 +395,7 @@ export default function RecomendadorPlatosModal({
             </span>
             <ChevronRight className="h-3.5 w-3.5 text-white/30" />
             <span
-              className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-black ${
+              className={`tabular-nums flex h-6 w-6 items-center justify-center rounded-full text-xs font-black ${
                 paso === 3
                   ? "bg-amber-500 text-slate-950"
                   : "bg-white/10 text-white/40"
@@ -644,7 +672,7 @@ export default function RecomendadorPlatosModal({
                         className="group relative flex flex-col sm:flex-row items-center gap-3 rounded-2xl border border-white/15 bg-white/5 p-3.5 transition hover:border-amber-400/60 hover:bg-white/10"
                       >
                         {/* Medalla 1°, 2°, 3° */}
-                        <div className="absolute -top-2.5 -left-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-xs font-black text-slate-950 shadow-md">
+                        <div className="tabular-nums absolute -top-2.5 -left-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-xs font-black text-slate-950 shadow-md">
                           #{idx + 1}
                         </div>
 
@@ -684,7 +712,7 @@ export default function RecomendadorPlatosModal({
                           )}
 
                           <div className="mt-2 flex items-center justify-between gap-2">
-                            <span className="text-base font-black text-emerald-400">
+                            <span className="tabular-nums text-base font-black text-emerald-400">
                               {formatCLP(precioFinal)}
                             </span>
 

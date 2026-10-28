@@ -662,6 +662,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <button
                   key={categoria.id}
                   type="button"
+                  aria-current={activa ? "true" : undefined}
                   onClick={() => irACategoria(categoria.id)}
                   className={`filter-chip shrink-0 px-4 py-1.5 text-xs font-bold transition-all ${
                     activa ? theme.tabActive : theme.tabInactive

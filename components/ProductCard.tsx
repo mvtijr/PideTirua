@@ -128,7 +128,7 @@ export default memo(function ProductCard({
             )}
             {disponible && cantidadEnCarrito > 0 && (
               <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${theme.cardInCartBadge}`}
+                className={`tabular-nums inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold ${theme.cardInCartBadge}`}
               >
                 {cantidadEnCarrito} en tu pedido
               </span>
@@ -199,7 +199,7 @@ export default memo(function ProductCard({
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 shadow-sm"
               >
-                <span className="text-xs font-bold text-amber-900">
+                <span className="tabular-nums text-xs font-bold text-amber-900">
                   {cantidadEnCarrito} agregado{cantidadEnCarrito > 1 ? "s" : ""}
                 </span>
                 <button

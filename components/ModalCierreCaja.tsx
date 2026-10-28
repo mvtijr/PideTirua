@@ -64,6 +64,16 @@ export default function ModalCierreCaja({
     }
   }, [isOpen, cargarPedidos]);
 
+  // Bloquear scroll de fondo cuando el modal esté abierto
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [isOpen]);
+
   // Manejador tecla ESC
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -158,11 +168,17 @@ export default function ModalCierreCaja({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-cierre-caja-title"
+    >
       {/* Backdrop */}
       <div
         onClick={onClose}
         className="fixed inset-0 bg-stone-950/70 backdrop-blur-sm transition-opacity"
+        aria-hidden="true"
       />
 
       {/* Contenedor Modal */}
@@ -174,7 +190,10 @@ export default function ModalCierreCaja({
               <Moon className="h-5 w-5" />
             </span>
             <div>
-              <h3 className="font-display text-lg sm:text-xl font-bold uppercase tracking-wide text-stone-900 leading-tight">
+              <h3
+                id="modal-cierre-caja-title"
+                className="font-display text-lg sm:text-xl font-bold uppercase tracking-wide text-stone-900 leading-tight"
+              >
                 Cierre de Caja de Hoy
               </h3>
               <p className="text-xs font-semibold text-stone-500 capitalize">
@@ -185,6 +204,7 @@ export default function ModalCierreCaja({
           <button
             type="button"
             onClick={onClose}
+            aria-label="Cerrar modal de cierre de caja"
             className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"
           >
             <X className="h-4 w-4" />
@@ -214,14 +234,14 @@ export default function ModalCierreCaja({
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs">
                       <Banknote className="h-4 w-4" />
                     </span>
-                    <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
+                    <span className="tabular-nums rounded-full bg-emerald-100 border border-emerald-200 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
                       {pedidosEfectivo.length} pedidos
                     </span>
                   </div>
                   <span className="mt-2 block text-xs font-bold uppercase tracking-wider text-emerald-800">
                     Efectivo en Caja
                   </span>
-                  <span className="mt-0.5 block font-display text-2xl font-bold tracking-tight text-emerald-950">
+                  <span className="tabular-nums mt-0.5 block font-display text-2xl font-bold tracking-tight text-emerald-950">
                     {formatCLP(totalEfectivo)}
                   </span>
                 </div>
@@ -232,14 +252,14 @@ export default function ModalCierreCaja({
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-600 text-white shadow-xs">
                       <CreditCard className="h-4 w-4" />
                     </span>
-                    <span className="rounded-full bg-sky-100 border border-sky-200 px-2 py-0.5 text-[10px] font-extrabold text-sky-800">
+                    <span className="tabular-nums rounded-full bg-sky-100 border border-sky-200 px-2 py-0.5 text-[10px] font-extrabold text-sky-800">
                       {pedidosTransferencia.length} pedidos
                     </span>
                   </div>
                   <span className="mt-2 block text-xs font-bold uppercase tracking-wider text-sky-800">
                     Transferencias CuentaRUT
                   </span>
-                  <span className="mt-0.5 block font-display text-2xl font-bold tracking-tight text-sky-950">
+                  <span className="tabular-nums mt-0.5 block font-display text-2xl font-bold tracking-tight text-sky-950">
                     {formatCLP(totalTransferencia)}
                   </span>
                 </div>
@@ -254,12 +274,12 @@ export default function ModalCierreCaja({
                       Total Recaudado del Día
                     </span>
                   </div>
-                  <span className="rounded-full bg-stone-800 px-2.5 py-0.5 text-xs font-bold text-stone-300 border border-stone-700">
+                  <span className="tabular-nums rounded-full bg-stone-800 px-2.5 py-0.5 text-xs font-bold text-stone-300 border border-stone-700">
                     {totalPedidos} órdenes atendidas
                   </span>
                 </div>
                 <div className="mt-2 flex items-baseline justify-between">
-                  <span className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+                  <span className="tabular-nums font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
                     {formatCLP(totalGeneral)}
                   </span>
                 </div>

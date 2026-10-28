@@ -977,7 +977,7 @@ export default function SuperAdminClient({
               </span>
               <Store className="h-5 w-5 text-emerald-600" />
             </div>
-            <p className="mt-2 text-3xl font-display uppercase tracking-wide text-stone-900 sm:text-4xl">
+            <p className="tabular-nums mt-2 text-3xl font-display uppercase tracking-wide text-stone-900 sm:text-4xl">
               {localesActivos.length}{" "}
               <span className="text-sm font-sans font-bold text-stone-400">
                 / {locales.length} registrados
@@ -996,7 +996,7 @@ export default function SuperAdminClient({
               </span>
               <TrendingUp className="h-5 w-5 text-amber-600" />
             </div>
-            <p className="mt-2 text-3xl font-display uppercase tracking-wide text-[#EA580C] sm:text-4xl">
+            <p className="tabular-nums mt-2 text-3xl font-display uppercase tracking-wide text-[#EA580C] sm:text-4xl">
               {formatCLP(ingresoMensualRecurrente)}
               <span className="text-xs font-sans font-bold text-stone-400"> /mes</span>
             </p>
@@ -1014,16 +1014,16 @@ export default function SuperAdminClient({
               <Users className="h-5 w-5 text-sky-600" />
             </div>
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-bold text-sky-800">
+              <span className="tabular-nums inline-flex items-center gap-1 rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-bold text-sky-800">
                 <Zap className="h-3.5 w-3.5 text-sky-600" />
                 {totalAutogestionados} Autogestionados
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">
+              <span className="tabular-nums inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">
                 <Crown className="h-3.5 w-3.5 text-amber-600" />
                 {totalLlaveEnMano} Llave en Mano
               </span>
             </div>
-            <p className="mt-2 text-xs text-stone-500">
+            <p className="tabular-nums mt-2 text-xs text-stone-500">
               [{totalAutogestionados} Autogestionados] | [{totalLlaveEnMano}{" "}
               Llave en Mano]
             </p>
@@ -1781,12 +1781,12 @@ export default function SuperAdminClient({
                     {/* Badge del Plan Comercial */}
                     <div className="absolute left-3.5 top-3 flex flex-wrap items-center gap-1.5">
                       {esVip ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 font-display text-[11px] uppercase tracking-wider text-stone-950 shadow-xs">
+                        <span className="tabular-nums inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-1 font-display text-[11px] uppercase tracking-wider text-stone-950 shadow-xs">
                           <Crown className="h-3.5 w-3.5" />
                           VIP Llave en Mano · {formatCLP(precioPlan)}/mes
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-stone-900 px-3 py-1 font-display text-[11px] uppercase tracking-wider text-white shadow-xs">
+                        <span className="tabular-nums inline-flex items-center gap-1 rounded-full bg-stone-900 px-3 py-1 font-display text-[11px] uppercase tracking-wider text-white shadow-xs">
                           <Zap className="h-3.5 w-3.5" />
                           Autogestionado · {formatCLP(precioPlan)}/mes
                         </span>
@@ -1843,12 +1843,12 @@ export default function SuperAdminClient({
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         {estadoCobro.alDia ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                          <span className="tabular-nums inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
                             🟢 Al día (Vence el {estadoCobro.diaCobro} de este
                             mes)
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-rose-600 px-3 py-1 text-xs font-bold text-white shadow-xs">
+                          <span className="tabular-nums inline-flex items-center gap-1.5 rounded-full border border-rose-300 bg-rose-600 px-3 py-1 text-xs font-bold text-white shadow-xs">
                             <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                             <span>
                               ⚠️ Pago Vencido ({formatCLP(precioPlan)} CLP)
@@ -1856,7 +1856,7 @@ export default function SuperAdminClient({
                           </span>
                         )}
 
-                        <span className="text-[11px] font-semibold text-stone-500">
+                        <span className="tabular-nums text-[11px] font-semibold text-stone-500">
                           Últ. pago: {estadoCobro.fechaUltimoPago}
                         </span>
                       </div>

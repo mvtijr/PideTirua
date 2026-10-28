@@ -262,7 +262,7 @@ export default function VentasReportes({
                 </div>
               </div>
               <div className="mt-2">
-                <p className="text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
+                <p className="tabular-nums text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
                   {formatCLP(ventasDelMes)}
                 </p>
                 <span className="mt-0.5 block text-[11px] font-medium text-stone-500">
@@ -286,7 +286,7 @@ export default function VentasReportes({
                 </div>
               </div>
               <div className="mt-2">
-                <p className="text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
+                <p className="tabular-nums text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
                   {totalPedidos}
                 </p>
                 <span className="mt-0.5 block text-[11px] font-medium text-stone-500">
@@ -297,7 +297,7 @@ export default function VentasReportes({
               </div>
               <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-amber-700">
                 <Sparkles className="h-3 w-3" />
-                <span>
+                <span className="tabular-nums">
                   {totalPlatosVendidos}{" "}
                   {totalPlatosVendidos === 1
                     ? "plato preparado"
@@ -317,7 +317,7 @@ export default function VentasReportes({
                 </div>
               </div>
               <div className="mt-2">
-                <p className="text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
+                <p className="tabular-nums text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
                   {formatCLP(ticketPromedio)}
                 </p>
                 <span className="mt-0.5 block text-[11px] font-medium text-stone-500">
@@ -415,7 +415,7 @@ export default function VentasReportes({
                             <span>{textoLugar}</span>
                           </span>
 
-                          <span className="text-[11px] font-extrabold text-stone-400">
+                          <span className="tabular-nums text-[11px] font-extrabold text-stone-400">
                             #{lugar}
                           </span>
                         </div>
@@ -429,7 +429,7 @@ export default function VentasReportes({
                         <span className="text-[11px] font-bold text-stone-500">
                           Unidades vendidas:
                         </span>
-                        <span className="inline-flex items-center gap-1 rounded-lg bg-stone-100 px-2 py-0.5 text-xs font-black text-stone-900">
+                        <span className="tabular-nums inline-flex items-center gap-1 rounded-lg bg-stone-100 px-2 py-0.5 text-xs font-black text-stone-900">
                           <strong className="text-[#EA580C]">
                             {item.cantidad}
                           </strong>{" "}
