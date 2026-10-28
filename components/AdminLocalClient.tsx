@@ -49,11 +49,35 @@ import {
 import { Local, Producto, GrupoOpcion } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
-import KitchenMonitor from "@/components/KitchenMonitor";
-import VentasReportes from "@/components/VentasReportes";
-import ModalCierreCaja from "@/components/ModalCierreCaja";
-import ModalGestionOpcionesPlato from "@/components/ModalGestionOpcionesPlato";
+import dynamic from "next/dynamic";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
+
+const KitchenMonitor = dynamic(() => import("@/components/KitchenMonitor"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-64 items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
+    </div>
+  ),
+});
+
+const VentasReportes = dynamic(() => import("@/components/VentasReportes"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-64 items-center justify-center">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-500 border-t-transparent" />
+    </div>
+  ),
+});
+
+const ModalCierreCaja = dynamic(() => import("@/components/ModalCierreCaja"), {
+  ssr: false,
+});
+
+const ModalGestionOpcionesPlato = dynamic(
+  () => import("@/components/ModalGestionOpcionesPlato"),
+  { ssr: false }
+);
 
 interface AdminLocalClientProps {
   initialLocal: Local;

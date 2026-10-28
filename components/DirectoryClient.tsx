@@ -20,8 +20,13 @@ import {
   Clock,
   UtensilsCrossed,
 } from "lucide-react";
-import RecomendadorPlatosModal from "@/components/RecomendadorPlatosModal";
+import dynamic from "next/dynamic";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
+
+const RecomendadorPlatosModal = dynamic(
+  () => import("@/components/RecomendadorPlatosModal"),
+  { ssr: false }
+);
 
 interface DirectoryClientProps {
   locales: Local[];
@@ -176,6 +181,9 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               <img
                 src="/logo-pidetirua.jpg"
                 alt="PideTirúa"
+                width={48}
+                height={48}
+                decoding="async"
                 className="w-full h-full object-contain rounded-full"
               />
             </div>
@@ -379,6 +387,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   <img
                     src={oferta.imagen}
                     alt={oferta.productoNombre}
+                    loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute top-2 left-2">
@@ -827,6 +837,10 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   `https://pidetirua.cl/${localQrModal.slug}`
                 )}`}
                 alt={`QR ${localQrModal.nombre}`}
+                width={176}
+                height={176}
+                loading="lazy"
+                decoding="async"
                 className="h-44 w-44 rounded-xl bg-white p-2 shadow-sm"
               />
               <code className="mt-3 rounded-full bg-stone-200 px-3 py-0.5 text-xs font-bold text-stone-800">

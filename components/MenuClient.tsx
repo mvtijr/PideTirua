@@ -25,9 +25,16 @@ import {
 import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
 import ProductCard from "@/components/ProductCard";
 import FloatingCartBar from "@/components/FloatingCartBar";
-import CartDrawer from "@/components/CartDrawer";
-import ModalPersonalizarPlato from "@/components/ModalPersonalizarPlato";
+import dynamic from "next/dynamic";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
+
+const CartDrawer = dynamic(() => import("@/components/CartDrawer"), {
+  ssr: false,
+});
+const ModalPersonalizarPlato = dynamic(
+  () => import("@/components/ModalPersonalizarPlato"),
+  { ssr: false }
+);
 
 interface MenuClientProps {
   local: Local;

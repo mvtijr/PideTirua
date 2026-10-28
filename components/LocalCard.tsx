@@ -49,7 +49,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
     <article
       ref={cardRef}
       id={`local-${local.slug}`}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-orange-300/80"
+      className="content-auto group flex flex-col overflow-hidden rounded-2xl border border-stone-200/90 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-orange-300/80"
     >
       {/* Imagen o Video & Badges Flotantes */}
       <div className="relative aspect-[16/10] w-full overflow-hidden bg-stone-900">
@@ -95,6 +95,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
             alt={`Portada de ${local.nombre}`}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
+            decoding="async"
           />
         )}
         <div className="absolute inset-0 z-20 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none" />

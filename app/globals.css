@@ -92,6 +92,17 @@
   padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
 }
 
+/* Optimización de Renderizado: Content-visibility para listas y tarjetas fuera de pantalla */
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 380px;
+}
+
+.content-auto-dish {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 140px;
+}
+
 html,
 body,
 button,
