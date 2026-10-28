@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import {
   DatosCheckout,
+  EstadoPedido,
   ItemCarrito,
   Local,
   MetodoPago,
@@ -91,7 +92,9 @@ export interface ItemPedidoConfirmado {
 }
 
 export interface PedidoConfirmadoInfo {
+  pedidoId?: string;
   codigoRetiro: string;
+  estado: EstadoPedido;
   fecha: string;
   clienteNombre: string;
   clienteTelefono: string;
@@ -102,6 +105,39 @@ export interface PedidoConfirmadoInfo {
   items: ItemPedidoConfirmado[];
   total: number;
   urlWhatsApp: string;
+}
+
+function reproducirTimbreListo() {
+  try {
+    const AudioCtx =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const ahora = ctx.currentTime;
+
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(587.33, ahora); // D5
+    gain1.gain.setValueAtTime(0.2, ahora);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ahora + 0.35);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(ahora);
+    osc1.stop(ahora + 0.35);
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(880, ahora + 0.18); // A5
+    gain2.gain.setValueAtTime(0.25, ahora + 0.18);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ahora + 0.7);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(ahora + 0.18);
+    osc2.stop(ahora + 0.7);
+  } catch {}
 }
 
 export default function CartDrawer({
@@ -159,6 +195,57 @@ export default function CartDrawer({
       // Ignorar errores de localStorage en modo privado
     }
   }, [local.slug, pedidoConfirmado]);
+
+  // Polling en vivo para actualizar el estado del pedido con el monitor de cocina
+  useEffect(() => {
+    if (!pedidoConfirmado?.pedidoId) return;
+    if (
+      pedidoConfirmado.estado === "entregado" ||
+      pedidoConfirmado.estado === "cancelado"
+    ) {
+      return;
+    }
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(
+          `/api/pedidos/estado?id=${pedidoConfirmado.pedidoId}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (
+            data.ok &&
+            data.estado &&
+            data.estado !== pedidoConfirmado.estado
+          ) {
+            const nuevoEstado = data.estado as EstadoPedido;
+            if (nuevoEstado === "listo") {
+              reproducirTimbreListo();
+              if (typeof navigator !== "undefined" && navigator.vibrate) {
+                try {
+                  navigator.vibrate([200, 100, 200]);
+                } catch {}
+              }
+            }
+
+            setPedidoConfirmado((prev) => {
+              if (!prev) return null;
+              const actualizado = { ...prev, estado: nuevoEstado };
+              try {
+                localStorage.setItem(
+                  `${LS_KEY_ULTIMO_PEDIDO_PREFIX}${local.slug}`,
+                  JSON.stringify(actualizado)
+                );
+              } catch {}
+              return actualizado;
+            });
+          }
+        }
+      } catch {}
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [pedidoConfirmado?.pedidoId, pedidoConfirmado?.estado, local.slug]);
 
   // Manejador de tecla Escape para cerrar el carrito
   useEffect(() => {
@@ -377,6 +464,7 @@ export default function CartDrawer({
     }, 3500);
 
     let codigoGenerado = `TR-${Date.now().toString().slice(-4)}`;
+    let pedidoIdRetornado: string | undefined = undefined;
     try {
       const resp = await fetch("/api/pedidos", {
         method: "POST",
@@ -388,6 +476,7 @@ export default function CartDrawer({
       if (resp.ok) {
         const data = await resp.json();
         if (data.ok && data.pedido?.id) {
+          pedidoIdRetornado = data.pedido.id;
           codigoGenerado = `TR-${data.pedido.id.slice(-4).toUpperCase()}`;
         }
       }
@@ -400,7 +489,9 @@ export default function CartDrawer({
     }
 
     const infoConfirmacion: PedidoConfirmadoInfo = {
+      pedidoId: pedidoIdRetornado,
       codigoRetiro: codigoGenerado,
+      estado: "pendiente",
       fecha: new Date().toISOString(),
       clienteNombre: nombreCliente.trim(),
       clienteTelefono: telefonoCliente.trim(),
@@ -554,6 +645,97 @@ export default function CartDrawer({
                 <p className="text-[11px] text-amber-900 font-medium">
                   Muestra este código al retirar en el local o en tu mesa.
                 </p>
+              </div>
+
+              {/* Stepper Visual de Estado en Vivo (Sincronizado con Monitor de Cocina) */}
+              <div className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-stone-500">
+                    Estado en Cocina
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider tabular-nums ${
+                      pedidoConfirmado.estado === "listo"
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse"
+                        : pedidoConfirmado.estado === "preparando"
+                        ? "bg-orange-100 text-[#EA580C] border border-orange-200"
+                        : pedidoConfirmado.estado === "entregado"
+                        ? "bg-slate-100 text-slate-700 border border-slate-200"
+                        : "bg-amber-100 text-amber-900 border border-amber-200"
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        pedidoConfirmado.estado === "listo"
+                          ? "bg-emerald-600"
+                          : pedidoConfirmado.estado === "preparando"
+                          ? "bg-[#EA580C] animate-ping"
+                          : "bg-amber-600"
+                      }`}
+                    />
+                    <span>
+                      {pedidoConfirmado.estado === "listo"
+                        ? "¡Listo para retirar!"
+                        : pedidoConfirmado.estado === "preparando"
+                        ? "En preparación"
+                        : pedidoConfirmado.estado === "entregado"
+                        ? "Entregado"
+                        : "Recibido en cocina"}
+                    </span>
+                  </span>
+                </div>
+
+                {/* 3 Fases del Pedido */}
+                <div className="grid grid-cols-3 gap-2 text-center pt-1">
+                  <div
+                    className={`p-2 rounded-xl border transition-all ${
+                      ["pendiente", "preparando", "listo", "entregado"].includes(
+                        pedidoConfirmado.estado
+                      )
+                        ? "border-emerald-300 bg-emerald-50 text-emerald-900 font-bold"
+                        : "border-stone-200 bg-stone-50 text-stone-400"
+                    }`}
+                  >
+                    <span className="block text-base">⏳</span>
+                    <span className="text-[10px] uppercase tracking-wider block mt-0.5">
+                      Recibido
+                    </span>
+                  </div>
+
+                  <div
+                    className={`p-2 rounded-xl border transition-all ${
+                      ["preparando", "listo", "entregado"].includes(
+                        pedidoConfirmado.estado
+                      )
+                        ? "border-orange-300 bg-orange-50 text-orange-950 font-bold"
+                        : "border-stone-200 bg-stone-50 text-stone-400"
+                    }`}
+                  >
+                    <span className="block text-base">🔥</span>
+                    <span className="text-[10px] uppercase tracking-wider block mt-0.5">
+                      En Cocina
+                    </span>
+                  </div>
+
+                  <div
+                    className={`p-2 rounded-xl border transition-all ${
+                      ["listo", "entregado"].includes(pedidoConfirmado.estado)
+                        ? "border-emerald-500 bg-emerald-600 text-white font-black shadow-sm"
+                        : "border-stone-200 bg-stone-50 text-stone-400"
+                    }`}
+                  >
+                    <span className="block text-base">🎉</span>
+                    <span className="text-[10px] uppercase tracking-wider block mt-0.5">
+                      ¡Listo!
+                    </span>
+                  </div>
+                </div>
+
+                {pedidoConfirmado.estado === "listo" && (
+                  <div className="rounded-xl bg-emerald-600 text-white p-3 text-center text-xs font-bold shadow-md animate-in fade-in zoom-in-95 duration-300">
+                    🔔 ¡Tu comanda está lista y caliente! Pasa al mostrador o a tu mesa con el código #{pedidoConfirmado.codigoRetiro}.
+                  </div>
+                )}
               </div>
 
               {/* Botón Destacado de Auxilio / Reintento de WhatsApp */}

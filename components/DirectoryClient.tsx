@@ -31,8 +31,14 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
   const [busqueda, setBusqueda] = useState("");
   const [categoriaActiva, setCategoriaActiva] = useState<CategoriaFiltro>("Todos");
   const [sectorActivo, setSectorActivo] = useState<"Todos" | SectorComuna>("Todos");
+  const [soloAbiertos, setSoloAbiertos] = useState(false);
   const [localQrModal, setLocalQrModal] = useState<Local | null>(null);
   const [mostrarRecomendador, setMostrarRecomendador] = useState(false);
+
+  const cantidadAbiertos = useMemo(
+    () => locales.filter((l) => l.abierto).length,
+    [locales]
+  );
 
   // Platos con Oferta activa del Día
   const ofertasDelDia = useMemo(() => {
@@ -98,7 +104,9 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
   const localesFiltrados = useMemo(() => {
     const rawQuery = busqueda.trim().toLowerCase();
     const filtrarSoloAbiertos =
-      rawQuery.includes("abierto") || rawQuery.includes("abiertos");
+      soloAbiertos ||
+      rawQuery.includes("abierto") ||
+      rawQuery.includes("abiertos");
     const query = rawQuery
       .replace(/\babiertos\b/g, "")
       .replace(/\babierto\b/g, "")
@@ -134,7 +142,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
       return enNombreORubro || enProductos;
     });
-  }, [locales, busqueda, categoriaActiva, sectorActivo]);
+  }, [locales, busqueda, categoriaActiva, sectorActivo, soloAbiertos]);
 
   const scrollHaciaId = (id: string) => (e: React.MouseEvent) => {
     e.preventDefault();
@@ -154,7 +162,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
   const hayFiltrosActivos =
     busqueda.trim() !== "" ||
     categoriaActiva !== "Todos" ||
-    sectorActivo !== "Todos";
+    sectorActivo !== "Todos" ||
+    soloAbiertos;
 
   return (
     <div className="relative min-h-screen w-full bg-[#FAF8F5] text-[#18181B] selection:bg-[#EA580C] selection:text-white">
@@ -435,25 +444,47 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             </p>
           </div>
 
-          {/* Filtro por Sector Territorial (Píldoras Segmentadas) */}
-          <div className="flex items-center gap-1.5 p-1 rounded-full bg-stone-200/80 border border-stone-300/60 self-start md:self-auto shrink-0">
-            {(["Todos", "Tirúa Centro", "Quidico"] as const).map((sec) => {
-              const activo = sectorActivo === sec;
-              return (
-                <button
-                  key={sec}
-                  type="button"
-                  onClick={() => setSectorActivo(sec)}
-                  className={`px-3 sm:px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
-                    activo
-                      ? "bg-[#18181B] text-white shadow-xs"
-                      : "text-stone-700 hover:text-black"
-                  }`}
-                >
-                  {sec === "Todos" ? "Toda la Comuna" : sec}
-                </button>
-              );
-            })}
+          {/* Controles y Filtros Rápidos */}
+          <div className="flex flex-wrap items-center gap-2 self-start md:self-auto shrink-0">
+            {/* Toggle Abiertos Ahora */}
+            <button
+              type="button"
+              onClick={() => setSoloAbiertos((prev) => !prev)}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all shadow-xs ${
+                soloAbiertos
+                  ? "bg-emerald-600 text-white ring-2 ring-emerald-300"
+                  : "bg-white border border-stone-300 text-stone-700 hover:border-emerald-500 hover:text-emerald-700"
+              }`}
+              title="Mostrar únicamente locales que están abiertos recibiendo pedidos ahora"
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  soloAbiertos ? "bg-white animate-pulse" : "bg-emerald-500"
+                }`}
+              />
+              <span>Abiertos Ahora ({cantidadAbiertos})</span>
+            </button>
+
+            {/* Filtro por Sector Territorial (Píldoras Segmentadas) */}
+            <div className="flex items-center gap-1.5 p-1 rounded-full bg-stone-200/80 border border-stone-300/60">
+              {(["Todos", "Tirúa Centro", "Quidico"] as const).map((sec) => {
+                const activo = sectorActivo === sec;
+                return (
+                  <button
+                    key={sec}
+                    type="button"
+                    onClick={() => setSectorActivo(sec)}
+                    className={`px-3 sm:px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
+                      activo
+                        ? "bg-[#18181B] text-white shadow-xs"
+                        : "text-stone-700 hover:text-black"
+                    }`}
+                  >
+                    {sec === "Todos" ? "Toda la Comuna" : sec}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -484,6 +515,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 setBusqueda("");
                 setCategoriaActiva("Todos");
                 setSectorActivo("Todos");
+                setSoloAbiertos(false);
               }}
               className="px-3 py-1.5 rounded-full text-[11px] font-bold text-stone-500 hover:text-[#EA580C] hover:bg-orange-50 transition whitespace-nowrap flex items-center gap-1"
             >
@@ -521,6 +553,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 setBusqueda("");
                 setCategoriaActiva("Todos");
                 setSectorActivo("Todos");
+                setSoloAbiertos(false);
               }}
               className="mt-4 rounded-full bg-[#18181B] text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 hover:bg-[#EA580C] transition"
             >

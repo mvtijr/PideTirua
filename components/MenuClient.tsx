@@ -16,7 +16,7 @@ import {
   AlertTriangle,
   Sparkles,
 } from "lucide-react";
-import { ItemCarrito, Local, Producto, OpcionSeleccionada } from "@/types/local";
+import { ItemCarrito, Local, Producto, OpcionSeleccionada, EstadoPedido } from "@/types/local";
 import {
   formatPhoneDisplay,
   getPrecioEfectivoProducto,
@@ -60,6 +60,41 @@ export default function MenuClient({ local }: MenuClientProps) {
   const [platoParaPersonalizar, setPlatoParaPersonalizar] =
     useState<Producto | null>(null);
   const [itemParaEditar, setItemParaEditar] = useState<ItemCarrito | null>(null);
+  const [pedidoActivo, setPedidoActivo] = useState<{
+    codigoRetiro: string;
+    estado: EstadoPedido;
+    pedidoId?: string;
+  } | null>(null);
+
+  // Sincronizar estado de última comanda activa para el live tracker flotante
+  useEffect(() => {
+    const revisarUltimoPedido = () => {
+      try {
+        const raw = localStorage.getItem(`pidetirua_ultimo_pedido_${local.slug}`);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          const fecha = parsed.fecha ? new Date(parsed.fecha).getTime() : 0;
+          if (
+            Date.now() - fecha < 8 * 60 * 60 * 1000 &&
+            parsed.estado !== "entregado" &&
+            parsed.estado !== "cancelado"
+          ) {
+            setPedidoActivo({
+              codigoRetiro: parsed.codigoRetiro,
+              estado: parsed.estado || "pendiente",
+              pedidoId: parsed.pedidoId,
+            });
+            return;
+          }
+        }
+        setPedidoActivo(null);
+      } catch {}
+    };
+
+    revisarUltimoPedido();
+    const interval = setInterval(revisarUltimoPedido, 4000);
+    return () => clearInterval(interval);
+  }, [local.slug, drawerAbierto]);
 
   // Cargar carrito persistido por local en el navegador
   useEffect(() => {
@@ -789,6 +824,54 @@ export default function MenuClient({ local }: MenuClientProps) {
       </div>
 
 
+
+      {/* Píldora Flotante de Estado en Vivo (Live Tracker) */}
+      {pedidoActivo && !drawerAbierto && (
+        <aside
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-24 right-4 left-4 sm:left-auto sm:right-6 sm:w-84 z-30 animate-in slide-in-from-bottom duration-300"
+        >
+          <button
+            type="button"
+            onClick={() => setDrawerAbierto(true)}
+            className="w-full flex items-center justify-between gap-3 rounded-2xl border border-stone-200/90 bg-white/95 backdrop-blur-md p-3 shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] text-left"
+          >
+            <div className="flex items-center gap-2.5">
+              <span
+                className={`flex h-8 w-8 items-center justify-center rounded-xl text-base ${
+                  pedidoActivo.estado === "listo"
+                    ? "bg-emerald-500 text-white animate-pulse"
+                    : pedidoActivo.estado === "preparando"
+                    ? "bg-orange-500 text-white"
+                    : "bg-amber-100 text-amber-800"
+                }`}
+              >
+                {pedidoActivo.estado === "listo"
+                  ? "🎉"
+                  : pedidoActivo.estado === "preparando"
+                  ? "🔥"
+                  : "⏳"}
+              </span>
+              <div>
+                <span className="block text-xs font-black text-stone-900 leading-tight">
+                  {pedidoActivo.estado === "listo"
+                    ? "¡Tu comida está lista para retirar!"
+                    : pedidoActivo.estado === "preparando"
+                    ? "En cocina preparando..."
+                    : "Comanda en preparación"}
+                </span>
+                <span className="block text-[10px] font-bold text-[#EA580C] tabular-nums mt-0.5">
+                  #{pedidoActivo.codigoRetiro} • Toca para ver recibo
+                </span>
+              </div>
+            </div>
+            <span className="rounded-full bg-stone-100 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-stone-700">
+              Ver ➔
+            </span>
+          </button>
+        </aside>
+      )}
 
       {/* Carrito flotante inferior */}
       <FloatingCartBar

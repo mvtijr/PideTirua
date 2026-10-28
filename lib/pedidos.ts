@@ -204,3 +204,33 @@ export async function actualizarEstadoPedidoEnSupabase(
     };
   }
 }
+
+export async function obtenerEstadoPedidoPorId(
+  pedidoId: string
+): Promise<{ ok: boolean; estado?: EstadoPedido; error?: string }> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from("pedidos")
+      .select("id, estado")
+      .eq("id", pedidoId)
+      .maybeSingle();
+
+    if (error || !data) {
+      return { ok: false, error: "Pedido no encontrado" };
+    }
+
+    const estadoRaw = String(data.estado || "pendiente");
+    const estado: EstadoPedido =
+      estadoRaw === "preparando" ||
+      estadoRaw === "listo" ||
+      estadoRaw === "entregado" ||
+      estadoRaw === "cancelado"
+        ? estadoRaw
+        : "pendiente";
+
+    return { ok: true, estado };
+  } catch (err: unknown) {
+    return { ok: false, error: String(err) };
+  }
+}
