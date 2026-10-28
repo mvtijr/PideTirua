@@ -11,6 +11,9 @@ interface ModalPersonalizarPlatoProps {
   onClose: () => void;
   producto: Producto | null;
   localSlug: string;
+  opcionesIniciales?: OpcionSeleccionada[];
+  cantidadInicial?: number;
+  modoEdicion?: boolean;
   onConfirmar: (
     producto: Producto,
     opcionesSeleccionadas: OpcionSeleccionada[],
@@ -23,6 +26,9 @@ export default function ModalPersonalizarPlato({
   onClose,
   producto,
   localSlug,
+  opcionesIniciales,
+  cantidadInicial,
+  modoEdicion = false,
   onConfirmar,
 }: ModalPersonalizarPlatoProps) {
   const theme = getLocalTheme(localSlug);
@@ -31,7 +37,7 @@ export default function ModalPersonalizarPlato({
   const [selecciones, setSelecciones] = useState<Record<number, string[]>>({});
   const [imgError, setImgError] = useState(false);
 
-  // Inicializar selecciones al abrir con un plato
+  // Inicializar selecciones al abrir con un plato (o precargar al editar)
   useEffect(() => {
     if (!isOpen || !producto) {
       setCantidad(1);
@@ -40,23 +46,33 @@ export default function ModalPersonalizarPlato({
       return;
     }
 
-    setCantidad(1);
+    setCantidad(cantidadInicial && cantidadInicial > 0 ? cantidadInicial : 1);
     setImgError(false);
 
     const initMap: Record<number, string[]> = {};
     const grupos: GrupoOpcion[] = producto.opciones || [];
 
-    grupos.forEach((grupo, idx) => {
-      if (grupo.tipo === "unica" && grupo.items.length > 0) {
-        // En selección única obligatoria, seleccionamos por defecto la primera opción
-        initMap[idx] = [grupo.items[0].nombre];
-      } else {
-        initMap[idx] = [];
-      }
-    });
+    if (opcionesIniciales && opcionesIniciales.length > 0) {
+      // Pre-cargar opciones existentes en modo edición
+      grupos.forEach((grupo, idx) => {
+        const seleccionados = opcionesIniciales
+          .filter((op) => op.grupoTitulo === grupo.titulo)
+          .map((op) => op.nombre);
+        initMap[idx] = seleccionados;
+      });
+    } else {
+      // Selección por defecto para plato nuevo
+      grupos.forEach((grupo, idx) => {
+        if (grupo.tipo === "unica" && grupo.items.length > 0) {
+          initMap[idx] = [grupo.items[0].nombre];
+        } else {
+          initMap[idx] = [];
+        }
+      });
+    }
 
     setSelecciones(initMap);
-  }, [isOpen, producto]);
+  }, [isOpen, producto, opcionesIniciales, cantidadInicial]);
 
   // Manejador tecla ESC
   useEffect(() => {
@@ -145,7 +161,7 @@ export default function ModalPersonalizarPlato({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center sm:p-4">
       {/* Backdrop */}
       <div
         onClick={onClose}
@@ -165,8 +181,11 @@ export default function ModalPersonalizarPlato({
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
               <Sparkles className="h-4 w-4" />
             </span>
-            <span className="font-display text-lg font-bold tracking-wide uppercase text-stone-900">
-              Personaliza tu plato
+            <span
+              id="modal-personalizar-title"
+              className="font-display text-lg font-bold tracking-wide uppercase text-stone-900"
+            >
+              {modoEdicion ? "Modificar extras del plato" : "Personaliza tu plato"}
             </span>
           </div>
           <button
@@ -345,13 +364,13 @@ export default function ModalPersonalizarPlato({
               </button>
             </div>
 
-            {/* Botón Destacado Agregar al Pedido */}
+            {/* Botón Destacado */}
             <button
               type="button"
               onClick={handleConfirmar}
               className="flex-1 flex items-center justify-center gap-2 rounded-full py-3.5 px-4 font-display text-base font-bold tracking-wide uppercase text-white bg-[#EA580C] hover:bg-[#c2410c] shadow-md transition-all active:scale-98"
             >
-              <span>Agregar al pedido</span>
+              <span>{modoEdicion ? "Guardar cambios" : "Agregar al pedido"}</span>
               <span className="opacity-60">•</span>
               <span className="font-mono text-sm tracking-normal tabular-nums">
                 {formatCLP(precioTotal)}

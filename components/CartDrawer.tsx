@@ -22,6 +22,7 @@ import {
   Landmark,
   Loader2,
   Clock,
+  Pencil,
 } from "lucide-react";
 import {
   DatosCheckout,
@@ -50,6 +51,7 @@ interface CartDrawerProps {
   onAgregar: (producto: Producto) => void;
   onIncrementarItem?: (item: ItemCarrito) => void;
   onDisminuir: (itemId: string) => void;
+  onEditarItem?: (item: ItemCarrito) => void;
   onVaciar: () => void;
 }
 
@@ -110,6 +112,7 @@ export default function CartDrawer({
   onAgregar,
   onIncrementarItem,
   onDisminuir,
+  onEditarItem,
   onVaciar,
 }: CartDrawerProps) {
   const [nombreCliente, setNombreCliente] = useState("");
@@ -851,6 +854,20 @@ export default function CartDrawer({
                                   {op.precio > 0 ? ` (+${formatCLP(op.precio)})` : ""}
                                 </span>
                               ))}
+                            </div>
+                          )}
+
+                          {producto.opciones && producto.opciones.length > 0 && onEditarItem && (
+                            <div className="mt-1.5">
+                              <button
+                                type="button"
+                                onClick={() => onEditarItem(item)}
+                                className="inline-flex items-center gap-1 rounded-md bg-orange-50 hover:bg-orange-100 text-[#EA580C] px-2 py-0.5 text-[10px] font-bold transition active:scale-95"
+                                title="Modificar salsas o agregados de este plato"
+                              >
+                                <Pencil className="h-2.5 w-2.5" />
+                                <span>Modificar extras / salsas</span>
+                              </button>
                             </div>
                           )}
 

@@ -59,6 +59,7 @@ export default function MenuClient({ local }: MenuClientProps) {
   const [mostrarQr, setMostrarQr] = useState(false);
   const [platoParaPersonalizar, setPlatoParaPersonalizar] =
     useState<Producto | null>(null);
+  const [itemParaEditar, setItemParaEditar] = useState<ItemCarrito | null>(null);
 
   // Cargar carrito persistido por local en el navegador
   useEffect(() => {
@@ -124,6 +125,11 @@ export default function MenuClient({ local }: MenuClientProps) {
     [localSuspendido]
   );
 
+  const handleEditarItem = useCallback((item: ItemCarrito) => {
+    setItemParaEditar(item);
+    setPlatoParaPersonalizar(item.producto);
+  }, []);
+
   const handleConfirmarPersonalizacion = useCallback(
     (
       producto: Producto,
@@ -136,7 +142,7 @@ export default function MenuClient({ local }: MenuClientProps) {
         .map((o) => `${o.grupoTitulo}:${o.nombre}`)
         .sort()
         .join("|");
-      const cartItemId = `${producto.id}${
+      const nuevoCartItemId = `${producto.id}${
         extrasClave ? `-${extrasClave}` : ""
       }`;
 
@@ -147,13 +153,33 @@ export default function MenuClient({ local }: MenuClientProps) {
       );
       const precioUnitarioFinal = precioBase + precioExtras;
 
+      if (itemParaEditar) {
+        const targetId = itemParaEditar.id || itemParaEditar.producto.id;
+        setCarrito((prev) =>
+          prev.map((item) =>
+            (item.id || item.producto.id) === targetId
+              ? {
+                  id: nuevoCartItemId,
+                  producto,
+                  cantidad,
+                  opcionesSeleccionadas,
+                  precioUnitarioFinal,
+                }
+              : item
+          )
+        );
+        setItemParaEditar(null);
+        setPlatoParaPersonalizar(null);
+        return;
+      }
+
       setCarrito((prev) => {
         const existe = prev.find(
-          (item) => (item.id || item.producto.id) === cartItemId
+          (item) => (item.id || item.producto.id) === nuevoCartItemId
         );
         if (existe) {
           return prev.map((item) =>
-            (item.id || item.producto.id) === cartItemId
+            (item.id || item.producto.id) === nuevoCartItemId
               ? { ...item, cantidad: item.cantidad + cantidad }
               : item
           );
@@ -161,7 +187,7 @@ export default function MenuClient({ local }: MenuClientProps) {
         return [
           ...prev,
           {
-            id: cartItemId,
+            id: nuevoCartItemId,
             producto,
             cantidad,
             opcionesSeleccionadas,
@@ -169,8 +195,9 @@ export default function MenuClient({ local }: MenuClientProps) {
           },
         ];
       });
+      setPlatoParaPersonalizar(null);
     },
-    [localSuspendido]
+    [itemParaEditar, localSuspendido]
   );
 
   const handleDisminuirProducto = useCallback((itemId: string) => {
@@ -780,15 +807,22 @@ export default function MenuClient({ local }: MenuClientProps) {
         onAgregar={handleAgregarProducto}
         onIncrementarItem={handleIncrementarItem}
         onDisminuir={handleDisminuirProducto}
+        onEditarItem={handleEditarItem}
         onVaciar={handleVaciarCarrito}
       />
 
-      {/* Modal de Personalización de Plato */}
+      {/* Modal de Personalización / Edición de Plato */}
       <ModalPersonalizarPlato
         isOpen={Boolean(platoParaPersonalizar)}
-        onClose={() => setPlatoParaPersonalizar(null)}
+        onClose={() => {
+          setPlatoParaPersonalizar(null);
+          setItemParaEditar(null);
+        }}
         producto={platoParaPersonalizar}
         localSlug={local.slug}
+        opcionesIniciales={itemParaEditar?.opcionesSeleccionadas}
+        cantidadInicial={itemParaEditar?.cantidad}
+        modoEdicion={Boolean(itemParaEditar)}
         onConfirmar={handleConfirmarPersonalizacion}
       />
 
