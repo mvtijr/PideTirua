@@ -78,6 +78,29 @@ const METODOS_PAGO: {
 const LS_KEY_NOMBRE = "pidetirua_nombre";
 const LS_KEY_DIRECCION = "pidetirua_direccion";
 const LS_KEY_TELEFONO = "pidetirua_telefono";
+const LS_KEY_ULTIMO_PEDIDO_PREFIX = "pidetirua_ultimo_pedido_";
+
+export interface ItemPedidoConfirmado {
+  nombre: string;
+  cantidad: number;
+  precioUnitario: number;
+  subtotal: number;
+  opcionesTexto?: string;
+}
+
+export interface PedidoConfirmadoInfo {
+  codigoRetiro: string;
+  fecha: string;
+  clienteNombre: string;
+  clienteTelefono: string;
+  tipoEntrega: string;
+  direccionOMesa: string;
+  horaRetiro: string;
+  metodoPago: string;
+  items: ItemPedidoConfirmado[];
+  total: number;
+  urlWhatsApp: string;
+}
 
 export default function CartDrawer({
   abierto,
@@ -102,9 +125,11 @@ export default function CartDrawer({
   const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
   const [datosCopiados, setDatosCopiados] = useState(false);
   const [enviandoPedido, setEnviandoPedido] = useState(false);
+  const [pedidoConfirmado, setPedidoConfirmado] = useState<PedidoConfirmadoInfo | null>(null);
+  const [ultimoPedidoGuardado, setUltimoPedidoGuardado] = useState<PedidoConfirmadoInfo | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Cargar datos previamente guardados del cliente desde localStorage tras montar
+  // Cargar datos previamente guardados del cliente y último pedido desde localStorage
   useEffect(() => {
     setIsMounted(true);
     try {
@@ -115,10 +140,22 @@ export default function CartDrawer({
       if (nombreGuardado) setNombreCliente(nombreGuardado);
       if (direccionGuardada) setDireccionOMesa(direccionGuardada);
       if (telefonoGuardado) setTelefonoCliente(telefonoGuardado);
+
+      const rawUltimo = localStorage.getItem(
+        `${LS_KEY_ULTIMO_PEDIDO_PREFIX}${local.slug}`
+      );
+      if (rawUltimo) {
+        const parsed: PedidoConfirmadoInfo = JSON.parse(rawUltimo);
+        const fecha = parsed.fecha ? new Date(parsed.fecha).getTime() : 0;
+        // Relevante si es de las últimas 8 horas
+        if (Date.now() - fecha < 8 * 60 * 60 * 1000) {
+          setUltimoPedidoGuardado(parsed);
+        }
+      }
     } catch {
       // Ignorar errores de localStorage en modo privado
     }
-  }, []);
+  }, [local.slug, pedidoConfirmado]);
 
   // Manejador de tecla Escape para cerrar el carrito
   useEffect(() => {
@@ -336,14 +373,21 @@ export default function CartDrawer({
       } catch {}
     }, 3500);
 
+    let codigoGenerado = `TR-${Date.now().toString().slice(-4)}`;
     try {
-      await fetch("/api/pedidos", {
+      const resp = await fetch("/api/pedidos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         keepalive: true,
         signal: controller.signal,
         body: JSON.stringify(payloadPedido),
       });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.ok && data.pedido?.id) {
+          codigoGenerado = `TR-${data.pedido.id.slice(-4).toUpperCase()}`;
+        }
+      }
     } catch {
       // Si la llamada a Supabase falla o supera los 3.5s (por señal 4G inestable),
       // se captura el error en silencio y se ABRE WHATSAPP DE TODAS FORMAS.
@@ -352,20 +396,65 @@ export default function CartDrawer({
       clearTimeout(timeoutId);
     }
 
-    // Abrir WhatsApp de forma inmediata y garantizada
+    const infoConfirmacion: PedidoConfirmadoInfo = {
+      codigoRetiro: codigoGenerado,
+      fecha: new Date().toISOString(),
+      clienteNombre: nombreCliente.trim(),
+      clienteTelefono: telefonoCliente.trim(),
+      tipoEntrega,
+      direccionOMesa:
+        direccionOMesa.trim() ||
+        (tipoEntrega === "Consumo en mesa"
+          ? "Mesa en salón"
+          : `${local.nombre} (${local.ubicacion})`),
+      horaRetiro:
+        horaRetiroFinal === "lo_antes_posible"
+          ? `Lo antes posible (~${local.tiempo_estimado || "20-30 min"})`
+          : `Retiro a las ${horaRetiroFinal} hrs`,
+      metodoPago:
+        metodoPago === "Transferencia Bancaria" ? "Transferencia" : "Efectivo",
+      items: items.map((item) => {
+        const precioUnitario = getPrecioUnitarioItem(item);
+        return {
+          nombre: item.producto.nombre,
+          cantidad: item.cantidad,
+          precioUnitario,
+          subtotal: precioUnitario * item.cantidad,
+          opcionesTexto: item.opcionesSeleccionadas?.length
+            ? item.opcionesSeleccionadas
+                .map((op) =>
+                  op.precio > 0
+                    ? `${op.nombre} (+${formatCLP(op.precio)})`
+                    : op.nombre
+                )
+                .join(", ")
+            : undefined,
+        };
+      }),
+      total,
+      urlWhatsApp: url,
+    };
+
     try {
-      const opened = window.open(url, "_blank", "noopener,noreferrer");
-      if (!opened || opened.closed || typeof opened.closed === "undefined") {
-        window.location.assign(url);
-      }
+      localStorage.setItem(
+        `${LS_KEY_ULTIMO_PEDIDO_PREFIX}${local.slug}`,
+        JSON.stringify(infoConfirmacion)
+      );
     } catch {
-      window.location.assign(url);
+      // Ignorar error de almacenamiento
     }
 
-    setTimeout(() => {
-      setEnviandoPedido(false);
-      onClose();
-    }, 1200);
+    // Intentar abrir WhatsApp en ventana emergente/pestaña
+    try {
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch {
+      // En navegadores con bloqueo estricto, el botón directo de la pantalla de confirmación lo abre
+    }
+
+    // Transicionar a la pantalla de confirmación con el recibo y vaciar el carrito
+    setPedidoConfirmado(infoConfirmacion);
+    setEnviandoPedido(false);
+    onVaciar();
   };
 
   const mensajePrevia = formatWhatsAppMessage({
@@ -403,18 +492,27 @@ export default function CartDrawer({
             <span
               className={`text-[11px] font-bold uppercase tracking-wider ${theme.drawerHeaderSub}`}
             >
-              Pedido directo a WhatsApp
+              {pedidoConfirmado
+                ? `Comanda Registrada • #${pedidoConfirmado.codigoRetiro}`
+                : "Pedido directo a WhatsApp"}
             </span>
             <h2
               id="cart-drawer-title"
               className="font-display text-2xl tracking-wide uppercase leading-tight text-stone-900"
             >
-              Tu Pedido en {local.nombre}
+              {pedidoConfirmado
+                ? `Comanda en ${local.nombre}`
+                : `Tu Pedido en ${local.nombre}`}
             </h2>
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              if (pedidoConfirmado) {
+                setPedidoConfirmado(null);
+              }
+              onClose();
+            }}
             className={`rounded-full p-2 transition ${theme.drawerCloseBtn}`}
             aria-label="Cerrar carrito"
           >
@@ -422,7 +520,223 @@ export default function CartDrawer({
           </button>
         </div>
 
-        {/* Contenido scrollable */}
+        {/* PANTALLA POST-CHECKOUT: CONFIRMACIÓN Y RECIBO DE COMANDA */}
+        {pedidoConfirmado ? (
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <div className="flex-1 space-y-5 overflow-y-auto px-4 py-5 sm:px-6">
+              {/* Header de Éxito */}
+              <div className="text-center space-y-1.5 pt-1">
+                <div className="mx-auto flex h-13 w-13 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-xs">
+                  <CheckCircle2 className="h-7 w-7 text-emerald-600" />
+                </div>
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-800">
+                  ✓ Comanda Registrada con Éxito
+                </span>
+                <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-wide text-stone-900 leading-tight">
+                  ¡Tu pedido está en cocina!
+                </h3>
+                <p className="font-body text-xs text-stone-600 max-w-sm mx-auto leading-relaxed">
+                  El equipo de <strong>{local.nombre}</strong> ya tiene tu orden en el monitor de cocina.
+                </p>
+              </div>
+
+              {/* Tarjeta Destacada con Código de Retiro */}
+              <div className="rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50/90 p-4 text-center space-y-1 shadow-xs">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-900">
+                  Código de Identificación / Retiro
+                </span>
+                <div className="font-display text-3xl sm:text-4xl font-black tracking-widest text-stone-950 tabular-nums">
+                  #{pedidoConfirmado.codigoRetiro}
+                </div>
+                <p className="text-[11px] text-amber-900 font-medium">
+                  Muestra este código al retirar en el local o en tu mesa.
+                </p>
+              </div>
+
+              {/* Botón Destacado de Auxilio / Reintento de WhatsApp */}
+              <div className="space-y-1.5">
+                <a
+                  href={pedidoConfirmado.urlWhatsApp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white py-3.5 px-4 font-bold text-sm shadow-md transition-all active:scale-[0.98]"
+                >
+                  <MessageCircle className="h-5 w-5 shrink-0 fill-white" />
+                  <span>📲 Abrir comanda en WhatsApp</span>
+                </a>
+                <p className="text-center text-[11px] text-stone-500 leading-relaxed">
+                  ¿Se cerró la ventana? Presiona el botón verde para enviar o revisar el mensaje directo con el restaurante.
+                </p>
+              </div>
+
+              {/* Detalles de Retiro / Entrega */}
+              <div className="rounded-2xl border border-stone-200/90 bg-white p-4 space-y-2.5 shadow-xs text-xs text-stone-800">
+                <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+                  <span className="font-bold text-stone-500 flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-[#EA580C]" />
+                    Horario de Retiro
+                  </span>
+                  <span className="font-black text-stone-900 tabular-nums">
+                    {pedidoConfirmado.horaRetiro}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+                  <span className="font-bold text-stone-500 flex items-center gap-1.5">
+                    <Store className="h-3.5 w-3.5 text-stone-600" />
+                    Modalidad
+                  </span>
+                  <span className="font-bold text-stone-900">
+                    {pedidoConfirmado.tipoEntrega}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+                  <span className="font-bold text-stone-500 flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5 text-stone-600" />
+                    Referencia / Ubicación
+                  </span>
+                  <span className="font-medium text-stone-900 text-right truncate max-w-[200px]">
+                    {pedidoConfirmado.direccionOMesa}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-stone-500 flex items-center gap-1.5">
+                    <Phone className="h-3.5 w-3.5 text-stone-600" />
+                    Teléfono registrado
+                  </span>
+                  <span className="font-bold text-emerald-700 tabular-nums">
+                    {pedidoConfirmado.clienteTelefono}
+                  </span>
+                </div>
+              </div>
+
+              {/* Resumen de Productos */}
+              <div className="rounded-2xl border border-stone-200/90 bg-white p-4 space-y-2 shadow-xs">
+                <h4 className="text-[11px] font-black uppercase tracking-wider text-stone-500 border-b border-stone-100 pb-1.5">
+                  Resumen del Pedido ({pedidoConfirmado.items.length} platos)
+                </h4>
+                <div className="divide-y divide-stone-100 text-xs">
+                  {pedidoConfirmado.items.map((it, idx) => (
+                    <div key={idx} className="py-2 flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-bold text-stone-900">
+                          {it.cantidad}x {it.nombre}
+                        </span>
+                        {it.opcionesTexto && (
+                          <span className="block text-[11px] text-stone-500 italic mt-0.5">
+                            Extras: [{it.opcionesTexto}]
+                          </span>
+                        )}
+                      </div>
+                      <span className="font-black text-stone-900 shrink-0 tabular-nums">
+                        {formatCLP(it.subtotal)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="border-t border-stone-200 pt-2 flex items-center justify-between">
+                  <span className="font-display text-base uppercase text-stone-900">
+                    Total a Pagar
+                  </span>
+                  <span className="font-display text-2xl font-black text-[#EA580C] tabular-nums">
+                    {formatCLP(pedidoConfirmado.total)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Si pagó con Transferencia Bancaria, mostrar CuentaRUT con botón de copiado */}
+              {pedidoConfirmado.metodoPago === "Transferencia" && tieneDatosBancarios && (
+                <div className="rounded-2xl border border-emerald-300/80 bg-emerald-50/70 p-4 text-slate-900 shadow-xs space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-emerald-200/80 pb-2">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-emerald-900">
+                      <Landmark className="h-4 w-4 text-emerald-700" />
+                      Datos para Transferir (CuentaRUT)
+                    </span>
+                    <span className="rounded-full bg-emerald-200/80 px-2 py-0.5 text-[10px] font-extrabold text-emerald-900">
+                      Directo
+                    </span>
+                  </div>
+
+                  <dl className="grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
+                    {local.banco && (
+                      <div className="bg-white/85 p-2 rounded-lg">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Banco</dt>
+                        <dd className="font-bold text-slate-900">{local.banco}</dd>
+                      </div>
+                    )}
+                    {local.tipo_cuenta && (
+                      <div className="bg-white/85 p-2 rounded-lg">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Tipo de cuenta</dt>
+                        <dd className="font-bold text-slate-900">{local.tipo_cuenta}</dd>
+                      </div>
+                    )}
+                    {local.numero_cuenta && (
+                      <div className="bg-white/85 p-2 rounded-lg">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">N° de cuenta</dt>
+                        <dd className="font-black text-slate-900 tabular-nums">{local.numero_cuenta}</dd>
+                      </div>
+                    )}
+                    {local.rut_titular && (
+                      <div className="bg-white/85 p-2 rounded-lg">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">RUT</dt>
+                        <dd className="font-black text-slate-900 tabular-nums">{local.rut_titular}</dd>
+                      </div>
+                    )}
+                    {local.nombre_titular && (
+                      <div className="bg-white/85 p-2 rounded-lg sm:col-span-2">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Titular</dt>
+                        <dd className="font-bold text-slate-900">{local.nombre_titular}</dd>
+                      </div>
+                    )}
+                  </dl>
+
+                  <button
+                    type="button"
+                    onClick={handleCopiarDatosBancarios}
+                    className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-extrabold shadow-xs transition active:scale-[0.99] ${
+                      datosCopiados
+                        ? "border-emerald-600 bg-emerald-700 text-white"
+                        : "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
+                    }`}
+                  >
+                    {datosCopiados ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span>✓ ¡Datos bancarios copiados!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4 shrink-0" />
+                        <span>📋 Copiar datos de transferencia</span>
+                      </>
+                    )}
+                  </button>
+                  <p className="text-[11px] text-emerald-900 text-center font-medium">
+                    Envía el comprobante al chat de WhatsApp al realizar el pago.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Pie con botón para volver a la carta */}
+            <div className="border-t border-stone-200/90 bg-white p-4 sm:px-6 safe-bottom">
+              <button
+                type="button"
+                onClick={() => {
+                  setPedidoConfirmado(null);
+                  onClose();
+                }}
+                className="w-full rounded-full bg-[#18181B] hover:bg-[#EA580C] text-white py-3 text-xs font-black uppercase tracking-wider transition shadow-sm"
+              >
+                ✓ Entendido, volver a la carta
+              </button>
+            </div>
+          </div>
+        ) : (
+        /* Contenido scrollable del formulario de checkout */
         <form
           onSubmit={handleEnviarWhatsApp}
           className="flex flex-1 flex-col overflow-hidden"
@@ -465,9 +779,40 @@ export default function CartDrawer({
               </div>
 
               {items.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-outline-variant bg-surface-container-low p-6 text-center text-sm text-on-surface-variant">
-                  Tu carrito está vacío. Agrega platos de la carta para armar tu
-                  pedido.
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-6 text-center text-sm text-stone-500 shadow-xs">
+                    Tu carrito está vacío. Agrega platos de la carta para armar tu
+                    pedido.
+                  </div>
+
+                  {ultimoPedidoGuardado && (
+                    <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-xs space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
+                          Última comanda registrada
+                        </span>
+                        <span className="rounded-full bg-amber-100 border border-amber-300 px-2 py-0.5 text-[10px] font-black text-amber-900 tabular-nums">
+                          #{ultimoPedidoGuardado.codigoRetiro}
+                        </span>
+                      </div>
+                      <p className="text-xs text-stone-700">
+                        {ultimoPedidoGuardado.items.length}{" "}
+                        {ultimoPedidoGuardado.items.length === 1
+                          ? "producto"
+                          : "productos"}{" "}
+                        • {formatCLP(ultimoPedidoGuardado.total)} (
+                        {ultimoPedidoGuardado.horaRetiro})
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setPedidoConfirmado(ultimoPedidoGuardado)}
+                        className="w-full rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-900 py-2.5 px-3 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                      >
+                        <FileText className="h-3.5 w-3.5 text-[#EA580C]" />
+                        <span>Ver recibo y estado de comanda</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div
@@ -981,6 +1326,7 @@ export default function CartDrawer({
             </button>
           </div>
         </form>
+        )}
       </div>
     </div>
   );
