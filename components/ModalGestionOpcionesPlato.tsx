@@ -318,7 +318,7 @@ export default function ModalGestionOpcionesPlato({
 
                   {/* Lista de Ítems */}
                   <div className="space-y-2 pt-1 border-t border-stone-100">
-                    <label className="block text-[10px] font-black uppercase tracking-wider text-stone-500">
+                    <label className="block text-[11px] font-black uppercase tracking-wider text-stone-600">
                       Opciones / Ítems disponibles:
                     </label>
 

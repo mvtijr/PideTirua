@@ -61,7 +61,7 @@ export default function GlobalError({
 
         {/* Digest técnico opcional para soporte */}
         {error.digest && (
-          <p className="border-t border-white/10 pt-3 text-[10px] text-slate-600 font-mono">
+          <p className="border-t border-white/10 pt-3 text-[11px] text-slate-400 font-mono">
             ID de diagnóstico: {error.digest}
           </p>
         )}

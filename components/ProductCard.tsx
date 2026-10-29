@@ -260,7 +260,7 @@ export default memo(function ProductCard({
       {/* Imagen del producto */}
       <div className="relative h-28 w-28 shrink-0 overflow-hidden rounded-2xl bg-stone-100 sm:h-32 sm:w-32 border border-stone-200/80">
         {tieneOferta && disponible && (
-          <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 rounded-lg bg-rose-600/95 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-md backdrop-blur-xs animate-pulse">
+          <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 rounded-lg bg-rose-600/95 px-2 py-0.5 text-[11px] font-black uppercase tracking-wider text-white shadow-md backdrop-blur-xs animate-pulse">
             <Flame className="h-3 w-3 fill-white text-white" />
             <span>{producto.texto_promo || "OFERTA"}</span>
           </div>
@@ -268,7 +268,7 @@ export default memo(function ProductCard({
         {imagenError || !imagenSrc ? (
           <div className="flex h-full w-full flex-col items-center justify-center bg-slate-100 text-slate-400 p-2 text-center border border-slate-200">
             <UtensilsCrossed className="h-7 w-7 text-slate-400" />
-            <span className="mt-1 text-[9px] font-bold text-slate-500 uppercase tracking-tight line-clamp-1">
+            <span className="mt-1 text-[11px] font-bold text-slate-600 uppercase tracking-tight line-clamp-1">
               {producto.nombre}
             </span>
           </div>
@@ -289,7 +289,7 @@ export default memo(function ProductCard({
         )}
         {!disponible && (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-900/45 backdrop-blur-[1px]">
-            <span className="rounded-full bg-slate-900/90 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-white shadow">
+            <span className="rounded-full bg-slate-900/90 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-white shadow">
               Agotado
             </span>
           </div>

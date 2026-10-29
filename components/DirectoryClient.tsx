@@ -326,13 +326,13 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           {/* Micro Pilares de Servicio */}
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-5 text-[11px] font-bold text-stone-600">
             <span className="flex items-center gap-1.5">
-              <span className="text-[#EA580C]">⚡</span> Retiro sin filas en local
+              <span className="text-[#C2410C]">⚡</span> Retiro sin filas en local
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-[#EA580C]">📲</span> Pedido directo por WhatsApp
+              <span className="text-[#C2410C]">📲</span> Pedido directo por WhatsApp
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-[#EA580C]">💳</span> Efectivo o CuentaRUT
+              <span className="text-[#C2410C]">💳</span> Efectivo o CuentaRUT
             </span>
           </div>
         </div>
@@ -530,7 +530,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 setSectorActivo("Todos");
                 setSoloAbiertos(false);
               }}
-              className="px-3 py-1.5 rounded-full text-[11px] font-bold text-stone-500 hover:text-[#EA580C] hover:bg-orange-50 transition whitespace-nowrap flex items-center gap-1"
+              className="px-3 py-1.5 rounded-full text-[11px] font-bold text-stone-500 hover:text-[#C2410C] hover:bg-orange-50 transition whitespace-nowrap flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C]"
             >
               <X className="h-3 w-3" />
               <span>Limpiar filtros</span>
@@ -669,7 +669,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
             {/* Narrativa Editorial */}
             <div className="lg:col-span-6 space-y-4">
-              <span className="text-[11px] font-black uppercase tracking-[0.25em] text-[#EA580C]">
+              <span className="text-[11px] font-black uppercase tracking-[0.25em] text-orange-400">
                 GASTRONOMÍA LOCAL CON IDENTIDAD
               </span>
               <h2 className="font-display text-3xl sm:text-5xl text-white tracking-wide uppercase leading-tight">
@@ -702,7 +702,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/70 border border-stone-300/40">
-              <div className="w-11 h-11 rounded-full bg-[#EA580C]/10 text-[#EA580C] flex items-center justify-center shrink-0">
+              <div className="w-11 h-11 rounded-full bg-orange-100 text-[#C2410C] flex items-center justify-center shrink-0">
                 <Store className="h-6 w-6" />
               </div>
               <div>
@@ -753,7 +753,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             <a
               href="#directorio-locales"
               onClick={scrollHaciaId("directorio-locales")}
-              className="hover:text-[#EA580C] transition"
+              className="hover:text-[#C2410C] transition"
             >
               NUESTROS LOCALES
             </a>
@@ -761,7 +761,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               <a
                 href="#ofertas-hoy"
                 onClick={scrollHaciaId("ofertas-hoy")}
-                className="hover:text-[#EA580C] transition"
+                className="hover:text-[#C2410C] transition"
               >
                 OFERTAS DEL DÍA
               </a>
@@ -769,11 +769,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             <a
               href="#historia-comuna"
               onClick={scrollHaciaId("historia-comuna")}
-              className="hover:text-[#EA580C] transition"
+              className="hover:text-[#C2410C] transition"
             >
               SABORES LOCALES
             </a>
-            <Link href="/superadmin" className="hover:text-[#EA580C] transition">
+            <Link href="/superadmin" className="hover:text-[#C2410C] transition">
               PANEL ADMIN
             </Link>
           </div>

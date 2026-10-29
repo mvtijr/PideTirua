@@ -234,7 +234,7 @@ export default function ModalCierreCaja({
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-xs">
                       <Banknote className="h-4 w-4" />
                     </span>
-                    <span className="tabular-nums rounded-full bg-emerald-100 border border-emerald-200 px-2 py-0.5 text-[10px] font-extrabold text-emerald-800">
+                    <span className="tabular-nums rounded-full bg-emerald-100 border border-emerald-200 px-2 py-0.5 text-[11px] font-extrabold text-emerald-800">
                       {pedidosEfectivo.length} pedidos
                     </span>
                   </div>
@@ -252,7 +252,7 @@ export default function ModalCierreCaja({
                     <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-600 text-white shadow-xs">
                       <CreditCard className="h-4 w-4" />
                     </span>
-                    <span className="tabular-nums rounded-full bg-sky-100 border border-sky-200 px-2 py-0.5 text-[10px] font-extrabold text-sky-800">
+                    <span className="tabular-nums rounded-full bg-sky-100 border border-sky-200 px-2 py-0.5 text-[11px] font-extrabold text-sky-800">
                       {pedidosTransferencia.length} pedidos
                     </span>
                   </div>

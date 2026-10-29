@@ -263,7 +263,7 @@ export default function ModalPersonalizarPlato({
                     </p>
                   </div>
                   <span
-                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider ${
+                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider ${
                       esUnica
                         ? "bg-amber-100 text-amber-800 border border-amber-200"
                         : "bg-stone-100 text-stone-600 border border-stone-200"

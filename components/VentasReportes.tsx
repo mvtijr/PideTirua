@@ -236,7 +236,7 @@ export default function VentasReportes({
         >
           <RefreshCw
             className={`h-3.5 w-3.5 ${
-              recargando || cargando ? "animate-spin text-[#EA580C]" : ""
+              recargando || cargando ? "animate-spin text-[#C2410C]" : ""
             }`}
           />
           <span className="hidden sm:inline">Actualizar</span>
@@ -245,7 +245,7 @@ export default function VentasReportes({
 
       {cargando ? (
         <div className="mt-6 flex flex-col items-center justify-center py-12 text-center text-stone-500">
-          <Loader2 className="h-8 w-8 animate-spin text-[#EA580C]" />
+          <Loader2 className="h-8 w-8 animate-spin text-[#C2410C]" />
           <p className="mt-2 text-xs font-bold">Cargando reporte de ventas...</p>
         </div>
       ) : (

@@ -158,7 +158,7 @@ export default function SearchInput({
             {/* Locales Encontrados */}
             {resultadosEnVivo.locales.length > 0 && (
               <div>
-                <span className="block px-3 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                <span className="block px-3 py-1 text-[11px] font-black uppercase tracking-wider text-slate-600">
                   Restaurantes y Locales
                 </span>
                 <div className="space-y-1">
@@ -179,7 +179,7 @@ export default function SearchInput({
                           <p className="text-xs font-black text-slate-900 group-hover:text-amber-700 truncate">
                             {loc.nombre}
                           </p>
-                          <p className="text-[10px] text-slate-500 truncate">
+                          <p className="text-[11px] text-slate-600 truncate">
                             {loc.rubro} · {loc.ubicacion}
                           </p>
                         </div>
@@ -187,7 +187,7 @@ export default function SearchInput({
 
                       <div className="flex items-center gap-1.5 shrink-0 ml-2">
                         <span
-                          className={`rounded-full px-2 py-0.5 text-[9px] font-extrabold ${
+                          className={`rounded-full px-2 py-0.5 text-[11px] font-extrabold ${
                             loc.abierto
                               ? "bg-emerald-100 text-emerald-800"
                               : "bg-rose-100 text-rose-800"
@@ -206,7 +206,7 @@ export default function SearchInput({
             {/* Platos Encontrados */}
             {resultadosEnVivo.platos.length > 0 && (
               <div className="border-t border-slate-100 pt-2">
-                <span className="block px-3 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400">
+                <span className="block px-3 py-1 text-[11px] font-black uppercase tracking-wider text-slate-600">
                   Platos Disponibles en la Carta
                 </span>
                 <div className="space-y-1">
@@ -243,7 +243,7 @@ export default function SearchInput({
                           <p className="text-xs font-bold text-slate-900 group-hover:text-amber-700 truncate">
                             {item.producto.nombre}
                           </p>
-                          <p className="text-[10px] text-slate-500 truncate">
+                          <p className="text-[11px] text-slate-600 truncate">
                             en {item.localNombre}
                           </p>
                         </div>

@@ -340,7 +340,7 @@ export default function RecomendadorPlatosModal({
               <Dices className="h-7 w-7 animate-spin-slow" />
             </div>
             <div>
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-white">
                 <Sparkles className="h-3 w-3" />
                 Asistente Gastronómico
               </span>
@@ -683,7 +683,7 @@ export default function RecomendadorPlatosModal({
                             nombre={item.producto.nombre}
                           />
                           {item.producto.es_oferta && (
-                            <span className="absolute top-1 right-1 flex items-center gap-0.5 rounded-full bg-rose-600 px-1.5 py-0.5 text-[9px] font-black text-white">
+                            <span className="absolute top-1 right-1 flex items-center gap-0.5 rounded-full bg-rose-600 px-2 py-0.5 text-[11px] font-black text-white">
                               <Flame className="h-2.5 w-2.5" />
                               Promo
                             </span>

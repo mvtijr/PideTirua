@@ -517,7 +517,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                       : `🔴 Cerrado • Abre hoy a las ${horaApertura} hrs`}
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 border border-stone-200 px-2.5 py-0.5 text-xs font-bold text-stone-700">
-                    <MapPin className="h-3 w-3 text-[#EA580C]" />
+                    <MapPin className="h-3 w-3 text-[#C2410C]" />
                     {local.ubicacion}
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-xs font-bold text-amber-900">
@@ -604,7 +604,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                   <AlertTriangle className="h-5 w-5" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="inline-block rounded-md bg-amber-200/90 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-amber-950">
+                  <span className="inline-block rounded-md bg-amber-200/90 px-2 py-0.5 text-[11px] font-black uppercase tracking-wider text-amber-950">
                     Aviso del Local en Vivo
                   </span>
                   <p className="mt-1 font-body text-xs sm:text-sm font-bold leading-snug text-amber-950">
@@ -641,12 +641,12 @@ export default function MenuClient({ local }: MenuClientProps) {
                   <span className="block font-display text-xs uppercase tracking-wider text-stone-900 leading-none">
                     Carta Digital Oficial • {local.nombre}
                   </span>
-                  <span className="block text-[10px] font-semibold text-stone-600 mt-0.5">
+                  <span className="block text-[11px] font-semibold text-stone-600 mt-0.5">
                     Retiro en local y consumo en mesa
                   </span>
                 </div>
               </div>
-              <span className="rounded-full bg-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-stone-700 shadow-2xs border border-stone-200 shrink-0">
+              <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-stone-700 shadow-2xs border border-stone-200 shrink-0">
                 Directo WhatsApp
               </span>
             </div>
@@ -731,7 +731,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                         {categoria.nombre}
                       </h2>
                       {pausada && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 border border-slate-300 px-2 py-0.5 text-[10px] font-black uppercase text-slate-700">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 border border-slate-300 px-2 py-0.5 text-[11px] font-black uppercase text-slate-700">
                           ⏸️ Pausada por hoy
                         </span>
                       )}
@@ -871,12 +871,12 @@ export default function MenuClient({ local }: MenuClientProps) {
                     ? "En cocina preparando..."
                     : "Comanda en preparación"}
                 </span>
-                <span className="block text-[10px] font-bold text-[#EA580C] tabular-nums mt-0.5">
+                <span className="block text-[11px] font-bold text-[#C2410C] tabular-nums mt-0.5">
                   #{pedidoActivo.codigoRetiro} • Toca para ver recibo
                 </span>
               </div>
             </div>
-            <span className="rounded-full bg-stone-100 px-2 py-1 text-[10px] font-black uppercase tracking-wider text-stone-700">
+            <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-stone-700">
               Ver ➔
             </span>
           </button>

@@ -3752,7 +3752,7 @@ export default function AdminLocalClient({
                                     [producto.id]: updated,
                                   }));
                                 }}
-                                className="h-4 w-4 rounded border-amber-300 text-[#EA580C] focus:ring-[#EA580C]"
+                                className="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
                               />
                               <Flame className="h-3.5 w-3.5 text-[#C2410C]" />
                               <span>¿Activar como Oferta del Día?</span>
