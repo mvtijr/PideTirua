@@ -205,9 +205,9 @@ export default function ModalCierreCaja({
             type="button"
             onClick={onClose}
             aria-label="Cerrar modal de cierre de caja"
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"
+            className="flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -293,9 +293,9 @@ export default function ModalCierreCaja({
                 <button
                   type="button"
                   onClick={() => void cargarPedidos()}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 transition-colors"
+                  className="inline-flex min-h-[44px] items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-bold text-stone-700 hover:bg-stone-50 transition shadow-2xs"
                 >
-                  <RefreshCw className="h-3.5 w-3.5" />
+                  <RefreshCw className="h-4 w-4 text-stone-600" />
                   <span>Actualizar cifras</span>
                 </button>
               </div>

@@ -647,6 +647,86 @@ export default function CartDrawer({
                 </p>
               </div>
 
+              {/* Si pagó con Transferencia Bancaria, mostrar CuentaRUT en primer plano con botón de copiado */}
+              {pedidoConfirmado.metodoPago === "Transferencia" && tieneDatosBancarios && (
+                <div className="rounded-2xl border-2 border-emerald-400 bg-emerald-50/90 p-4 text-slate-900 shadow-md space-y-2.5">
+                  <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-emerald-950">
+                      <Landmark className="h-4 w-4 text-emerald-700" />
+                      Datos para Transferir (Total: {formatCLP(pedidoConfirmado.total)})
+                    </span>
+                    <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-extrabold text-emerald-900">
+                      CuentaRUT
+                    </span>
+                  </div>
+
+                  <dl className="grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2">
+                    {local.banco && (
+                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Banco</dt>
+                        <dd className="font-bold text-slate-900">{local.banco}</dd>
+                      </div>
+                    )}
+                    {local.tipo_cuenta && (
+                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Tipo de cuenta</dt>
+                        <dd className="font-bold text-slate-900">{local.tipo_cuenta}</dd>
+                      </div>
+                    )}
+                    {local.numero_cuenta && (
+                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">N° de cuenta</dt>
+                        <dd className="font-black text-slate-900 tabular-nums">{local.numero_cuenta}</dd>
+                      </div>
+                    )}
+                    {local.rut_titular && (
+                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">RUT Titular</dt>
+                        <dd className="font-black text-slate-900 tabular-nums">{local.rut_titular}</dd>
+                      </div>
+                    )}
+                    {local.nombre_titular && (
+                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100 sm:col-span-2">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Nombre del Titular</dt>
+                        <dd className="font-bold text-slate-900">{local.nombre_titular}</dd>
+                      </div>
+                    )}
+                    {local.email_transferencia && (
+                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100 sm:col-span-2">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Correo para comprobante</dt>
+                        <dd className="font-semibold text-slate-800">{local.email_transferencia}</dd>
+                      </div>
+                    )}
+                  </dl>
+
+                  <button
+                    type="button"
+                    onClick={handleCopiarDatosBancarios}
+                    className={`mt-2 flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-black shadow-xs transition active:scale-[0.99] ${
+                      datosCopiados
+                        ? "border-emerald-600 bg-emerald-700 text-white"
+                        : "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
+                    }`}
+                  >
+                    {datosCopiados ? (
+                      <>
+                        <CheckCircle2 className="h-4 w-4 shrink-0" />
+                        <span>¡Datos bancarios copiados al portapapeles!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4 shrink-0" />
+                        <span>📋 Copiar todos los datos de transferencia</span>
+                      </>
+                    )}
+                  </button>
+
+                  <p className="text-[11px] text-emerald-950 font-medium text-center">
+                    💡 Adjunta el comprobante de transferencia en el chat de WhatsApp a continuación.
+                  </p>
+                </div>
+              )}
+
               {/* Stepper Visual de Estado en Vivo (Sincronizado con Monitor de Cocina) */}
               <div className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
@@ -832,78 +912,7 @@ export default function CartDrawer({
                 </div>
               </div>
 
-              {/* Si pagó con Transferencia Bancaria, mostrar CuentaRUT con botón de copiado */}
-              {pedidoConfirmado.metodoPago === "Transferencia" && tieneDatosBancarios && (
-                <div className="rounded-2xl border border-emerald-300/80 bg-emerald-50/70 p-4 text-slate-900 shadow-xs space-y-2.5">
-                  <div className="flex items-center justify-between border-b border-emerald-200/80 pb-2">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-emerald-900">
-                      <Landmark className="h-4 w-4 text-emerald-700" />
-                      Datos para Transferir (CuentaRUT)
-                    </span>
-                    <span className="rounded-full bg-emerald-200/80 px-2 py-0.5 text-[10px] font-extrabold text-emerald-900">
-                      Directo
-                    </span>
-                  </div>
 
-                  <dl className="grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
-                    {local.banco && (
-                      <div className="bg-white/85 p-2 rounded-lg">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">Banco</dt>
-                        <dd className="font-bold text-slate-900">{local.banco}</dd>
-                      </div>
-                    )}
-                    {local.tipo_cuenta && (
-                      <div className="bg-white/85 p-2 rounded-lg">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">Tipo de cuenta</dt>
-                        <dd className="font-bold text-slate-900">{local.tipo_cuenta}</dd>
-                      </div>
-                    )}
-                    {local.numero_cuenta && (
-                      <div className="bg-white/85 p-2 rounded-lg">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">N° de cuenta</dt>
-                        <dd className="font-black text-slate-900 tabular-nums">{local.numero_cuenta}</dd>
-                      </div>
-                    )}
-                    {local.rut_titular && (
-                      <div className="bg-white/85 p-2 rounded-lg">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">RUT</dt>
-                        <dd className="font-black text-slate-900 tabular-nums">{local.rut_titular}</dd>
-                      </div>
-                    )}
-                    {local.nombre_titular && (
-                      <div className="bg-white/85 p-2 rounded-lg sm:col-span-2">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">Titular</dt>
-                        <dd className="font-bold text-slate-900">{local.nombre_titular}</dd>
-                      </div>
-                    )}
-                  </dl>
-
-                  <button
-                    type="button"
-                    onClick={handleCopiarDatosBancarios}
-                    className={`mt-2 flex w-full items-center justify-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-extrabold shadow-xs transition active:scale-[0.99] ${
-                      datosCopiados
-                        ? "border-emerald-600 bg-emerald-700 text-white"
-                        : "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
-                    }`}
-                  >
-                    {datosCopiados ? (
-                      <>
-                        <CheckCircle2 className="h-4 w-4" />
-                        <span>✓ ¡Datos bancarios copiados!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-4 w-4 shrink-0" />
-                        <span>📋 Copiar datos de transferencia</span>
-                      </>
-                    )}
-                  </button>
-                  <p className="text-[11px] text-emerald-900 text-center font-medium">
-                    Envía el comprobante al chat de WhatsApp al realizar el pago.
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* Pie con botón para volver a la carta */}
@@ -1044,10 +1053,10 @@ export default function CartDrawer({
                               <button
                                 type="button"
                                 onClick={() => onEditarItem(item)}
-                                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-[#EA580C] px-2.5 py-1 text-xs font-bold transition active:scale-95"
+                                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#C2410C] px-3 py-2 text-xs font-bold transition active:scale-95"
                                 title="Modificar salsas o agregados de este plato"
                               >
-                                <Pencil className="h-3 w-3" />
+                                <Pencil className="h-3.5 w-3.5" />
                                 <span>Modificar extras / salsas</span>
                               </button>
                             </div>
@@ -1055,7 +1064,7 @@ export default function CartDrawer({
 
                           <p className="mt-0.5 text-xs font-medium text-on-surface-variant tabular-nums">
                             {esPromo && (
-                              <span className="mr-1 text-[11px] text-slate-400 line-through">
+                              <span className="mr-1 text-[11px] text-stone-500 line-through">
                                 {formatCLP(producto.precio)}
                               </span>
                             )}
@@ -1075,7 +1084,7 @@ export default function CartDrawer({
                           <button
                             type="button"
                             onClick={() => onDisminuir(itemKey)}
-                            className={`flex min-h-[44px] min-w-[40px] h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-lg active:scale-90 transition ${theme.cardMinusBtn}`}
+                            className={`flex min-h-[44px] min-w-[44px] h-11 w-11 sm:h-10 sm:w-10 items-center justify-center rounded-lg active:scale-90 transition ${theme.cardMinusBtn}`}
                             aria-label="Disminuir cantidad"
                           >
                             <Minus className="h-4 w-4" />
@@ -1092,7 +1101,7 @@ export default function CartDrawer({
                                 ? onIncrementarItem(item)
                                 : onAgregar(producto)
                             }
-                            className={`flex min-h-[44px] min-w-[40px] h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-lg active:scale-90 transition ${theme.cardPlusBtn}`}
+                            className={`flex min-h-[44px] min-w-[44px] h-11 w-11 sm:h-10 sm:w-10 items-center justify-center rounded-lg active:scale-90 transition ${theme.cardPlusBtn}`}
                             aria-label="Aumentar cantidad"
                           >
                             <Plus className="h-4 w-4" />
@@ -1317,113 +1326,19 @@ export default function CartDrawer({
                   })}
                 </div>
 
-                {/* Tarjeta visual destacada con Datos Bancarios si selecciona Transferencia Bancaria */}
+                {/* Indicador de flujo para Transferencia Bancaria */}
                 {metodoPago === "Transferencia Bancaria" && (
-                  <div className="mt-3 space-y-2.5">
-                    {tieneDatosBancarios && (
-                      <div className="rounded-2xl border border-emerald-300/80 bg-emerald-50/70 p-3.5 text-slate-900 shadow-xs">
-                        <div className="mb-2.5 flex items-center justify-between gap-2 border-b border-emerald-200/80 pb-2">
-                          <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-emerald-900">
-                            <Landmark className="h-4 w-4 text-emerald-700" />
-                            Datos para Transferencia
-                          </span>
-                          <span className="rounded-full bg-emerald-200/80 px-2 py-0.5 text-[10px] font-extrabold text-emerald-900">
-                            {local.nombre}
-                          </span>
-                        </div>
-
-                        <dl className="grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2">
-                          {local.banco && (
-                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:block">
-                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                                Banco
-                              </dt>
-                              <dd className="font-extrabold text-slate-900">
-                                {local.banco}
-                              </dd>
-                            </div>
-                          )}
-                          {local.tipo_cuenta && (
-                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:block">
-                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                                Tipo de cuenta
-                              </dt>
-                              <dd className="font-extrabold text-slate-900">
-                                {local.tipo_cuenta}
-                              </dd>
-                            </div>
-                          )}
-                          {local.numero_cuenta && (
-                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:block">
-                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                                N° de cuenta
-                              </dt>
-                              <dd className="font-mono font-extrabold text-slate-900">
-                                {local.numero_cuenta}
-                              </dd>
-                            </div>
-                          )}
-                          {local.rut_titular && (
-                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:block">
-                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                                RUT
-                              </dt>
-                              <dd className="font-mono font-extrabold text-slate-900">
-                                {local.rut_titular}
-                              </dd>
-                            </div>
-                          )}
-                          {local.nombre_titular && (
-                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:col-span-2 sm:block">
-                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                                Titular
-                              </dt>
-                              <dd className="font-extrabold text-slate-900">
-                                {local.nombre_titular}
-                              </dd>
-                            </div>
-                          )}
-                          {local.email_transferencia && (
-                            <div className="flex justify-between gap-2 rounded-lg bg-white/85 px-2.5 py-1.5 sm:col-span-2 sm:block">
-                              <dt className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                                Correo
-                              </dt>
-                              <dd className="font-semibold text-slate-800">
-                                {local.email_transferencia}
-                              </dd>
-                            </div>
-                          )}
-                        </dl>
-
-                        <button
-                          type="button"
-                          onClick={handleCopiarDatosBancarios}
-                          className={`mt-3 flex w-full items-center justify-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-extrabold shadow-xs transition active:scale-[0.99] ${
-                            datosCopiados
-                              ? "border-emerald-600 bg-emerald-600 text-white"
-                              : "border-emerald-600/30 bg-white text-emerald-900 hover:bg-emerald-100/70"
-                          }`}
-                        >
-                          {datosCopiados ? (
-                            <>
-                              <CheckCircle2 className="h-4 w-4 shrink-0" />
-                              <span>¡Datos bancarios copiados!</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="h-4 w-4 shrink-0" />
-                              <span>📋 Copiar datos de transferencia</span>
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Texto recordatorio en color amigable */}
-                    <div className="rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2.5 text-xs font-semibold leading-relaxed text-sky-950">
-                      💡 Recuerda adjuntar el comprobante o captura de la
-                      transferencia en el chat de WhatsApp que se abrirá al
-                      confirmar el pedido.
+                  <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-3.5 space-y-2 text-xs">
+                    <div className="flex items-center gap-2 text-emerald-900 font-extrabold">
+                      <Landmark className="h-4 w-4 text-emerald-700 shrink-0" />
+                      <span>Transferencia directa CuentaRUT</span>
+                    </div>
+                    <p className="text-stone-600 leading-relaxed font-medium">
+                      Al presionar <strong>Enviar pedido a WhatsApp</strong>, registraremos tu comanda en cocina y te mostraremos de inmediato los datos de la CuentaRUT de <strong>{local.nombre}</strong> con botón de copiado rápido para que transfieras tranquilamente.
+                    </p>
+                    <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                      <span>Sin comisiones intermediarias · Tu pedido queda reservado en cocina</span>
                     </div>
                   </div>
                 )}

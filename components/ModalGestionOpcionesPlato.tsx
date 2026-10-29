@@ -188,7 +188,12 @@ export default function ModalGestionOpcionesPlato({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-opciones-plato-titulo"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
       {/* Backdrop */}
       <div
         onClick={onClose}
@@ -204,7 +209,10 @@ export default function ModalGestionOpcionesPlato({
               <Sparkles className="h-5 w-5" />
             </span>
             <div>
-              <h3 className="font-display text-lg font-bold uppercase tracking-wide text-stone-900 leading-tight">
+              <h3
+                id="modal-opciones-plato-titulo"
+                className="font-display text-lg font-bold uppercase tracking-wide text-stone-900 leading-tight"
+              >
                 ⚙️ Personalización y Extras del Plato
               </h3>
               <p className="text-xs font-semibold text-stone-500 truncate max-w-xs sm:max-w-md">
@@ -215,9 +223,10 @@ export default function ModalGestionOpcionesPlato({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"
+            aria-label="Cerrar modal de opciones"
+            className="flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-full bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"
           >
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </button>
         </div>
 
@@ -258,9 +267,10 @@ export default function ModalGestionOpcionesPlato({
                     <button
                       type="button"
                       onClick={() => handleEliminarGrupo(gIdx)}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-rose-600 hover:text-rose-800 hover:underline"
+                      className="inline-flex min-h-[44px] items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition"
+                      aria-label={`Eliminar grupo ${gIdx + 1}`}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-4 w-4" />
                       <span>Eliminar grupo</span>
                     </button>
                   </div>
@@ -346,10 +356,11 @@ export default function ModalGestionOpcionesPlato({
                         <button
                           type="button"
                           onClick={() => handleEliminarItem(gIdx, iIdx)}
-                          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-stone-400 hover:bg-rose-50 hover:text-rose-600 transition"
+                          className="flex min-h-[44px] min-w-[44px] h-11 w-11 shrink-0 items-center justify-center rounded-xl text-stone-400 hover:bg-rose-50 hover:text-rose-600 transition"
                           title="Eliminar opción"
+                          aria-label={`Eliminar opción ${item.nombre || iIdx + 1}`}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     ))}
@@ -357,9 +368,9 @@ export default function ModalGestionOpcionesPlato({
                     <button
                       type="button"
                       onClick={() => handleAgregarItem(gIdx)}
-                      className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-amber-700 hover:text-amber-900 hover:underline"
+                      className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border border-amber-300/80 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-900 hover:bg-amber-100 transition active:scale-95"
                     >
-                      <Plus className="h-3.5 w-3.5" />
+                      <Plus className="h-4 w-4" />
                       <span>+ Agregar otra opción a este grupo</span>
                     </button>
                   </div>

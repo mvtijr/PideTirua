@@ -129,9 +129,10 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
                 type="button"
                 onClick={() => onOpenQr(local)}
                 title={`Ver código QR de ${local.nombre}`}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-stone-900 shadow transition hover:bg-stone-100"
+                aria-label={`Ver código QR de ${local.nombre}`}
+                className="inline-flex min-h-[40px] min-w-[40px] h-10 w-10 sm:h-9 sm:w-9 sm:min-h-[36px] sm:min-w-[36px] items-center justify-center rounded-full bg-white text-stone-900 shadow-md transition hover:bg-stone-100 active:scale-95"
               >
-                <QrCode className="h-3.5 w-3.5" />
+                <QrCode className="h-4 w-4" />
               </button>
             )}
           </div>

@@ -358,17 +358,17 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   type="button"
                   onClick={() => scrollPromos("izq")}
                   aria-label="Ver ofertas anteriores"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-300 bg-white text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95"
+                  className="flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-full border border-stone-300 bg-white text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <ChevronLeft className="h-5 w-5" />
                 </button>
                 <button
                   type="button"
                   onClick={() => scrollPromos("der")}
                   aria-label="Ver siguientes ofertas"
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-stone-300 bg-white text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95"
+                  className="flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-full border border-stone-300 bg-white text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95"
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  <ChevronRight className="h-5 w-5" />
                 </button>
               </div>
             )}
@@ -411,7 +411,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   <div className="mt-3 pt-2.5 border-t border-stone-100 flex items-center justify-between">
                     <div>
                       {oferta.precioOferta < oferta.precioOriginal && (
-                        <span className="block text-[10px] font-bold text-stone-400 line-through tabular-nums">
+                        <span className="block text-xs font-bold text-stone-500 line-through tabular-nums">
                           {formatCLP(oferta.precioOriginal)}
                         </span>
                       )}
@@ -422,7 +422,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
                     <Link
                       href={`/${oferta.localSlug}`}
-                      className="rounded-full bg-[#18181B] hover:bg-[#EA580C] text-white text-[10px] font-black uppercase tracking-wider px-3.5 py-1.5 transition shadow-xs"
+                      className="inline-flex min-h-[36px] items-center justify-center rounded-full bg-[#18181B] hover:bg-[#EA580C] text-white text-xs font-black uppercase tracking-wider px-4 py-2 transition shadow-xs active:scale-95"
                     >
                       PEDIR
                     </Link>

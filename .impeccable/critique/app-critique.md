@@ -1,0 +1,110 @@
+Method: dual-agent (A: c3f82fbd-7d14-41f1-ae75-82fb1aff2cdf · B: c71dfc2e-16f3-4fdd-ad5a-1d7006d637ca)
+
+# Design Critique — PideTirúa
+
+## Design Health Score
+
+| # | Heurística | Puntaje | Problema Clave |
+|---|------------|:-------:|----------------|
+| 1 | **Visibilidad del Estado del Sistema** | 3.5/4 | Badges en tiempo real claros; al enviar pedido el drawer cierra en 1.2s sin recibo web intermedio |
+| 2 | **Coincidencia entre Sistema y Mundo Real** | 4.0/4 | Lenguaje 100% tiruano: CuentaRUT, colaciones, retiro en local, mesa, arqueo de caja |
+| 3 | **Control y Libertad del Usuario** | 3.0/4 | Cierre con Escape y backdrop click; falta edición directa de modificadores de un plato en carrito |
+| 4 | **Consistencia y Estándares** | 3.0/4 | Tipografía y botones unificados; múltiples patrones simultáneos de navegación en la portada |
+| 5 | **Prevención de Errores** | 3.5/4 | Bloqueo si el local está cerrado; teléfono de cliente opcional inhabilita aviso WhatsApp en KDS |
+| 6 | **Reconocimiento antes que Recuerdo** | 3.5/4 | Carrito desglosa extras y datos bancarios; la tarjeta de la carta solo indica "X agregados" |
+| 7 | **Flexibilidad y Eficiencia de Uso** | 3.5/4 | Prellenado localStorage ágil; botón dual en KDS (marca Listo y abre WhatsApp en 1 clic) |
+| 8 | **Diseño Estético y Minimalista** | 2.5/4 | Carta y KDS impecables; sobrecarga de stickers, vitrina radial y 3D en la portada principal |
+| 9 | **Reconocimiento y Recuperación de Errores** | 3.0/4 | Mensajes de validación inline claros; falta enlace de rescate si el navegador bloquea pop-ups |
+| 10 | **Ayuda y Documentación** | 3.0/4 | Microcopy bancario excelente; falta guía visual de 3 pasos ("Cómo pedir") para turistas en el Hero |
+| **Total** | | **32.5/40** | **Buena / Sólida (Banda Alta, 81%)** |
+
+---
+
+## Design Specificity Verdict
+
+**PideTirúa posee un ADN de diseño profundamente hiperlocal y específico.** No es una plantilla genérica reconvertida ni un clon de aplicaciones corporativas de delivery metropolitano.
+
+### Evaluación Cualitativa (LLM)
+La plataforma resuelve de raíz la dinámica real de Tirúa y Quidico:
+- **Cero comisiones abusivas:** Despliegue nativo de datos de transferencia CuentaRUT (RUT, cuenta, titular, correo) con copiado 1-tap y pago en efectivo al retirar.
+- **Logística honesta:** Enfoque exclusivo en retiro presencial (take-away) y consumo en mesa, sin prometer repartidores que no existen en la comuna.
+- **Canal universal WhatsApp:** Formateo estructurado de comandas con límite de tolerancia (3.5s timeout) para resiliencia en conexiones rurales.
+- **Monitor de cocina KDS práctico:** Síntesis sonora nativa con Web Audio API (timbre agradable de dos tonos sin depender de archivos de audio de red) y notificación en 1 clic.
+
+### Escaneo Determinista (Detector)
+- **Total de Incidencias:** 3 advertencias (`overused-font`) sobre `Montserrat`.
+- **Análisis de Falso Positivo:** Descartado como falso positivo justificado en `PRODUCT.md`. Los titulares usan **Bebas Neue** (identidad condensada de pizarra gastronómica), mientras que `Montserrat` se reserva como fuente de alta legibilidad funcional para precios, opciones e ingredientes bajo la luz solar directa.
+- **Pruebas de Rendimiento:** 0 loops en canvas de fondo (`patternRefreshInterval = 0`), lazy loading con `IntersectionObserver` en videos y First Load JS de apenas 103 kB.
+
+### Visual Overlays
+El escaneo determinista se ejecutó en modo CLI estático sobre el árbol de componentes web sin necesidad de inyección de servidor live adicional.
+
+---
+
+## Impresión General
+Una experiencia culinaria auténtica, rápida y sumamente respetuosa de los comerciantes y comensales de Tirúa. La carta móvil, el drawer de checkout con CuentaRUT y el monitor KDS de cocina son ejemplos brillantes de diseño centrado en el contexto real. La mayor oportunidad de mejora se concentra en **despejar la sobrecarga visual de la página principal (Home)** y **otorgar un recibo web de seguimiento post-checkout** para que el comensal no quede en el vacío al pasar a WhatsApp.
+
+---
+
+## Aspectos Destacados
+1. **Módulo de Transferencia Bancaria Directa:** Presentar la CuentaRUT con botón de copiado rápido y recordatorio de comprobante resuelve con elegancia la mayor fricción de pagos en comunas costeras.
+2. **KDS con Síntesis de Audio y Notificador 1-Clic:** El timbre sintetizado y la automatización que marca el pedido como "Listo" mientras abre WhatsApp con mensaje personalizado es una solución de primer nivel para cocinas ocupadas.
+3. **Resiliencia ante Señal Débil:** El AbortController de 3.5s asegura que, incluso si la conexión móvil falla momentáneamente, el carrito abra WhatsApp con el pedido íntegro.
+
+---
+
+## Problemas Prioritarios
+
+### [P0] Teléfono Opcional Invalida el Notificador en Cocina
+- **Qué:** En `CartDrawer.tsx`, el campo de teléfono del cliente es opcional.
+- **Por qué importa:** Si un cliente pide para retiro sin ingresar teléfono, el cocinero en el KDS no puede presionar *"📲 Avisar Listo por WhatsApp"*, perdiendo la principal ventaja operativa de la cocina.
+- **Cómo solucionarlo:** Hacer obligatorio el campo de teléfono cuando la modalidad sea "Retiro en local", con el microcopy: *"Tu número es necesario para avisarte en cuanto tu comida esté caliente y lista"*.
+- **Comando sugerido:** `/impeccable harden`
+
+### [P1] Sobrecarga Visual y Redundancia en la Portada Principal
+- **Qué:** `DirectoryClient.tsx` acumula vitrina radial interactiva, Coverflow 3D de 470px, stepper de comunas y banners decorativos antes del listado de locales.
+- **Por qué importa:** Provoca fricción cognitiva y ralentiza la tarea principal del comensal hambriento: encontrar un restaurante y ver su menú.
+- **Cómo solucionarlo:** Simplificar la portada con un carrusel editorial horizontal ligero, llevando las tarjetas de restaurantes al primer scroll visual.
+- **Comando sugerido:** `/impeccable distill`
+
+### [P2] Vacío Informativo Post-Checkout (Efecto "Agujero Negro")
+- **Qué:** Al presionar *"Enviar pedido a WhatsApp"*, el drawer simplemente se cierra tras 1.2 segundos sin dejar confirmación en la web.
+- **Por qué importa:** Si el navegador bloquea la ventana emergente o el cliente vuelve a la web, desconoce si su comanda `#XXXX` fue procesada.
+- **Cómo solucionarlo:** Mostrar una pantalla intermedia accesible de *"¡Comanda en Preparación!"* con el resumen, el código de retiro y un botón de auxilio (*"¿No abrió WhatsApp? Reintentar aquí"*).
+- **Comando sugerido:** `/impeccable polish`
+
+### [P3] Edición de Modificadores Directa en el Carrito
+- **Qué:** Si un cliente desea cambiar la salsa o extra de un plato ya agregado, debe eliminarlo del carrito y reconfigurarlo en la carta.
+- **Por qué importa:** Genera fricción en pedidos con múltiples platos o agregados familiares.
+- **Cómo solucionarlo:** Permitir que al pulsar el ítem dentro del carrito se reabra `ModalPersonalizarPlato` con sus opciones actuales precargadas.
+- **Comando sugerido:** `/impeccable polish`
+
+---
+
+## Pruebas de Persona (Red Flags)
+
+### Valeria (Turista en la playa con señal 4G intermitente)
+- **Bandera Roja:** La portada intenta precargar animaciones y videos 3D que consumen datos móviles y generan saltos de scroll mientras busca dónde almorzar bajo el sol.
+- **Punto Fuerte:** El texto `#18181B` sobre `#FAF8F5` ofrece excelente contraste solar, y el timeout de 3.5s garantiza que su pedido pase a WhatsApp aunque el internet oscile.
+
+### Don Carlos (Dueño y cocinero con el local lleno a las 13:30)
+- **Bandera Roja:** Cuando entran comandas sin número de teléfono, no puede usar el botón verde de aviso a WhatsApp y debe esperar a que el cliente pregunte en el mostrador.
+- **Punto Fuerte:** El cierre de caja diario en 1 toque y el timbre sonoro limpio le permiten no perder pedidos sin tener que mirar la pantalla permanentemente.
+
+### Gonzalo (Comensal habitual de Tirúa que pide almuerzo de retiro)
+- **Bandera Roja:** Debe navegar por toda la carta cada vez, sin un atajo de *"Repetir mi último pedido"*.
+- **Punto Fuerte:** Gracias al prellenado con `localStorage`, su proceso de checkout habitual toma menos de 8 segundos.
+
+---
+
+## Observaciones Menores
+- `SearchInput.tsx` carece de `aria-label="Buscar locales o platos"` explícito (posee únicamente placeholder).
+- `ModalCierreCaja.tsx` se beneficiaría de los atributos `role="dialog"` y `aria-modal="true"`.
+- Los botones de cambio de estado en comandas podrían tener una sutil separación visual respecto al botón de WhatsApp para evitar pulsaciones erróneas con dedos húmedos.
+
+---
+
+## Preguntas para Reflexionar
+1. *¿El Coverflow 3D de la portada responde a una necesidad del comensal tiruano con hambre, o es un artefacto estético que retrasa la decisión de compra?*
+2. *¿Por qué no convertir la web post-pedido en una tarjeta viva de "Turno de Retiro" que vibre en verde cuando la cocina marque "Listo" en el KDS?*
+3. *¿Podría PideTirúa ofrecer un botón de "Repetir mi pedido de la semana pasada" para fidelizar a los trabajadores locales de Tirúa Centro?*

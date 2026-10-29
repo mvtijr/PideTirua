@@ -666,11 +666,22 @@ export default function SuperAdminClient({
         }),
       });
       const data = await res.json();
-      if (res.ok && data.ok && Array.isArray(data.locales)) {
+      if (!res.ok || !data.ok) {
+        throw new Error(data?.error || "Error al registrar pago");
+      }
+      if (Array.isArray(data.locales)) {
         setLocales(data.locales);
       }
       mostrarToast("Pago registrado con éxito");
     } catch {
+      // Revertir optimismo ante fallo de red
+      setLocales((prev) =>
+        prev.map((l) =>
+          l.slug === loc.slug
+            ? { ...l, fecha_ultimo_pago: loc.fecha_ultimo_pago }
+            : l
+        )
+      );
       mostrarToast("No se pudo registrar el pago en Supabase");
     } finally {
       setRegistrandoPagoSlug(null);
@@ -697,7 +708,10 @@ export default function SuperAdminClient({
         }),
       });
       const data = await res.json();
-      if (res.ok && data.ok && Array.isArray(data.locales)) {
+      if (!res.ok || !data.ok) {
+        throw new Error(data?.error || "Error al cambiar estado");
+      }
+      if (Array.isArray(data.locales)) {
         setLocales(data.locales);
       }
       mostrarToast(
@@ -705,6 +719,14 @@ export default function SuperAdminClient({
           ? `🟢 "${loc.nombre}" activado en el portal público`
           : `🔴 "${loc.nombre}" suspendido temporalmente`
       );
+    } catch {
+      // Revertir optimismo ante fallo de red
+      setLocales((prev) =>
+        prev.map((l) =>
+          l.slug === loc.slug ? { ...l, activo: activoActual } : l
+        )
+      );
+      mostrarToast(`⚠️ No se pudo cambiar el estado de "${loc.nombre}". Revisa tu conexión.`);
     } finally {
       setGuardandoSlug(null);
     }
@@ -736,13 +758,20 @@ export default function SuperAdminClient({
         }),
       });
       const data = await res.json();
-      if (res.ok && data.ok && Array.isArray(data.locales)) {
+      if (!res.ok || !data.ok) {
+        throw new Error(data?.error || "Error al actualizar PIN");
+      }
+      if (Array.isArray(data.locales)) {
         setLocales(data.locales);
       }
       setPinEditandoPorSlug((prev) => ({ ...prev, [loc.slug]: false }));
       setPinVisiblePorSlug((prev) => ({ ...prev, [loc.slug]: true }));
       mostrarToast(`🔑 Nuevo PIN (${pinNuevo}) guardado para "${loc.nombre}"`);
     } catch {
+      // Revertir optimismo ante fallo de red
+      setLocales((prev) =>
+        prev.map((l) => (l.slug === loc.slug ? { ...l, pin: loc.pin } : l))
+      );
       mostrarToast("No se pudo guardar el nuevo PIN");
     } finally {
       setGuardandoPinSlug(null);

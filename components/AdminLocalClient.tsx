@@ -327,6 +327,10 @@ export default function AdminLocalClient({
     Boolean(initialLocal.mensaje_emergencia)
   );
 
+  // Modal de seguridad para confirmación de Apertura / Cierre del local (Harden)
+  const [mostrarModalConfirmarEstado, setMostrarModalConfirmarEstado] =
+    useState<boolean>(false);
+
   const inputFotoNuevoRef = useRef<HTMLInputElement | null>(null);
 
   // Estado local de edición rápida de nombre, precio, descripción, etiqueta y oferta por producto
@@ -1988,7 +1992,7 @@ export default function AdminLocalClient({
                   <button
                     type="button"
                     disabled={guardandoId === "local-abierto"}
-                    onClick={handleToggleAbierto}
+                    onClick={() => setMostrarModalConfirmarEstado(true)}
                     className={`mt-4 flex w-full items-center justify-between rounded-2xl border-2 px-5 py-4 text-left shadow-md transition-all active:scale-[0.99] ${
                       local.abierto
                         ? "border-emerald-400 bg-emerald-600 text-white shadow-emerald-900/20 hover:bg-emerald-500"
@@ -3444,8 +3448,8 @@ export default function AdminLocalClient({
                                 {disponible ? "🟢 Disponible" : "⚪ Agotado"}
                               </span>
 
-                              <label className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-stone-200 bg-stone-50 px-2.5 py-0.5 text-[10px] font-bold text-stone-600 hover:bg-stone-100">
-                                <Camera className="h-3 w-3" />
+                              <label className="inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-xs font-bold text-stone-700 hover:bg-stone-100 transition shadow-2xs">
+                                <Camera className="h-3.5 w-3.5" />
                                 <span>Cambiar foto</span>
                                 <input
                                   type="file"
@@ -3474,13 +3478,13 @@ export default function AdminLocalClient({
                               <button
                                 type="button"
                                 onClick={() => setPlatoParaEditarOpciones(producto)}
-                                className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-bold border transition active:scale-95 ${
+                                className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold border transition active:scale-95 ${
                                   producto.opciones && producto.opciones.length > 0
                                     ? "bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100"
-                                    : "bg-stone-100 text-stone-600 border-stone-200 hover:bg-stone-200"
+                                    : "bg-stone-100 text-stone-700 border-stone-200 hover:bg-stone-200"
                                 }`}
                               >
-                                <Sparkles className="h-3 w-3 text-amber-600" />
+                                <Sparkles className="h-3.5 w-3.5 text-amber-600" />
                                 <span>
                                   {producto.opciones && producto.opciones.length > 0
                                     ? `⚙️ Extras (${producto.opciones.length} grupo${
@@ -3526,13 +3530,14 @@ export default function AdminLocalClient({
                             type="button"
                             disabled={guardandoId === `del-${producto.id}`}
                             onClick={() => void handleEliminarProducto(producto)}
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-600 transition hover:bg-rose-100 active:scale-95"
+                            className="inline-flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-rose-600 transition hover:bg-rose-100 active:scale-95"
                             title="Eliminar plato de la carta"
+                            aria-label={`Eliminar ${producto.nombre}`}
                           >
                             {guardandoId === `del-${producto.id}` ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 className="h-4 w-4" />
                             )}
                           </button>
                         </div>
@@ -3614,7 +3619,7 @@ export default function AdminLocalClient({
                             onClick={() =>
                               void handleGuardarEdicionProducto(producto)
                             }
-                            className={`inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-full px-3.5 text-xs font-display uppercase tracking-wider transition ${
+                            className={`inline-flex min-h-[44px] shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-display uppercase tracking-wider transition ${
                               hayCambiosSinGuardar
                                 ? `${brand.accentBg} shadow-xs active:scale-95`
                                 : "border border-stone-200 bg-stone-100 text-stone-400"
@@ -3622,9 +3627,9 @@ export default function AdminLocalClient({
                             title="Guardar cambios"
                           >
                             {guardandoId === `edit-${producto.id}` ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
-                              <Check className="h-3.5 w-3.5" />
+                              <Check className="h-4 w-4" />
                             )}
                             <span>Guardar</span>
                           </button>
@@ -3648,17 +3653,17 @@ export default function AdminLocalClient({
                                   producto.id
                                 )
                               }
-                              className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-[10px] font-extrabold text-amber-800 transition hover:bg-amber-100 active:scale-95 disabled:opacity-40"
+                              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-extrabold text-amber-900 transition hover:bg-amber-100 active:scale-95 disabled:opacity-40"
                               title="Generar descripción apetitosa con Gemini"
                             >
                               {generandoDescripcionId === producto.id ? (
                                 <>
-                                  <Loader2 className="h-2.5 w-2.5 animate-spin text-amber-600" />
+                                  <Loader2 className="h-3 w-3 animate-spin text-amber-600" />
                                   <span>Generando...</span>
                                 </>
                               ) : (
                                 <>
-                                  <Sparkles className="h-2.5 w-2.5 text-amber-600" />
+                                  <Sparkles className="h-3.5 w-3.5 text-amber-600" />
                                   <span>✨ Describir con IA</span>
                                 </>
                               )}
@@ -3952,6 +3957,109 @@ export default function AdminLocalClient({
                 className="rounded-full border border-stone-200 bg-stone-100 px-4 py-1.5 text-xs font-bold text-stone-700 hover:bg-stone-200 transition"
               >
                 Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Seguridad: Confirmar Apertura / Cierre del Local (Harden) */}
+      {mostrarModalConfirmarEstado && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-confirmar-estado-titulo"
+          className="no-print fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs"
+          onClick={() => {
+            if (guardandoId !== "local-abierto") {
+              setMostrarModalConfirmarEstado(false);
+            }
+          }}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl border border-stone-200 bg-white p-6 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${
+                    local.abierto
+                      ? "bg-rose-100 text-rose-600"
+                      : "bg-emerald-100 text-emerald-600"
+                  }`}
+                >
+                  <Store className="h-6 w-6" />
+                </div>
+                <div>
+                  <span
+                    className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
+                      local.abierto
+                        ? "bg-rose-100 text-rose-800"
+                        : "bg-emerald-100 text-emerald-800"
+                    }`}
+                  >
+                    {local.abierto ? "⚠️ Confirmar Cierre" : "✨ Confirmar Apertura"}
+                  </span>
+                  <h3
+                    id="modal-confirmar-estado-titulo"
+                    className="mt-0.5 font-display text-xl uppercase tracking-wide text-stone-900"
+                  >
+                    {local.abierto
+                      ? `¿Cerrar pedidos en ${local.nombre}?`
+                      : `¿Abrir pedidos en ${local.nombre}?`}
+                  </h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMostrarModalConfirmarEstado(false)}
+                disabled={guardandoId === "local-abierto"}
+                className="flex h-10 w-10 items-center justify-center rounded-full text-stone-400 hover:bg-stone-100 hover:text-stone-700 transition"
+                aria-label="Cerrar modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-stone-600 leading-relaxed">
+              {local.abierto
+                ? "Al cerrar el local, tu carta digital quedará en modo 'Solo Lectura'. Los comensales podrán ver los platos y precios, pero no podrán armar pedidos ni enviar comandas a cocina ni a WhatsApp."
+                : "Al abrir el local, tu carta quedará inmediatamente activa en el portal de Tirúa. Los clientes podrán realizar pedidos para retiro o consumo en mesa."}
+            </p>
+
+            <div className="flex flex-col-reverse sm:flex-row items-center gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setMostrarModalConfirmarEstado(false)}
+                disabled={guardandoId === "local-abierto"}
+                className="w-full sm:w-auto flex-1 min-h-[48px] rounded-full border border-stone-300 bg-white px-4 py-2.5 text-xs font-bold text-stone-700 hover:bg-stone-100 transition active:scale-95"
+              >
+                Cancelar y Mantener
+              </button>
+              <button
+                type="button"
+                disabled={guardandoId === "local-abierto"}
+                onClick={async () => {
+                  await handleToggleAbierto();
+                  setMostrarModalConfirmarEstado(false);
+                }}
+                className={`w-full sm:w-auto flex-1 min-h-[48px] rounded-full px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-md transition active:scale-95 flex items-center justify-center gap-2 ${
+                  local.abierto
+                    ? "bg-rose-600 hover:bg-rose-700 shadow-rose-600/25"
+                    : "bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25"
+                }`}
+              >
+                {guardandoId === "local-abierto" ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-white" />
+                    <span>Guardando...</span>
+                  </>
+                ) : (
+                  <span>
+                    {local.abierto ? "Sí, Cerrar Local Ahora" : "Sí, Abrir Local Ahora"}
+                  </span>
+                )}
               </button>
             </div>
           </div>
