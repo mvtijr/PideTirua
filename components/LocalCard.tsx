@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Star, QrCode, Clock, MapPin, ArrowRight, MessageCircle } from "lucide-react";
 import { Local } from "@/types/local";
 import { getVideoPoster } from "@/lib/localTheme";
 
@@ -120,12 +121,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
 
           <div className="flex items-center gap-1">
             <span className="inline-flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold text-amber-300 border border-white/20">
-              <span
-                className="material-symbols-outlined text-xs text-amber-400"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                star
-              </span>
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
               {local.calificacion.toFixed(1)}
             </span>
             {onOpenQr && (
@@ -135,9 +131,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
                 title={`Ver código QR de ${local.nombre}`}
                 className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-stone-900 shadow transition hover:bg-stone-100"
               >
-                <span className="material-symbols-outlined text-sm">
-                  qr_code_2
-                </span>
+                <QrCode className="h-3.5 w-3.5" />
               </button>
             )}
           </div>
@@ -145,7 +139,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
 
         <div className="absolute bottom-2.5 left-3 right-3 z-30 flex items-center justify-between text-white">
           <span className="text-[11px] font-semibold bg-black/50 backdrop-blur-md px-2.5 py-0.5 rounded-full flex items-center gap-1 border border-white/10">
-            <span className="material-symbols-outlined text-xs">schedule</span>
+            <Clock className="h-3 w-3" />
             {local.tiempoEstimado}
           </span>
           <span className="text-[11px] font-bold bg-[#EA580C]/90 backdrop-blur-md px-2.5 py-0.5 rounded-full text-white">
@@ -184,10 +178,8 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
 
         {/* Micro Metadatos y Pedido Directo */}
         <div className="space-y-2 pt-1 border-t border-stone-100">
-          <div className="flex items-center gap-1 font-body text-xs text-stone-500">
-            <span className="material-symbols-outlined text-sm text-[#EA580C]">
-              location_on
-            </span>
+          <div className="flex items-center gap-1.5 font-body text-xs text-stone-500">
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-[#EA580C]" />
             <span className="truncate">{local.direccionDetalle}</span>
           </div>
 
@@ -195,12 +187,10 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
           <div className="grid grid-cols-2 gap-2 pt-1">
             <Link
               href={`/${local.slug}`}
-              className="min-h-[44px] bg-stone-100 hover:bg-[#18181B] hover:text-white text-stone-900 font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1 transition-all"
+              className="min-h-[44px] bg-stone-100 hover:bg-[#18181B] hover:text-white text-stone-900 font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all"
             >
               <span>Ver Carta</span>
-              <span className="material-symbols-outlined text-sm">
-                arrow_forward
-              </span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </Link>
             <a
               href={`https://wa.me/${(
@@ -212,9 +202,9 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="min-h-[44px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1 transition-all shadow-sm"
+              className="min-h-[44px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all shadow-sm"
             >
-              <span className="material-symbols-outlined text-sm">chat</span>
+              <MessageCircle className="h-3.5 w-3.5 fill-white text-white" />
               <span>WhatsApp</span>
             </a>
           </div>

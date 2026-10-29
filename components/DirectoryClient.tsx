@@ -19,6 +19,8 @@ import {
   MapPin,
   Clock,
   UtensilsCrossed,
+  Fish,
+  QrCode,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
@@ -271,9 +273,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10 text-center">
           {/* Badge Territorial */}
           <div className="inline-flex items-center gap-2 bg-white text-stone-900 border border-stone-200 shadow-xs px-3.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider mb-4">
-            <span className="material-symbols-outlined text-sm text-[#EA580C]">
-              restaurant
-            </span>
+            <UtensilsCrossed className="h-3.5 w-3.5 text-[#EA580C]" />
             <span className="text-[#EA580C]">GASTRONOMÍA LOCAL</span>
             <span className="text-stone-300">•</span>
             <span>TIRÚA CENTRO &amp; QUIDICO</span>
@@ -551,9 +551,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </div>
         ) : (
           <div className="rounded-3xl border border-dashed border-stone-300 bg-white p-12 text-center max-w-md mx-auto my-6">
-            <span className="material-symbols-outlined text-4xl text-stone-400">
-              restaurant
-            </span>
+            <UtensilsCrossed className="mx-auto h-10 w-10 text-stone-400" />
             <h3 className="mt-3 font-display text-2xl text-stone-900 tracking-wide uppercase">
               NO ENCONTRAMOS RESULTADOS
             </h3>
@@ -719,7 +717,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
             <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/70 border border-stone-300/40">
               <div className="w-11 h-11 rounded-full bg-[#0284C7]/10 text-[#0284C7] flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-2xl">phishing</span>
+                <Fish className="h-5 w-5" />
               </div>
               <div>
                 <h3 className="font-display text-xl text-stone-900 tracking-wide uppercase">
@@ -733,7 +731,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
             <div className="flex items-start gap-4 p-4 rounded-2xl bg-white/70 border border-stone-300/40">
               <div className="w-11 h-11 rounded-full bg-[#0A3656]/10 text-[#0A3656] flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-2xl">qr_code_2</span>
+                <QrCode className="h-5 w-5" />
               </div>
               <div>
                 <h3 className="font-display text-xl text-stone-900 tracking-wide uppercase">
@@ -814,7 +812,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-[10px] font-bold text-[#EA580C] uppercase tracking-wider">
-                  <span className="material-symbols-outlined text-sm">qr_code_2</span>
+                  <QrCode className="h-3 w-3" />
                   MENÚ QR EXCLUSIVO
                 </span>
                 <h3 className="mt-1 font-display text-2xl text-stone-900 tracking-wide uppercase">

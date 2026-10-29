@@ -1044,10 +1044,10 @@ export default function CartDrawer({
                               <button
                                 type="button"
                                 onClick={() => onEditarItem(item)}
-                                className="inline-flex items-center gap-1 rounded-md bg-orange-50 hover:bg-orange-100 text-[#EA580C] px-2 py-0.5 text-[10px] font-bold transition active:scale-95"
+                                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-[#EA580C] px-2.5 py-1 text-xs font-bold transition active:scale-95"
                                 title="Modificar salsas o agregados de este plato"
                               >
-                                <Pencil className="h-2.5 w-2.5" />
+                                <Pencil className="h-3 w-3" />
                                 <span>Modificar extras / salsas</span>
                               </button>
                             </div>
@@ -1070,18 +1070,18 @@ export default function CartDrawer({
                         </div>
 
                         <div
-                          className={`flex items-center gap-2 rounded-xl border bg-white p-1 shadow-2xs ${theme.cardCounterBox}`}
+                          className={`flex items-center gap-1 rounded-xl border bg-white p-1 shadow-2xs ${theme.cardCounterBox}`}
                         >
                           <button
                             type="button"
                             onClick={() => onDisminuir(itemKey)}
-                            className={`flex h-7 w-7 items-center justify-center rounded-lg active:scale-95 ${theme.cardMinusBtn}`}
+                            className={`flex min-h-[44px] min-w-[40px] h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-lg active:scale-90 transition ${theme.cardMinusBtn}`}
                             aria-label="Disminuir cantidad"
                           >
-                            <Minus className="h-3.5 w-3.5" />
+                            <Minus className="h-4 w-4" />
                           </button>
                           <span
-                            className={`min-w-[1.25rem] text-center text-sm font-extrabold ${theme.cardQtyText}`}
+                            className={`min-w-[1.75rem] text-center text-sm font-extrabold tabular-nums ${theme.cardQtyText}`}
                           >
                             {cantidad}
                           </span>
@@ -1092,10 +1092,10 @@ export default function CartDrawer({
                                 ? onIncrementarItem(item)
                                 : onAgregar(producto)
                             }
-                            className={`flex h-7 w-7 items-center justify-center rounded-lg active:scale-95 ${theme.cardPlusBtn}`}
+                            className={`flex min-h-[44px] min-w-[40px] h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-lg active:scale-90 transition ${theme.cardPlusBtn}`}
                             aria-label="Aumentar cantidad"
                           >
-                            <Plus className="h-3.5 w-3.5" />
+                            <Plus className="h-4 w-4" />
                           </button>
                         </div>
                       </div>
@@ -1220,7 +1220,7 @@ export default function CartDrawer({
                   <button
                     type="button"
                     onClick={() => setHoraRetiroTipo("inmediato")}
-                    className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 px-3 text-xs font-black transition active:scale-[0.98] ${
+                    className={`flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border py-2.5 px-3 text-xs font-black transition active:scale-[0.98] ${
                       horaRetiroTipo === "inmediato"
                         ? "border-[#EA580C] bg-[#EA580C] text-white shadow-xs"
                         : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
@@ -1232,7 +1232,7 @@ export default function CartDrawer({
                   <button
                     type="button"
                     onClick={handleSeleccionarProgramado}
-                    className={`flex items-center justify-center gap-1.5 rounded-xl border py-2.5 px-3 text-xs font-black transition active:scale-[0.98] ${
+                    className={`flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border py-2.5 px-3 text-xs font-black transition active:scale-[0.98] ${
                       horaRetiroTipo === "programado"
                         ? "border-[#EA580C] bg-[#EA580C] text-white shadow-xs"
                         : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
@@ -1298,7 +1298,7 @@ export default function CartDrawer({
                         key={valor}
                         type="button"
                         onClick={() => setMetodoPago(valor)}
-                        className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition ${
+                        className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition ${
                           activo
                             ? theme.drawerOptionActive
                             : "border-outline-variant/50 bg-white text-on-surface-variant hover:border-secondary"
