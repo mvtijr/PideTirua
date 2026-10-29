@@ -105,7 +105,7 @@ function createEditorialTheme(config: {
     infoSectionBg: "bg-white border-b border-stone-200/90",
     infoDescText: "text-stone-600 font-medium",
     infoGridBox: "border border-stone-200/90 bg-[#FAF8F5] text-stone-800 rounded-2xl",
-    infoIcon: "text-[#EA580C]",
+    infoIcon: "text-[#C2410C]",
     infoTitle: "text-stone-900 font-bold",
     infoSub: "text-stone-500 font-medium",
     modalityBadge: `${config.accentBg} ${config.tagText} border ${config.accentBorder} font-bold rounded-xl`,
@@ -127,13 +127,13 @@ function createEditorialTheme(config: {
     emptyStateBox: "border-stone-200/90 bg-white rounded-2xl",
     emptyStateIcon: "text-stone-400",
     emptyStateText: "text-stone-600",
-    emptyStateBtn: "text-[#EA580C] font-bold",
+    emptyStateBtn: "text-[#C2410C] font-bold",
     footerBg: "border-t border-stone-200/90 bg-white text-stone-600",
     footerTitle:
       "text-stone-900 font-display text-2xl uppercase tracking-wide",
     footerSub: "text-stone-500",
-    footerLink: "text-[#EA580C] font-bold hover:underline",
-    qrModalAccent: "text-[#EA580C] font-bold",
+    footerLink: "text-[#C2410C] font-bold hover:underline",
+    qrModalAccent: "text-[#C2410C] font-bold",
     qrModalTitle:
       "text-stone-900 font-display text-2xl uppercase tracking-wide",
     cardActive:
@@ -165,7 +165,7 @@ function createEditorialTheme(config: {
     drawerHeader:
       "border-b border-stone-200/90 bg-[#FAF8F5] text-stone-900",
     drawerHeaderSub:
-      "text-[#EA580C] font-bold uppercase tracking-wider",
+      "text-[#C2410C] font-bold uppercase tracking-wider",
     drawerCloseBtn:
       "bg-stone-200 text-stone-700 hover:bg-stone-300 rounded-full",
     drawerItemsBox:
@@ -175,9 +175,9 @@ function createEditorialTheme(config: {
     drawerItemTotal: "text-stone-900 font-bold",
     drawerOptionActive:
       "border-[#EA580C] bg-orange-50/70 text-stone-900 ring-2 ring-[#EA580C] rounded-2xl",
-    drawerOptionIconActive: "text-[#EA580C]",
+    drawerOptionIconActive: "text-[#C2410C]",
     drawerLabel: "text-stone-800 font-bold",
-    drawerLabelIcon: "text-[#EA580C]",
+    drawerLabelIcon: "text-[#C2410C]",
     drawerPreviewBox: "bg-[#18181B] text-stone-200 rounded-2xl",
   };
 }
@@ -189,7 +189,7 @@ export function getLocalTheme(slug: string): LocalTheme {
         accent: "#EA580C",
         accentBg: "bg-orange-50",
         accentBorder: "border-orange-200",
-        tagText: "text-[#EA580C]",
+        tagText: "text-[#C2410C]",
         logoBg: "#f8dc4b",
       });
 
@@ -198,7 +198,7 @@ export function getLocalTheme(slug: string): LocalTheme {
         accent: "#D93829",
         accentBg: "bg-red-50",
         accentBorder: "border-red-200",
-        tagText: "text-[#D93829]",
+        tagText: "text-[#B91C1C]",
         logoBg: "#ffffff",
       });
 
@@ -207,7 +207,7 @@ export function getLocalTheme(slug: string): LocalTheme {
         accent: "#D4A843",
         accentBg: "bg-amber-50",
         accentBorder: "border-amber-200",
-        tagText: "text-[#B88728]",
+        tagText: "text-[#85530E]",
         logoBg: "#000000",
       });
 
@@ -216,7 +216,7 @@ export function getLocalTheme(slug: string): LocalTheme {
         accent: "#0284C7",
         accentBg: "bg-sky-50",
         accentBorder: "border-sky-200",
-        tagText: "text-[#0284C7]",
+        tagText: "text-[#0369A1]",
         logoBg: "#194a6e",
       });
 
@@ -225,7 +225,7 @@ export function getLocalTheme(slug: string): LocalTheme {
         accent: "#EA580C",
         accentBg: "bg-orange-50",
         accentBorder: "border-orange-200",
-        tagText: "text-[#EA580C]",
+        tagText: "text-[#C2410C]",
         logoBg: "#ffffff",
       });
   }

@@ -689,10 +689,14 @@ export default function SuperAdminClient({
   };
 
   const handleToggleActivo = async (loc: Local) => {
+    if (guardandoSlug === loc.slug) return;
     const activoActual = loc.activo !== false;
     const nuevoActivo = !activoActual;
 
     setGuardandoSlug(loc.slug);
+    const snapshotPrevio = locales;
+
+    // Mutación optimista en el estado de la UI
     setLocales((prev) =>
       prev.map((l) => (l.slug === loc.slug ? { ...l, activo: nuevoActivo } : l))
     );
@@ -707,10 +711,16 @@ export default function SuperAdminClient({
           activo: nuevoActivo,
         }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        throw new Error(data?.error || "Error al cambiar estado");
+
+      if (!res.ok) {
+        throw new Error(`Error HTTP ${res.status}: ${res.statusText}`);
       }
+
+      const data = await res.json();
+      if (!data.ok) {
+        throw new Error(data?.error || "Error al actualizar estado en Supabase");
+      }
+
       if (Array.isArray(data.locales)) {
         setLocales(data.locales);
       }
@@ -719,14 +729,14 @@ export default function SuperAdminClient({
           ? `🟢 "${loc.nombre}" activado en el portal público`
           : `🔴 "${loc.nombre}" suspendido temporalmente`
       );
-    } catch {
-      // Revertir optimismo ante fallo de red
-      setLocales((prev) =>
-        prev.map((l) =>
-          l.slug === loc.slug ? { ...l, activo: activoActual } : l
-        )
+    } catch (err: unknown) {
+      // Rollback determinista al snapshot previo si falla la llamada
+      setLocales(snapshotPrevio);
+      const detalleError =
+        err instanceof Error ? err.message : "Error de conexión con el servidor";
+      mostrarToast(
+        `⚠️ No se pudo cambiar el estado de "${loc.nombre}". Se revirtió al estado anterior (${detalleError}).`
       );
-      mostrarToast(`⚠️ No se pudo cambiar el estado de "${loc.nombre}". Revisa tu conexión.`);
     } finally {
       setGuardandoSlug(null);
     }
@@ -781,7 +791,7 @@ export default function SuperAdminClient({
   if (verificandoSesion) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#FAF8F5] text-stone-900">
-        <Loader2 className="h-8 w-8 animate-spin text-[#EA580C]" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#C2410C]" />
       </div>
     );
   }
@@ -889,7 +899,7 @@ export default function SuperAdminClient({
           </form>
         </div>
 
-        <p className="relative z-10 text-center text-[11px] text-stone-400">
+        <p className="relative z-10 text-center text-xs font-semibold text-stone-600">
           PideTirúa · Arquitectura Comercial SaaS conectada a Supabase
         </p>
       </div>
@@ -955,7 +965,7 @@ export default function SuperAdminClient({
               <Crown className="h-6 w-6" />
             </div>
             <div>
-              <span className="block text-[10px] font-extrabold uppercase tracking-widest text-amber-800">
+              <span className="block text-[11px] font-extrabold uppercase tracking-widest text-amber-800">
                 Panel Maestro · Modelo SaaS
               </span>
               <h1 className="text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
@@ -1008,7 +1018,7 @@ export default function SuperAdminClient({
             </div>
             <p className="tabular-nums mt-2 text-3xl font-display uppercase tracking-wide text-stone-900 sm:text-4xl">
               {localesActivos.length}{" "}
-              <span className="text-sm font-sans font-bold text-stone-400">
+              <span className="text-sm font-sans font-bold text-stone-600">
                 / {locales.length} registrados
               </span>
             </p>
@@ -1025,9 +1035,9 @@ export default function SuperAdminClient({
               </span>
               <TrendingUp className="h-5 w-5 text-amber-600" />
             </div>
-            <p className="tabular-nums mt-2 text-3xl font-display uppercase tracking-wide text-[#EA580C] sm:text-4xl">
+            <p className="tabular-nums mt-2 text-3xl font-display uppercase tracking-wide text-[#C2410C] sm:text-4xl">
               {formatCLP(ingresoMensualRecurrente)}
-              <span className="text-xs font-sans font-bold text-stone-400"> /mes</span>
+              <span className="text-xs font-sans font-bold text-stone-600"> /mes</span>
             </p>
             <p className="mt-1 text-xs text-stone-500">
               Suma de planes con estado Activo
@@ -1210,7 +1220,7 @@ export default function SuperAdminClient({
         <section className="rounded-3xl border border-stone-200/90 bg-white p-5 shadow-xs sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <span className="inline-flex items-center gap-1.5 text-xs font-display uppercase tracking-wider text-[#EA580C]">
+              <span className="inline-flex items-center gap-1.5 text-xs font-display uppercase tracking-wider text-[#C2410C]">
                 <Sparkles className="h-4 w-4" />
                 Alta de Clientes e Identidad Visual
               </span>
@@ -1392,7 +1402,7 @@ export default function SuperAdminClient({
                         : "border-stone-200 bg-stone-50/60 hover:border-stone-300"
                     }`}
                   >
-                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-[#EA580C]">
+                    <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-[#C2410C]">
                       <Zap className="h-5 w-5" />
                     </div>
                     <div className="flex-1">
@@ -1449,7 +1459,7 @@ export default function SuperAdminClient({
                 <div className="mt-3.5 grid grid-cols-1 gap-3.5 rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:grid-cols-2">
                   <div>
                     <label className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-600">
-                      <Calendar className="h-3.5 w-3.5 text-[#EA580C]" />
+                      <Calendar className="h-3.5 w-3.5 text-[#C2410C]" />
                       Día de cobro mensual (1 al 31)
                     </label>
                     <input
@@ -1614,7 +1624,7 @@ export default function SuperAdminClient({
                 <div className="mt-4 rounded-2xl border border-stone-200 bg-stone-50 p-4">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-800">
-                      <Video className="h-4 w-4 text-[#EA580C]" />
+                      <Video className="h-4 w-4 text-[#C2410C]" />
                       🎥 Video de Portada (Opcional)
                     </span>
                     {formBannerVideoUrl && (
@@ -1659,15 +1669,15 @@ export default function SuperAdminClient({
                           className="pointer-events-none select-none h-full w-full object-cover"
                         />
                       ) : (
-                        <div className="flex flex-col items-center gap-1 text-center text-stone-400">
-                          <Video className="h-6 w-6 text-stone-400" />
-                          <span className="text-[10px] font-bold uppercase">
+                        <div className="flex flex-col items-center gap-1 text-center text-stone-500">
+                          <Video className="h-6 w-6 text-stone-500" />
+                          <span className="text-[11px] font-bold uppercase">
                             Sin video (usa imagen)
                           </span>
                         </div>
                       )}
                       {subiendoVideo && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 text-[10px] font-bold text-white">
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 text-[11px] font-bold text-white">
                           <Loader2 className="h-5 w-5 animate-spin text-white" />
                           <span>Subiendo...</span>
                         </div>
@@ -1822,21 +1832,34 @@ export default function SuperAdminClient({
                       )}
                     </div>
 
-                    {/* Switch [Activo / Suspendido] */}
+                    {/* Switch [Activo / Suspendido] con Rollback Optimista */}
                     <div className="absolute right-3.5 top-3">
                       <button
                         type="button"
                         disabled={guardandoSlug === loc.slug}
                         onClick={() => void handleToggleActivo(loc)}
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-display text-[11px] uppercase tracking-wider shadow-xs transition active:scale-95 ${
+                        aria-pressed={activo}
+                        aria-label={
                           activo
-                            ? "border border-emerald-300 bg-emerald-600 text-white hover:bg-emerald-700"
-                            : "border border-rose-300 bg-rose-600 text-white hover:bg-rose-700"
+                            ? `Suspender ${loc.nombre} del portal público`
+                            : `Activar ${loc.nombre} en el portal público`
+                        }
+                        className={`inline-flex min-h-[32px] items-center gap-1.5 rounded-full px-3 py-1 font-display text-[11px] uppercase tracking-wider shadow-xs transition active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${
+                          activo
+                            ? "border border-emerald-300 bg-emerald-600 text-white hover:bg-emerald-700 focus-visible:ring-emerald-500"
+                            : "border border-rose-300 bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500"
                         }`}
                       >
-                        <span>
-                          {activo ? "🟢 Activo" : "🔴 Suspendido"}
-                        </span>
+                        {guardandoSlug === loc.slug ? (
+                          <>
+                            <Loader2 className="h-3 w-3 animate-spin text-white" />
+                            <span>Guardando...</span>
+                          </>
+                        ) : (
+                          <span>
+                            {activo ? "🟢 Activo" : "🔴 Suspendido"}
+                          </span>
+                        )}
                       </button>
                     </div>
                   </div>
@@ -1856,7 +1879,7 @@ export default function SuperAdminClient({
                         <h3 className="truncate font-display text-lg uppercase tracking-wide text-stone-900 sm:text-xl">
                           {loc.nombre}
                         </h3>
-                        <p className="truncate text-xs font-bold uppercase tracking-wider text-[#EA580C]">
+                        <p className="truncate text-xs font-bold uppercase tracking-wider text-[#C2410C]">
                           {loc.rubro}
                         </p>
                       </div>
@@ -1885,7 +1908,7 @@ export default function SuperAdminClient({
                           </span>
                         )}
 
-                        <span className="tabular-nums text-[11px] font-semibold text-stone-500">
+                        <span className="tabular-nums text-[11px] font-semibold text-stone-700">
                           Últ. pago: {estadoCobro.fechaUltimoPago}
                         </span>
                       </div>
@@ -1930,7 +1953,7 @@ export default function SuperAdminClient({
                         </div>
 
                         <div className="flex items-center gap-1.5 text-stone-500">
-                          <MapPin className="h-3.5 w-3.5 shrink-0 text-[#EA580C]" />
+                          <MapPin className="h-3.5 w-3.5 shrink-0 text-[#C2410C]" />
                           <span className="truncate">
                             {loc.direccion || loc.direccionDetalle}
                           </span>

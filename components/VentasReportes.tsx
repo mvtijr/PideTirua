@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Loader2,
   Calendar,
+  FileText,
   ShieldCheck,
   CheckCircle2,
 } from "lucide-react";
@@ -249,43 +250,49 @@ export default function VentasReportes({
         </div>
       ) : (
         <div className="mt-5 space-y-5">
-          {/* A) Tarjetas Resumen del Mes Actual */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {/* A) Cifras de Cuadre del Mes Actual (Estructura Semántica DL/DT/DD Accesible) */}
+          <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {/* 💰 Ventas del Mes */}
             <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-4 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
+                <dt className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
                   Ventas del Mes
-                </span>
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                </dt>
+                <div
+                  aria-hidden="true"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700"
+                >
                   <DollarSign className="h-4 w-4" />
                 </div>
               </div>
-              <div className="mt-2">
+              <dd className="mt-2 m-0">
                 <p className="tabular-nums text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
                   {formatCLP(ventasDelMes)}
                 </p>
                 <span className="mt-0.5 block text-[11px] font-medium text-stone-500">
                   {nombreMes} {anioActual} · CLP
                 </span>
-              </div>
-              <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-emerald-700">
-                <TrendingUp className="h-3 w-3" />
-                <span>100% de recaudación directa</span>
-              </div>
+                <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-emerald-700">
+                  <TrendingUp className="h-3 w-3" aria-hidden="true" />
+                  <span>100% de recaudación directa</span>
+                </div>
+              </dd>
             </div>
 
             {/* 📦 Total de Pedidos */}
             <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-4 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">
+                <dt className="text-[11px] font-bold uppercase tracking-wider text-amber-800">
                   Total de Pedidos
-                </span>
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-700">
+                </dt>
+                <div
+                  aria-hidden="true"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-700"
+                >
                   <Package className="h-4 w-4" />
                 </div>
               </div>
-              <div className="mt-2">
+              <dd className="mt-2 m-0">
                 <p className="tabular-nums text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
                   {totalPedidos}
                 </p>
@@ -294,48 +301,51 @@ export default function VentasReportes({
                     ? "1 orden recibida"
                     : `${totalPedidos} órdenes registradas`}
                 </span>
-              </div>
-              <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-amber-700">
-                <Sparkles className="h-3 w-3" />
-                <span className="tabular-nums">
-                  {totalPlatosVendidos}{" "}
-                  {totalPlatosVendidos === 1
-                    ? "plato preparado"
-                    : "platos preparados"}
-                </span>
-              </div>
+                <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-amber-700">
+                  <Sparkles className="h-3 w-3" aria-hidden="true" />
+                  <span className="tabular-nums">
+                    {totalPlatosVendidos}{" "}
+                    {totalPlatosVendidos === 1
+                      ? "plato preparado"
+                      : "platos preparados"}
+                  </span>
+                </div>
+              </dd>
             </div>
 
             {/* 🏷️ Ticket Promedio */}
             <div className="relative overflow-hidden rounded-2xl border border-stone-200 bg-white p-4 shadow-xs">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-sky-800">
+                <dt className="text-[11px] font-bold uppercase tracking-wider text-sky-800">
                   Ticket Promedio
-                </span>
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-50 text-sky-700">
+                </dt>
+                <div
+                  aria-hidden="true"
+                  className="flex h-8 w-8 items-center justify-center rounded-xl bg-sky-50 text-sky-700"
+                >
                   <Receipt className="h-4 w-4" />
                 </div>
               </div>
-              <div className="mt-2">
+              <dd className="mt-2 m-0">
                 <p className="tabular-nums text-2xl font-display uppercase tracking-wide text-stone-900 sm:text-3xl">
                   {formatCLP(ticketPromedio)}
                 </p>
                 <span className="mt-0.5 block text-[11px] font-medium text-stone-500">
                   Venta media por pedido
                 </span>
-              </div>
-              <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-sky-700">
-                <Calendar className="h-3 w-3" />
-                <span>Consumo promedio en el local</span>
-              </div>
+                <div className="mt-3 flex items-center gap-1 text-[11px] font-bold text-sky-700">
+                  <Calendar className="h-3 w-3" aria-hidden="true" />
+                  <span>Consumo promedio en el local</span>
+                </div>
+              </dd>
             </div>
-          </div>
+          </dl>
 
-          {/* B) Ranking "Top 3 Platos Más Vendidos" con Podio Visual */}
+          {/* B) Ranking "Top 3 Platos Más Vendidos" con Semántica Accesible (OL y Table) */}
           <div className="rounded-2xl border border-stone-200 bg-stone-50 p-4 sm:p-5">
             <div className="flex items-center justify-between gap-2 mb-3.5">
               <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-800" aria-hidden="true">
                   <Trophy className="h-4 w-4" />
                 </div>
                 <div>
@@ -357,7 +367,7 @@ export default function VentasReportes({
 
             {rankingTop3.length === 0 ? (
               <div className="rounded-xl border border-dashed border-stone-300 bg-white py-8 text-center text-stone-500">
-                <Trophy className="mx-auto h-8 w-8 text-stone-300" />
+                <Trophy className="mx-auto h-8 w-8 text-stone-300" aria-hidden="true" />
                 <p className="mt-2 text-xs font-bold text-stone-700">
                   Aún no hay platos pedidos este mes
                 </p>
@@ -367,78 +377,145 @@ export default function VentasReportes({
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-                {rankingTop3.map((item, idx) => {
-                  const lugar = idx + 1;
-                  const esOro = lugar === 1;
-                  const esPlata = lugar === 2;
-                  const esBronce = lugar === 3;
+              <div className="space-y-4">
+                {/* Podio Visual con Semántica de Lista Ordenada <ol> / <li> */}
+                <ol className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 list-none p-0 m-0">
+                  {rankingTop3.map((item, idx) => {
+                    const lugar = idx + 1;
+                    const esOro = lugar === 1;
+                    const esPlata = lugar === 2;
 
-                  const badgeColor = esOro
-                    ? "border-amber-300 bg-amber-50 text-amber-800"
-                    : esPlata
-                    ? "border-stone-300 bg-stone-100 text-stone-700"
-                    : "border-orange-300 bg-orange-50 text-orange-800";
+                    const badgeColor = esOro
+                      ? "border-amber-300 bg-amber-50 text-amber-800"
+                      : esPlata
+                      ? "border-stone-300 bg-stone-100 text-stone-700"
+                      : "border-orange-300 bg-orange-50 text-orange-800";
 
-                  const cardBorder = esOro
-                    ? "border-amber-300 bg-white shadow-xs"
-                    : esPlata
-                    ? "border-stone-200 bg-white shadow-xs"
-                    : "border-orange-200 bg-white shadow-xs";
+                    const cardBorder = esOro
+                      ? "border-amber-300 bg-white shadow-xs"
+                      : esPlata
+                      ? "border-stone-200 bg-white shadow-xs"
+                      : "border-orange-200 bg-white shadow-xs";
 
-                  const iconoMedalla = esOro ? (
-                    <Crown className="h-4 w-4 text-amber-600" />
-                  ) : esPlata ? (
-                    <Medal className="h-4 w-4 text-stone-500" />
-                  ) : (
-                    <Medal className="h-4 w-4 text-orange-600" />
-                  );
+                    const iconoMedalla = esOro ? (
+                      <Crown className="h-4 w-4 text-amber-600" aria-hidden="true" />
+                    ) : esPlata ? (
+                      <Medal className="h-4 w-4 text-stone-500" aria-hidden="true" />
+                    ) : (
+                      <Medal className="h-4 w-4 text-orange-600" aria-hidden="true" />
+                    );
 
-                  const textoLugar =
-                    lugar === 1
-                      ? "1° Lugar · Estrella"
-                      : lugar === 2
-                      ? "2° Lugar · Favorito"
-                      : "3° Lugar · Popular";
+                    const textoLugar =
+                      lugar === 1
+                        ? "1° Lugar · Estrella"
+                        : lugar === 2
+                        ? "2° Lugar · Favorito"
+                        : "3° Lugar · Popular";
 
-                  return (
-                    <div
-                      key={`top-plato-${idx}`}
-                      className={`relative flex flex-col justify-between rounded-xl border p-3.5 transition ${cardBorder}`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between gap-1.5">
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-black uppercase tracking-wider ${badgeColor}`}
-                          >
-                            {iconoMedalla}
-                            <span>{textoLugar}</span>
-                          </span>
+                    return (
+                      <li
+                        key={`top-plato-${idx}`}
+                        className={`relative flex flex-col justify-between rounded-xl border p-3.5 transition ${cardBorder}`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-1.5">
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-black uppercase tracking-wider ${badgeColor}`}
+                            >
+                              {iconoMedalla}
+                              <span>{textoLugar}</span>
+                            </span>
 
-                          <span className="tabular-nums text-[11px] font-extrabold text-stone-400">
-                            #{lugar}
-                          </span>
+                            <span className="tabular-nums text-[11px] font-black text-stone-600">
+                              #{lugar}
+                            </span>
+                          </div>
+
+                          <h4 className="mt-2.5 text-xs font-bold text-stone-900 sm:text-sm line-clamp-2">
+                            {item.nombre}
+                          </h4>
                         </div>
 
-                        <h4 className="mt-2.5 text-xs font-bold text-stone-900 sm:text-sm line-clamp-2">
-                          {item.nombre}
-                        </h4>
-                      </div>
+                        <div className="mt-3.5 flex items-center justify-between border-t border-stone-100 pt-2.5">
+                          <span className="text-[11px] font-bold text-stone-500">
+                            Unidades vendidas:
+                          </span>
+                          <span className="tabular-nums inline-flex items-center gap-1 rounded-lg bg-stone-100 px-2 py-0.5 text-xs font-black text-stone-900">
+                            <strong className="text-[#C2410C]">
+                              {item.cantidad}
+                            </strong>{" "}
+                            uds
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ol>
 
-                      <div className="mt-3.5 flex items-center justify-between border-t border-stone-100 pt-2.5">
-                        <span className="text-[11px] font-bold text-stone-500">
-                          Unidades vendidas:
-                        </span>
-                        <span className="tabular-nums inline-flex items-center gap-1 rounded-lg bg-stone-100 px-2 py-0.5 text-xs font-black text-stone-900">
-                          <strong className="text-[#EA580C]">
-                            {item.cantidad}
-                          </strong>{" "}
-                          uds
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
+                {/* Tabla Semántica Accesible de Cuadre y Demanda */}
+                <div className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-2xs">
+                  <div className="flex items-center justify-between border-b border-stone-100 bg-stone-50/80 px-3.5 py-2.5">
+                    <span className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-stone-700">
+                      <FileText className="h-3.5 w-3.5 text-stone-500" aria-hidden="true" />
+                      Cuadro Detallado de Ranking y Cuadre
+                    </span>
+                    <span className="text-[11px] font-medium text-stone-500">
+                      Total unidades: <strong className="text-stone-800">{totalPlatosVendidos}</strong>
+                    </span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full border-collapse text-left text-xs">
+                      <caption className="sr-only">
+                        Cuadro estadístico de ventas por plato del mes actual
+                      </caption>
+                      <thead>
+                        <tr className="border-b border-stone-200 bg-stone-50/40 text-[11px] font-bold uppercase tracking-wider text-stone-600">
+                          <th scope="col" className="py-2.5 pl-3.5 pr-2">
+                            Posición
+                          </th>
+                          <th scope="col" className="py-2.5 px-3">
+                            Plato
+                          </th>
+                          <th scope="col" className="py-2.5 px-3 text-right">
+                            Unidades Vendidas
+                          </th>
+                          <th scope="col" className="py-2.5 pr-3.5 pl-2 text-right">
+                            Participación
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-stone-100">
+                        {rankingTop3.map((item, idx) => {
+                          const porcentaje =
+                            totalPlatosVendidos > 0
+                              ? Math.round(
+                                  (item.cantidad / totalPlatosVendidos) * 100
+                                )
+                              : 0;
+                          return (
+                            <tr
+                              key={`ranking-row-${idx}`}
+                              className="hover:bg-stone-50/60 transition"
+                            >
+                              <td className="py-2.5 pl-3.5 pr-2 font-bold tabular-nums text-stone-800">
+                                #{idx + 1}
+                              </td>
+                              <td className="py-2.5 px-3 font-semibold text-stone-900">
+                                {item.nombre}
+                              </td>
+                              <td className="py-2.5 px-3 text-right font-black tabular-nums text-[#C2410C]">
+                                {item.cantidad} uds
+                              </td>
+                              <td className="py-2.5 pr-3.5 pl-2 text-right tabular-nums font-medium text-stone-600">
+                                {porcentaje}%
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -467,13 +544,13 @@ export default function VentasReportes({
 
               {ventasDelMes > 0 && (
                 <div className="shrink-0 rounded-xl bg-black/25 p-3 text-center backdrop-blur-xs border border-white/15">
-                  <span className="block text-[10px] font-black uppercase tracking-wider text-emerald-200">
+                  <span className="block text-[11px] font-black uppercase tracking-wider text-emerald-200">
                     Ahorro estimado en comisiones
                   </span>
                   <span className="text-base font-black text-amber-300 sm:text-lg">
                     ~{formatCLP(Math.round(ventasDelMes * 0.22))}
                   </span>
-                  <span className="block text-[10px] font-semibold text-emerald-100/80">
+                  <span className="block text-[11px] font-semibold text-emerald-100/90">
                     (Vs. apps con 22% de comisión)
                   </span>
                 </div>

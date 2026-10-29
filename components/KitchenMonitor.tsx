@@ -420,12 +420,12 @@ export default function KitchenMonitor({
               👨‍🍳 Monitor de Cocina en Vivo
             </h2>
             {estadoConexion === "conectado" ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 En vivo
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-700 border border-amber-200">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-bold text-amber-700 border border-amber-200">
                 <RefreshCw className="h-2.5 w-2.5 animate-spin" />
                 Reconectando...
               </span>
@@ -444,7 +444,7 @@ export default function KitchenMonitor({
                 playKitchenDingDongChime();
               }
             }}
-            className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold shadow-xs transition active:scale-95 ${
+            className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-bold shadow-xs transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
               sonidoActivo
                 ? "border-emerald-300 bg-emerald-50 text-emerald-800"
                 : "border-stone-200 bg-stone-100 text-stone-600 hover:bg-stone-200"
@@ -467,7 +467,7 @@ export default function KitchenMonitor({
             type="button"
             onClick={() => playKitchenDingDongChime()}
             title="Probar timbre Ding-Dong de cocina"
-            className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-bold text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-bold text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
           >
             <Volume2 className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Probar timbre</span>
@@ -477,7 +477,7 @@ export default function KitchenMonitor({
             type="button"
             onClick={() => void cargarPedidos(false)}
             title="Actualizar comandas"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95"
+            className="inline-flex min-h-[44px] min-w-[44px] h-11 w-11 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
           >
             <RefreshCw
               className={`h-3.5 w-3.5 ${cargando ? "animate-spin" : ""}`}
@@ -630,7 +630,7 @@ export default function KitchenMonitor({
                         ⏰ RETIRO A LAS: {pedido.hora_retiro} HRS
                       </span>
                     </div>
-                    <span className="rounded-md bg-slate-950 px-2 py-0.5 text-[10px] font-black uppercase text-amber-300 shrink-0">
+                    <span className="rounded-md bg-slate-950 px-2 py-0.5 text-[11px] font-black uppercase text-amber-300 shrink-0">
                       Horario Programado
                     </span>
                   </div>
@@ -650,7 +650,7 @@ export default function KitchenMonitor({
                       <Store className="h-4 w-4 shrink-0 text-slate-700" />
                     )}
                     <div className="min-w-0">
-                      <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                      <span className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-600">
                         Modalidad / Ubicación
                       </span>
                       <span className="truncate block">
@@ -671,7 +671,7 @@ export default function KitchenMonitor({
                       <Banknote className="h-4 w-4 shrink-0 text-amber-700" />
                     )}
                     <div>
-                      <span className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                      <span className="block text-[11px] font-extrabold uppercase tracking-wider text-slate-600">
                         Método de Pago
                       </span>
                       <span>{pedido.metodo_pago}</span>
@@ -681,7 +681,7 @@ export default function KitchenMonitor({
 
                 {/* Detalle de Ítems de la Comanda */}
                 <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <span className="mb-1.5 block text-[10px] font-extrabold uppercase tracking-wider text-slate-500">
+                  <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-600">
                     Detalle de la comanda
                   </span>
                   <ul className="divide-y divide-slate-200/80 text-xs sm:text-sm">

@@ -114,7 +114,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
               <span>{local.abierto ? "Abierto" : "Cerrado"}</span>
             </span>
 
-            <span className="rounded-full bg-white/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-stone-900 shadow-xs">
+            <span className="rounded-full bg-white/90 backdrop-blur-md px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-stone-900 shadow-xs">
               {local.ubicacion}
             </span>
           </div>
@@ -160,7 +160,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
               loading="lazy"
             />
             <div className="flex-1 min-w-0">
-              <span className="text-[11px] font-black uppercase tracking-widest text-[#EA580C] block truncate">
+              <span className="text-[11px] font-black uppercase tracking-widest text-[#C2410C] block truncate">
                 {local.rubro}
               </span>
               <span className="text-[11px] font-medium text-stone-500 block truncate">
@@ -169,7 +169,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
             </div>
           </div>
 
-          <h3 className="font-display text-2xl font-bold tracking-wide text-stone-900 group-hover:text-[#EA580C] transition-colors line-clamp-1">
+          <h3 className="font-display text-2xl font-bold tracking-wide text-stone-900 group-hover:text-[#C2410C] transition-colors line-clamp-1">
             {local.nombre}
           </h3>
           <p className="font-body text-xs text-stone-600 line-clamp-2 mt-1 leading-relaxed">
@@ -180,7 +180,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
         {/* Micro Metadatos y Pedido Directo */}
         <div className="space-y-2 pt-1 border-t border-stone-100">
           <div className="flex items-center gap-1.5 font-body text-xs text-stone-500">
-            <MapPin className="h-3.5 w-3.5 shrink-0 text-[#EA580C]" />
+            <MapPin className="h-3.5 w-3.5 shrink-0 text-[#C2410C]" />
             <span className="truncate">{local.direccionDetalle}</span>
           </div>
 

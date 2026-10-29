@@ -193,7 +193,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               <span className="font-display text-2xl tracking-widest text-[#18181B] uppercase block leading-none">
                 PIDETIRÚA
               </span>
-              <span className="font-body text-[9px] font-bold uppercase tracking-[0.2em] text-[#EA580C] block mt-0.5">
+              <span className="font-body text-[11px] font-bold uppercase tracking-[0.2em] text-[#C2410C] block mt-0.5">
                 SABORES DE NUESTRA TIERRA
               </span>
             </div>
@@ -204,7 +204,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             <a
               href="#directorio-locales"
               onClick={scrollHaciaId("directorio-locales")}
-              className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#EA580C] transition-colors"
+              className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#C2410C] transition-colors"
             >
               RESTAURANTES ({locales.length})
             </a>
@@ -212,7 +212,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               <a
                 href="#ofertas-hoy"
                 onClick={scrollHaciaId("ofertas-hoy")}
-                className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#EA580C] transition-colors flex items-center gap-1.5"
+                className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#C2410C] transition-colors flex items-center gap-1.5"
               >
                 <span>OFERTAS DEL DÍA</span>
                 <span className="w-1.5 h-1.5 rounded-full bg-[#EA580C] animate-pulse" />
@@ -221,7 +221,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             <a
               href="#historia-comuna"
               onClick={scrollHaciaId("historia-comuna")}
-              className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#EA580C] transition-colors"
+              className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#C2410C] transition-colors"
             >
               TIRÚA Y QUIDICO
             </a>
@@ -232,18 +232,18 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             <button
               type="button"
               onClick={() => setMostrarRecomendador(true)}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-stone-300 bg-white hover:border-orange-300 hover:bg-orange-50/50 text-stone-800 text-[11px] font-bold uppercase tracking-wider px-2.5 sm:px-3.5 py-2 transition"
+              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-stone-300 bg-white hover:border-orange-300 hover:bg-orange-50/50 text-stone-800 text-[11px] font-bold uppercase tracking-wider px-2.5 sm:px-3.5 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C]"
               title="¿No sabes qué comer? Descúbrelo con el recomendador"
               aria-label="¿No sabes qué comer? Descúbrelo con el recomendador"
             >
-              <Dices className="h-3.5 w-3.5 text-[#EA580C]" />
+              <Dices className="h-3.5 w-3.5 text-[#C2410C]" />
               <span className="hidden xs:inline">¿Qué comer?</span>
             </button>
 
             <button
               type="button"
               onClick={scrollADirectorio}
-              className="inline-flex min-h-[40px] items-center gap-1.5 sm:gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white text-[10px] sm:text-[11px] font-black uppercase tracking-widest px-3 sm:px-5 py-2 sm:py-2.5 shadow-sm transition-all hover:scale-105 active:scale-95"
+              className="inline-flex min-h-[40px] items-center gap-1.5 sm:gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white text-[11px] sm:text-xs font-black uppercase tracking-widest px-3 sm:px-5 py-2 sm:py-2.5 shadow-sm transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C]"
             >
               <Store className="h-3.5 w-3.5" />
               <span>VER LOCALES</span>
@@ -273,8 +273,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10 text-center">
           {/* Badge Territorial */}
           <div className="inline-flex items-center gap-2 bg-white text-stone-900 border border-stone-200 shadow-xs px-3.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider mb-4">
-            <UtensilsCrossed className="h-3.5 w-3.5 text-[#EA580C]" />
-            <span className="text-[#EA580C]">GASTRONOMÍA LOCAL</span>
+            <UtensilsCrossed className="h-3.5 w-3.5 text-[#C2410C]" />
+            <span className="text-[#C2410C]">GASTRONOMÍA LOCAL</span>
             <span className="text-stone-300">•</span>
             <span>TIRÚA CENTRO &amp; QUIDICO</span>
           </div>
@@ -343,7 +343,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         <section id="ofertas-hoy" className="py-8 sm:py-10 max-w-[1240px] mx-auto px-4 sm:px-6 border-b border-stone-200/70">
           <div className="flex items-end justify-between gap-3 mb-5">
             <div>
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-red-100 text-red-700 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider">
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-red-100 text-red-700 px-3 py-0.5 text-[11px] font-black uppercase tracking-wider">
                 <Flame className="h-3 w-3 fill-red-600 text-red-600" />
                 <span>OFERTAS DE HOY</span>
               </div>
@@ -392,7 +392,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute top-2 left-2">
-                    <span className="rounded-full bg-[#EA580C] px-2.5 py-0.5 text-[10px] font-black text-white uppercase tracking-wider shadow-sm">
+                    <span className="rounded-full bg-[#EA580C] px-2.5 py-0.5 text-[11px] font-black text-white uppercase tracking-wider shadow-sm">
                       {oferta.textoPromo}
                     </span>
                   </div>
@@ -400,7 +400,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
                 <div className="p-3.5 flex flex-1 flex-col justify-between">
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-stone-500">
+                    <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
                       {oferta.localNombre}
                     </span>
                     <h3 className="font-display text-lg text-stone-900 tracking-wide uppercase line-clamp-1 mt-0.5">
@@ -415,7 +415,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                           {formatCLP(oferta.precioOriginal)}
                         </span>
                       )}
-                      <span className="text-sm font-black text-[#EA580C] tabular-nums">
+                      <span className="text-sm font-black text-[#C2410C] tabular-nums">
                         {formatCLP(oferta.precioOferta)}
                       </span>
                     </div>
@@ -598,11 +598,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-[#EA580C] group-hover:rotate-12 transition-transform duration-300">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-[#C2410C] group-hover:rotate-12 transition-transform duration-300">
                 <Dices className="h-6 w-6" />
               </div>
               <div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#EA580C]">
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#C2410C]">
                   <Sparkles className="h-3 w-3" />
                   RECOMENDADOR DE PLATOS
                 </span>
@@ -650,7 +650,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   alt="Caleta Quidico"
                   className="w-full h-36 sm:h-44 object-cover rounded"
                 />
-                <p className="mt-2 text-center text-stone-800 text-[10px] font-bold tracking-widest uppercase">
+                <p className="mt-2 text-center text-stone-800 text-[11px] font-bold tracking-widest uppercase">
                   CALETA QUIDICO
                 </p>
               </div>
@@ -661,7 +661,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   alt="Gastronomía de Tirúa"
                   className="w-full h-36 sm:h-44 object-cover rounded"
                 />
-                <p className="mt-2 text-center text-stone-800 text-[10px] font-bold tracking-widest uppercase">
+                <p className="mt-2 text-center text-stone-800 text-[11px] font-bold tracking-widest uppercase">
                   SABORES DE NUESTRA TIERRA
                 </p>
               </div>
@@ -811,7 +811,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-[10px] font-bold text-[#EA580C] uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-[11px] font-bold text-[#C2410C] uppercase tracking-wider">
                   <QrCode className="h-3 w-3" />
                   MENÚ QR EXCLUSIVO
                 </span>

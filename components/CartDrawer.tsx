@@ -623,7 +623,7 @@ export default function CartDrawer({
                 <div className="mx-auto flex h-13 w-13 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-xs">
                   <CheckCircle2 className="h-7 w-7 text-emerald-600" />
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-800">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-0.5 text-[11px] font-black uppercase tracking-wider text-emerald-800">
                   ✓ Comanda Registrada con Éxito
                 </span>
                 <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-wide text-stone-900 leading-tight">
@@ -636,7 +636,7 @@ export default function CartDrawer({
 
               {/* Tarjeta Destacada con Código de Retiro */}
               <div className="rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50/90 p-4 text-center space-y-1 shadow-xs">
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-900">
+                <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-900">
                   Código de Identificación / Retiro
                 </span>
                 <div className="font-display text-3xl sm:text-4xl font-black tracking-widest text-stone-950 tabular-nums">
@@ -655,7 +655,7 @@ export default function CartDrawer({
                       <Landmark className="h-4 w-4 text-emerald-700" />
                       Datos para Transferir (Total: {formatCLP(pedidoConfirmado.total)})
                     </span>
-                    <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-extrabold text-emerald-900">
+                    <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[11px] font-extrabold text-emerald-900">
                       CuentaRUT
                     </span>
                   </div>
@@ -663,37 +663,37 @@ export default function CartDrawer({
                   <dl className="grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2">
                     {local.banco && (
                       <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">Banco</dt>
+                        <dt className="text-[11px] font-bold uppercase text-slate-600">Banco</dt>
                         <dd className="font-bold text-slate-900">{local.banco}</dd>
                       </div>
                     )}
                     {local.tipo_cuenta && (
                       <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">Tipo de cuenta</dt>
+                        <dt className="text-[11px] font-bold uppercase text-slate-600">Tipo de cuenta</dt>
                         <dd className="font-bold text-slate-900">{local.tipo_cuenta}</dd>
                       </div>
                     )}
                     {local.numero_cuenta && (
                       <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">N° de cuenta</dt>
+                        <dt className="text-[11px] font-bold uppercase text-slate-600">N° de cuenta</dt>
                         <dd className="font-black text-slate-900 tabular-nums">{local.numero_cuenta}</dd>
                       </div>
                     )}
                     {local.rut_titular && (
                       <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">RUT Titular</dt>
+                        <dt className="text-[11px] font-bold uppercase text-slate-600">RUT Titular</dt>
                         <dd className="font-black text-slate-900 tabular-nums">{local.rut_titular}</dd>
                       </div>
                     )}
                     {local.nombre_titular && (
                       <div className="bg-white/90 p-2 rounded-lg border border-emerald-100 sm:col-span-2">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">Nombre del Titular</dt>
+                        <dt className="text-[11px] font-bold uppercase text-slate-600">Nombre del Titular</dt>
                         <dd className="font-bold text-slate-900">{local.nombre_titular}</dd>
                       </div>
                     )}
                     {local.email_transferencia && (
                       <div className="bg-white/90 p-2 rounded-lg border border-emerald-100 sm:col-span-2">
-                        <dt className="text-[10px] font-bold uppercase text-slate-500">Correo para comprobante</dt>
+                        <dt className="text-[11px] font-bold uppercase text-slate-600">Correo para comprobante</dt>
                         <dd className="font-semibold text-slate-800">{local.email_transferencia}</dd>
                       </div>
                     )}
@@ -730,15 +730,15 @@ export default function CartDrawer({
               {/* Stepper Visual de Estado en Vivo (Sincronizado con Monitor de Cocina) */}
               <div className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-wider text-stone-500">
+                  <span className="text-[11px] font-black uppercase tracking-wider text-stone-600">
                     Estado en Cocina
                   </span>
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider tabular-nums ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider tabular-nums ${
                       pedidoConfirmado.estado === "listo"
                         ? "bg-emerald-100 text-emerald-800 border border-emerald-300 animate-pulse"
                         : pedidoConfirmado.estado === "preparando"
-                        ? "bg-orange-100 text-[#EA580C] border border-orange-200"
+                        ? "bg-orange-100 text-[#C2410C] border border-orange-200"
                         : pedidoConfirmado.estado === "entregado"
                         ? "bg-slate-100 text-slate-700 border border-slate-200"
                         : "bg-amber-100 text-amber-900 border border-amber-200"
@@ -773,11 +773,11 @@ export default function CartDrawer({
                         pedidoConfirmado.estado
                       )
                         ? "border-emerald-300 bg-emerald-50 text-emerald-900 font-bold"
-                        : "border-stone-200 bg-stone-50 text-stone-400"
+                        : "border-stone-200 bg-stone-50 text-stone-500"
                     }`}
                   >
                     <span className="block text-base">⏳</span>
-                    <span className="text-[10px] uppercase tracking-wider block mt-0.5">
+                    <span className="text-[11px] uppercase tracking-wider block mt-0.5 font-bold">
                       Recibido
                     </span>
                   </div>
@@ -788,11 +788,11 @@ export default function CartDrawer({
                         pedidoConfirmado.estado
                       )
                         ? "border-orange-300 bg-orange-50 text-orange-950 font-bold"
-                        : "border-stone-200 bg-stone-50 text-stone-400"
+                        : "border-stone-200 bg-stone-50 text-stone-500"
                     }`}
                   >
                     <span className="block text-base">🔥</span>
-                    <span className="text-[10px] uppercase tracking-wider block mt-0.5">
+                    <span className="text-[11px] uppercase tracking-wider block mt-0.5 font-bold">
                       En Cocina
                     </span>
                   </div>
@@ -801,11 +801,11 @@ export default function CartDrawer({
                     className={`p-2 rounded-xl border transition-all ${
                       ["listo", "entregado"].includes(pedidoConfirmado.estado)
                         ? "border-emerald-500 bg-emerald-600 text-white font-black shadow-sm"
-                        : "border-stone-200 bg-stone-50 text-stone-400"
+                        : "border-stone-200 bg-stone-50 text-stone-500"
                     }`}
                   >
                     <span className="block text-base">🎉</span>
-                    <span className="text-[10px] uppercase tracking-wider block mt-0.5">
+                    <span className="text-[11px] uppercase tracking-wider block mt-0.5 font-bold">
                       ¡Listo!
                     </span>
                   </div>
@@ -838,7 +838,7 @@ export default function CartDrawer({
               <div className="rounded-2xl border border-stone-200/90 bg-white p-4 space-y-2.5 shadow-xs text-xs text-stone-800">
                 <div className="flex items-center justify-between border-b border-stone-100 pb-2">
                   <span className="font-bold text-stone-500 flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5 text-[#EA580C]" />
+                    <Clock className="h-3.5 w-3.5 text-[#C2410C]" />
                     Horario de Retiro
                   </span>
                   <span className="font-black text-stone-900 tabular-nums">
@@ -906,7 +906,7 @@ export default function CartDrawer({
                   <span className="font-display text-base uppercase text-stone-900">
                     Total a Pagar
                   </span>
-                  <span className="font-display text-2xl font-black text-[#EA580C] tabular-nums">
+                  <span className="font-display text-2xl font-black text-[#C2410C] tabular-nums">
                     {formatCLP(pedidoConfirmado.total)}
                   </span>
                 </div>
@@ -985,7 +985,7 @@ export default function CartDrawer({
                         <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
                           Última comanda registrada
                         </span>
-                        <span className="rounded-full bg-amber-100 border border-amber-300 px-2 py-0.5 text-[10px] font-black text-amber-900 tabular-nums">
+                        <span className="rounded-full bg-amber-100 border border-amber-300 px-2 py-0.5 text-[11px] font-black text-amber-900 tabular-nums">
                           #{ultimoPedidoGuardado.codigoRetiro}
                         </span>
                       </div>
@@ -1002,7 +1002,7 @@ export default function CartDrawer({
                         onClick={() => setPedidoConfirmado(ultimoPedidoGuardado)}
                         className="w-full rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-900 py-2.5 px-3 text-xs font-bold transition flex items-center justify-center gap-1.5"
                       >
-                        <FileText className="h-3.5 w-3.5 text-[#EA580C]" />
+                        <FileText className="h-3.5 w-3.5 text-[#C2410C]" />
                         <span>Ver recibo y estado de comanda</span>
                       </button>
                     </div>
@@ -1039,7 +1039,7 @@ export default function CartDrawer({
                               {opcionesSeleccionadas.map((op, opIdx) => (
                                 <span
                                   key={opIdx}
-                                  className="inline-flex items-center rounded-md bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-700 border border-stone-200"
+                                  className="inline-flex items-center rounded-md bg-stone-100 px-1.5 py-0.5 text-[11px] font-medium text-stone-700 border border-stone-200"
                                 >
                                   {op.nombre}
                                   {op.precio > 0 ? ` (+${formatCLP(op.precio)})` : ""}
@@ -1219,7 +1219,7 @@ export default function CartDrawer({
                     ¿Cuándo pasas a retirar tu pedido?
                   </span>
                   {horaRetiroTipo === "inmediato" && (
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-extrabold text-amber-900 border border-amber-300">
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-extrabold text-amber-900 border border-amber-300">
                       ~{local.tiempo_estimado || "20-30 min"}
                     </span>
                   )}
