@@ -27,6 +27,7 @@ import ProductCard from "@/components/ProductCard";
 import FloatingCartBar from "@/components/FloatingCartBar";
 import dynamic from "next/dynamic";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
+import { TopDownLetters } from "@/components/ui/top-down-letters";
 
 const CartDrawer = dynamic(() => import("@/components/CartDrawer"), {
   ssr: false,
@@ -721,15 +722,15 @@ export default function MenuClient({ local }: MenuClientProps) {
                 >
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <h2
+                      <TopDownLetters
+                        as="h2"
+                        text={categoria.nombre}
                         className={`font-display text-2xl tracking-wide uppercase ${
                           pausada
                             ? "text-stone-400 line-through decoration-stone-400"
                             : theme.categoryTitle
                         }`}
-                      >
-                        {categoria.nombre}
-                      </h2>
+                      />
                       {pausada && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-slate-200 border border-slate-300 px-2 py-0.5 text-[11px] font-black uppercase text-slate-700">
                           ⏸️ Pausada por hoy

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
+import { TopDownLetters } from "@/components/ui/top-down-letters";
 
 const RecomendadorPlatosModal = dynamic(
   () => import("@/components/RecomendadorPlatosModal"),
@@ -281,9 +282,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </div>
 
           {/* Título Principal */}
-          <h1 className="font-display text-4xl sm:text-6xl md:text-7xl text-[#18181B] tracking-tight uppercase max-w-4xl mx-auto leading-none">
-            PIDE DIRECTO A LA COCINA EN NUESTRA COMUNA
-          </h1>
+          <TopDownLetters
+            as="h1"
+            text="PIDE DIRECTO A LA COCINA EN NUESTRA COMUNA"
+            className="font-display text-4xl sm:text-6xl md:text-7xl text-[#18181B] tracking-tight uppercase max-w-4xl mx-auto leading-none"
+          />
 
           {/* Subtítulo descriptivo sin rodeos */}
           <p className="font-body text-sm sm:text-base text-stone-600 max-w-2xl mx-auto mt-3 leading-relaxed">
@@ -348,9 +351,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 <Flame className="h-3 w-3 fill-red-600 text-red-600" />
                 <span>OFERTAS DE HOY</span>
               </div>
-              <h2 className="font-display text-2xl sm:text-3xl text-stone-900 tracking-wide uppercase mt-1">
-                PROMOS DESTACADAS DE LA JORNADA
-              </h2>
+              <TopDownLetters
+                as="h2"
+                text="PROMOS DESTACADAS DE LA JORNADA"
+                className="font-display text-2xl sm:text-3xl text-stone-900 tracking-wide uppercase mt-1"
+              />
             </div>
 
             {ofertasDelDia.length > 1 && (
@@ -444,9 +449,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2 border-b border-stone-200">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="font-display text-3xl sm:text-4xl uppercase tracking-wide text-[#18181B]">
-                RESTAURANTES Y PICADAS
-              </h2>
+              <TopDownLetters
+                as="h2"
+                text="RESTAURANTES Y PICADAS"
+                className="font-display text-3xl sm:text-4xl uppercase tracking-wide text-[#18181B]"
+              />
               <span className="tabular-nums rounded-full bg-stone-200 px-2.5 py-0.5 text-xs font-black text-stone-800">
                 {localesFiltrados.length}
               </span>
@@ -607,9 +614,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   <Sparkles className="h-3 w-3" />
                   RECOMENDADOR DE PLATOS
                 </span>
-                <h3 className="mt-1 font-display text-2xl sm:text-3xl tracking-wide text-stone-900">
-                  ¿NO SABES QUÉ PEDIR HOY? DESCÚBRELO EN 2 TOQUES
-                </h3>
+                <TopDownLetters
+                  as="h3"
+                  text="¿NO SABES QUÉ PEDIR HOY? DESCÚBRELO EN 2 TOQUES"
+                  className="mt-1 font-display text-2xl sm:text-3xl tracking-wide text-stone-900"
+                />
                 <p className="text-xs sm:text-sm font-medium text-stone-600">
                   Elige con quién comes y tu antojo del momento. Te sugerimos los 3 mejores platos al instante.
                 </p>
@@ -673,9 +682,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               <span className="text-[11px] font-black uppercase tracking-[0.25em] text-orange-400">
                 GASTRONOMÍA LOCAL CON IDENTIDAD
               </span>
-              <h2 className="font-display text-3xl sm:text-5xl text-white tracking-wide uppercase leading-tight">
-                SABORES AUTÉNTICOS DE NUESTRA TIERRA Y MAR
-              </h2>
+              <TopDownLetters
+                as="h2"
+                text="SABORES AUTÉNTICOS DE NUESTRA TIERRA Y MAR"
+                className="font-display text-3xl sm:text-5xl text-white tracking-wide uppercase leading-tight"
+              />
               <p className="font-body text-xs sm:text-sm text-stone-300 leading-relaxed font-normal">
                 PideTirúa es la vitrina gastronómica comunal que une a los emprendedores de <strong>Tirúa Centro</strong> y la emblemática caleta de <strong>Quidico</strong>. Pescados y mariscos frescos de la costa, pollos asados, papas fritas y recetas familiares preparadas por las manos de nuestra gente.
               </p>
@@ -707,9 +718,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 <Store className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-display text-xl text-stone-900 tracking-wide uppercase">
-                  RETIRO EN LOCAL Y EN MESA
-                </h3>
+                <TopDownLetters
+                  as="h3"
+                  text="RETIRO EN LOCAL Y EN MESA"
+                  className="font-display text-xl text-stone-900 tracking-wide uppercase"
+                />
                 <p className="font-body text-xs text-stone-600 mt-1 leading-relaxed">
                   Pide con anticipación desde tu celular y retira tu comida caliente y lista sin filas en el mostrador.
                 </p>
@@ -721,9 +734,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 <Fish className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-display text-xl text-stone-900 tracking-wide uppercase">
-                  PRODUCTO 100% LOCAL
-                </h3>
+                <TopDownLetters
+                  as="h3"
+                  text="PRODUCTO 100% LOCAL"
+                  className="font-display text-xl text-stone-900 tracking-wide uppercase"
+                />
                 <p className="font-body text-xs text-stone-600 mt-1 leading-relaxed">
                   Mariscos frescos de caleta Quidico y recetas tradicionales del campo tiruano a tu mesa.
                 </p>
@@ -735,9 +750,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 <QrCode className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="font-display text-xl text-stone-900 tracking-wide uppercase">
-                  ¿TIENES UN LOCAL?
-                </h3>
+                <TopDownLetters
+                  as="h3"
+                  text="¿TIENES UN LOCAL?"
+                  className="font-display text-xl text-stone-900 tracking-wide uppercase"
+                />
                 <p className="font-body text-xs text-stone-600 mt-1 leading-relaxed">
                   Suma tu restaurante a PideTirúa y obtén tu carta digital QR para pedidos en mesa y mostrador.
                 </p>
