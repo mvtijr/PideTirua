@@ -331,11 +331,11 @@ export default function RecomendadorPlatosModal({
       aria-labelledby="recomendador-modal-title"
     >
       <div
-        className="relative w-full max-w-lg my-auto overflow-hidden rounded-3xl border border-stone-200/90 bg-[#FAF8F5] text-[#18181B] shadow-2xl flex flex-col max-h-[92vh] shrink-0"
+        className="relative w-full max-w-xl sm:max-w-2xl my-auto overflow-hidden rounded-3xl border border-stone-200/90 bg-[#FAF8F5] text-[#18181B] shadow-2xl flex flex-col max-h-[92vh] shrink-0"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Cabecera Editorial con GradientBackground y Textura */}
-        <div className="relative p-5 pb-4 border-b border-stone-200/80 bg-white/95 flex items-start justify-between overflow-hidden">
+        <div className="relative p-5 pb-4 sm:p-6 sm:pb-5 border-b border-stone-200/80 bg-white/95 flex items-start justify-between overflow-hidden">
           <GradientBackground
             gradientType="linear-gradient"
             gradientOrigin="left-middle"
@@ -351,9 +351,9 @@ export default function RecomendadorPlatosModal({
             noisePatternRefreshInterval={0}
           />
 
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-[#C2410C] border border-orange-200/70 shadow-xs">
-              <Dices className="h-6 w-6" />
+          <div className="relative z-10 flex items-center gap-3.5">
+            <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-[#C2410C] border border-orange-200/70 shadow-xs">
+              <Dices className="h-6 w-6 sm:h-7 sm:w-7" />
             </div>
             <div>
               <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-[#C2410C] border border-orange-200/60">
@@ -362,7 +362,7 @@ export default function RecomendadorPlatosModal({
               </span>
               <h2
                 id="recomendador-modal-title"
-                className="mt-1 font-display text-2xl sm:text-3xl tracking-wide uppercase text-stone-900 leading-none"
+                className="mt-1 font-display text-2xl sm:text-3xl md:text-4xl tracking-wide uppercase text-stone-900 leading-none"
               >
                 ¿Indeciso? Te ayudamos en 2 toques
               </h2>
@@ -372,7 +372,7 @@ export default function RecomendadorPlatosModal({
           <button
             type="button"
             onClick={handleCerrar}
-            className="relative z-10 rounded-full p-2 text-stone-400 hover:text-stone-800 hover:bg-stone-100 transition active:scale-95 border border-transparent hover:border-stone-200 shrink-0"
+            className="relative z-10 rounded-full p-2.5 text-stone-400 hover:text-stone-800 hover:bg-stone-100 transition active:scale-95 border border-transparent hover:border-stone-200 shrink-0"
             aria-label="Cerrar recomendador"
           >
             <X className="h-5 w-5" />
@@ -380,10 +380,10 @@ export default function RecomendadorPlatosModal({
         </div>
 
         {/* Indicador de Pasos / Stepper Artesanal */}
-        <div className="flex items-center justify-between border-b border-stone-200/80 bg-[#F4EFE6] px-5 py-2.5 text-xs font-bold text-stone-600">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between border-b border-stone-200/80 bg-[#F4EFE6] px-5 py-3 sm:px-6 sm:py-3.5 text-xs font-bold text-stone-600">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             <span
-              className={`tabular-nums flex h-6 w-6 items-center justify-center rounded-full text-xs font-black shadow-xs ${
+              className={`tabular-nums flex h-6 w-6 sm:h-6 sm:w-6 items-center justify-center rounded-full text-xs font-black shadow-xs ${
                 paso === 1
                   ? "bg-[#18181B] text-white"
                   : "bg-emerald-600 text-white"
@@ -391,12 +391,12 @@ export default function RecomendadorPlatosModal({
             >
               1
             </span>
-            <span className={paso === 1 ? "text-stone-900 font-extrabold uppercase tracking-wider text-[11px]" : "uppercase tracking-wider text-[11px]"}>
+            <span className={paso === 1 ? "text-stone-900 font-extrabold uppercase tracking-wider text-[11px] sm:text-xs" : "uppercase tracking-wider text-[11px] sm:text-xs"}>
               Comensales
             </span>
             <ChevronRight className="h-3.5 w-3.5 text-stone-400" />
             <span
-              className={`tabular-nums flex h-6 w-6 items-center justify-center rounded-full text-xs font-black shadow-xs ${
+              className={`tabular-nums flex h-6 w-6 sm:h-6 sm:w-6 items-center justify-center rounded-full text-xs font-black shadow-xs ${
                 paso === 2
                   ? "bg-[#18181B] text-white"
                   : paso === 3
@@ -406,12 +406,12 @@ export default function RecomendadorPlatosModal({
             >
               2
             </span>
-            <span className={paso === 2 ? "text-stone-900 font-extrabold uppercase tracking-wider text-[11px]" : "uppercase tracking-wider text-[11px]"}>
+            <span className={paso === 2 ? "text-stone-900 font-extrabold uppercase tracking-wider text-[11px] sm:text-xs" : "uppercase tracking-wider text-[11px] sm:text-xs"}>
               Antojo
             </span>
             <ChevronRight className="h-3.5 w-3.5 text-stone-400" />
             <span
-              className={`tabular-nums flex h-6 w-6 items-center justify-center rounded-full text-xs font-black shadow-xs ${
+              className={`tabular-nums flex h-6 w-6 sm:h-6 sm:w-6 items-center justify-center rounded-full text-xs font-black shadow-xs ${
                 paso === 3
                   ? "bg-[#18181B] text-white"
                   : "bg-stone-200 text-stone-500"
@@ -419,7 +419,7 @@ export default function RecomendadorPlatosModal({
             >
               3
             </span>
-            <span className={paso === 3 ? "text-stone-900 font-extrabold uppercase tracking-wider text-[11px]" : "uppercase tracking-wider text-[11px]"}>
+            <span className={paso === 3 ? "text-stone-900 font-extrabold uppercase tracking-wider text-[11px] sm:text-xs" : "uppercase tracking-wider text-[11px] sm:text-xs"}>
               Platos
             </span>
           </div>
@@ -428,42 +428,42 @@ export default function RecomendadorPlatosModal({
             <button
               type="button"
               onClick={reiniciar}
-              className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-[#C2410C] hover:text-orange-700 transition"
+              className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-black uppercase tracking-wider text-[#C2410C] hover:text-orange-700 transition"
             >
-              <RotateCcw className="h-3 w-3" />
+              <RotateCcw className="h-3.5 w-3.5" />
               Reiniciar
             </button>
           )}
         </div>
 
         {/* Contenido Dinámico según el Paso */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5">
           {/* PASO 1: ¿Con quién comes? */}
           {paso === 1 && (
-            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
               <div className="text-center sm:text-left">
-                <h3 className="font-display text-2xl uppercase tracking-wide text-stone-900">
+                <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-wide text-stone-900">
                   Paso 1: ¿Para cuántas personas es el pedido?
                 </h3>
-                <p className="font-body text-xs text-stone-600 mt-0.5">
+                <p className="font-body text-xs sm:text-sm text-stone-600 mt-1">
                   Selecciona la opción para ajustar el tamaño de las porciones:
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 pt-2">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 pt-2">
                 <button
                   type="button"
                   onClick={() => seleccionarConQuien("solo")}
-                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-center transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
+                  className="flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 sm:p-5 text-center transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-[#C2410C] border border-orange-200/60 group-hover:scale-105 transition">
-                    <User className="h-6 w-6" />
+                  <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-orange-100 text-[#C2410C] border border-orange-200/60 group-hover:scale-105 transition">
+                    <User className="h-6 w-6 sm:h-7 sm:w-7" />
                   </div>
                   <div>
-                    <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
+                    <span className="block font-display text-lg sm:text-xl tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       Solo yo
                     </span>
-                    <span className="block font-body text-xs text-stone-500">
+                    <span className="block font-body text-xs text-stone-500 mt-0.5">
                       Porción individual
                     </span>
                   </div>
@@ -472,16 +472,16 @@ export default function RecomendadorPlatosModal({
                 <button
                   type="button"
                   onClick={() => seleccionarConQuien("pareja")}
-                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-center transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
+                  className="flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 sm:p-5 text-center transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-700 border border-rose-200/60 group-hover:scale-105 transition">
-                    <Users className="h-6 w-6" />
+                  <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-rose-100 text-rose-700 border border-rose-200/60 group-hover:scale-105 transition">
+                    <Users className="h-6 w-6 sm:h-7 sm:w-7" />
                   </div>
                   <div>
-                    <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
+                    <span className="block font-display text-lg sm:text-xl tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       En pareja
                     </span>
-                    <span className="block font-body text-xs text-stone-500">
+                    <span className="block font-body text-xs text-stone-500 mt-0.5">
                       Para 2 personas
                     </span>
                   </div>
@@ -490,16 +490,16 @@ export default function RecomendadorPlatosModal({
                 <button
                   type="button"
                   onClick={() => seleccionarConQuien("grupo")}
-                  className="flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-center transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
+                  className="flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 sm:p-5 text-center transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-sky-100 text-[#0284C7] border border-sky-200/60 group-hover:scale-105 transition">
-                    <Users className="h-6 w-6" />
+                  <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-sky-100 text-[#0284C7] border border-sky-200/60 group-hover:scale-105 transition">
+                    <Users className="h-6 w-6 sm:h-7 sm:w-7" />
                   </div>
                   <div>
-                    <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
+                    <span className="block font-display text-lg sm:text-xl tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       En grupo
                     </span>
-                    <span className="block font-body text-xs text-stone-500">
+                    <span className="block font-body text-xs text-stone-500 mt-0.5">
                       Familia o amigos
                     </span>
                   </div>
@@ -510,30 +510,30 @@ export default function RecomendadorPlatosModal({
 
           {/* PASO 2: ¿Qué antojo tienes? */}
           {paso === 2 && (
-            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
               <div className="text-center sm:text-left">
-                <h3 className="font-display text-2xl uppercase tracking-wide text-stone-900">
+                <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-wide text-stone-900">
                   Paso 2: ¿Qué tipo de antojo tienes hoy?
                 </h3>
-                <p className="font-body text-xs text-stone-600 mt-0.5">
+                <p className="font-body text-xs sm:text-sm text-stone-600 mt-1">
                   Elige el sabor que más te entusiasma:
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => seleccionarAntojo("rapido")}
-                  className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-3.5 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
+                  className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-[#C2410C] border border-orange-200/60 group-hover:scale-105 transition">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-[#C2410C] border border-orange-200/60 group-hover:scale-105 transition">
                     <Zap className="h-6 w-6" />
                   </div>
                   <div>
-                    <span className="block font-display text-base tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
+                    <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       Rápido y contundente
                     </span>
-                    <span className="block font-body text-xs text-stone-500 leading-snug">
+                    <span className="block font-body text-xs text-stone-500 leading-snug mt-0.5">
                       Burgers, sándwiches, papas y chorrillanas
                     </span>
                   </div>
@@ -542,16 +542,16 @@ export default function RecomendadorPlatosModal({
                 <button
                   type="button"
                   onClick={() => seleccionarAntojo("sushi")}
-                  className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-3.5 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
+                  className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700 border border-rose-200/60 group-hover:scale-105 transition">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700 border border-rose-200/60 group-hover:scale-105 transition">
                     <Sparkles className="h-6 w-6" />
                   </div>
                   <div>
-                    <span className="block font-display text-base tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
+                    <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       Sushi / Fusión
                     </span>
-                    <span className="block font-body text-xs text-stone-500 leading-snug">
+                    <span className="block font-body text-xs text-stone-500 leading-snug mt-0.5">
                       Rolls tempura, handrolls y combinaciones
                     </span>
                   </div>
@@ -560,16 +560,16 @@ export default function RecomendadorPlatosModal({
                 <button
                   type="button"
                   onClick={() => seleccionarAntojo("pescados")}
-                  className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-3.5 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
+                  className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-[#0284C7] border border-sky-200/60 group-hover:scale-105 transition">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-[#0284C7] border border-sky-200/60 group-hover:scale-105 transition">
                     <Fish className="h-6 w-6" />
                   </div>
                   <div>
-                    <span className="block font-display text-base tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
+                    <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       Pescados / Tradicional
                     </span>
-                    <span className="block font-body text-xs text-stone-500 leading-snug">
+                    <span className="block font-body text-xs text-stone-500 leading-snug mt-0.5">
                       Reineta fresca, mariscos y sazón marina
                     </span>
                   </div>
@@ -578,16 +578,16 @@ export default function RecomendadorPlatosModal({
                 <button
                   type="button"
                   onClick={() => seleccionarAntojo("economico")}
-                  className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-3.5 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
+                  className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200/60 group-hover:scale-105 transition">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200/60 group-hover:scale-105 transition">
                     <Coins className="h-6 w-6" />
                   </div>
                   <div>
-                    <span className="block font-display text-base tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
+                    <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       Económico
                     </span>
-                    <span className="block font-body text-xs text-stone-500 leading-snug">
+                    <span className="block font-body text-xs text-stone-500 leading-snug mt-0.5">
                       Platos ricos y promociones al mejor precio
                     </span>
                   </div>
@@ -595,8 +595,8 @@ export default function RecomendadorPlatosModal({
               </div>
 
               {/* Búsqueda manual de antojo específico */}
-              <div className="pt-3.5 border-t border-stone-200/80 mt-2">
-                <label className="block font-body text-xs font-bold text-stone-700 mb-1.5">
+              <div className="pt-4 border-t border-stone-200/80 mt-2">
+                <label className="block font-body text-xs sm:text-sm font-bold text-stone-700 mb-1.5">
                   ¿O tienes un antojo o plato específico en mente?
                 </label>
                 <form
@@ -618,7 +618,7 @@ export default function RecomendadorPlatosModal({
                   />
                   <button
                     type="submit"
-                    className="flex min-h-[42px] items-center justify-center rounded-full bg-[#18181B] hover:bg-[#EA580C] px-5 py-2.5 text-[11px] font-black uppercase tracking-wider text-white transition-all active:scale-95 shrink-0 shadow-xs"
+                    className="flex min-h-[44px] items-center justify-center rounded-full bg-[#18181B] hover:bg-[#EA580C] px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white transition-all active:scale-95 shrink-0 shadow-xs"
                   >
                     Buscar plato
                   </button>
@@ -629,13 +629,13 @@ export default function RecomendadorPlatosModal({
 
           {/* PASO 3: Resultados con las 3 mejores recomendaciones */}
           {paso === 3 && (
-            <div className="space-y-3.5 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-200">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-display text-2xl uppercase tracking-wide text-stone-900">
+                  <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-wide text-stone-900">
                     Tus recomendaciones ideales
                   </h3>
-                  <p className="font-body text-xs text-stone-600">
+                  <p className="font-body text-xs sm:text-sm text-stone-600 mt-0.5">
                     {busquedaTexto ? (
                       <span>Platos que coinciden con: <strong className="text-[#C2410C]">"{busquedaTexto}"</strong></span>
                     ) : antojo === "sushi" ? (
@@ -653,7 +653,7 @@ export default function RecomendadorPlatosModal({
                 <button
                   type="button"
                   onClick={reiniciar}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white hover:border-[#EA580C] hover:bg-orange-50/50 px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-stone-700 hover:text-[#C2410C] transition shadow-xs"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white hover:border-[#EA580C] hover:bg-orange-50/50 px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-stone-700 hover:text-[#C2410C] transition shadow-xs"
                 >
                   <RotateCcw className="h-3 w-3" />
                   <span>Probar otro</span>
@@ -672,7 +672,7 @@ export default function RecomendadorPlatosModal({
                   </button>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-3.5">
                   {sugerencias.map((item, idx) => {
                     const foto = item.producto.imagen_url || item.producto.imagen;
                     const precioFinal =
@@ -685,7 +685,7 @@ export default function RecomendadorPlatosModal({
                     return (
                       <div
                         key={item.producto.id}
-                        className="group relative flex flex-col sm:flex-row items-center gap-3.5 rounded-2xl border border-stone-200/90 bg-white p-3.5 shadow-xs transition hover:border-[#EA580C] hover:shadow-md"
+                        className="group relative flex flex-col sm:flex-row items-center gap-4 rounded-2xl border border-stone-200/90 bg-white p-4 shadow-xs transition hover:border-[#EA580C] hover:shadow-md"
                       >
                         {/* Medalla 1°, 2°, 3° */}
                         <div className="tabular-nums absolute -top-2.5 -left-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#EA580C] text-xs font-black text-white shadow-md">
@@ -693,13 +693,13 @@ export default function RecomendadorPlatosModal({
                         </div>
 
                         {/* Foto del plato */}
-                        <div className="relative h-24 w-full sm:w-28 shrink-0 overflow-hidden rounded-xl bg-stone-100 border border-stone-200/60">
+                        <div className="relative h-28 w-full sm:w-32 shrink-0 overflow-hidden rounded-xl bg-stone-100 border border-stone-200/60">
                           <PlatoSugeridoImagen
                             foto={foto}
                             nombre={item.producto.nombre}
                           />
                           {item.producto.es_oferta && (
-                            <span className="absolute top-1 right-1 flex items-center gap-0.5 rounded-full bg-[#EA580C] px-2 py-0.5 text-[10px] font-black uppercase text-white shadow-xs">
+                            <span className="absolute top-1.5 right-1.5 flex items-center gap-0.5 rounded-full bg-[#EA580C] px-2 py-0.5 text-[10px] font-black uppercase text-white shadow-xs">
                               <Flame className="h-2.5 w-2.5" />
                               Promo
                             </span>
@@ -709,33 +709,33 @@ export default function RecomendadorPlatosModal({
                         {/* Detalles */}
                         <div className="flex-1 min-w-0 text-left w-full sm:w-auto">
                           <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-[#C2410C]">
-                            <Store className="h-3 w-3 shrink-0" />
+                            <Store className="h-3.5 w-3.5 shrink-0" />
                             <span className="truncate">{item.localNombre}</span>
                             <span className="text-stone-300">•</span>
                             <span className={item.localAbierto ? "text-emerald-600" : "text-rose-600"}>
-                              {item.localAbierto ? "Abierto" : "Cerrado"}
+                              {item.localAbierto ? "Abierto ahora" : "Cerrado"}
                             </span>
                           </div>
 
-                          <h4 className="mt-0.5 font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors truncate">
+                          <h4 className="mt-1 font-display text-xl tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors truncate">
                             {item.producto.nombre}
                           </h4>
 
                           {item.producto.descripcion && (
-                            <p className="mt-0.5 font-body text-xs text-stone-500 line-clamp-1">
+                            <p className="mt-0.5 font-body text-xs text-stone-500 line-clamp-2 leading-relaxed">
                               {item.producto.descripcion}
                             </p>
                           )}
 
-                          <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-stone-100 pt-2">
-                            <span className="tabular-nums text-base font-black text-[#C2410C]">
+                          <div className="mt-3 flex items-center justify-between gap-3 border-t border-stone-100 pt-2.5">
+                            <span className="tabular-nums text-lg font-black text-[#C2410C]">
                               {formatCLP(precioFinal)}
                             </span>
 
                             <Link
                               href={`/${item.localSlug}`}
                               onClick={handleCerrar}
-                              className="inline-flex min-h-[38px] items-center gap-1.5 rounded-full bg-[#18181B] hover:bg-[#EA580C] px-4 py-2 text-xs font-black uppercase tracking-wider text-white shadow-xs transition-all active:scale-95 shrink-0"
+                              className="inline-flex min-h-[40px] items-center gap-2 rounded-full bg-[#18181B] hover:bg-[#EA580C] px-5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-xs transition-all active:scale-95 shrink-0"
                             >
                               <span>Pedir este plato</span>
                               <ArrowRight className="h-3.5 w-3.5" />
