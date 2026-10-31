@@ -41,6 +41,7 @@ async function getEffectiveSupabaseClient() {
 }
 
 import { timingSafeCompare } from "@/lib/security";
+import { getFechaHoyChile } from "@/lib/formatters";
 
 export function verifySuperAdminKey(inputKey: string): boolean {
   const expected = (process.env.SUPERADMIN_KEY || "Tirua2026Admin").trim();
@@ -78,6 +79,7 @@ interface SupabaseProductoRow {
   es_oferta?: boolean | null;
   precio_oferta?: number | null;
   texto_promo?: string | null;
+  fecha_oferta?: string | null;
   opciones?: GrupoOpcion[] | null;
   orden?: number | null;
 }
@@ -210,6 +212,7 @@ function normalizeStaticLocal(raw: Local): Local {
             ? prod.precio_oferta
             : undefined,
         texto_promo: prod.texto_promo?.trim() || undefined,
+        fecha_oferta: prod.fecha_oferta || undefined,
         opciones: Array.isArray(prod.opciones) ? prod.opciones : [],
       })),
     })),
@@ -342,6 +345,10 @@ function mapSupabaseRowToLocal(
                 p.texto_promo != null
                   ? String(p.texto_promo)
                   : fallbackProd?.texto_promo,
+              fecha_oferta:
+                p.fecha_oferta != null
+                  ? String(p.fecha_oferta)
+                  : fallbackProd?.fecha_oferta,
               opciones: Array.isArray(p.opciones)
                 ? p.opciones
                 : fallbackProd?.opciones || [],
@@ -1270,6 +1277,7 @@ export async function updateProductoInSupabase(
     es_oferta?: boolean;
     precio_oferta?: number | null;
     texto_promo?: string | null;
+    fecha_oferta?: string | null;
     opciones?: GrupoOpcion[];
   }
 ): Promise<{ ok: boolean; local?: Local }> {
@@ -1370,7 +1378,14 @@ export async function updateProductoInSupabase(
               ? { etiqueta: cambios.etiqueta.trim() || undefined }
               : {}),
             ...(typeof cambios.es_oferta === "boolean"
-              ? { es_oferta: cambios.es_oferta }
+              ? {
+                  es_oferta: cambios.es_oferta,
+                  fecha_oferta: cambios.es_oferta
+                    ? cambios.fecha_oferta || getFechaHoyChile()
+                    : undefined,
+                }
+              : cambios.fecha_oferta !== undefined
+              ? { fecha_oferta: cambios.fecha_oferta || undefined }
               : {}),
             ...(cambios.precio_oferta !== undefined
               ? {
@@ -1470,6 +1485,7 @@ export async function createProductoInSupabase(
     destacado: Boolean(datos.etiqueta?.trim()),
     ...(datos.etiqueta?.trim() ? { etiqueta: datos.etiqueta.trim() } : {}),
     es_oferta: Boolean(datos.es_oferta),
+    ...(datos.es_oferta ? { fecha_oferta: getFechaHoyChile() } : {}),
     ...(typeof datos.precio_oferta === "number" && !Number.isNaN(datos.precio_oferta)
       ? { precio_oferta: Math.round(datos.precio_oferta) }
       : {}),

@@ -4,7 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { CategoriaFiltro, Local, SectorComuna } from "@/types/local";
 import { CATEGORIAS_DIRECTORIO } from "@/lib/locales";
-import { formatCLP } from "@/lib/formatters";
+import { esOfertaValidaHoy, formatCLP } from "@/lib/formatters";
 import LocalCard from "@/components/LocalCard";
 import {
   ArrowRight,
@@ -70,7 +70,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       .forEach((loc) => {
         loc.categorias.forEach((cat) => {
           cat.productos.forEach((p) => {
-            if (p.es_oferta && p.disponible !== false) {
+            if (esOfertaValidaHoy(p)) {
               const precioOferta =
                 typeof p.precio_oferta === "number" && p.precio_oferta > 0
                   ? p.precio_oferta

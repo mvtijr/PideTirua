@@ -3,7 +3,7 @@
 import { useState, memo } from "react";
 import { Plus, Minus, Sparkles, Ban, Flame, Check, UtensilsCrossed } from "lucide-react";
 import { Producto } from "@/types/local";
-import { formatCLP } from "@/lib/formatters";
+import { esOfertaValidaHoy, formatCLP } from "@/lib/formatters";
 import { getLocalTheme } from "@/lib/localTheme";
 
 interface ProductCardProps {
@@ -32,7 +32,7 @@ export default memo(function ProductCard({
     producto.opciones && producto.opciones.length > 0
   );
   const tieneOferta =
-    Boolean(producto.es_oferta) &&
+    esOfertaValidaHoy(producto) &&
     typeof producto.precio_oferta === "number" &&
     producto.precio_oferta > 0 &&
     producto.precio_oferta < producto.precio;

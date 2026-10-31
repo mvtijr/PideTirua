@@ -30,11 +30,40 @@ interface WhatsAppOrderPayload {
 }
 
 /**
- * Obtiene el precio efectivo a cobrar por un producto (aplica precio_oferta si es_oferta está activo).
+ * Retorna la fecha actual en Chile (zona horaria America/Santiago) en formato YYYY-MM-DD.
+ */
+export function getFechaHoyChile(): string {
+  try {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "America/Santiago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+  } catch {
+    return new Date().toISOString().split("T")[0];
+  }
+}
+
+/**
+ * Determina si una oferta del día está activa y vigente exclusivamente para la fecha de hoy.
+ * Si fue configurada en una fecha previa o expiró, retorna false para que vuelva a su precio normal.
+ */
+export function esOfertaValidaHoy(producto: Producto): boolean {
+  if (!producto.es_oferta || producto.disponible === false) return false;
+  const hoy = getFechaHoyChile();
+  if (producto.fecha_oferta) {
+    return producto.fecha_oferta === hoy;
+  }
+  return true;
+}
+
+/**
+ * Obtiene el precio efectivo a cobrar por un producto (aplica precio_oferta si la oferta del día está activa hoy).
  */
 export function getPrecioEfectivoProducto(producto: Producto): number {
   if (
-    producto.es_oferta &&
+    esOfertaValidaHoy(producto) &&
     typeof producto.precio_oferta === "number" &&
     producto.precio_oferta > 0
   ) {

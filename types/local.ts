@@ -45,6 +45,7 @@ export interface Producto {
   es_oferta?: boolean;
   precio_oferta?: number; // En pesos chilenos (CLP) rebajado
   texto_promo?: string; // Ej: "2x1", "20% OFF", "Promo del Día"
+  fecha_oferta?: string; // Fecha en formato YYYY-MM-DD (Chile) en que la oferta del día es válida
   opciones?: GrupoOpcion[];
 }
 

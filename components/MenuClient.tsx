@@ -15,9 +15,11 @@ import {
   UtensilsCrossed,
   AlertTriangle,
   Sparkles,
+  Flame,
 } from "lucide-react";
 import { ItemCarrito, Local, Producto, OpcionSeleccionada, EstadoPedido } from "@/types/local";
 import {
+  esOfertaValidaHoy,
   formatPhoneDisplay,
   getPrecioEfectivoProducto,
   getPrecioUnitarioItem,
@@ -491,6 +493,18 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
     [carrito]
   );
 
+  const ofertasDelDiaLocal = useMemo(() => {
+    const listado: Producto[] = [];
+    local.categorias.forEach((cat) => {
+      cat.productos.forEach((p) => {
+        if (esOfertaValidaHoy(p)) {
+          listado.push(p);
+        }
+      });
+    });
+    return listado;
+  }, [local.categorias]);
+
   const categoriasFiltradas = useMemo(() => {
     const query = busquedaPlato.trim().toLowerCase();
     if (!query) return local.categorias;
@@ -897,6 +911,24 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
             aria-label="Categorías del menú"
             className="flex items-center gap-2 overflow-x-auto px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 no-scrollbar"
           >
+            {ofertasDelDiaLocal.length > 0 && (
+              <button
+                type="button"
+                onClick={() => irACategoria("ofertas-dia")}
+                className={`filter-chip shrink-0 inline-flex items-center gap-1.5 px-4 py-1.5 text-xs sm:text-sm font-black transition-all rounded-full ${
+                  categoriaActiva === "ofertas-dia"
+                    ? "bg-gradient-to-r from-red-600 to-amber-500 text-white shadow-md shadow-orange-500/20"
+                    : "border border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
+                }`}
+              >
+                <Flame className="h-3.5 w-3.5 fill-red-600 text-red-600" />
+                <span>Ofertas de Hoy</span>
+                <span className="rounded-full bg-white/90 px-1.5 py-0.2 text-[10px] font-black text-amber-950">
+                  {ofertasDelDiaLocal.length}
+                </span>
+              </button>
+            )}
+
             {local.categorias.map((categoria) => {
               const activa = categoriaActiva === categoria.id;
               const pausada = categoria.activa === false;
@@ -945,6 +977,57 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
 
         {/* Listado de Categorías y Tarjetas de Producto */}
         <main className="space-y-8 px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8">
+          {/* SECCIÓN DESTACADA: OFERTAS DEL DÍA DEL LOCAL */}
+          {ofertasDelDiaLocal.length > 0 && !busquedaPlato && (
+            <section
+              id="seccion-ofertas-dia"
+              className="scroll-mt-36 rounded-3xl border-2 border-amber-300 bg-gradient-to-br from-amber-50/90 via-orange-50/50 to-rose-50/80 p-4 sm:p-6 shadow-sm"
+            >
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-red-600 to-amber-500 text-white shadow-xs">
+                    <Flame className="h-5 w-5 fill-white text-white" />
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <TopDownLetters
+                        as="h2"
+                        text="Ofertas del Día"
+                        className="font-display text-2xl sm:text-3xl font-black uppercase tracking-wide text-amber-950"
+                      />
+                      <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-white shadow-xs">
+                        Solo por hoy
+                      </span>
+                    </div>
+                    <p className="text-xs font-semibold text-amber-900/80">
+                      Precios rebajados y promociones exclusivas para hoy en {local.nombre}
+                    </p>
+                  </div>
+                </div>
+                <span className="rounded-full bg-amber-100 border border-amber-300 px-3 py-1 text-xs font-black uppercase text-amber-900">
+                  {ofertasDelDiaLocal.length}{" "}
+                  {ofertasDelDiaLocal.length === 1 ? "promo activa" : "promos activas"}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4 md:gap-5">
+                {ofertasDelDiaLocal.map((producto) => (
+                  <ProductCard
+                    key={`oferta-top-${producto.id}`}
+                    producto={producto}
+                    cantidadEnCarrito={
+                      cantidadPorProducto.get(producto.id) ?? 0
+                    }
+                    onAgregar={handleAgregarProducto}
+                    onPersonalizar={(p) => setPlatoParaPersonalizar(p)}
+                    onDisminuir={handleDisminuirProducto}
+                    localSlug={local.slug}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
           {categoriasFiltradas.length > 0 ? (
             categoriasFiltradas.map((categoria) => {
               const pausada = categoria.activa === false;

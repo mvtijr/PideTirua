@@ -742,6 +742,38 @@ export default function SuperAdminClient({
     }
   };
 
+  const handleRestablecerPinSoporte = async (loc: Local) => {
+    const seguro = window.confirm(
+      `¿Restablecer el PIN de "${loc.nombre}" al código temporal 1234?\n\nEl dueño podrá volver a entrar con 1234 y configurar de inmediato su nueva clave privada.`
+    );
+    if (!seguro) return;
+
+    setGuardandoPinSlug(loc.slug);
+    try {
+      const res = await fetch("/api/superadmin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-pin",
+          slug: loc.slug,
+          pin: "1234",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data?.error || "Error al restablecer PIN");
+      }
+      if (Array.isArray(data.locales)) {
+        setLocales(data.locales);
+      }
+      mostrarToast(`PIN de ${loc.nombre} restablecido a 1234 (Temporal)`);
+    } catch {
+      mostrarToast("No se pudo restablecer el PIN");
+    } finally {
+      setGuardandoPinSlug(null);
+    }
+  };
+
   const handleGuardarPinRapido = async (loc: Local) => {
     const pinNuevo = (pinDraftPorSlug[loc.slug] ?? loc.pin ?? "1234")
       .replace(/\D/g, "")
@@ -1960,114 +1992,37 @@ export default function SuperAdminClient({
                         </div>
                       </div>
 
-                      {/* Campo PIN de Acceso: Enmascarado (••••) con botón de ojo (👁️) y edición inmediata */}
+                      {/* Campo PIN de Acceso: Privacidad protegida con opción de restablecer a 1234 si el dueño lo olvidó */}
                       <div className="rounded-xl border border-stone-200 bg-white p-2.5">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <KeyRound className="h-3.5 w-3.5 shrink-0 text-stone-600" />
-                            <span className="font-bold uppercase tracking-wider text-stone-600 text-[11px]">
-                              PIN:
+                          <div className="flex items-center gap-1.5 text-xs text-stone-600">
+                            <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                            <span className="font-bold text-stone-700 text-[11px] uppercase tracking-wider">
+                              PIN Local:
                             </span>
-                            <strong className="rounded-lg border border-stone-200 bg-stone-100 px-2.5 py-0.5 font-mono text-xs font-bold tracking-widest text-stone-900">
-                              {pinVisiblePorSlug[loc.slug]
-                                ? loc.pin || "1234"
-                                : "••••"}
-                            </strong>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setPinVisiblePorSlug((prev) => ({
-                                  ...prev,
-                                  [loc.slug]: !prev[loc.slug],
-                                }))
-                              }
-                              title={
-                                pinVisiblePorSlug[loc.slug]
-                                  ? "Ocultar PIN"
-                                  : "Revelar PIN"
-                              }
-                              aria-label={
-                                pinVisiblePorSlug[loc.slug]
-                                  ? "Ocultar PIN"
-                                  : "Revelar PIN"
-                              }
-                              className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-stone-50 hover:bg-stone-100 px-2.5 py-1 text-[11px] font-bold text-stone-700 transition active:scale-95"
-                            >
-                              {pinVisiblePorSlug[loc.slug] ? (
-                                <>
-                                  <EyeOff className="h-3.5 w-3.5 text-stone-600" />
-                                  <span>Ocultar</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Eye className="h-3.5 w-3.5 text-stone-600" />
-                                  <span>👁️ Ver</span>
-                                </>
-                              )}
-                            </button>
+                            <span className="rounded-lg border border-stone-200 bg-stone-100 px-2 py-0.5 font-mono text-xs font-black tracking-widest text-stone-800">
+                              •••• (Privado)
+                            </span>
+                            <span className="text-[10px] text-stone-400 italic hidden sm:inline">
+                              Solo conocido por el dueño
+                            </span>
                           </div>
 
                           <button
                             type="button"
-                            onClick={() => {
-                              const abriendo = !pinEditandoPorSlug[loc.slug];
-                              setPinEditandoPorSlug((prev) => ({
-                                ...prev,
-                                [loc.slug]: abriendo,
-                              }));
-                              if (abriendo) {
-                                setPinDraftPorSlug((prev) => ({
-                                  ...prev,
-                                  [loc.slug]: loc.pin || "1234",
-                                }));
-                              }
-                            }}
-                            className="inline-flex items-center gap-1 rounded-full border border-stone-200 bg-stone-50 hover:bg-stone-100 px-2.5 py-1 text-[11px] font-bold text-stone-700 transition active:scale-95"
+                            disabled={guardandoPinSlug === loc.slug}
+                            onClick={() => void handleRestablecerPinSoporte(loc)}
+                            title="Restablece el PIN temporal a 1234 si el dueño olvidó su clave"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 hover:bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-900 transition active:scale-95 disabled:opacity-50"
                           >
-                            <Edit3 className="h-3 w-3" />
-                            <span>
-                              {pinEditandoPorSlug[loc.slug]
-                                ? "Cancelar"
-                                : "Cambiar PIN"}
-                            </span>
+                            {guardandoPinSlug === loc.slug ? (
+                              <Loader2 className="h-3 w-3 animate-spin text-amber-700" />
+                            ) : (
+                              <KeyRound className="h-3 w-3 text-amber-700" />
+                            )}
+                            <span>Resetear a 1234 (Soporte)</span>
                           </button>
                         </div>
-
-                        {pinEditandoPorSlug[loc.slug] && (
-                          <div className="mt-2.5 flex items-center gap-2 border-t border-stone-100 pt-2.5">
-                            <input
-                              type="text"
-                              inputMode="numeric"
-                              maxLength={4}
-                              value={
-                                pinDraftPorSlug[loc.slug] ?? loc.pin ?? "1234"
-                              }
-                              onChange={(e) =>
-                                setPinDraftPorSlug((prev) => ({
-                                  ...prev,
-                                  [loc.slug]: e.target.value
-                                    .replace(/\D/g, "")
-                                    .slice(0, 4),
-                                }))
-                              }
-                              placeholder="Nuevo PIN (4 dígitos)"
-                              className="w-36 rounded-xl border border-stone-200 bg-stone-50 px-2.5 py-1.5 font-mono text-xs font-bold tracking-widest text-stone-900 focus:border-[#EA580C] focus:bg-white focus:outline-none"
-                            />
-                            <button
-                              type="button"
-                              disabled={guardandoPinSlug === loc.slug}
-                              onClick={() => void handleGuardarPinRapido(loc)}
-                              className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#18181B] hover:bg-black px-3 py-1.5 text-xs font-display uppercase tracking-wider text-white shadow-xs transition active:scale-95 disabled:opacity-50"
-                            >
-                              {guardandoPinSlug === loc.slug ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <Check className="h-3.5 w-3.5" />
-                              )}
-                              <span>Guardar nuevo PIN</span>
-                            </button>
-                          </div>
-                        )}
                       </div>
                     </div>
 

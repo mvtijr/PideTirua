@@ -45,9 +45,11 @@ import {
   Plus,
   ChefHat,
   Utensils,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Local, Producto, GrupoOpcion } from "@/types/local";
-import { formatCLP } from "@/lib/formatters";
+import { formatCLP, getFechaHoyChile, esOfertaValidaHoy } from "@/lib/formatters";
 import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
 import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
@@ -262,6 +264,7 @@ export default function AdminLocalClient({
   const [nuevoPinSeguridad, setNuevoPinSeguridad] = useState<string>(
     initialLocal.pin || ""
   );
+  const [mostrarPinClaro, setMostrarPinClaro] = useState<boolean>(false);
   const [guardandoAjustes, setGuardandoAjustes] = useState<boolean>(false);
 
   // Estado de Gestión de Categorías
@@ -384,7 +387,7 @@ export default function AdminLocalClient({
           precio: String(prod.precio),
           descripcion: prod.descripcion,
           etiqueta: prod.etiqueta || "",
-          es_oferta: Boolean(prod.es_oferta),
+          es_oferta: esOfertaValidaHoy(prod),
           precio_oferta:
             prod.precio_oferta != null ? String(prod.precio_oferta) : "",
           texto_promo: prod.texto_promo || "",
@@ -414,7 +417,7 @@ export default function AdminLocalClient({
           precio: String(prod.precio),
           descripcion: prod.descripcion,
           etiqueta: prod.etiqueta || "",
-          es_oferta: Boolean(prod.es_oferta),
+          es_oferta: esOfertaValidaHoy(prod),
           precio_oferta:
             prod.precio_oferta != null ? String(prod.precio_oferta) : "",
           texto_promo: prod.texto_promo || "",
@@ -943,6 +946,7 @@ export default function AdminLocalClient({
           etiqueta: nuevaEtiqueta.trim() || undefined,
           disponible: true,
           es_oferta: nuevoEsOferta,
+          fecha_oferta: nuevoEsOferta ? getFechaHoyChile() : undefined,
           precio_oferta:
             nuevoEsOferta && precioOfertaNum > 0 ? precioOfertaNum : undefined,
           texto_promo:
@@ -1244,6 +1248,7 @@ export default function AdminLocalClient({
                 descripcion: descripcionLimpia,
                 etiqueta: etiquetaLimpia || undefined,
                 es_oferta: esOferta,
+                fecha_oferta: esOferta ? getFechaHoyChile() : undefined,
                 precio_oferta:
                   esOferta && precioOfertaNum > 0 ? precioOfertaNum : undefined,
                 texto_promo:
@@ -1267,6 +1272,7 @@ export default function AdminLocalClient({
           descripcion: descripcionLimpia,
           etiqueta: etiquetaLimpia,
           es_oferta: esOferta,
+          fecha_oferta: esOferta ? getFechaHoyChile() : null,
           precio_oferta:
             esOferta && precioOfertaNum > 0 ? precioOfertaNum : null,
           texto_promo: esOferta && textoPromoLimpio ? textoPromoLimpio : null,
@@ -2325,24 +2331,59 @@ export default function AdminLocalClient({
                       </div>
 
                       <div>
-                        <label htmlFor="al-pin" className="mb-1 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
-                          <KeyRound className="h-3.5 w-3.5 text-rose-600" />
-                          PIN de Seguridad (4 dígitos)
-                        </label>
-                        <input
-                          id="al-pin"
-                          type="text"
-                          inputMode="numeric"
-                          maxLength={4}
-                          value={nuevoPinSeguridad}
-                          onChange={(e) =>
-                            setNuevoPinSeguridad(
-                              e.target.value.replace(/\D/g, "").slice(0, 4)
-                            )
-                          }
-                          placeholder="Ej: 1234"
-                          className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 font-mono text-xs font-extrabold tracking-widest text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
-                        />
+                        <div className="mb-1 flex items-center justify-between">
+                          <label htmlFor="al-pin" className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-700">
+                            <KeyRound className="h-3.5 w-3.5 text-rose-600" />
+                            PIN de Seguridad (4 dígitos)
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setMostrarPinClaro((prev) => !prev)}
+                            className="flex items-center gap-1 text-[11px] font-bold text-stone-500 hover:text-stone-800"
+                          >
+                            {mostrarPinClaro ? (
+                              <>
+                                <EyeOff className="h-3 w-3" />
+                                <span>Ocultar</span>
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="h-3 w-3" />
+                                <span>Ver PIN</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                        <div className="relative">
+                          <input
+                            id="al-pin"
+                            type={mostrarPinClaro ? "text" : "password"}
+                            inputMode="numeric"
+                            maxLength={4}
+                            value={nuevoPinSeguridad}
+                            onChange={(e) =>
+                              setNuevoPinSeguridad(
+                                e.target.value.replace(/\D/g, "").slice(0, 4)
+                              )
+                            }
+                            placeholder="••••"
+                            className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 font-mono text-sm font-black tracking-widest text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#EA580C] focus:bg-white"
+                          />
+                        </div>
+
+                        {/* Tarjeta de Confianza y Seguridad */}
+                        <div className="mt-2.5 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3 text-[11px] leading-relaxed text-emerald-950">
+                          <div className="flex items-center gap-1.5 font-extrabold text-emerald-800">
+                            <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                            <span>Tu PIN es confidencial y solo tuyo</span>
+                          </div>
+                          <p className="mt-1 text-emerald-900/90 font-medium">
+                            Este PIN solo protege tu carta (precios y disponibilidad de platos). <strong>Nunca toca tus transferencias ni tu dinero</strong> (los cobros van directo a tu CuentaRUT o en efectivo en tu local).
+                          </p>
+                          <p className="mt-1.5 pt-1.5 border-t border-emerald-200/60 text-emerald-800 text-[10.5px]">
+                            💡 <strong>Consejo de seguridad:</strong> Elige un código sencillo exclusivo para este negocio. No uses la clave secreta de tu tarjeta bancaria ni de tu CuentaRUT.
+                          </p>
+                        </div>
                       </div>
                     </div>
 
@@ -3800,12 +3841,21 @@ export default function AdminLocalClient({
                               <span>¿Activar como Oferta del Día?</span>
                             </label>
 
-                            {editState.es_oferta && (
-                              <span className="rounded-full bg-amber-100 border border-amber-200 px-2.5 py-0.5 text-[11px] font-extrabold text-amber-900">
-                                Visible en portada de Tirúa
+                            {editState.es_oferta ? (
+                              <span className="rounded-full bg-emerald-100 border border-emerald-300 px-2.5 py-0.5 text-[11px] font-black text-emerald-900 flex items-center gap-1">
+                                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                                Activa hoy en portada y carta
                               </span>
-                            )}
+                            ) : producto.es_oferta && producto.fecha_oferta && producto.fecha_oferta !== getFechaHoyChile() ? (
+                              <span className="rounded-full bg-stone-200 border border-stone-300 px-2.5 py-0.5 text-[10px] font-bold text-stone-600">
+                                ⏳ Expiró ({producto.fecha_oferta})
+                              </span>
+                            ) : null}
                           </div>
+
+                          <p className="mt-1.5 text-[10.5px] text-amber-900/85 font-medium">
+                            ⏰ <strong>Vigencia automática:</strong> La oferta dura exclusivamente durante el día de hoy. Mañana vuelve a su precio normal automáticamente.
+                          </p>
 
                           {editState.es_oferta && (
                             <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2">

@@ -349,6 +349,9 @@ export async function POST(
                 typeof texto_promo === "string" ? texto_promo.trim() : null,
             }
           : {}),
+        ...(typeof body.fecha_oferta === "string" || body.fecha_oferta === null
+          ? { fecha_oferta: body.fecha_oferta }
+          : {}),
         ...(opciones !== undefined
           ? { opciones: Array.isArray(opciones) ? opciones : [] }
           : {}),
