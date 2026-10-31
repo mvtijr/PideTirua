@@ -49,6 +49,7 @@ import {
 import { Local, Producto, GrupoOpcion } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
+import { supabase } from "@/lib/supabase";
 import dynamic from "next/dynamic";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
@@ -231,6 +232,22 @@ export default function AdminLocalClient({
   // Estado de guardado y Toast de feedback inmediato
   const [guardandoId, setGuardandoId] = useState<string | null>(null);
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
+
+  // Emitir evento en tiempo real a todas las cartas de clientes conectadas
+  const broadcastMenuChange = (
+    event: "producto-disponibilidad" | "categoria-disponibilidad" | "menu-actualizado",
+    payload: Record<string, unknown> = {}
+  ) => {
+    try {
+      void supabase.channel(`menu-${local.slug}`).send({
+        type: "broadcast",
+        event,
+        payload,
+      });
+    } catch {
+      // Ignorar si no hay conexión
+    }
+  };
 
   // Estado de Ajustes Básicos del Dueño (WhatsApp, horario, dirección y PIN)
   const [telefonoWhatsapp, setTelefonoWhatsapp] = useState<string>(
@@ -544,6 +561,7 @@ export default function AdminLocalClient({
 
     setLocal((prev) => ({ ...prev, abierto: nuevoEstado }));
     setGuardandoId("local-abierto");
+    broadcastMenuChange("menu-actualizado");
 
     try {
       const res = await fetch(`/api/admin/${local.slug}`, {
@@ -557,10 +575,12 @@ export default function AdminLocalClient({
       const data = await res.json();
       if (!res.ok || !data.ok) {
         setLocal((prev) => ({ ...prev, abierto: estadoAnterior }));
+        broadcastMenuChange("menu-actualizado");
         return;
       }
       if (data.local) {
         setLocal(data.local);
+        broadcastMenuChange("menu-actualizado");
       }
       mostrarToast(
         nuevoEstado
@@ -941,6 +961,7 @@ export default function AdminLocalClient({
 
       if (data.local) {
         setLocal(data.local);
+        broadcastMenuChange("menu-actualizado");
       }
 
       // Limpiar formulario
@@ -989,6 +1010,7 @@ export default function AdminLocalClient({
       const data = await res.json();
       if (res.ok && data.ok && data.local) {
         setLocal(data.local);
+        broadcastMenuChange("menu-actualizado");
       }
       mostrarToast(`Tiempo estimado actualizado a ${nuevoTiempo}`);
     } catch {
@@ -1028,6 +1050,7 @@ export default function AdminLocalClient({
       const data = await res.json();
       if (res.ok && data.ok && data.local) {
         setLocal(data.local);
+        broadcastMenuChange("menu-actualizado");
       }
       mostrarToast(
         desactivar
@@ -1061,6 +1084,10 @@ export default function AdminLocalClient({
         };
       }),
     }));
+    broadcastMenuChange("categoria-disponibilidad", {
+      categoriaId,
+      activa: nuevaActiva,
+    });
 
     try {
       const res = await fetch(`/api/admin/${local.slug}`, {
@@ -1075,6 +1102,10 @@ export default function AdminLocalClient({
       const data = await res.json();
       if (res.ok && data.ok && data.local) {
         setLocal(data.local);
+        broadcastMenuChange("categoria-disponibilidad", {
+          categoriaId,
+          activa: nuevaActiva,
+        });
       }
       mostrarToast(
         nuevaActiva
@@ -1107,6 +1138,7 @@ export default function AdminLocalClient({
       const data = await res.json();
       if (res.ok && data.ok && data.local) {
         setLocal(data.local);
+        broadcastMenuChange("menu-actualizado");
         mostrarToast("Personalización y extras guardados con éxito");
       } else {
         mostrarToast("Error al actualizar opciones del plato");
@@ -1133,6 +1165,10 @@ export default function AdminLocalClient({
       })),
     }));
     setGuardandoId(`disp-${producto.id}`);
+    broadcastMenuChange("producto-disponibilidad", {
+      productoId: producto.id,
+      disponible: nuevoDisponible,
+    });
 
     try {
       const res = await fetch(`/api/admin/${local.slug}`, {
@@ -1147,6 +1183,10 @@ export default function AdminLocalClient({
       const data = await res.json();
       if (res.ok && data.ok && data.local) {
         setLocal(data.local);
+        broadcastMenuChange("producto-disponibilidad", {
+          productoId: producto.id,
+          disponible: nuevoDisponible,
+        });
       }
       mostrarToast(
         nuevoDisponible
@@ -1235,6 +1275,7 @@ export default function AdminLocalClient({
       const data = await res.json();
       if (res.ok && data.ok && data.local) {
         setLocal(data.local);
+        broadcastMenuChange("menu-actualizado");
       }
 
       if (esOferta) {
@@ -1262,6 +1303,7 @@ export default function AdminLocalClient({
       const data = await res.json();
       if (res.ok && data.ok && data.local) {
         setLocal(data.local);
+        broadcastMenuChange("menu-actualizado");
         mostrarToast(`Plato "${producto.nombre}" eliminado`);
       }
     } finally {

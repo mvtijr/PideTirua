@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useCallback, useState } from "react";
+import { useEffect, useMemo, useCallback, useState, useRef } from "react";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -23,6 +23,7 @@ import {
   getPrecioUnitarioItem,
 } from "@/lib/formatters";
 import { getLocalTheme, getVideoPoster } from "@/lib/localTheme";
+import { supabase } from "@/lib/supabase";
 import ProductCard from "@/components/ProductCard";
 import FloatingCartBar from "@/components/FloatingCartBar";
 import dynamic from "next/dynamic";
@@ -41,7 +42,18 @@ interface MenuClientProps {
   local: Local;
 }
 
-export default function MenuClient({ local }: MenuClientProps) {
+export default function MenuClient({ local: initialLocal }: MenuClientProps) {
+  const [local, setLocal] = useState<Local>(initialLocal);
+  const [notificacionRealtime, setNotificacionRealtime] = useState<{
+    mensaje: string;
+    tipo: "info" | "alerta" | "exito";
+  } | null>(null);
+  const timeoutNotifRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setLocal(initialLocal);
+  }, [initialLocal]);
+
   const storageKey = `pidetirua_cart_${local.slug}`;
   const theme = getLocalTheme(local.slug);
   const bannerPrincipal = local.banner_url || local.fotoPortada;
@@ -73,6 +85,192 @@ export default function MenuClient({ local }: MenuClientProps) {
     estado: EstadoPedido;
     pedidoId?: string;
   } | null>(null);
+
+  const mostrarNotificacion = useCallback(
+    (mensaje: string, tipo: "info" | "alerta" | "exito" = "info") => {
+      if (timeoutNotifRef.current) clearTimeout(timeoutNotifRef.current);
+      setNotificacionRealtime({ mensaje, tipo });
+      timeoutNotifRef.current = setTimeout(() => {
+        setNotificacionRealtime(null);
+      }, 4000);
+    },
+    []
+  );
+
+  const aplicarCambioDisponibilidad = useCallback(
+    (productoId: string, disponible: boolean) => {
+      let nombrePlato = "";
+      setLocal((prev) => {
+        let encontrado = false;
+        const nuevasCategorias = prev.categorias.map((cat) => ({
+          ...cat,
+          productos: cat.productos.map((prod) => {
+            if (prod.id === productoId) {
+              encontrado = true;
+              nombrePlato = prod.nombre;
+              return { ...prod, disponible };
+            }
+            return prod;
+          }),
+        }));
+        if (!encontrado) return prev;
+        return { ...prev, categorias: nuevasCategorias };
+      });
+
+      if (nombrePlato) {
+        mostrarNotificacion(
+          disponible
+            ? `🟢 ¡"${nombrePlato}" ya está disponible para pedir!`
+            : `⏸️ "${nombrePlato}" se agotó por el momento`,
+          disponible ? "exito" : "alerta"
+        );
+      }
+    },
+    [mostrarNotificacion]
+  );
+
+  const aplicarCambioCategoria = useCallback(
+    (categoriaId: string, activa: boolean) => {
+      let nombreCat = "";
+      setLocal((prev) => {
+        const nuevasCategorias = prev.categorias.map((cat) => {
+          if (cat.id === categoriaId) {
+            nombreCat = cat.nombre;
+            return {
+              ...cat,
+              activa,
+              productos: cat.productos.map((p) => ({
+                ...p,
+                disponible: activa,
+              })),
+            };
+          }
+          return cat;
+        });
+        return { ...prev, categorias: nuevasCategorias };
+      });
+
+      if (nombreCat) {
+        mostrarNotificacion(
+          activa
+            ? `🟢 Categoría "${nombreCat}" disponible`
+            : `⏸️ Categoría "${nombreCat}" pausada por hoy`,
+          activa ? "exito" : "alerta"
+        );
+      }
+    },
+    [mostrarNotificacion]
+  );
+
+  const sincronizarMenuCompleto = useCallback(
+    async (silencioso = true) => {
+      try {
+        const res = await fetch(
+          `/api/menu/${initialLocal.slug}?t=${Date.now()}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data.ok && data.local) {
+            setLocal(data.local);
+            if (!silencioso) {
+              mostrarNotificacion("✨ Carta sincronizada en vivo", "info");
+            }
+          }
+        }
+      } catch (err) {
+        console.debug("[MenuClient] Error en sincronización:", err);
+      }
+    },
+    [initialLocal.slug, mostrarNotificacion]
+  );
+
+  // Suscripción Realtime a cambios de disponibilidad y menú
+  useEffect(() => {
+    const canal = supabase
+      .channel(`menu-${initialLocal.slug}`)
+      .on("broadcast", { event: "producto-disponibilidad" }, (payload) => {
+        const { productoId, disponible } = (payload.payload || {}) as {
+          productoId?: string;
+          disponible?: boolean;
+        };
+        if (productoId && typeof disponible === "boolean") {
+          aplicarCambioDisponibilidad(productoId, disponible);
+        }
+      })
+      .on("broadcast", { event: "categoria-disponibilidad" }, (payload) => {
+        const { categoriaId, activa } = (payload.payload || {}) as {
+          categoriaId?: string;
+          activa?: boolean;
+        };
+        if (categoriaId && typeof activa === "boolean") {
+          aplicarCambioCategoria(categoriaId, activa);
+        }
+      })
+      .on("broadcast", { event: "menu-actualizado" }, () => {
+        void sincronizarMenuCompleto(false);
+      })
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "productos",
+        },
+        (payload) => {
+          const nuevo = payload.new as { id?: string; disponible?: boolean };
+          if (nuevo?.id && typeof nuevo.disponible === "boolean") {
+            aplicarCambioDisponibilidad(nuevo.id, nuevo.disponible);
+          } else {
+            void sincronizarMenuCompleto(true);
+          }
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "locales",
+          filter: `slug=eq.${initialLocal.slug}`,
+        },
+        () => {
+          void sincronizarMenuCompleto(true);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(canal);
+    };
+  }, [
+    initialLocal.slug,
+    aplicarCambioDisponibilidad,
+    aplicarCambioCategoria,
+    sincronizarMenuCompleto,
+  ]);
+
+  // Sincronización al volver a enfocar la ventana o desbloquear pantalla
+  useEffect(() => {
+    const onFocusOrVisible = () => {
+      if (document.visibilityState === "visible") {
+        void sincronizarMenuCompleto(true);
+      }
+    };
+    window.addEventListener("visibilitychange", onFocusOrVisible);
+    window.addEventListener("focus", onFocusOrVisible);
+
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void sincronizarMenuCompleto(true);
+      }
+    }, 45000);
+
+    return () => {
+      window.removeEventListener("visibilitychange", onFocusOrVisible);
+      window.removeEventListener("focus", onFocusOrVisible);
+      clearInterval(interval);
+    };
+  }, [sincronizarMenuCompleto]);
 
   // Sincronizar estado de última comanda activa para el live tracker flotante
   useEffect(() => {
@@ -322,6 +520,28 @@ export default function MenuClient({ local }: MenuClientProps) {
 
   return (
     <div className={`relative min-h-screen pb-28 ${theme.pageBg} overflow-hidden`}>
+      {/* Notificación flotante de sincronización en tiempo real */}
+      {notificacionRealtime && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none animate-in fade-in slide-in-from-top-4 duration-300 max-w-sm sm:max-w-md w-auto px-4"
+        >
+          <div
+            className={`flex items-center gap-2.5 rounded-full px-4 py-2 text-xs font-bold shadow-2xl backdrop-blur-md border ${
+              notificacionRealtime.tipo === "exito"
+                ? "bg-emerald-950/90 text-emerald-100 border-emerald-500/50 shadow-emerald-950/40"
+                : notificacionRealtime.tipo === "alerta"
+                ? "bg-amber-950/90 text-amber-100 border-amber-500/50 shadow-amber-950/40"
+                : "bg-stone-900/90 text-white border-stone-700/60 shadow-black/40"
+            }`}
+          >
+            <span className="flex h-2 w-2 rounded-full bg-current animate-ping" />
+            <span>{notificacionRealtime.mensaje}</span>
+          </div>
+        </div>
+      )}
+
       {/* Fondo degradado ambiental con textura de ruido estática (Zero GPU loop) */}
       <GradientBackground
         gradientType="radial-gradient"
