@@ -10,6 +10,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: "480px",
+      },
       colors: {
         "on-secondary-container": "#00476e",
         "primary-fixed-dim": "#9bccf6",

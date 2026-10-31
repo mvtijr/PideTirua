@@ -173,13 +173,13 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
     soloAbiertos;
 
   return (
-    <div className="relative min-h-screen w-full bg-[#FAF8F5] text-[#18181B] selection:bg-[#EA580C] selection:text-white">
+    <div className="relative min-h-screen w-full max-w-full overflow-x-hidden bg-[#FAF8F5] text-[#18181B] selection:bg-[#EA580C] selection:text-white">
       {/* 1. HEADER EDITORIAL */}
       <header className="sticky top-0 z-50 w-full bg-[#FAF8F5]/95 backdrop-blur-md border-b border-stone-200/80 transition-all">
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+        <div className="max-w-[1240px] mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo Circular Vintage */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="relative w-11 h-11 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-stone-300 shadow-sm bg-white p-0.5 group-hover:scale-105 transition-transform">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 min-w-0 shrink group">
+            <div className="relative w-9 h-9 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-stone-300 shadow-sm bg-white p-0.5 group-hover:scale-105 transition-transform shrink-0">
               <img
                 src="/logo-pidetirua.jpg"
                 alt="PideTirúa"
@@ -189,11 +189,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 className="w-full h-full object-contain rounded-full"
               />
             </div>
-            <div>
-              <span className="font-display text-2xl tracking-widest text-[#18181B] uppercase block leading-none">
+            <div className="min-w-0">
+              <span className="font-display text-xl sm:text-2xl tracking-widest text-[#18181B] uppercase block leading-none">
                 PIDETIRÚA
               </span>
-              <span className="font-body text-[11px] font-bold uppercase tracking-[0.2em] text-[#C2410C] block mt-0.5">
+              <span className="font-body text-[10px] sm:text-[11px] font-bold uppercase tracking-wider sm:tracking-[0.2em] text-[#C2410C] block mt-0.5 truncate max-w-[130px] xs:max-w-none">
                 SABORES DE NUESTRA TIERRA
               </span>
             </div>
@@ -228,25 +228,26 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </nav>
 
           {/* Acciones Superiores */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               type="button"
               onClick={() => setMostrarRecomendador(true)}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full border border-stone-300 bg-white hover:border-orange-300 hover:bg-orange-50/50 text-stone-800 text-[11px] font-bold uppercase tracking-wider px-2.5 sm:px-3.5 py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C]"
+              className="inline-flex min-h-[38px] sm:min-h-[40px] items-center gap-1.5 rounded-full border border-stone-300 bg-white hover:border-orange-300 hover:bg-orange-50/50 text-stone-800 text-[11px] font-bold uppercase tracking-wider px-2.5 sm:px-3.5 py-1.5 sm:py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C] shrink-0"
               title="¿No sabes qué comer? Descúbrelo con el recomendador"
               aria-label="¿No sabes qué comer? Descúbrelo con el recomendador"
             >
-              <Dices className="h-3.5 w-3.5 text-[#C2410C]" />
-              <span className="hidden xs:inline">¿Qué comer?</span>
+              <Dices className="h-3.5 w-3.5 text-[#C2410C] shrink-0" />
+              <span className="hidden sm:inline">¿Qué comer?</span>
             </button>
 
             <button
               type="button"
               onClick={scrollADirectorio}
-              className="inline-flex min-h-[40px] items-center gap-1.5 sm:gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white text-[11px] sm:text-xs font-black uppercase tracking-widest px-3 sm:px-5 py-2 sm:py-2.5 shadow-sm transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C]"
+              className="inline-flex min-h-[38px] sm:min-h-[40px] items-center gap-1.5 sm:gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white text-[11px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest px-2.5 sm:px-5 py-1.5 sm:py-2.5 shadow-sm transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C] shrink-0"
             >
-              <Store className="h-3.5 w-3.5" />
-              <span>VER LOCALES</span>
+              <Store className="h-3.5 w-3.5 shrink-0" />
+              <span className="hidden sm:inline">VER </span>
+              <span>LOCALES</span>
             </button>
           </div>
         </div>
@@ -300,13 +301,13 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 placeholder="Busca por plato, local o especialidad (ej: completos, mariscos, sushi)..."
-                className="w-full bg-transparent text-base sm:text-sm text-stone-900 placeholder:text-stone-400 font-medium focus:outline-none py-2"
+                className="min-w-0 flex-1 w-full bg-transparent text-base sm:text-sm text-stone-900 placeholder:text-stone-400 font-medium focus:outline-none py-2"
               />
               {busqueda && (
                 <button
                   type="button"
                   onClick={() => setBusqueda("")}
-                  className="p-2 text-stone-400 hover:text-stone-700 transition"
+                  className="p-2 text-stone-400 hover:text-stone-700 transition shrink-0"
                   aria-label="Limpiar búsqueda"
                 >
                   <X className="h-4 w-4" />
@@ -315,7 +316,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               <button
                 type="button"
                 onClick={scrollADirectorio}
-                className="bg-[#18181B] hover:bg-[#EA580C] text-white text-[11px] font-black uppercase tracking-wider px-4 sm:px-6 py-2.5 rounded-full transition-all shrink-0 inline-flex items-center gap-1.5 ml-1"
+                className="bg-[#18181B] hover:bg-[#EA580C] text-white text-[11px] font-black uppercase tracking-wider px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-full transition-all shrink-0 inline-flex items-center gap-1.5 ml-1"
               >
                 <span>BUSCAR</span>
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -456,12 +457,12 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </div>
 
           {/* Controles y Filtros Rápidos */}
-          <div className="flex flex-wrap items-center gap-2 self-start md:self-auto shrink-0">
+          <div className="flex flex-wrap items-center gap-2 self-start md:self-auto max-w-full">
             {/* Toggle Abiertos Ahora */}
             <button
               type="button"
               onClick={() => setSoloAbiertos((prev) => !prev)}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all shadow-xs ${
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all shadow-xs shrink-0 ${
                 soloAbiertos
                   ? "bg-emerald-600 text-white ring-2 ring-emerald-300"
                   : "bg-white border border-stone-300 text-stone-700 hover:border-emerald-500 hover:text-emerald-700"
@@ -479,7 +480,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             </button>
 
             {/* Filtro por Sector Territorial (Píldoras Segmentadas) */}
-            <div className="flex items-center gap-1.5 p-1 rounded-full bg-stone-200/80 border border-stone-300/60">
+            <div className="flex items-center gap-1.5 p-1 rounded-full bg-stone-200/80 border border-stone-300/60 max-w-full overflow-x-auto no-scrollbar">
               {(["Todos", "Tirúa Centro", "Quidico"] as const).map((sec) => {
                 const activo = sectorActivo === sec;
                 return (
@@ -487,7 +488,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     key={sec}
                     type="button"
                     onClick={() => setSectorActivo(sec)}
-                    className={`px-3 sm:px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
+                    className={`px-3 sm:px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all shrink-0 ${
                       activo
                         ? "bg-[#18181B] text-white shadow-xs"
                         : "text-stone-700 hover:text-black"
@@ -643,25 +644,25 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Fotos con Estética Polaroid */}
-            <div className="lg:col-span-6 relative flex items-center justify-center min-h-[300px]">
-              <div className="w-48 sm:w-56 bg-white p-2.5 pb-6 rounded-xl shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-300 border border-stone-200">
+            <div className="lg:col-span-6 relative flex items-center justify-center min-h-[260px] sm:min-h-[300px]">
+              <div className="w-36 xs:w-44 sm:w-56 bg-white p-2 sm:p-2.5 pb-4 sm:pb-6 rounded-xl shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-300 border border-stone-200">
                 <img
                   src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=85"
                   alt="Caleta Quidico"
-                  className="w-full h-36 sm:h-44 object-cover rounded"
+                  className="w-full h-32 sm:h-44 object-cover rounded"
                 />
-                <p className="mt-2 text-center text-stone-800 text-[11px] font-bold tracking-widest uppercase">
+                <p className="mt-2 text-center text-stone-800 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase">
                   CALETA QUIDICO
                 </p>
               </div>
 
-              <div className="w-48 sm:w-56 bg-white p-2.5 pb-6 rounded-xl shadow-2xl transform rotate-6 hover:rotate-0 transition-transform duration-300 border border-stone-200 -ml-12 sm:-ml-16 mt-10 z-20">
+              <div className="w-36 xs:w-44 sm:w-56 bg-white p-2 sm:p-2.5 pb-4 sm:pb-6 rounded-xl shadow-2xl transform rotate-6 hover:rotate-0 transition-transform duration-300 border border-stone-200 -ml-8 sm:-ml-16 mt-6 sm:mt-10 z-20">
                 <img
                   src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=85"
                   alt="Gastronomía de Tirúa"
-                  className="w-full h-36 sm:h-44 object-cover rounded"
+                  className="w-full h-32 sm:h-44 object-cover rounded"
                 />
-                <p className="mt-2 text-center text-stone-800 text-[11px] font-bold tracking-widest uppercase">
+                <p className="mt-2 text-center text-stone-800 text-[10px] sm:text-[11px] font-bold tracking-widest uppercase">
                   SABORES DE NUESTRA TIERRA
                 </p>
               </div>

@@ -60,7 +60,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-[#FAF8F5] font-body text-[#18181B] antialiased selection:bg-[#EA580C] selection:text-white">
+      <body className="bg-[#FAF8F5] font-body text-[#18181B] antialiased selection:bg-[#EA580C] selection:text-white min-h-screen w-full max-w-full overflow-x-hidden">
         <InstallPWA />
         {children}
       </body>
