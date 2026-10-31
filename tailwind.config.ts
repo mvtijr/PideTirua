@@ -14,6 +14,12 @@ const config: Config = {
         xs: "480px",
       },
       colors: {
+        foreground: "#18181B",
+        "muted-foreground": "#71717A",
+        muted: {
+          DEFAULT: "#F4F4F5",
+          foreground: "#71717A",
+        },
         "on-secondary-container": "#00476e",
         "primary-fixed-dim": "#9bccf6",
         "surface-dim": "#d2d9f4",
@@ -82,6 +88,7 @@ const config: Config = {
         },
       },
       spacing: {
+        "50": "12.5rem",
         "space-md": "1rem",
         "margin-desktop": "3rem",
         "margin-tablet": "2rem",
