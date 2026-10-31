@@ -373,14 +373,14 @@ export default function MenuClient({ local }: MenuClientProps) {
         </div>
       )}
 
-      {/* Contenedor Mobile-First (optimizado para lectura QR en celular) con acabado translúcido */}
+      {/* Contenedor Mobile-First en celular y Widescreen Editorial en PC */}
       <div
-        className={`relative z-10 mx-auto max-w-xl min-h-screen ${theme.containerBg}`}
+        className={`relative z-10 mx-auto w-full max-w-xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl min-h-screen md:min-h-0 md:my-6 md:rounded-3xl md:shadow-2xl md:border md:border-stone-200/90 ${theme.containerBg}`}
       >
         {/* Portada e Identidad del Local */}
         <header className="relative">
           <div
-            className={`relative w-full overflow-hidden h-56 sm:h-64 ${theme.headerBg}`}
+            className={`relative w-full overflow-hidden md:rounded-t-3xl h-56 sm:h-64 md:h-72 lg:h-80 xl:h-96 ${theme.headerBg}`}
           >
             {bannerVideoUrl ? (
               <video
@@ -417,16 +417,16 @@ export default function MenuClient({ local }: MenuClientProps) {
             />
 
             {/* Barra superior de navegación */}
-            <div className="absolute left-3 right-3 top-3 flex items-center justify-between">
+            <div className="absolute left-3.5 right-3.5 top-3.5 sm:left-6 sm:right-6 sm:top-5 flex items-center justify-between">
               <Link
                 href="/"
-                className={`inline-flex items-center gap-2 rounded-full pl-2 pr-3.5 py-1.5 text-xs font-bold backdrop-blur-md transition ${theme.backBtn}`}
+                className={`inline-flex items-center gap-2 rounded-full pl-2.5 pr-4 py-2 text-xs font-bold backdrop-blur-md transition shadow-md hover:scale-105 active:scale-95 ${theme.backBtn}`}
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 <img
                   src="/logo-pidetirua.jpg"
                   alt="Logo PideTirúa"
-                  className="h-6 w-6 rounded-full object-contain bg-white"
+                  className="h-6 w-6 rounded-full object-contain bg-white ring-1 ring-stone-200"
                 />
                 <span>PideTirúa</span>
               </Link>
@@ -435,7 +435,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 <button
                   type="button"
                   onClick={() => setMostrarQr(true)}
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-xs font-bold shadow backdrop-blur-md transition ${theme.qrBtn}`}
+                  className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-bold shadow-md backdrop-blur-md transition hover:scale-105 active:scale-95 ${theme.qrBtn}`}
                   aria-label="Mostrar código QR del local"
                 >
                   <QrCode className={`h-3.5 w-3.5 ${theme.qrIcon}`} />
@@ -445,9 +445,9 @@ export default function MenuClient({ local }: MenuClientProps) {
             </div>
 
             {/* Logo y título sobre la portada */}
-            <div className="absolute bottom-4 left-4 right-4 flex items-end gap-3.5">
+            <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 md:bottom-8 md:left-8 md:right-8 flex items-end gap-3.5 sm:gap-5">
               <div
-                className={`h-16 w-16 shrink-0 overflow-hidden shadow-lg sm:h-20 sm:w-20 ${theme.logoBox}`}
+                className={`h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 shrink-0 overflow-hidden shadow-2xl rounded-2xl ring-2 sm:ring-4 ring-white/20 ${theme.logoBox}`}
               >
                 <img
                   src={logoPrincipal}
@@ -458,9 +458,9 @@ export default function MenuClient({ local }: MenuClientProps) {
                 />
               </div>
               <div className="min-w-0 flex-1 text-white">
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <span
-                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold shadow-sm backdrop-blur-md border ${
+                    className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] sm:text-xs font-bold shadow-sm backdrop-blur-md border ${
                       localSuspendido
                         ? "bg-rose-700/95 text-white border-rose-400/50"
                         : local.abierto
@@ -474,15 +474,15 @@ export default function MenuClient({ local }: MenuClientProps) {
                       ? `🟢 Abierto • ${local.horario}`
                       : `🔴 Cerrado • Abre hoy a las ${horaApertura} hrs`}
                   </span>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-xs font-bold text-[#F8DC4B]">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-0.5 text-xs font-bold text-[#F8DC4B]">
                     <Star className="h-3 w-3 fill-[#F8DC4B] text-[#F8DC4B]" />
                     {local.calificacion.toFixed(1)}
                   </span>
                 </div>
-                <h1 className="mt-1 truncate font-display tracking-wide uppercase text-2xl sm:text-3xl leading-tight">
+                <h1 className="mt-1 truncate font-display tracking-wide uppercase text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight drop-shadow-md">
                   {local.nombre}
                 </h1>
-                <p className={`truncate text-xs font-bold uppercase tracking-wider ${theme.rubroText}`}>
+                <p className={`truncate text-xs sm:text-sm font-bold uppercase tracking-wider ${theme.rubroText}`}>
                   {local.rubro}
                 </p>
               </div>
@@ -497,9 +497,9 @@ export default function MenuClient({ local }: MenuClientProps) {
           )}
 
           {/* Ficha informativa del Local */}
-          <div className={`border-b px-4 py-4 ${theme.infoSectionBg}`}>
+          <div className={`border-b px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6 ${theme.infoSectionBg}`}>
             {/* Cabecera compacta con Estado, Ubicación y Botón de Llamada */}
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2.5">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span
@@ -526,7 +526,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                     <span>Tiempo est.: {local.tiempo_estimado || local.tiempoEstimado || "20-30 min"}</span>
                   </span>
                 </div>
-                <p className={`mt-1.5 flex items-center gap-1.5 text-xs ${theme.infoSub}`}>
+                <p className={`mt-1.5 flex items-center gap-1.5 text-xs sm:text-sm ${theme.infoSub}`}>
                   <MapPin className={`h-3.5 w-3.5 shrink-0 ${theme.infoIcon}`} />
                   <span className="truncate">{local.direccionDetalle}</span>
                 </p>
@@ -535,7 +535,7 @@ export default function MenuClient({ local }: MenuClientProps) {
               {telefonoDirecto && (
                 <a
                   href={`tel:+${telefonoDirecto}`}
-                  className={`inline-flex shrink-0 items-center gap-1.5 px-3.5 py-2 text-xs font-bold shadow-sm transition active:scale-95 ${theme.callBtn}`}
+                  className={`inline-flex shrink-0 items-center gap-1.5 px-4 py-2 text-xs font-bold shadow-sm rounded-full transition active:scale-95 hover:scale-105 ${theme.callBtn}`}
                 >
                   <Phone className={`h-3.5 w-3.5 ${theme.callIcon}`} />
                   <span>Llamar al local</span>
@@ -544,15 +544,15 @@ export default function MenuClient({ local }: MenuClientProps) {
             </div>
 
             <p
-              className={`text-xs leading-relaxed sm:text-sm ${theme.infoDescText}`}
+              className={`text-xs leading-relaxed sm:text-sm md:text-base max-w-4xl ${theme.infoDescText}`}
             >
               {local.descripcionCorta}
             </p>
 
             <div
-              className={`mt-3.5 grid grid-cols-1 gap-2 rounded-2xl p-3 text-xs sm:grid-cols-2 ${theme.infoGridBox}`}
+              className={`mt-3.5 grid grid-cols-1 gap-3 rounded-2xl p-3.5 sm:p-4 text-xs sm:text-sm sm:grid-cols-2 lg:grid-cols-3 ${theme.infoGridBox}`}
             >
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-2.5">
                 <MapPin
                   className={`mt-0.5 h-4 w-4 shrink-0 ${theme.infoIcon}`}
                 />
@@ -560,13 +560,13 @@ export default function MenuClient({ local }: MenuClientProps) {
                   <span className={`font-bold ${theme.infoTitle}`}>
                     {local.ubicacion}
                   </span>
-                  <p className={`text-[11px] ${theme.infoSub}`}>
+                  <p className={`text-[11px] sm:text-xs ${theme.infoSub}`}>
                     {local.direccionDetalle}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-2.5">
                 <Clock
                   className={`mt-0.5 h-4 w-4 shrink-0 ${theme.infoIcon}`}
                 />
@@ -574,8 +574,22 @@ export default function MenuClient({ local }: MenuClientProps) {
                   <span className={`font-bold ${theme.infoTitle}`}>
                     Horario: {local.horario}
                   </span>
-                  <p className={`text-[11px] ${theme.infoSub}`}>
+                  <p className={`text-[11px] sm:text-xs ${theme.infoSub}`}>
                     Preparación est.: {local.tiempo_estimado || local.tiempoEstimado || "20-30 min"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-2.5 sm:col-span-2 lg:col-span-1">
+                <Store
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${theme.infoIcon}`}
+                />
+                <div>
+                  <span className={`font-bold ${theme.infoTitle}`}>
+                    Modalidades de Pedido
+                  </span>
+                  <p className={`text-[11px] sm:text-xs ${theme.infoSub}`}>
+                    Retiro en local y Consumo en mesa • WhatsApp
                   </p>
                 </div>
               </div>
@@ -584,7 +598,7 @@ export default function MenuClient({ local }: MenuClientProps) {
             {/* Modalidades de atención exclusivas: Retiro en local y Consumo en mesa */}
             <div className="mt-3.5 flex items-center justify-between gap-3">
               <div
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold ${theme.modalityBadge}`}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full ${theme.modalityBadge}`}
               >
                 <Store className={`h-4 w-4 ${theme.modalityIcon}`} />
                 <span>Retiro en local y Consumo en mesa</span>
@@ -595,7 +609,7 @@ export default function MenuClient({ local }: MenuClientProps) {
 
         {/* Banner de Aviso de Emergencia o Contingencia en Vivo */}
         {local.mensaje_emergencia && local.mensaje_emergencia.trim() && (
-          <div className="px-4 mt-3">
+          <div className="px-4 sm:px-6 md:px-8 mt-3 sm:mt-4">
             <div
               role="alert"
               className="relative overflow-hidden rounded-2xl border-2 border-amber-500 bg-amber-50/95 p-4 text-amber-950 shadow-md backdrop-blur-xs animate-in fade-in duration-200"
@@ -618,8 +632,8 @@ export default function MenuClient({ local }: MenuClientProps) {
         )}
 
         {/* Banner Decorativo Editorial de la Carta con Grano Estático */}
-        <div className="px-4 my-3">
-          <div className="relative overflow-hidden rounded-2xl border border-stone-200/90 p-3 shadow-xs">
+        <div className="px-4 sm:px-6 md:px-8 my-3 sm:my-4">
+          <div className="relative overflow-hidden rounded-2xl border border-stone-200/90 p-3.5 sm:p-4 shadow-xs">
             <GradientBackground
               gradientType="linear-gradient"
               gradientOrigin="left-middle"
@@ -633,21 +647,21 @@ export default function MenuClient({ local }: MenuClientProps) {
               noisePatternSize={80}
               noisePatternRefreshInterval={0}
             />
-            <div className="relative z-10 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#EA580C] text-white shrink-0">
-                  <Store className="h-3.5 w-3.5" />
+            <div className="relative z-10 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 sm:gap-3">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#EA580C] text-white shrink-0 shadow-sm">
+                  <Store className="h-4 w-4" />
                 </span>
                 <div>
-                  <span className="block font-display text-xs uppercase tracking-wider text-stone-900 leading-none">
+                  <span className="block font-display text-xs sm:text-sm uppercase tracking-wider text-stone-900 leading-none">
                     Carta Digital Oficial • {local.nombre}
                   </span>
-                  <span className="block text-[11px] font-semibold text-stone-600 mt-0.5">
+                  <span className="block text-[11px] sm:text-xs font-semibold text-stone-600 mt-0.5">
                     Retiro en local y consumo en mesa
                   </span>
                 </div>
               </div>
-              <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider text-stone-700 shadow-2xs border border-stone-200 shrink-0">
+              <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-stone-700 shadow-2xs border border-stone-200 shrink-0">
                 Directo WhatsApp
               </span>
             </div>
@@ -661,7 +675,7 @@ export default function MenuClient({ local }: MenuClientProps) {
           {/* Pestañas de categorías */}
           <nav
             aria-label="Categorías del menú"
-            className="flex items-center gap-2 overflow-x-auto px-4 py-2.5 no-scrollbar"
+            className="flex items-center gap-2 overflow-x-auto px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 no-scrollbar"
           >
             {local.categorias.map((categoria) => {
               const activa = categoriaActiva === categoria.id;
@@ -672,7 +686,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                   type="button"
                   aria-current={activa ? "true" : undefined}
                   onClick={() => irACategoria(categoria.id)}
-                  className={`filter-chip shrink-0 px-4 py-1.5 text-xs font-bold transition-all ${
+                  className={`filter-chip shrink-0 px-4 py-1.5 text-xs sm:text-sm font-bold transition-all rounded-full ${
                     activa ? theme.tabActive : theme.tabInactive
                   } ${pausada ? "opacity-60" : ""}`}
                 >
@@ -684,7 +698,7 @@ export default function MenuClient({ local }: MenuClientProps) {
           </nav>
 
           {/* Buscador rápido dentro de la carta */}
-          <div className="px-4 pb-2.5">
+          <div className="px-4 sm:px-6 md:px-8 pb-2.5 sm:pb-3">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
               <input
@@ -693,7 +707,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                 onChange={(e) => setBusquedaPlato(e.target.value)}
                 placeholder={`Buscar en la carta de ${local.nombre}...`}
                 aria-label={`Buscar platos en la carta de ${local.nombre}`}
-                className={`w-full border py-2.5 pl-10 pr-9 text-xs focus:outline-none transition ${theme.searchInput}`}
+                className={`w-full border py-2.5 sm:py-3 pl-10 pr-9 text-xs sm:text-sm rounded-xl focus:outline-none transition ${theme.searchInput}`}
               />
               {busquedaPlato && (
                 <button
@@ -710,7 +724,7 @@ export default function MenuClient({ local }: MenuClientProps) {
         </div>
 
         {/* Listado de Categorías y Tarjetas de Producto */}
-        <main className="space-y-8 px-4 py-5">
+        <main className="space-y-8 px-4 sm:px-6 md:px-8 py-5 sm:py-6 md:py-8">
           {categoriasFiltradas.length > 0 ? (
             categoriasFiltradas.map((categoria) => {
               const pausada = categoria.activa === false;
@@ -720,12 +734,12 @@ export default function MenuClient({ local }: MenuClientProps) {
                   id={`seccion-${categoria.id}`}
                   className="scroll-mt-32"
                 >
-                  <div className="mb-3 flex items-center justify-between">
+                  <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <TopDownLetters
                         as="h2"
                         text={categoria.nombre}
-                        className={`font-display text-2xl tracking-wide uppercase ${
+                        className={`font-display text-2xl sm:text-3xl tracking-wide uppercase ${
                           pausada
                             ? "text-stone-400 line-through decoration-stone-400"
                             : theme.categoryTitle
@@ -738,7 +752,7 @@ export default function MenuClient({ local }: MenuClientProps) {
                       )}
                     </div>
                     <span
-                      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${theme.categoryCount}`}
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${theme.categoryCount}`}
                     >
                       {categoria.productos.length}{" "}
                       {categoria.productos.length === 1 ? "opción" : "opciones"}
@@ -746,12 +760,12 @@ export default function MenuClient({ local }: MenuClientProps) {
                   </div>
 
                   {pausada && (
-                    <div className="mb-3 rounded-xl border border-slate-200 bg-slate-100/90 p-3 text-xs font-semibold text-slate-600">
+                    <div className="mb-4 rounded-xl border border-slate-200 bg-slate-100/90 p-3 text-xs font-semibold text-slate-600">
                       ⏸️ Esta sección se encuentra pausada por hoy por reposición de stock.
                     </div>
                   )}
 
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5 sm:gap-4 md:gap-5">
                     {categoria.productos.map((producto) => {
                       const prodEfectivo = pausada
                         ? { ...producto, disponible: false }
@@ -797,7 +811,7 @@ export default function MenuClient({ local }: MenuClientProps) {
 
         {/* Pie del menú exclusivo */}
         <footer
-          className={`border-t px-4 py-6 text-center text-xs ${theme.footerBg}`}
+          className={`border-t md:rounded-b-3xl px-4 sm:px-6 md:px-8 py-6 sm:py-8 text-center text-xs ${theme.footerBg}`}
         >
           <p className={`font-bold ${theme.footerTitle}`}>{local.nombre}</p>
           <p className="mt-0.5">
@@ -839,7 +853,7 @@ export default function MenuClient({ local }: MenuClientProps) {
         <aside
           role="status"
           aria-live="polite"
-          className={`fixed right-4 left-4 sm:left-auto sm:right-6 sm:w-84 z-30 transition-all duration-300 animate-in slide-in-from-bottom ${
+          className={`fixed right-4 left-4 sm:left-auto sm:right-6 sm:w-80 md:w-96 z-30 transition-all duration-300 animate-in slide-in-from-bottom ${
             totalUnidades > 0 ? "bottom-24 sm:bottom-28" : "bottom-4 sm:bottom-6 safe-bottom"
           }`}
         >

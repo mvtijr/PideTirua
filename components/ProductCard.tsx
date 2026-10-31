@@ -66,7 +66,7 @@ export default memo(function ProductCard({
           onPersonalizar(producto);
         }
       }}
-      className={`content-auto-dish group relative flex gap-3.5 rounded-2xl border p-3.5 transition-all sm:gap-4 sm:p-4 ${
+      className={`content-auto-dish group relative flex h-full gap-3.5 rounded-2xl border p-3.5 transition-all sm:gap-4 sm:p-4 hover:shadow-md ${
         tieneOpciones && disponible ? "cursor-pointer" : ""
       } ${
         !disponible

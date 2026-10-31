@@ -25,7 +25,7 @@ export default function FloatingCartBar({
     <div
       className={`fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-t p-3 sm:p-4 pointer-events-none safe-bottom ${theme.floatingGradient}`}
     >
-      <div className="mx-auto max-w-xl pointer-events-auto">
+      <div className="mx-auto max-w-xl md:max-w-2xl lg:max-w-3xl pointer-events-auto">
         <button
           type="button"
           onClick={onOpenDrawer}
