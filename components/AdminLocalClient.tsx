@@ -1294,6 +1294,70 @@ export default function AdminLocalClient({
     }
   };
 
+  // Activar o desactivar Oferta del Día con 1 solo toque y guardado automático
+  const handleToggleOfertaRapida = async (producto: Producto, activar: boolean) => {
+    const precioOfertaSugerido = Math.round(producto.precio * 0.85);
+    const edicionActual = ediciones[producto.id] || {
+      nombre: producto.nombre,
+      precio: String(producto.precio),
+      descripcion: producto.descripcion,
+      etiqueta: producto.etiqueta || "",
+      es_oferta: esOfertaValidaHoy(producto),
+      precio_oferta: String(producto.precio_oferta || precioOfertaSugerido),
+      texto_promo: producto.texto_promo || "🔥 Oferta del Día",
+    };
+
+    const nuevoPrecioOferta = activar
+      ? Number(String(edicionActual.precio_oferta || precioOfertaSugerido).replace(/[^0-9]/g, "")) || precioOfertaSugerido
+      : null;
+    const nuevoTextoPromo = activar
+      ? (edicionActual.texto_promo || "🔥 Oferta del Día").trim()
+      : null;
+
+    const updated = {
+      ...edicionActual,
+      es_oferta: activar,
+      precio_oferta: activar ? String(nuevoPrecioOferta) : "",
+      texto_promo: activar ? (nuevoTextoPromo || "🔥 Oferta del Día") : "",
+    };
+
+    setEdiciones((prev) => ({
+      ...prev,
+      [producto.id]: updated,
+    }));
+
+    setGuardandoId(`oferta-${producto.id}`);
+
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-producto",
+          productoId: producto.id,
+          es_oferta: activar,
+          fecha_oferta: activar ? getFechaHoyChile() : null,
+          precio_oferta: nuevoPrecioOferta,
+          texto_promo: nuevoTextoPromo,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local) {
+        setLocal(data.local);
+        broadcastMenuChange("menu-actualizado");
+      }
+      if (activar) {
+        mostrarToast(`🔥 "${producto.nombre}" activado como Oferta del Día`);
+      } else {
+        mostrarToast(`Oferta desactivada en "${producto.nombre}"`);
+      }
+    } catch {
+      mostrarToast("No se pudo actualizar la oferta");
+    } finally {
+      setGuardandoId(null);
+    }
+  };
+
   // Eliminar un plato
   const handleEliminarProducto = async (producto: Producto) => {
     setGuardandoId(`del-${producto.id}`);
@@ -3448,7 +3512,7 @@ export default function AdminLocalClient({
                     precio: String(producto.precio),
                     descripcion: producto.descripcion,
                     etiqueta: producto.etiqueta || "",
-                    es_oferta: Boolean(producto.es_oferta),
+                    es_oferta: esOfertaValidaHoy(producto),
                     precio_oferta:
                       producto.precio_oferta != null
                         ? String(producto.precio_oferta)
@@ -3466,7 +3530,7 @@ export default function AdminLocalClient({
                     precioNumerico !== producto.precio ||
                     editState.descripcion.trim() !== producto.descripcion ||
                     editState.etiqueta.trim() !== (producto.etiqueta || "") ||
-                    Boolean(editState.es_oferta) !== Boolean(producto.es_oferta) ||
+                    Boolean(editState.es_oferta) !== esOfertaValidaHoy(producto) ||
                     (precioOfertaNumerico || 0) !== (producto.precio_oferta || 0) ||
                     editState.texto_promo.trim() !== (producto.texto_promo || "");
 
@@ -3815,30 +3879,18 @@ export default function AdminLocalClient({
                             <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-amber-950">
                               <input
                                 type="checkbox"
+                                disabled={guardandoId === `oferta-${producto.id}`}
                                 checked={Boolean(editState.es_oferta)}
                                 onChange={(e) => {
-                                  const activo = e.target.checked;
-                                  const updated = {
-                                    ...editState,
-                                    es_oferta: activo,
-                                    precio_oferta:
-                                      activo && !editState.precio_oferta
-                                        ? String(Math.round(producto.precio * 0.85))
-                                        : editState.precio_oferta,
-                                    texto_promo:
-                                      activo && !editState.texto_promo
-                                        ? "🔥 Oferta del Día"
-                                        : editState.texto_promo,
-                                  };
-                                  setEdiciones((prev) => ({
-                                    ...prev,
-                                    [producto.id]: updated,
-                                  }));
+                                  void handleToggleOfertaRapida(producto, e.target.checked);
                                 }}
-                                className="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500"
+                                className="h-4 w-4 rounded border-amber-300 text-amber-600 focus:ring-amber-500 disabled:opacity-50"
                               />
                               <Flame className="h-3.5 w-3.5 text-[#C2410C]" />
                               <span>¿Activar como Oferta del Día?</span>
+                              {guardandoId === `oferta-${producto.id}` && (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin text-amber-600" />
+                              )}
                             </label>
 
                             {editState.es_oferta ? (
@@ -3858,8 +3910,8 @@ export default function AdminLocalClient({
                           </p>
 
                           {editState.es_oferta && (
-                            <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                              <div>
+                            <div className="mt-2.5 flex flex-wrap items-end gap-2.5">
+                              <div className="flex-1 min-w-[140px]">
                                 <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-amber-950">
                                   Precio Oferta (CLP)
                                 </label>
@@ -3894,7 +3946,7 @@ export default function AdminLocalClient({
                                 </div>
                               </div>
 
-                              <div>
+                              <div className="flex-1 min-w-[160px]">
                                 <label className="mb-1 block text-[11px] font-bold uppercase tracking-wider text-amber-950">
                                   Etiqueta de Promo
                                 </label>
@@ -3924,6 +3976,21 @@ export default function AdminLocalClient({
                                   className="w-full rounded-xl border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-950 placeholder:text-amber-400 focus:border-[#EA580C] focus:outline-none"
                                 />
                               </div>
+
+                              <button
+                                type="button"
+                                disabled={guardandoId === `edit-${producto.id}` || guardandoId === `oferta-${producto.id}`}
+                                onClick={() => void handleGuardarEdicionProducto(producto)}
+                                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-[#EA580C] px-3.5 py-1.5 text-xs font-black text-white shadow-xs hover:from-amber-700 hover:to-[#C2410C] active:scale-95 transition disabled:opacity-50"
+                                title="Guardar cambios de la oferta"
+                              >
+                                {guardandoId === `edit-${producto.id}` || guardandoId === `oferta-${producto.id}` ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Check className="h-3.5 w-3.5" />
+                                )}
+                                <span>Guardar Oferta</span>
+                              </button>
                             </div>
                           )}
                         </div>
