@@ -748,10 +748,21 @@ function mergeRowsWithStaticLocales(
  * Obtiene todos los locales (incluyendo activos y suspendidos) con sus categorías y productos desde Supabase.
  */
 export async function fetchAllLocales(): Promise<Local[]> {
-  const supabase = await getEffectiveSupabaseClient();
   const staticLocales = getAllLocales();
 
+  // 1. Intentar leer estado unificado en Storage (locales-state.json) que contiene el estado vivo con ofertas y cambios en tiempo real
   try {
+    const cloudState = await readSupabaseCloudState();
+    if (cloudState && Array.isArray(cloudState) && cloudState.length > 0) {
+      return cloudState;
+    }
+  } catch (err) {
+    console.warn("No se pudo leer cloudState desde Storage:", err);
+  }
+
+  // 2. Intentar consultar tablas relacionales de Supabase
+  try {
+    const supabase = await getEffectiveSupabaseClient();
     const queryPromise = supabase
       .from("locales")
       .select("*, categorias(*, productos(*))");
@@ -776,138 +787,35 @@ export async function fetchAllLocales(): Promise<Local[]> {
 }
 
 /**
- * Obtiene únicamente los locales activos para la portada comunal (/)
- * mediante una consulta ultraliviana (menos de 5 KB) que evita consultar
- * categorías y productos innecesarios, respondiendo en milisegundos.
+ * Obtiene los locales activos para la portada comunal (/)
+ * manteniendo sincronizadas todas sus categorías y productos en tiempo real.
  */
 export async function fetchActiveLocales(): Promise<Local[]> {
-  const staticLocales = getAllLocales();
-
-  try {
-    const supabase = await getEffectiveSupabaseClient();
-    const queryPromise = supabase
-      .from("locales")
-      .select("id, slug, nombre, rubro, logo_url, banner_url, abierto, activo")
-      .eq("activo", true)
-      .order("nombre");
-
-    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
-      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 6000)
-    );
-
-    const { data: rows, error } = await Promise.race([queryPromise, timeoutPromise]);
-
-    if (!error && Array.isArray(rows) && rows.length > 0) {
-      return rows.map((row) => {
-        const fallback = staticLocales.find(
-          (s) =>
-            s.slug.toLowerCase() === (row.slug || "").toLowerCase() ||
-            s.id === row.id
-        );
-
-        if (fallback) {
-          const logoFinal =
-            row.logo_url || fallback.logo_url || fallback.logo || "/logo-pidetirua.jpg";
-          const bannerFinal =
-            row.banner_url || fallback.banner_url || fallback.fotoPortada;
-          return {
-            ...fallback,
-            id: row.id || fallback.id,
-            slug: row.slug || fallback.slug,
-            nombre: row.nombre || fallback.nombre,
-            rubro: row.rubro || fallback.rubro,
-            logo_url: logoFinal,
-            logo: logoFinal,
-            banner_url: bannerFinal,
-            fotoPortada: bannerFinal,
-            abierto: row.abierto !== false,
-            activo: row.activo !== false,
-          };
-        }
-
-        // Si es un local nuevo creado en Supabase
-        const logoFinal = row.logo_url || "/logo-pidetirua.jpg";
-        const bannerFinal =
-          row.banner_url ||
-          "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1600&q=90";
-
-        return {
-          id: row.id,
-          slug: row.slug,
-          nombre: row.nombre,
-          rubro: row.rubro,
-          categoriaFiltro: inferCategoriaFiltro(row.rubro),
-          sector: "Tirúa Centro",
-          ubicacion: "Tirúa",
-          direccionDetalle: "Tirúa, Región del Biobío",
-          telefonoWhatsapp: "56900000000",
-          telefono_whatsapp: "56900000000",
-          horario: "12:00 a 22:00 hrs",
-          horarioEntrega: "Lun a Dom · 12:00 a 22:00 hrs",
-          tiempoEstimado: "25 - 35 min",
-          calificacion: 4.9,
-          descripcionCorta: `Carta digital oficial de ${row.nombre} en PideTirúa.`,
-          fotoPortada: bannerFinal,
-          banner_url: bannerFinal,
-          logo: logoFinal,
-          logo_url: logoFinal,
-          abierto: row.abierto !== false,
-          activo: row.activo !== false,
-          plan: "autogestionado",
-          precio_mensual: 15000,
-          dia_cobro: 5,
-          fecha_ultimo_pago: getTodayDateISO(),
-          pin: "1234",
-          categorias: [],
-        };
-      });
-    }
-  } catch (err) {
-    console.warn("Retorno ultrarrápido a catálogo estático en fetchActiveLocales:", err);
-  }
-
-  // Fallback instantáneo (0ms) a locales activos locales en memoria
-  return staticLocales.filter((loc) => loc.activo !== false);
+  const locales = await fetchAllLocales();
+  return locales.filter((loc) => loc.activo !== false);
 }
 
 /**
- * Obtiene un local específico por su `slug` desde Supabase mediante una única
- * consulta relacional consolidada (evitando waterfalls y reduciendo drásticamente el TTFB).
+ * Obtiene un local específico por su `slug` manteniendo sincronización total
+ * con el estado unificado y la base de datos de Supabase.
  */
 export async function fetchLocalBySlug(
   slug: string,
   soloActivos: boolean = false
 ): Promise<Local | undefined> {
   const cleanSlug = slug.toLowerCase().trim();
+  const allLocales = await fetchAllLocales();
+  const found = allLocales.find((l) => l.slug.toLowerCase() === cleanSlug);
+
+  if (found) {
+    if (soloActivos && found.activo === false) return undefined;
+    return found;
+  }
+
   const staticLocales = getAllLocales();
   const fallbackLocal = staticLocales.find(
     (l) => l.slug.toLowerCase() === cleanSlug
   );
-
-  try {
-    const supabase = await getEffectiveSupabaseClient();
-    let query = supabase
-      .from("locales")
-      .select("*, categorias(*, productos(*))")
-      .eq("slug", cleanSlug);
-
-    if (soloActivos) {
-      query = query.eq("activo", true);
-    }
-
-    const timeoutPromise = new Promise<{ data: null; error: Error }>((resolve) =>
-      setTimeout(() => resolve({ data: null, error: new Error("Timeout Supabase") }), 6000)
-    );
-
-    const { data, error } = await Promise.race([query.single(), timeoutPromise]);
-
-    if (!error && data) {
-      return mapSupabaseRowToLocal(data as SupabaseLocalRow, fallbackLocal);
-    }
-  } catch (err) {
-    console.warn(`Error al consultar local por slug (${cleanSlug}) en Supabase:`, err);
-  }
-
   if (fallbackLocal && (!soloActivos || fallbackLocal.activo !== false)) {
     return fallbackLocal;
   }
@@ -1305,6 +1213,12 @@ export async function updateProductoInSupabase(
   if (typeof cambios.es_oferta === "boolean") {
     updatePayload.es_oferta = cambios.es_oferta;
   }
+  if (cambios.fecha_oferta !== undefined) {
+    updatePayload.fecha_oferta =
+      typeof cambios.fecha_oferta === "string" && cambios.fecha_oferta.trim()
+        ? cambios.fecha_oferta.trim()
+        : null;
+  }
   if (cambios.precio_oferta !== undefined) {
     updatePayload.precio_oferta =
       cambios.precio_oferta != null &&
@@ -1336,6 +1250,7 @@ export async function updateProductoInSupabase(
       delete safePayload.es_oferta;
       delete safePayload.precio_oferta;
       delete safePayload.texto_promo;
+      delete safePayload.fecha_oferta;
       delete safePayload.opciones;
       if (Object.keys(safePayload).length > 0) {
         await supabase

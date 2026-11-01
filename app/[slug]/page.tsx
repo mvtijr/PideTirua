@@ -7,7 +7,8 @@ import {
 } from "@/lib/locales";
 import MenuClient from "@/components/MenuClient";
 
-export const revalidate = 60; // Revalida cada 60 segundos en segundo plano (ISR)
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 interface LocalMenuPageProps {
   params: Promise<{ slug: string }>;
