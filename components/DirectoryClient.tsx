@@ -31,6 +31,14 @@ const RecomendadorPlatosModal = dynamic(
   { ssr: false }
 );
 
+const ICONOS_CATEGORIA: Record<CategoriaFiltro, string> = {
+  Todos: "🍽️",
+  Sushi: "🍣",
+  "Comida Rápida": "🍔",
+  "Pescados y Mariscos": "🐟",
+  Cafetería: "☕",
+};
+
 interface DirectoryClientProps {
   locales: Local[];
 }
@@ -290,7 +298,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
           {/* Subtítulo descriptivo sin rodeos */}
           <p className="font-body text-sm sm:text-base text-stone-600 max-w-2xl mx-auto mt-3 leading-relaxed">
-            Revisa las cartas digitales de los restaurantes locales, personaliza tus platos y coordina tu retiro en local o consumo en mesa directo por WhatsApp, sin cobros adicionales.
+            Revisa las cartas digitales de restaurantes, cafeterías y locales comunales, personaliza tus pedidos y coordina tu retiro o consumo en mesa directo por WhatsApp, sin intermediarios.
           </p>
 
           {/* Barra de Búsqueda Integrada */}
@@ -303,7 +311,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 type="text"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
-                placeholder="Busca por plato, local o especialidad (ej: completos, mariscos, sushi)..."
+                placeholder="Busca café latte, pastelería, mariscos, sushi, completos..."
                 className="min-w-0 flex-1 w-full bg-transparent text-base sm:text-sm text-stone-900 placeholder:text-stone-400 font-medium focus:outline-none py-2"
               />
               {busqueda && (
@@ -451,7 +459,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             <div className="flex items-center gap-2">
               <TopDownLetters
                 as="h2"
-                text="RESTAURANTES Y PICADAS"
+                text="RESTAURANTES, CAFÉS Y PICADAS"
                 className="font-display text-3xl sm:text-4xl uppercase tracking-wide text-[#18181B]"
               />
               <span className="tabular-nums rounded-full bg-stone-200 px-2.5 py-0.5 text-xs font-black text-stone-800">
@@ -518,13 +526,14 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 key={cat}
                 type="button"
                 onClick={() => setCategoriaActiva(cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
                   activa
                     ? "bg-[#EA580C] text-white shadow-xs"
                     : "bg-white border border-stone-200 text-stone-700 hover:border-stone-400"
                 }`}
               >
-                {cat}
+                <span>{ICONOS_CATEGORIA[cat] || "🍴"}</span>
+                <span>{cat}</span>
               </button>
             );
           })}
