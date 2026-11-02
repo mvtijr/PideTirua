@@ -58,6 +58,8 @@ export function stripSensitiveLocalFields(local: Local): Local {
     pin_temporal,
     pin_temporal_expira,
     requiere_cambio_pin,
+    pin_cocina,
+    token_cocina,
     precio_mensual,
     dia_cobro,
     fecha_ultimo_pago,
@@ -1963,5 +1965,97 @@ export async function registerLocalPagoBySuperAdminInSupabase(
   await writeSupabaseCloudState(actualizados);
 
   return { ok: true, locales: actualizados };
+}
+
+/**
+ * Obtiene o genera el token de acceso directo para la tablet de pedidos de un local.
+ */
+function simpleTokenHash(str: string): string {
+  let h1 = 0xdeadbeef, h2 = 0x41c64e6d;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const part1 = (h1 >>> 0).toString(16).padStart(8, "0");
+  const part2 = (h2 >>> 0).toString(16).padStart(8, "0");
+  return `${part1}${part2}`;
+}
+
+/**
+ * Obtiene o genera el token de acceso directo para la tablet de pedidos de un local.
+ */
+export function obtenerTokenCocina(local: Local): string {
+  if (local.token_cocina && local.token_cocina.trim()) {
+    return local.token_cocina.trim();
+  }
+  const hash = simpleTokenHash(`${local.slug}_kds_salt_pidetirua_secure_staff_token`);
+  return `kds_${hash}`;
+}
+
+/**
+ * Verifica el PIN de 4 dígitos de trabajadores/personal para la pantalla de pedidos.
+ * Por defecto es "0000" si el dueño aún no ha configurado uno personalizado.
+ */
+export async function verifyPinCocinaInSupabase(
+  slug: string,
+  inputPin: string
+): Promise<boolean> {
+  const local = await fetchLocalBySlug(slug);
+  if (!local) return false;
+  const pinConfigurado = (local.pin_cocina || "0000").trim();
+  const pinLimpio = inputPin.replace(/\D/g, "").slice(0, 4);
+  return timingSafeCompare(pinLimpio, pinConfigurado);
+}
+
+/**
+ * Verifica el token de acceso directo de 1 clic para la tablet de cocina/pedidos.
+ */
+export async function verifyTokenCocinaInSupabase(
+  slug: string,
+  inputToken: string
+): Promise<boolean> {
+  const local = await fetchLocalBySlug(slug);
+  if (!local) return false;
+  const tokenEsperado = obtenerTokenCocina(local);
+  return timingSafeCompare(inputToken.trim(), tokenEsperado);
+}
+
+/**
+ * Permite al dueño actualizar el PIN de personal/trabajadores desde su panel.
+ */
+export async function updatePinCocinaInSupabase(
+  slug: string,
+  nuevoPin: string
+): Promise<{ ok: boolean; local?: Local; error?: string }> {
+  const pinLimpio = nuevoPin.replace(/\D/g, "").slice(0, 4);
+  if (pinLimpio.length !== 4) {
+    return {
+      ok: false,
+      error: "El PIN de personal debe tener exactamente 4 números.",
+    };
+  }
+
+  const supabase = await getEffectiveSupabaseClient();
+  await supabase
+    .from("locales")
+    .update({ pin_cocina: pinLimpio })
+    .eq("slug", slug);
+
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) =>
+    loc.slug.toLowerCase() === slug.toLowerCase()
+      ? { ...loc, pin_cocina: pinLimpio }
+      : loc
+  );
+  await writeSupabaseCloudState(actualizados);
+
+  const localActualizado = actualizados.find(
+    (l) => l.slug.toLowerCase() === slug.toLowerCase()
+  );
+
+  return { ok: true, local: localActualizado };
 }
 

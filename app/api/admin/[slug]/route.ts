@@ -12,6 +12,7 @@ import {
   updateLocalAjustesBasicosInSupabase,
   updateLocalDatosBancariosInSupabase,
   updateLocalDemoraYEmergenciaInSupabase,
+  updatePinCocinaInSupabase,
   updateProductoInSupabase,
   uploadPlatoFotoInSupabase,
   verifyLocalPinInSupabase,
@@ -172,6 +173,17 @@ export async function POST(
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
       revalidatePath("/superadmin");
+      return NextResponse.json(result);
+    }
+
+    if (action === "update-pin-cocina") {
+      const { nuevoPin } = body;
+      const result = await updatePinCocinaInSupabase(
+        slug,
+        String(nuevoPin || "")
+      );
+      revalidatePath(`/admin/${slug}`);
+      revalidatePath(`/pedidos/${slug}`);
       return NextResponse.json(result);
     }
 

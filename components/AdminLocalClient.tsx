@@ -86,6 +86,7 @@ interface AdminLocalClientProps {
   initialLocal: Local;
   initialAuthenticated?: boolean;
   initialSuperAdmin?: boolean;
+  tokenCocina?: string;
 }
 
 interface AdminBrandPalette {
@@ -162,6 +163,7 @@ export default function AdminLocalClient({
   initialLocal,
   initialAuthenticated = false,
   initialSuperAdmin = false,
+  tokenCocina,
 }: AdminLocalClientProps) {
   const sessionKey = `pidetirua_admin_session_${initialLocal.slug}`;
   const theme = getLocalTheme(initialLocal.slug);
@@ -359,6 +361,12 @@ export default function AdminLocalClient({
   const [confirmarPinPersonal, setConfirmarPinPersonal] = useState<string>("");
   const [errorCambioPin, setErrorCambioPin] = useState<string | null>(null);
   const [guardandoNuevoPin, setGuardandoNuevoPin] = useState<boolean>(false);
+
+  // Estados para Pantalla de Trabajadores / Personal (KDS independiente)
+  const [editandoPinCocina, setEditandoPinCocina] = useState<boolean>(false);
+  const [nuevoPinCocina, setNuevoPinCocina] = useState<string>("");
+  const [guardandoPinCocina, setGuardandoPinCocina] = useState<boolean>(false);
+  const [errorPinCocina, setErrorPinCocina] = useState<string | null>(null);
 
   const inputFotoNuevoRef = useRef<HTMLInputElement | null>(null);
 
@@ -585,6 +593,72 @@ export default function AdminLocalClient({
     } finally {
       setGuardandoNuevoPin(false);
     }
+  };
+
+  const handleGuardarPinCocina = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const pinLimpio = nuevoPinCocina.replace(/\D/g, "").slice(0, 4);
+    if (pinLimpio.length !== 4) {
+      setErrorPinCocina("El PIN debe tener exactamente 4 números.");
+      return;
+    }
+    setGuardandoPinCocina(true);
+    setErrorPinCocina(null);
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update-pin-cocina",
+          nuevoPin: pinLimpio,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        throw new Error(data?.error || "Error al actualizar PIN de personal");
+      }
+      setLocal((prev) => ({ ...prev, pin_cocina: pinLimpio }));
+      setEditandoPinCocina(false);
+      setNuevoPinCocina("");
+      mostrarToast(`✅ PIN de personal actualizado a ${pinLimpio}`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Error al actualizar";
+      setErrorPinCocina(msg);
+    } finally {
+      setGuardandoPinCocina(false);
+    }
+  };
+
+  const obtenerUrlKdsTablet = () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://pidetirua.cl";
+    const token = tokenCocina || local.token_cocina || "";
+    return `${origin}/pedidos/${local.slug}${token ? `?token=${token}` : ""}`;
+  };
+
+  const handleCopiarEnlaceTablet = async () => {
+    try {
+      const url = obtenerUrlKdsTablet();
+      await navigator.clipboard.writeText(url);
+      mostrarToast("📋 ¡Enlace copiado! Pégalo en la tablet de cocina o barra.");
+    } catch {
+      mostrarToast("No se pudo copiar al portapapeles");
+    }
+  };
+
+  const handleEnviarWhatsAppTablet = () => {
+    const url = obtenerUrlKdsTablet();
+    const pinActual = local.pin_cocina || "0000";
+    const mensaje = [
+      `📲 *PideTirúa — Pantalla de Pedidos en Vivo*`,
+      ``,
+      `Hola equipo de *${local.nombre}*, aquí tienen el enlace directo para la tablet o teléfono de pedidos:`,
+      `👉 ${url}`,
+      ``,
+      `🔑 *PIN de Personal de respaldo:* *${pinActual}*`,
+      `_(Usa este PIN si la tablet se llega a reiniciar o cierran la pestaña)_`,
+    ].join("\n");
+
+    window.open(`https://wa.me/?text=${encodeURIComponent(mensaje)}`, "_blank");
   };
 
   const handleDigitoPin = (digito: string) => {
@@ -2853,17 +2927,122 @@ export default function AdminLocalClient({
           </div>
         )}
 
-        {/* 1.5 MONITOR DE COCINA EN TIEMPO REAL CON ALERTA SONORA (KDS) */}
+        {/* 1.5 MONITOR DE PEDIDOS EN TIEMPO REAL CON ALERTA SONORA (KDS) */}
         <div
           role="tabpanel"
           id="panel-cocina"
           aria-labelledby="tab-cocina"
           className={
             pestanaActiva === "cocina" || pestanaActiva === "todas"
-              ? "block"
+              ? "block space-y-5"
               : "hidden"
           }
         >
+          {/* Tarjeta de Control: Pantalla para Trabajadores / Tablet */}
+          <div className="rounded-3xl border border-stone-200/90 bg-white p-5 sm:p-6 shadow-sm">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div className="space-y-1 max-w-xl">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-50 border border-orange-200 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#C2410C]">
+                    <Smartphone className="h-3 w-3" />
+                    Pantalla para Trabajadores (Tablet / Barra / Cocina)
+                  </span>
+                </div>
+                <h3 className="font-display text-lg sm:text-xl font-bold uppercase tracking-wide text-stone-900">
+                  Acceso Independiente para tu Personal
+                </h3>
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  Tus trabajadores podrán ver pedidos y marcarlos como listos en una tablet o celular fijo, <strong className="text-stone-900">sin acceso a tus ventas, caja, CuentaRUT ni ajustes</strong>.
+                </p>
+              </div>
+
+              {/* Control de PIN de Personal */}
+              <div className="rounded-2xl border border-stone-200 bg-stone-50 p-3 shrink-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500 block">
+                  PIN de Personal
+                </span>
+                {!editandoPinCocina ? (
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="font-mono text-base font-black tracking-widest text-stone-900">
+                      {local.pin_cocina || "0000"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setNuevoPinCocina(local.pin_cocina || "0000");
+                        setEditandoPinCocina(true);
+                      }}
+                      className="text-[11px] font-bold text-[#EA580C] hover:underline ml-1"
+                    >
+                      Cambiar
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleGuardarPinCocina} className="flex items-center gap-1.5 mt-1">
+                    <input
+                      type="password"
+                      inputMode="numeric"
+                      maxLength={4}
+                      autoFocus
+                      value={nuevoPinCocina}
+                      onChange={(e) => setNuevoPinCocina(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                      placeholder="0000"
+                      className="w-20 rounded-xl border border-stone-300 bg-white px-2.5 py-1 font-mono text-sm font-bold tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-[#EA580C]"
+                    />
+                    <button
+                      type="submit"
+                      disabled={guardandoPinCocina || nuevoPinCocina.length !== 4}
+                      className="rounded-xl bg-[#EA580C] hover:bg-[#c2410c] text-white px-2.5 py-1 text-xs font-bold transition active:scale-95 disabled:opacity-50"
+                    >
+                      {guardandoPinCocina ? <Loader2 className="h-3 w-3 animate-spin" /> : "Guardar"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditandoPinCocina(false)}
+                      className="rounded-xl border border-stone-200 bg-white text-stone-600 px-2 py-1 text-xs font-bold hover:bg-stone-100"
+                    >
+                      ✕
+                    </button>
+                  </form>
+                )}
+                {errorPinCocina && (
+                  <p className="text-[10px] text-rose-600 font-semibold mt-1">{errorPinCocina}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Botones de Acción para la Tablet */}
+            <div className="mt-4 pt-4 border-t border-stone-100 flex flex-wrap items-center gap-2">
+              <a
+                href={obtenerUrlKdsTablet()}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white px-4 py-2 text-xs font-display uppercase tracking-wider shadow-xs transition active:scale-95"
+              >
+                <ExternalLink className="h-3.5 w-3.5" />
+                <span>Abrir Pantalla en esta Tablet</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={handleCopiarEnlaceTablet}
+                className="inline-flex items-center gap-1.5 rounded-full border border-stone-300 bg-white hover:bg-stone-50 text-stone-800 px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-xs"
+              >
+                <Copy className="h-3.5 w-3.5 text-[#C2410C]" />
+                <span>Copiar Enlace Directo (1 Clic)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleEnviarWhatsAppTablet}
+                className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 px-3.5 py-2 text-xs font-bold uppercase tracking-wider transition active:scale-95 shadow-xs"
+              >
+                <MessageCircle className="h-3.5 w-3.5 text-emerald-700" />
+                <span>Enviar Enlace por WhatsApp a Cocina</span>
+              </button>
+            </div>
+          </div>
+
           <KitchenMonitor
             localSlug={local.slug}
             localNombre={local.nombre}

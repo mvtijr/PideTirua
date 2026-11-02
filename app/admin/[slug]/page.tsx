@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { fetchLocalBySlug, stripSensitiveLocalFields } from "@/lib/locales";
+import {
+  fetchLocalBySlug,
+  obtenerTokenCocina,
+  stripSensitiveLocalFields,
+} from "@/lib/locales";
 import AdminLocalClient from "@/components/AdminLocalClient";
 
 export const dynamic = "force-dynamic";
@@ -81,11 +85,14 @@ export default async function AdminLocalPage({
   const initialAuthenticated =
     sesionCookie?.value === "authenticated" || isSuperAdmin;
 
+  const tokenCocina = isSuperAdmin || initialAuthenticated ? obtenerTokenCocina(local) : undefined;
+
   return (
     <AdminLocalClient
       initialLocal={initialAuthenticated ? local : stripSensitiveLocalFields(local)}
       initialAuthenticated={initialAuthenticated}
       initialSuperAdmin={isSuperAdmin}
+      tokenCocina={tokenCocina}
     />
   );
 }

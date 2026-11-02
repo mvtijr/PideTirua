@@ -95,6 +95,8 @@ export interface Local {
   pin_temporal?: string;
   pin_temporal_expira?: string; // Fecha ISO en que expira el código (3 minutos)
   requiere_cambio_pin?: boolean;
+  pin_cocina?: string; // PIN de 4 dígitos para trabajadores/personal (por defecto 0000)
+  token_cocina?: string; // Token para enlace directo de 1 clic en tablets de cocina/barra
   banco?: string;
   tipo_cuenta?: string;
   numero_cuenta?: string;
