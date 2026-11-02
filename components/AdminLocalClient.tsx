@@ -2052,8 +2052,8 @@ export default function AdminLocalClient({
                 : "text-stone-600 hover:text-stone-900 hover:bg-stone-100"
             }`}
           >
-            <ChefHat className="h-4 w-4" />
-            <span>👨‍🍳 Monitor Cocina</span>
+            <Receipt className="h-4 w-4" />
+            <span>📋 Monitor Pedidos</span>
           </button>
 
           <button

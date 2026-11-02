@@ -5,6 +5,7 @@ import {
   Bell,
   BellOff,
   ChefHat,
+  Receipt,
   Clock,
   CreditCard,
   Banknote,
@@ -412,12 +413,12 @@ export default function KitchenMonitor({
           <span
             className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${accentText}`}
           >
-            <ChefHat className="h-4 w-4" />
-            Sistema KDS en Tiempo Real
+            <Receipt className="h-4 w-4" />
+            Comandas & Pedidos en Tiempo Real
           </span>
           <div className="mt-0.5 flex items-center gap-2">
             <h2 className="text-lg font-display uppercase tracking-wide text-stone-900 sm:text-xl">
-              👨‍🍳 Monitor de Cocina en Vivo
+              📋 Monitor de Pedidos en Vivo
             </h2>
             {estadoConexion === "conectado" ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200">
@@ -466,7 +467,7 @@ export default function KitchenMonitor({
           <button
             type="button"
             onClick={() => playKitchenDingDongChime()}
-            title="Probar timbre Ding-Dong de cocina"
+            title="Probar timbre de alerta de pedidos"
             className="inline-flex min-h-[44px] items-center gap-1 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-xs font-bold text-stone-700 shadow-xs transition hover:bg-stone-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400"
           >
             <Volume2 className="h-3.5 w-3.5" />

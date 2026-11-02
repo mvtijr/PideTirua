@@ -740,7 +740,7 @@ export default function CartDrawer({
                 </div>
               )}
 
-              {/* Stepper Visual de Estado en Vivo (Sincronizado con Monitor de Cocina) */}
+              {/* Stepper Visual de Estado en Vivo (Sincronizado con Monitor de Pedidos) */}
               <div className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black uppercase tracking-wider text-stone-600">
