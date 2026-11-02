@@ -5,6 +5,7 @@ import {
   createProductoInSupabase,
   deleteCategoriaInSupabase,
   deleteProductoInSupabase,
+  establecerNuevoPinPersonalInSupabase,
   fetchLocalBySlug,
   toggleCategoriaActivaInSupabase,
   updateLocalAbiertoInSupabase,
@@ -73,8 +74,8 @@ export async function POST(
       }
 
       const { pin } = body;
-      const valido = await verifyLocalPinInSupabase(slug, String(pin || ""));
-      if (!valido) {
+      const resultado = await verifyLocalPinInSupabase(slug, String(pin || ""));
+      if (!resultado.valido) {
         const failedResult = recordFailedAttempt(
           rateLimitKey,
           5,
@@ -84,7 +85,9 @@ export async function POST(
         return NextResponse.json(
           {
             ok: false,
-            error: failedResult.locked
+            error: resultado.expirado
+              ? "Este código temporal de 3 minutos ya expiró. Solicita uno nuevo a soporte."
+              : failedResult.locked
               ? "Has superado el límite de 5 intentos fallidos. Bloqueado por 10 minutos."
               : "PIN incorrecto. Intenta nuevamente.",
             locked: failedResult.locked,
@@ -97,7 +100,11 @@ export async function POST(
 
       resetRateLimit(rateLimitKey);
 
-      const response = NextResponse.json({ ok: true });
+      const response = NextResponse.json({
+        ok: true,
+        esTemporal: resultado.esTemporal,
+        requiereCambioPin: resultado.requiereCambioPin,
+      });
       response.cookies.set(`pidetirua_admin_${slug}`, "authenticated", {
         path: "/",
         maxAge: 60 * 60 * 24 * 7, // 7 días
@@ -148,6 +155,19 @@ export async function POST(
         direccion: typeof direccion === "string" ? direccion : undefined,
         pin: typeof pin === "string" ? pin : undefined,
       });
+      revalidatePath("/");
+      revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      revalidatePath("/superadmin");
+      return NextResponse.json(result);
+    }
+
+    if (action === "cambiar-pin-personal") {
+      const { nuevoPin } = body;
+      const result = await establecerNuevoPinPersonalInSupabase(
+        slug,
+        String(nuevoPin || "")
+      );
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);

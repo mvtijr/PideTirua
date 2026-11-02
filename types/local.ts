@@ -92,6 +92,9 @@ export interface Local {
   dia_cobro?: number;
   fecha_ultimo_pago?: string;
   pin?: string;
+  pin_temporal?: string;
+  pin_temporal_expira?: string; // Fecha ISO en que expira el código (3 minutos)
+  requiere_cambio_pin?: boolean;
   banco?: string;
   tipo_cuenta?: string;
   numero_cuenta?: string;

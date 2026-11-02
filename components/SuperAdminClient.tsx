@@ -742,9 +742,15 @@ export default function SuperAdminClient({
     }
   };
 
-  const handleRestablecerPinSoporte = async (loc: Local) => {
+  const handleEnviarPinTemporalWhatsApp = async (loc: Local) => {
+    const telefono = loc.telefono_whatsapp || loc.telefonoWhatsapp || "";
+    if (!telefono) {
+      alert(`El local "${loc.nombre}" no tiene un número de WhatsApp configurado.`);
+      return;
+    }
+
     const seguro = window.confirm(
-      `¿Restablecer el PIN de "${loc.nombre}" al código temporal 1234?\n\nEl dueño podrá volver a entrar con 1234 y configurar de inmediato su nueva clave privada.`
+      `¿Generar PIN temporal de 3 minutos para "${loc.nombre}" y enviarlo a su WhatsApp?\n\n• Expira en 3 minutos exactos.\n• Es de uso único.\n• Al ingresar, el dueño creará su PIN personal privado (tú nunca lo sabrás).`
     );
     if (!seguro) return;
 
@@ -754,21 +760,28 @@ export default function SuperAdminClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "update-pin",
+          action: "generar-pin-temporal",
           slug: loc.slug,
-          pin: "1234",
         }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        throw new Error(data?.error || "Error al restablecer PIN");
+        throw new Error(data?.error || "Error al generar PIN temporal");
       }
       if (Array.isArray(data.locales)) {
         setLocales(data.locales);
       }
-      mostrarToast(`PIN de ${loc.nombre} restablecido a 1234 (Temporal)`);
-    } catch {
-      mostrarToast("No se pudo restablecer el PIN");
+
+      if (data.urlWhatsApp) {
+        window.open(data.urlWhatsApp, "_blank");
+        mostrarToast(
+          `📲 Código temporal generado (${data.pinTemporal}, expira en 3 min). Se abrió WhatsApp...`
+        );
+      } else {
+        mostrarToast(`Código generado: ${data.pinTemporal} (expira en 3 min)`);
+      }
+    } catch (err: any) {
+      mostrarToast(err?.message || "No se pudo generar el PIN temporal");
     } finally {
       setGuardandoPinSlug(null);
     }
@@ -2011,16 +2024,16 @@ export default function SuperAdminClient({
                           <button
                             type="button"
                             disabled={guardandoPinSlug === loc.slug}
-                            onClick={() => void handleRestablecerPinSoporte(loc)}
-                            title="Restablece el PIN temporal a 1234 si el dueño olvidó su clave"
-                            className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-50 hover:bg-amber-100 px-3 py-1 text-[11px] font-bold text-amber-900 transition active:scale-95 disabled:opacity-50"
+                            onClick={() => void handleEnviarPinTemporalWhatsApp(loc)}
+                            title="Genera un código temporal de uso único (expira en 3 min) y abre WhatsApp para enviarlo al dueño"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 px-3 py-1 text-[11px] font-bold text-emerald-900 transition active:scale-95 disabled:opacity-50"
                           >
                             {guardandoPinSlug === loc.slug ? (
-                              <Loader2 className="h-3 w-3 animate-spin text-amber-700" />
+                              <Loader2 className="h-3 w-3 animate-spin text-emerald-700" />
                             ) : (
-                              <KeyRound className="h-3 w-3 text-amber-700" />
+                              <MessageCircle className="h-3 w-3 text-emerald-700" />
                             )}
-                            <span>Resetear a 1234 (Soporte)</span>
+                            <span>📲 Enviar PIN Temporal (3 min) a WhatsApp</span>
                           </button>
                         </div>
                       </div>

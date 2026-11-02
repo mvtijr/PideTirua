@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import {
   ensurePlatosBucketVideoSupport,
   fetchAllLocales,
+  generarPinTemporalInSupabase,
   registerLocalPagoBySuperAdminInSupabase,
   toggleLocalActivoBySuperAdminInSupabase,
   updateLocalPinBySuperAdminInSupabase,
@@ -150,6 +151,23 @@ export async function POST(req: NextRequest) {
       );
       revalidatePath("/");
       revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      revalidatePath("/superadmin");
+      return NextResponse.json(res);
+    }
+
+    if (action === "generar-pin-temporal") {
+      const { slug } = body;
+      if (!slug || typeof slug !== "string") {
+        return NextResponse.json(
+          { ok: false, error: "Slug requerido" },
+          { status: 400 }
+        );
+      }
+      const res = await generarPinTemporalInSupabase(slug);
+      if (!res.ok) {
+        return NextResponse.json(res, { status: 400 });
+      }
       revalidatePath(`/admin/${slug}`);
       revalidatePath("/superadmin");
       return NextResponse.json(res);

@@ -351,6 +351,15 @@ export default function AdminLocalClient({
   const [mostrarModalConfirmarEstado, setMostrarModalConfirmarEstado] =
     useState<boolean>(false);
 
+  // Modal obligatorio de configuración de nuevo PIN personal (tras código temporal de 3 min)
+  const [mostrarModalCambioPin, setMostrarModalCambioPin] = useState<boolean>(
+    Boolean(initialLocal.requiere_cambio_pin)
+  );
+  const [nuevoPinPersonal, setNuevoPinPersonal] = useState<string>("");
+  const [confirmarPinPersonal, setConfirmarPinPersonal] = useState<string>("");
+  const [errorCambioPin, setErrorCambioPin] = useState<string | null>(null);
+  const [guardandoNuevoPin, setGuardandoNuevoPin] = useState<boolean>(false);
+
   const inputFotoNuevoRef = useRef<HTMLInputElement | null>(null);
 
   // Estado local de edición rápida de nombre, precio, descripción, etiqueta y oferta por producto
@@ -516,11 +525,65 @@ export default function AdminLocalClient({
       }
 
       setAutenticado(true);
-      mostrarToast("Sesión iniciada correctamente");
+      if (data.requiereCambioPin) {
+        setMostrarModalCambioPin(true);
+        mostrarToast("Código temporal verificado. Por favor define tu nuevo PIN personal.");
+      } else {
+        mostrarToast("Sesión iniciada correctamente");
+      }
     } catch {
       setErrorPin("Error de conexión al verificar el PIN.");
     } finally {
       setValidandoPin(false);
+    }
+  };
+
+  const handleGuardarNuevoPinPersonal = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const pinLimpio = nuevoPinPersonal.replace(/\D/g, "").slice(0, 4);
+    const confirmacionLimpia = confirmarPinPersonal.replace(/\D/g, "").slice(0, 4);
+
+    if (pinLimpio.length !== 4) {
+      setErrorCambioPin("El PIN debe tener exactamente 4 números.");
+      return;
+    }
+    if (pinLimpio !== confirmacionLimpia) {
+      setErrorCambioPin("Los dos PINs ingresados no coinciden.");
+      return;
+    }
+
+    setGuardandoNuevoPin(true);
+    setErrorCambioPin(null);
+
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "cambiar-pin-personal",
+          nuevoPin: pinLimpio,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setErrorCambioPin(data.error || "No se pudo actualizar el PIN.");
+        return;
+      }
+
+      setLocal((prev) => ({
+        ...prev,
+        pin: pinLimpio,
+        requiere_cambio_pin: false,
+      }));
+      setMostrarModalCambioPin(false);
+      setNuevoPinPersonal("");
+      setConfirmarPinPersonal("");
+      mostrarToast("✅ ¡PIN personal guardado! Ahora solo tú lo conoces.");
+    } catch {
+      setErrorCambioPin("Error de red al guardar el nuevo PIN.");
+    } finally {
+      setGuardandoNuevoPin(false);
     }
   };
 
@@ -4241,6 +4304,111 @@ export default function AdminLocalClient({
         producto={platoParaEditarOpciones}
         onGuardar={handleGuardarOpcionesProducto}
       />
+
+      {/* Modal Obligatorio: Configuración de Nuevo PIN Personal tras código temporal */}
+      {mostrarModalCambioPin && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-stone-200 text-stone-900">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-12 w-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 shadow-xs">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <div>
+                <span className="inline-block rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-emerald-800 mb-1">
+                  Acceso Seguro y Privado
+                </span>
+                <h3 className="font-display text-lg sm:text-xl font-bold uppercase tracking-tight text-[#18181B] leading-tight">
+                  Configura tu PIN Personal
+                </h3>
+              </div>
+            </div>
+
+            <p className="text-xs sm:text-sm text-stone-600 mb-5 leading-relaxed">
+              Ingresaste con un código temporal de soporte. Por tu máxima seguridad, define ahora tu nuevo <strong className="text-stone-900">PIN secreto de 4 dígitos</strong>. A partir de este momento, <strong className="text-stone-900">solo tú</strong> lo conocerás.
+            </p>
+
+            {errorCambioPin && (
+              <div className="mb-4 flex items-center gap-2 rounded-xl bg-rose-50 border border-rose-200 p-3 text-xs font-semibold text-rose-700">
+                <AlertTriangle className="h-4 w-4 shrink-0 text-rose-600" />
+                <span>{errorCambioPin}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleGuardarNuevoPinPersonal} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                  Nuevo PIN (4 números)
+                </label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    autoFocus
+                    placeholder="••••"
+                    value={nuevoPinPersonal}
+                    onChange={(e) => {
+                      setNuevoPinPersonal(e.target.value.replace(/\D/g, "").slice(0, 4));
+                      setErrorCambioPin(null);
+                    }}
+                    className="w-full rounded-2xl border border-stone-300 bg-stone-50 pl-10 pr-4 py-3 text-center font-mono text-xl tracking-[0.5em] font-black text-stone-900 focus:bg-white focus:border-[#EA580C] focus:ring-2 focus:ring-orange-200 focus:outline-none transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                  Confirmar nuevo PIN
+                </label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={4}
+                    placeholder="••••"
+                    value={confirmarPinPersonal}
+                    onChange={(e) => {
+                      setConfirmarPinPersonal(e.target.value.replace(/\D/g, "").slice(0, 4));
+                      setErrorCambioPin(null);
+                    }}
+                    className="w-full rounded-2xl border border-stone-300 bg-stone-50 pl-10 pr-4 py-3 text-center font-mono text-xl tracking-[0.5em] font-black text-stone-900 focus:bg-white focus:border-[#EA580C] focus:ring-2 focus:ring-orange-200 focus:outline-none transition"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={
+                    guardandoNuevoPin ||
+                    nuevoPinPersonal.length !== 4 ||
+                    confirmarPinPersonal.length !== 4
+                  }
+                  className="w-full rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold uppercase tracking-wider text-xs sm:text-sm py-3.5 shadow-md shadow-emerald-600/25 transition active:scale-95 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+                >
+                  {guardandoNuevoPin ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin text-white" />
+                      <span>Guardando PIN Secreto...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 text-white" />
+                      <span>Guardar mi PIN Personal</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <p className="text-[11px] text-stone-400 text-center">
+                🔒 Tus datos están protegidos con cifrado y hashing seguro.
+              </p>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

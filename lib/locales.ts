@@ -53,8 +53,16 @@ export function verifySuperAdminKey(inputKey: string): boolean {
  * antes de enviar información de locales al cliente público o en páginas no autenticadas.
  */
 export function stripSensitiveLocalFields(local: Local): Local {
-  const { pin, precio_mensual, dia_cobro, fecha_ultimo_pago, ...safeLocal } =
-    local;
+  const {
+    pin,
+    pin_temporal,
+    pin_temporal_expira,
+    requiere_cambio_pin,
+    precio_mensual,
+    dia_cobro,
+    fecha_ultimo_pago,
+    ...safeLocal
+  } = local;
   return safeLocal as Local;
 }
 
@@ -1507,17 +1515,189 @@ export async function deleteProductoInSupabase(
   return { ok: true, local: localActualizado };
 }
 
+export interface ResultadoVerificacionPin {
+  valido: boolean;
+  esTemporal?: boolean;
+  requiereCambioPin?: boolean;
+  expirado?: boolean;
+}
+
 /**
- * Valida el PIN de 4 dígitos del local contra Supabase.
+ * Valida el PIN de 4 dígitos del local contra Supabase (soporta PIN definitivo y temporal de 3 min).
  */
 export async function verifyLocalPinInSupabase(
   slug: string,
   pinIngresado: string
-): Promise<boolean> {
+): Promise<ResultadoVerificacionPin> {
   const local = await fetchLocalBySlug(slug);
-  if (!local) return false;
-  const pinEsperado = (local.pin || "1234").trim();
-  return timingSafeCompare(pinIngresado.trim(), pinEsperado);
+  if (!local) return { valido: false };
+
+  const inputLimpio = pinIngresado.trim();
+
+  // 1. Verificar si coincide con el PIN permanente
+  const pinPermanente = (local.pin || "1234").trim();
+  if (timingSafeCompare(inputLimpio, pinPermanente)) {
+    return {
+      valido: true,
+      esTemporal: false,
+      requiereCambioPin: Boolean(local.requiere_cambio_pin),
+    };
+  }
+
+  // 2. Verificar si coincide con un PIN temporal activo (expira en 3 minutos)
+  if (local.pin_temporal && local.pin_temporal_expira) {
+    const ahora = Date.now();
+    const tiempoExpira = new Date(local.pin_temporal_expira).getTime();
+
+    if (ahora <= tiempoExpira) {
+      if (timingSafeCompare(inputLimpio, local.pin_temporal.trim())) {
+        // PIN temporal correcto y vigente:
+        // Consumir el PIN temporal para que sea estrictamente de 1 solo uso
+        const locales = await fetchAllLocales();
+        const actualizados = locales.map((loc) =>
+          loc.slug.toLowerCase() === slug.toLowerCase()
+            ? {
+                ...loc,
+                pin_temporal: undefined,
+                pin_temporal_expira: undefined,
+                requiere_cambio_pin: true,
+              }
+            : loc
+        );
+        await writeSupabaseCloudState(actualizados);
+
+        return {
+          valido: true,
+          esTemporal: true,
+          requiereCambioPin: true,
+        };
+      }
+    } else {
+      // El PIN temporal ya superó los 3 minutos de vigencia
+      return { valido: false, expirado: true };
+    }
+  }
+
+  return { valido: false };
+}
+
+/**
+ * SuperAdmin: Genera un PIN temporal de 4 dígitos de uso único que expira en 3 minutos
+ * y construye el enlace oficial cifrado de WhatsApp hacia el teléfono del dueño.
+ */
+export async function generarPinTemporalInSupabase(
+  slug: string
+): Promise<{
+  ok: boolean;
+  pinTemporal?: string;
+  expiraEnMinutos?: number;
+  urlWhatsApp?: string;
+  locales?: Local[];
+  error?: string;
+}> {
+  const local = await fetchLocalBySlug(slug);
+  if (!local) {
+    return { ok: false, error: "Local no encontrado" };
+  }
+
+  // Generar código aleatorio seguro de 4 dígitos (entre 1000 y 9999)
+  const pinTemporal = String(Math.floor(1000 + Math.random() * 9000));
+  const ahora = new Date();
+  const fechaExpira = new Date(ahora.getTime() + 3 * 60 * 1000); // 3 minutos exactos
+  const horaExpiraFormateada = fechaExpira.toLocaleTimeString("es-CL", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) =>
+    loc.slug.toLowerCase() === slug.toLowerCase()
+      ? {
+          ...loc,
+          pin_temporal: pinTemporal,
+          pin_temporal_expira: fechaExpira.toISOString(),
+          requiere_cambio_pin: true,
+        }
+      : loc
+  );
+  await writeSupabaseCloudState(actualizados);
+
+  const telefonoDestino = (
+    local.telefono_whatsapp ||
+    local.telefonoWhatsapp ||
+    ""
+  ).replace(/\D/g, "");
+
+  const mensaje = [
+    `🔐 *PideTirúa — Código de Acceso Temporal (3 min)*`,
+    ``,
+    `Hola *${local.nombre}*, se ha generado un código de acceso temporal para ingresar a tu panel de administración:`,
+    ``,
+    `🔑 *Código Temporal:* *${pinTemporal}*`,
+    `⏱️ *Válido por exactamente 3 minutos* (expira a las ${horaExpiraFormateada} hrs).`,
+    ``,
+    `👉 *Ingresa ahora a tu panel:*`,
+    `https://pidetirua.cl/admin/${local.slug}`,
+    ``,
+    `🔒 _Por tu seguridad y privacidad, al ingresar el sistema te solicitará definir tu nuevo PIN secreto y personal de 4 dígitos._`,
+  ].join("\n");
+
+  const urlWhatsApp = `https://wa.me/${telefonoDestino}?text=${encodeURIComponent(
+    mensaje
+  )}`;
+
+  return {
+    ok: true,
+    pinTemporal,
+    expiraEnMinutos: 3,
+    urlWhatsApp,
+    locales: actualizados,
+  };
+}
+
+/**
+ * Establece el nuevo PIN personal definitivo del dueño y destruye el PIN temporal.
+ */
+export async function establecerNuevoPinPersonalInSupabase(
+  slug: string,
+  nuevoPin: string
+): Promise<{ ok: boolean; local?: Local; error?: string }> {
+  const pinLimpio = nuevoPin.replace(/\D/g, "").slice(0, 4);
+  if (pinLimpio.length !== 4) {
+    return {
+      ok: false,
+      error: "El nuevo PIN debe contener exactamente 4 dígitos numéricos.",
+    };
+  }
+
+  const supabase = await getEffectiveSupabaseClient();
+  await supabase
+    .from("locales")
+    .update({
+      pin: pinLimpio,
+    })
+    .eq("slug", slug);
+
+  const locales = await fetchAllLocales();
+  const actualizados = locales.map((loc) =>
+    loc.slug.toLowerCase() === slug.toLowerCase()
+      ? {
+          ...loc,
+          pin: pinLimpio,
+          pin_temporal: undefined,
+          pin_temporal_expira: undefined,
+          requiere_cambio_pin: false,
+        }
+      : loc
+  );
+  await writeSupabaseCloudState(actualizados);
+
+  const localActualizado = actualizados.find(
+    (loc) => loc.slug.toLowerCase() === slug.toLowerCase()
+  );
+
+  return { ok: true, local: localActualizado };
 }
 
 /**
