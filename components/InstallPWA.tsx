@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, X, Share } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Download, X, Share, Smartphone } from "lucide-react";
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -13,6 +14,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function InstallPWA() {
+  const pathname = usePathname();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState<boolean>(false);
@@ -27,37 +29,62 @@ export default function InstallPWA() {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
     }
 
-    // No mostrar si ya está instalada en modo standalone
+    // 1. Detectar si ya está instalada o ejecutándose como app nativa (standalone)
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
+      window.matchMedia("(display-mode: fullscreen)").matches ||
+      window.matchMedia("(display-mode: minimal-ui)").matches ||
       (window.navigator as unknown as { standalone?: boolean }).standalone ===
-        true;
+        true ||
+      document.referrer.includes("android-app://");
 
     if (isStandalone) {
+      try {
+        localStorage.setItem("pidetirua_pwa_installed", "true");
+      } catch {
+        // Ignorar en navegación privada
+      }
       setVisible(false);
       return;
     }
 
+    // 2. Comprobar si el usuario ya la instaló o decidió cerrar el anuncio previamente
     try {
-      if (sessionStorage.getItem("pidetirua_pwa_dismissed") === "1") {
+      const yaInstalada = localStorage.getItem("pidetirua_pwa_installed") === "true";
+      const descartada = localStorage.getItem("pidetirua_pwa_dismissed") === "true";
+
+      if (yaInstalada || descartada) {
+        setVisible(false);
         return;
       }
     } catch {
-      // Ignorar
+      // Ignorar si localStorage está bloqueado
     }
 
+    // 3. Detectar si es iOS (Safari no soporta beforeinstallprompt automático)
     const ua = window.navigator.userAgent.toLowerCase();
     const iosDetected = /iphone|ipad|ipod/.test(ua);
     setEsIOS(iosDetected);
-    setVisible(true);
 
+    // En iOS solo mostramos si nunca ha sido descartada
+    if (iosDetected) {
+      setVisible(true);
+    }
+
+    // Evento nativo de Chrome / Edge / Android
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setVisible(true);
     };
 
+    // Evento disparado automáticamente por el navegador cuando la app se instala con éxito
     const handleAppInstalled = () => {
+      try {
+        localStorage.setItem("pidetirua_pwa_installed", "true");
+      } catch {
+        // Ignorar
+      }
       setDeferredPrompt(null);
       setVisible(false);
       setMostrarGuiaManual(false);
@@ -75,12 +102,26 @@ export default function InstallPWA() {
     };
   }, []);
 
+  // No mostrar en paneles de administración, superadmin ni monitor de cocina/pedidos
+  if (
+    pathname?.startsWith("/admin") ||
+    pathname?.startsWith("/superadmin") ||
+    pathname?.startsWith("/pedidos")
+  ) {
+    return null;
+  }
+
   const handleInstalarClick = async () => {
     if (deferredPrompt) {
       try {
         await deferredPrompt.prompt();
         const choice = await deferredPrompt.userChoice;
         if (choice.outcome === "accepted") {
+          try {
+            localStorage.setItem("pidetirua_pwa_installed", "true");
+          } catch {
+            // Ignorar
+          }
           setVisible(false);
         }
         setDeferredPrompt(null);
@@ -97,7 +138,8 @@ export default function InstallPWA() {
     setVisible(false);
     setMostrarGuiaManual(false);
     try {
-      sessionStorage.setItem("pidetirua_pwa_dismissed", "1");
+      // Guardar de forma persistente en localStorage para no volver a molestar
+      localStorage.setItem("pidetirua_pwa_dismissed", "true");
     } catch {
       // Ignorar
     }
@@ -106,18 +148,20 @@ export default function InstallPWA() {
   if (!visible) return null;
 
   return (
-    <div className="no-print relative z-40 border-b border-emerald-500/30 bg-gradient-to-r from-[#0F314A] via-[#123d5a] to-[#0F314A] px-3 py-2 text-white shadow-md">
+    <div className="no-print relative z-40 border-b border-stone-800 bg-[#18181B] px-3.5 py-2 text-white shadow-md animate-in fade-in duration-300">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-2.5">
-        <p className="text-[11px] font-bold leading-snug text-white sm:text-xs">
-          📲 Instala <strong>PideTirúa</strong> en tu celular para pedir más
-          rápido
-        </p>
+        <div className="flex items-center gap-2 min-w-0">
+          <Smartphone className="h-4 w-4 text-[#EA580C] shrink-0" />
+          <p className="text-[11px] font-bold leading-snug text-stone-200 sm:text-xs truncate">
+            Instala <strong>PideTirúa</strong> en tu celular para pedir más rápido
+          </p>
+        </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
             onClick={() => void handleInstalarClick()}
-            className="inline-flex items-center gap-1.5 rounded-full bg-[#16a34a] px-3.5 py-1.5 text-[11px] font-extrabold text-white shadow-sm transition hover:bg-[#15803d] active:scale-95 sm:text-xs"
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#EA580C] hover:bg-[#c2410c] px-3.5 py-1.5 text-[11px] font-black uppercase tracking-wider text-white shadow-sm transition active:scale-95 sm:text-xs"
           >
             <Download className="h-3.5 w-3.5" />
             <span>Instalar</span>
@@ -126,8 +170,9 @@ export default function InstallPWA() {
           <button
             type="button"
             onClick={handleCerrarBanner}
+            title="Cerrar y no volver a mostrar"
             aria-label="Cerrar aviso de instalación"
-            className="rounded-full p-1 text-white/70 transition hover:bg-white/10 hover:text-white"
+            className="rounded-full p-1 text-stone-400 transition hover:bg-white/10 hover:text-white"
           >
             <X className="h-4 w-4" />
           </button>
@@ -135,21 +180,20 @@ export default function InstallPWA() {
       </div>
 
       {mostrarGuiaManual && (
-        <div className="mx-auto mt-2 max-w-xl rounded-xl border border-white/20 bg-black/45 px-3.5 py-2.5 text-[11px] leading-relaxed text-white/95 backdrop-blur-md">
+        <div className="mx-auto mt-2 max-w-xl rounded-2xl border border-stone-700 bg-stone-900/95 px-4 py-3 text-xs leading-relaxed text-stone-300 shadow-xl backdrop-blur-md">
           {esIOS ? (
-            <p className="flex items-center gap-1.5">
-              <Share className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
+            <p className="flex items-center gap-2">
+              <Share className="h-4 w-4 shrink-0 text-[#EA580C]" />
               <span>
-                En iPhone/iPad: toca el botón <strong>Compartir</strong> en
-                Safari y selecciona{" "}
-                <strong>&ldquo;Agregar a Inicio&rdquo;</strong>.
+                En iPhone/iPad: presiona el botón <strong className="text-white">Compartir</strong> de Safari (cuadrado con flecha) y selecciona{" "}
+                <strong className="text-white">&ldquo;Agregar a pantalla de inicio&rdquo;</strong>.
               </span>
             </p>
           ) : (
             <p>
-              💡 Abre el menú de tu navegador (<strong>⋮</strong>) y selecciona{" "}
-              <strong>&ldquo;Instalar aplicación&rdquo;</strong> o{" "}
-              <strong>&ldquo;Agregar a la pantalla principal&rdquo;</strong>.
+              💡 Toca los tres puntos de tu navegador (<strong className="text-white">⋮</strong>) y selecciona{" "}
+              <strong className="text-white">&ldquo;Instalar aplicación&rdquo;</strong> o{" "}
+              <strong className="text-white">&ldquo;Agregar a la pantalla principal&rdquo;</strong>.
             </p>
           )}
         </div>
