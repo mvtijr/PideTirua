@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { CategoriaFiltro, Local, SectorComuna } from "@/types/local";
 import { CATEGORIAS_DIRECTORIO } from "@/lib/locales";
@@ -40,6 +40,41 @@ const ICONOS_CATEGORIA: Record<CategoriaFiltro, string> = {
   Cafetería: "☕",
 };
 
+const FOTOS_HERO = [
+  {
+    localSlug: "kai-coffee",
+    nombreLocal: "Kai Coffee Tirúa",
+    plato: "Café Latte & Repostería Artesanal",
+    icono: "☕",
+    url: "https://images.unsplash.com/photo-1561047029-3000c68339ca?auto=format&fit=crop&w=1200&q=85",
+    alt: "Café de Especialidad en Kai Coffee Tirúa",
+  },
+  {
+    localSlug: "sushi-burger",
+    nombreLocal: "Sushi Burger Tirúa",
+    plato: "Tabla Costera 40 Piezas Tempura",
+    icono: "🍣",
+    url: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=85",
+    alt: "Sushi Costero en Sushi Burger Tirúa",
+  },
+  {
+    localSlug: "rio-mar",
+    nombreLocal: "Río Mar Tirúa",
+    plato: "Salmón a la Plancha & Once Costera",
+    icono: "🐟",
+    url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=85",
+    alt: "Salmón a la Plancha en Río Mar Tirúa",
+  },
+  {
+    localSlug: "las-tranqueras",
+    nombreLocal: "Las Tranqueras Tirúa",
+    plato: "Pollo Asado con Papas Caseras",
+    icono: "🍗",
+    url: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1200&q=85",
+    alt: "Pollo Asado en Las Tranqueras Tirúa",
+  },
+];
+
 interface DirectoryClientProps {
   locales: Local[];
 }
@@ -51,6 +86,15 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
   const [soloAbiertos, setSoloAbiertos] = useState(false);
   const [localQrModal, setLocalQrModal] = useState<Local | null>(null);
   const [mostrarRecomendador, setMostrarRecomendador] = useState(false);
+  const [fotoHeroIndex, setFotoHeroIndex] = useState(0);
+
+  // Rotación automática suave del carrusel de fotos del hero cada 5.5s
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFotoHeroIndex((prev) => (prev + 1) % FOTOS_HERO.length);
+    }, 5500);
+    return () => clearInterval(timer);
+  }, []);
 
   const cantidadAbiertos = useMemo(
     () => locales.filter((l) => l.abierto).length,
@@ -263,8 +307,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </div>
       </header>
 
-      {/* 2. HERO EDITORIAL LIGERO Y DIRECTO AL GRANO */}
-      <section className="relative w-full pt-10 pb-8 sm:pt-14 sm:pb-12 overflow-hidden bg-[#FAF8F5] border-b border-stone-200/80">
+      {/* 2. HERO PRINCIPAL GASTRONÓMICO CON FOTO SANGRADA (OPCIÓN 3) */}
+      <section className="relative w-full pt-10 pb-10 sm:pt-16 sm:pb-16 overflow-hidden bg-[#FAF8F5] border-b border-stone-200/80">
         <GradientBackground
           gradientType="radial-gradient"
           gradientOrigin="top-middle"
@@ -281,72 +325,120 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           noisePatternRefreshInterval={0}
         />
 
-        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10 text-center">
-          {/* Badge Territorial */}
-          <div className="inline-flex items-center gap-2 bg-white text-stone-900 border border-stone-200 shadow-xs px-3.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider mb-4">
-            <UtensilsCrossed className="h-3.5 w-3.5 text-[#C2410C]" />
-            <span className="text-[#C2410C]">GASTRONOMÍA LOCAL</span>
-            <span className="text-stone-300">•</span>
-            <span>TIRÚA CENTRO &amp; QUIDICO</span>
-          </div>
+        {/* Fondo fotográfico sangrado en la mitad derecha (sin marco exterior) */}
+        <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 overflow-hidden pointer-events-none z-0">
+          {FOTOS_HERO.map((foto, idx) => (
+            <img
+              key={foto.url}
+              src={foto.url}
+              alt={foto.alt}
+              className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-in-out ${
+                idx === fotoHeroIndex
+                  ? "opacity-100 scale-100"
+                  : "opacity-0 scale-105"
+              }`}
+            />
+          ))}
+          {/* Fundido horizontal hacia la izquierda para unificar con el fondo beige */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/30 to-transparent hidden lg:block" />
+          {/* En móviles y tablets: velo suave para no interferir con la legibilidad */}
+          <div className="absolute inset-0 bg-[#FAF8F5]/90 lg:hidden block" />
+        </div>
 
-          {/* Título Principal */}
-          <TopDownLetters
-            as="h1"
-            text="PIDE DIRECTO A LA COCINA EN NUESTRA COMUNA"
-            className="font-display text-4xl sm:text-6xl md:text-7xl text-[#18181B] tracking-tight uppercase max-w-4xl mx-auto leading-none"
-          />
+        <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10">
+          <div className="max-w-2xl lg:max-w-xl text-left">
+            {/* Badge Territorial */}
+            <div className="inline-flex items-center gap-2 bg-white text-stone-900 border border-stone-200 shadow-xs px-3.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider mb-4">
+              <UtensilsCrossed className="h-3.5 w-3.5 text-[#C2410C]" />
+              <span className="text-[#C2410C]">GASTRONOMÍA LOCAL</span>
+              <span className="text-stone-300">•</span>
+              <span>TIRÚA CENTRO &amp; QUIDICO</span>
+            </div>
 
-          {/* Subtítulo descriptivo sin rodeos */}
-          <p className="font-body text-sm sm:text-base text-stone-600 max-w-2xl mx-auto mt-3 leading-relaxed">
-            Revisa las cartas digitales de restaurantes y cafeterías de Tirúa. Pide antes de salir y elige: retiro al paso en mostrador sin filas o comida caliente servida en mesa al llegar, coordinado directo por WhatsApp sin intermediarios ni delivery.
-          </p>
+            {/* Título Principal */}
+            <TopDownLetters
+              as="h1"
+              text="PIDE DIRECTO A LA COCINA EN NUESTRA COMUNA"
+              className="font-display text-4xl sm:text-5xl lg:text-6xl text-[#18181B] tracking-tight uppercase leading-none"
+            />
 
-          {/* Barra de Búsqueda Integrada */}
-          <div className="max-w-2xl mx-auto mt-6">
-            <div className="flex items-center rounded-full bg-white shadow-lg border border-stone-200/90 p-1.5 transition-all focus-within:border-[#EA580C] focus-within:ring-2 focus-within:ring-orange-200">
-              <div className="pl-3 pr-2 text-stone-400">
-                <Search className="h-5 w-5 text-stone-500" />
-              </div>
-              <input
-                type="text"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                placeholder="Busca café latte, pastelería, mariscos, sushi, completos..."
-                className="min-w-0 flex-1 w-full bg-transparent text-base sm:text-sm text-stone-900 placeholder:text-stone-400 font-medium focus:outline-none py-2"
-              />
-              {busqueda && (
+            {/* Subtítulo descriptivo sin rodeos */}
+            <p className="font-body text-sm sm:text-base text-stone-600 mt-3.5 leading-relaxed max-w-xl">
+              Revisa las cartas digitales de restaurantes y cafeterías de Tirúa. Pide antes de salir y elige: retiro al paso en mostrador sin filas o comida caliente servida en mesa al llegar, coordinado directo por WhatsApp sin intermediarios ni delivery.
+            </p>
+
+            {/* Barra de Búsqueda Integrada */}
+            <div className="max-w-xl mt-6">
+              <div className="flex items-center rounded-full bg-white shadow-lg border border-stone-200/90 p-1.5 transition-all focus-within:border-[#EA580C] focus-within:ring-2 focus-within:ring-orange-200">
+                <div className="pl-3 pr-2 text-stone-400">
+                  <Search className="h-5 w-5 text-stone-500" />
+                </div>
+                <input
+                  type="text"
+                  value={busqueda}
+                  onChange={(e) => setBusqueda(e.target.value)}
+                  placeholder="Busca café latte, pastelería, mariscos, sushi, completos..."
+                  className="min-w-0 flex-1 w-full bg-transparent text-base sm:text-sm text-stone-900 placeholder:text-stone-400 font-medium focus:outline-none py-2"
+                />
+                {busqueda && (
+                  <button
+                    type="button"
+                    onClick={() => setBusqueda("")}
+                    className="p-2 text-stone-400 hover:text-stone-700 transition shrink-0"
+                    aria-label="Limpiar búsqueda"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => setBusqueda("")}
-                  className="p-2 text-stone-400 hover:text-stone-700 transition shrink-0"
-                  aria-label="Limpiar búsqueda"
+                  onClick={scrollADirectorio}
+                  className="bg-[#18181B] hover:bg-[#EA580C] text-white text-[11px] font-black uppercase tracking-wider px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-full transition-all shrink-0 inline-flex items-center gap-1.5 ml-1"
                 >
-                  <X className="h-4 w-4" />
+                  <span>BUSCAR</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
-              )}
-              <button
-                type="button"
-                onClick={scrollADirectorio}
-                className="bg-[#18181B] hover:bg-[#EA580C] text-white text-[11px] font-black uppercase tracking-wider px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-full transition-all shrink-0 inline-flex items-center gap-1.5 ml-1"
-              >
-                <span>BUSCAR</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </button>
+              </div>
             </div>
-          </div>
 
-          {/* Micro Pilares de Servicio */}
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 mt-5 text-[11px] font-bold text-stone-600">
-            <span className="flex items-center gap-1.5">
-              <span className="text-[#C2410C]">⚡</span> Retiro sin filas en local
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-[#C2410C]">📲</span> Pedido directo por WhatsApp
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-[#C2410C]">💳</span> Efectivo o CuentaRUT
-            </span>
+            {/* Micro Pilares de Servicio */}
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 mt-4 text-[11px] font-bold text-stone-600">
+              <span className="flex items-center gap-1.5">
+                <span className="text-[#C2410C]">⚡</span> Retiro sin filas en local
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-[#C2410C]">📲</span> Pedido directo por WhatsApp
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="text-[#C2410C]">💳</span> Efectivo o CuentaRUT
+              </span>
+            </div>
+
+            {/* Selector de Fotos de Locales (1-clic y auto-rotación) */}
+            <div className="mt-5 pt-3 border-t border-stone-200/60 flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-stone-400 mr-1 hidden sm:inline">
+                En imagen:
+              </span>
+              {FOTOS_HERO.map((f, idx) => {
+                const activa = idx === fotoHeroIndex;
+                return (
+                  <button
+                    key={f.localSlug}
+                    type="button"
+                    onClick={() => setFotoHeroIndex(idx)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
+                      activa
+                        ? "bg-[#18181B] text-white shadow-xs"
+                        : "bg-white/80 hover:bg-white text-stone-700 border border-stone-200/80"
+                    }`}
+                  >
+                    <span>{f.icono}</span>
+                    <span>{f.nombreLocal.replace(" Tirúa", "").replace(" Quidico", "")}</span>
+                  </button>
+                );
+              })}
+            </div>
+
           </div>
         </div>
       </section>
