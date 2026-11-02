@@ -325,8 +325,16 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           noisePatternRefreshInterval={0}
         />
 
-        {/* Fondo fotográfico sangrado en la mitad derecha (sin marco exterior) */}
-        <div className="absolute right-0 top-0 bottom-0 w-full lg:w-1/2 overflow-hidden pointer-events-none z-0">
+        {/* Fondo fotográfico con fundido orgánico (sin línea de separación ni cortes duros) */}
+        <div
+          className="absolute right-0 top-0 bottom-0 w-full lg:w-7/12 overflow-hidden pointer-events-none z-0 opacity-40 lg:opacity-100 transition-opacity duration-700"
+          style={{
+            maskImage:
+              "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
+          }}
+        >
           {FOTOS_HERO.map((foto, idx) => (
             <img
               key={foto.url}
@@ -339,10 +347,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               }`}
             />
           ))}
-          {/* Fundido horizontal hacia la izquierda para unificar con el fondo beige */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FAF8F5] via-[#FAF8F5]/30 to-transparent hidden lg:block" />
-          {/* En móviles y tablets: velo suave para no interferir con la legibilidad */}
-          <div className="absolute inset-0 bg-[#FAF8F5]/90 lg:hidden block" />
+          {/* Suave degradado vertical en la parte inferior para fundir con la división de sección */}
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FAF8F5] to-transparent opacity-80" />
         </div>
 
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10">
