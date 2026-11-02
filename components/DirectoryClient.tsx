@@ -40,7 +40,7 @@ const ICONOS_CATEGORIA: Record<CategoriaFiltro, string> = {
   Cafetería: "☕",
 };
 
-const FOTOS_HERO = [
+const FOTOS_HERO_FALLBACK = [
   {
     localSlug: "kai-coffee",
     nombreLocal: "Kai Coffee Tirúa",
@@ -88,13 +88,76 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
   const [mostrarRecomendador, setMostrarRecomendador] = useState(false);
   const [fotoHeroIndex, setFotoHeroIndex] = useState(0);
 
+  // Selección dinámica de fotos del Hero que rota cada día y se actualiza sola al cambiar fotos en el panel admin
+  const fotosHero = useMemo(() => {
+    const hoy = new Date();
+    // Día del año (1-366) para rotación diaria sin intervención manual
+    const inicioAnio = new Date(hoy.getFullYear(), 0, 0);
+    const difMs = hoy.getTime() - inicioAnio.getTime();
+    const diaDelAnio = Math.floor(difMs / (1000 * 60 * 60 * 24));
+
+    const items: Array<{
+      localSlug: string;
+      nombreLocal: string;
+      plato: string;
+      icono: string;
+      url: string;
+      alt: string;
+    }> = [];
+
+    locales
+      .filter((loc) => loc.activo !== false)
+      .forEach((loc, localIdx) => {
+        const platosConFoto: Array<{ nombre: string; url: string }> = [];
+
+        loc.categorias.forEach((cat) => {
+          cat.productos.forEach((p) => {
+            const img = p.imagen_url || p.imagen;
+            if (img && img.trim() && p.disponible !== false) {
+              platosConFoto.push({ nombre: p.nombre, url: img.trim() });
+            }
+          });
+        });
+
+        const primerRubro = loc.categoriaFiltro?.[0] as CategoriaFiltro;
+        const icono = ICONOS_CATEGORIA[primerRubro] || "🍴";
+
+        if (platosConFoto.length > 0) {
+          // Elige un plato distinto cada día de forma automática
+          const platoHoy =
+            platosConFoto[(diaDelAnio + localIdx) % platosConFoto.length];
+          items.push({
+            localSlug: loc.slug,
+            nombreLocal: loc.nombre,
+            plato: platoHoy.nombre,
+            icono,
+            url: platoHoy.url,
+            alt: `${platoHoy.nombre} en ${loc.nombre}`,
+          });
+        } else if (loc.banner_url || loc.fotoPortada) {
+          const portada = (loc.banner_url || loc.fotoPortada)!;
+          items.push({
+            localSlug: loc.slug,
+            nombreLocal: loc.nombre,
+            plato: loc.rubro || "Gastronomía Local",
+            icono,
+            url: portada,
+            alt: `${loc.nombre} en Tirúa`,
+          });
+        }
+      });
+
+    return items.length > 0 ? items : FOTOS_HERO_FALLBACK;
+  }, [locales]);
+
   // Rotación automática suave del carrusel de fotos del hero cada 5.5s
   useEffect(() => {
+    if (fotosHero.length <= 1) return;
     const timer = setInterval(() => {
-      setFotoHeroIndex((prev) => (prev + 1) % FOTOS_HERO.length);
+      setFotoHeroIndex((prev) => (prev + 1) % fotosHero.length);
     }, 5500);
     return () => clearInterval(timer);
-  }, []);
+  }, [fotosHero.length]);
 
   const cantidadAbiertos = useMemo(
     () => locales.filter((l) => l.abierto).length,
@@ -335,9 +398,9 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
           }}
         >
-          {FOTOS_HERO.map((foto, idx) => (
+          {fotosHero.map((foto, idx) => (
             <img
-              key={foto.url}
+              key={`${foto.localSlug}-${foto.url}`}
               src={foto.url}
               alt={foto.alt}
               className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-in-out ${
@@ -422,14 +485,19 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
             {/* Selector de Fotos de Locales (1-clic y auto-rotación) */}
             <div className="mt-5 pt-3 border-t border-stone-200/60 flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-stone-400 mr-1 hidden sm:inline">
-                En imagen:
+              <span className="text-[10px] font-black uppercase tracking-wider text-stone-500 mr-1 flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#EA580C] animate-pulse"></span>
+                <span>En imagen:</span>
+                <strong className="text-stone-900 font-bold truncate max-w-[180px] sm:max-w-none">
+                  {fotosHero[fotoHeroIndex]?.plato || "Especialidad Local"}
+                </strong>
+                <span className="text-stone-300">·</span>
               </span>
-              {FOTOS_HERO.map((f, idx) => {
+              {fotosHero.map((f, idx) => {
                 const activa = idx === fotoHeroIndex;
                 return (
                   <button
-                    key={f.localSlug}
+                    key={`${f.localSlug}-${idx}`}
                     type="button"
                     onClick={() => setFotoHeroIndex(idx)}
                     className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
