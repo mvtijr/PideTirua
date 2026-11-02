@@ -4,7 +4,9 @@
     "slug": "las-tranqueras",
     "nombre": "Las Tranqueras Tirúa",
     "rubro": "Pollos Asados y Comida Rápida",
-    "categoriaFiltro": ["Comida Rápida"],
+    "categoriaFiltro": [
+      "Comida Rápida"
+    ],
     "sector": "Tirúa Centro",
     "ubicacion": "Tirúa Centro",
     "direccion": "Av. Costanera esq. Galvarino, Tirúa Centro",
@@ -129,7 +131,10 @@
     "slug": "sushi-burger",
     "nombre": "Sushi Burger Tirúa",
     "rubro": "Sushi y Hamburguesas",
-    "categoriaFiltro": ["Sushi", "Comida Rápida"],
+    "categoriaFiltro": [
+      "Sushi",
+      "Comida Rápida"
+    ],
     "sector": "Tirúa Centro",
     "ubicacion": "Calle Arturo Prat, Tirúa",
     "direccion": "Arturo Prat #420, frente a Plaza de Armas de Tirúa",
@@ -247,7 +252,10 @@
     "slug": "rio-mar",
     "nombre": "Cafetería y Restaurante Río Mar",
     "rubro": "Cafetería y Almuerzos",
-    "categoriaFiltro": ["Cafetería", "Pescados y Mariscos"],
+    "categoriaFiltro": [
+      "Cafetería",
+      "Pescados y Mariscos"
+    ],
     "sector": "Tirúa Centro",
     "ubicacion": "Costanera Tirúa",
     "direccion": "Paseo Costanera Río Tirúa s/n, frente a la desembocadura",
@@ -352,7 +360,9 @@
     "slug": "gran-pacifico",
     "nombre": "Restaurant Gran Pacífico",
     "rubro": "Pescados, Mariscos y Empanadas",
-    "categoriaFiltro": ["Pescados y Mariscos"],
+    "categoriaFiltro": [
+      "Pescados y Mariscos"
+    ],
     "sector": "Quidico",
     "ubicacion": "Quidico",
     "direccion": "Av. Costanera Playa Quidico #185, Balneario de Quidico",
@@ -362,7 +372,7 @@
     "horario": "11:30 a 21:30 hrs",
     "horarioEntrega": "Lun a Dom · 11:30 a 21:30 hrs",
     "tiempoEstimado": "30 - 45 min",
-    "calificacion": 5.0,
+    "calificacion": 5,
     "descripcionCorta": "Gastronomía marina frente al mar de Quidico. Famosos por nuestras empanadas de mariscos recién fritas, pailas marinas y pescados frescos de caleta.",
     "fotoPortada": "https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=1800&q=95",
     "videoPortada": "/videos/granpacifico.mp4",
@@ -466,6 +476,760 @@
             "descripcion": "Coca-Cola, Fanta, Sprite o Agua Mineral Cachantun.",
             "precio": 1600,
             "imagen": "https://images.unsplash.com/photo-1554866585-cd94860890b7?auto=format&fit=crop&w=1000&q=90"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "loc-5",
+    "slug": "kai-coffee",
+    "nombre": "Kai Coffee Tirúa",
+    "rubro": "Cafetería de Especialidad & Take Away",
+    "categoriaFiltro": [
+      "Cafetería"
+    ],
+    "sector": "Tirúa Centro",
+    "ubicacion": "Tirúa Centro",
+    "direccion": "San Joaquín 227, Galería M&H, Tirúa Centro",
+    "direccionDetalle": "San Joaquín 227, Galería M&H, Tirúa Centro (formato al paso y retiro)",
+    "telefonoWhatsapp": "56912345678",
+    "telefono_whatsapp": "56912345678",
+    "horario": "08:30 a 19:30 hrs",
+    "horarioEntrega": "Lun a Sáb · 08:30 a 19:30 hrs",
+    "tiempoEstimado": "10 - 20 min",
+    "calificacion": 4.9,
+    "descripcionCorta": "Café de especialidad en formato al paso (to go). Espresso bar, cafés fríos, granos de origen seleccionados y repostería artesanal en Galería M&H.",
+    "fotoPortada": "/images/kai-coffee-banner.jpg",
+    "banner_url": "/images/kai-coffee-banner.jpg",
+    "logo": "/logos/kai-coffee.jpg",
+    "logo_url": "/logos/kai-coffee.jpg",
+    "abierto": true,
+    "activo": true,
+    "plan": "autogestionado",
+    "precio_mensual": 15000,
+    "dia_cobro": 5,
+    "pin": "1234",
+    "banco": "BancoEstado",
+    "tipo_cuenta": "CuentaRUT / Vista",
+    "numero_cuenta": "19876543",
+    "rut_titular": "19.876.543-2",
+    "nombre_titular": "Kai Coffee Tirúa",
+    "email_transferencia": "contacto@kaicoffeetirua.cl",
+    "categorias": [
+      {
+        "id": "cat-kai-espresso",
+        "nombre": "Cafés de Especialidad (Calientes)",
+        "orden": 1,
+        "activa": true,
+        "productos": [
+          {
+            "id": "kai-1",
+            "nombre": "Espresso Doble (Doppio)",
+            "descripcion": "Extracción doble calibrada con notas a caramelo y chocolate de origen. Intenso y aromático.",
+            "precio": 2200,
+            "imagen": "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?auto=format&fit=crop&w=800&q=90",
+            "destacado": false,
+            "etiqueta": "Especialidad",
+            "opciones": [
+              {
+                "id": "grp-endulzante-1",
+                "titulo": "Endulzante",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Sin azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "1 cucharadita de azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "2 cucharaditas de azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Stevia",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Sucralosa",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-2",
+            "nombre": "Café Americano",
+            "descripcion": "Doble shot de espresso vertido sobre agua caliente a temperatura justa para preservar sus notas aromáticas.",
+            "precio": 2600,
+            "imagen": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=90",
+            "opciones": [
+              {
+                "id": "grp-tamano-2",
+                "titulo": "Tamaño",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Mediano (250ml)",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Grande (400ml)",
+                    "precio": 600
+                  }
+                ]
+              },
+              {
+                "id": "grp-endulzante-2",
+                "titulo": "Endulzante",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Sin azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "1 de azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "2 de azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Stevia",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-3",
+            "nombre": "Café Cortado / Macchiato",
+            "descripcion": "Espresso doble coronado con una capa suave de leche vaporizada y microespuma.",
+            "precio": 2800,
+            "imagen": "https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=800&q=90",
+            "opciones": [
+              {
+                "id": "grp-leche-3",
+                "titulo": "Tipo de Leche",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Leche Entera",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Leche Descremada",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Sin Lactosa",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Bebida Vegetal de Avena",
+                    "precio": 500
+                  }
+                ]
+              },
+              {
+                "id": "grp-endulzante-3",
+                "titulo": "Endulzante",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Sin azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "1 de azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "2 de azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Stevia",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-4",
+            "nombre": "Cappuccino Italiano",
+            "descripcion": "Tercio perfecto de espresso, leche vaporizada y cremosa microespuma con arte latte.",
+            "precio": 3200,
+            "imagen": "https://images.unsplash.com/photo-1572442388796-11668a67e53d?auto=format&fit=crop&w=800&q=90",
+            "destacado": true,
+            "etiqueta": "Más pedido",
+            "opciones": [
+              {
+                "id": "grp-leche-4",
+                "titulo": "Tipo de Leche",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Leche Entera",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Leche Descremada",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Sin Lactosa",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Bebida Vegetal de Avena",
+                    "precio": 500
+                  }
+                ]
+              },
+              {
+                "id": "grp-endulzante-4",
+                "titulo": "Endulzante",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Sin azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "1 de azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "2 de azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Stevia",
+                    "precio": 0
+                  }
+                ]
+              },
+              {
+                "id": "grp-extras-4",
+                "titulo": "Toppings y Extras",
+                "tipo": "multiple",
+                "items": [
+                  {
+                    "nombre": "Toque de canela",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Cacao amargo espolvoreado",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Shot espresso extra",
+                    "precio": 800
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-5",
+            "nombre": "Café Latte de la Casa",
+            "descripcion": "Suave combinación de espresso con abundante leche vaporizada sedosa y diseño de barismo.",
+            "precio": 3400,
+            "imagen": "https://images.unsplash.com/photo-1561047029-3000c68339ca?auto=format&fit=crop&w=800&q=90",
+            "destacado": true,
+            "opciones": [
+              {
+                "id": "grp-leche-5",
+                "titulo": "Tipo de Leche",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Leche Entera",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Leche Descremada",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Sin Lactosa",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Bebida Vegetal de Avena",
+                    "precio": 500
+                  }
+                ]
+              },
+              {
+                "id": "grp-sirope-5",
+                "titulo": "Saborizante Opcional",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Sin sirope adicional",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Jarabe de Vainilla Francesa",
+                    "precio": 400
+                  },
+                  {
+                    "nombre": "Jarabe de Caramelo Salado",
+                    "precio": 400
+                  },
+                  {
+                    "nombre": "Jarabe de Avellana",
+                    "precio": 400
+                  }
+                ]
+              },
+              {
+                "id": "grp-endulzante-5",
+                "titulo": "Endulzante",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Sin azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "1 de azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "2 de azúcar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Stevia",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-6",
+            "nombre": "Mocaccino Belga",
+            "descripcion": "Espresso de especialidad combinado con cacao semiamargo fundido, leche vaporizada y lluvia de chocolate.",
+            "precio": 3800,
+            "imagen": "https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?auto=format&fit=crop&w=800&q=90",
+            "opciones": [
+              {
+                "id": "grp-leche-6",
+                "titulo": "Tipo de Leche",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Leche Entera",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Leche Descremada",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Sin Lactosa",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Bebida Vegetal de Avena",
+                    "precio": 500
+                  }
+                ]
+              },
+              {
+                "id": "grp-extras-6",
+                "titulo": "Extras",
+                "tipo": "multiple",
+                "items": [
+                  {
+                    "nombre": "Crema Chantilly",
+                    "precio": 500
+                  },
+                  {
+                    "nombre": "Shot espresso extra",
+                    "precio": 800
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "cat-kai-frios",
+        "nombre": "Cafés Fríos & Iced Drinks",
+        "orden": 2,
+        "activa": true,
+        "productos": [
+          {
+            "id": "kai-7",
+            "nombre": "Iced Latte Refrescante",
+            "descripcion": "Doble espresso vertido sobre leche fría texturizada con hielo cristalino. Súper refrescante.",
+            "precio": 3600,
+            "imagen": "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=800&q=90",
+            "destacado": true,
+            "etiqueta": "Favorito de Verano",
+            "opciones": [
+              {
+                "id": "grp-leche-7",
+                "titulo": "Tipo de Leche",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Leche Entera",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Leche Descremada",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Sin Lactosa",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Bebida Vegetal de Avena",
+                    "precio": 500
+                  }
+                ]
+              },
+              {
+                "id": "grp-sirope-7",
+                "titulo": "Toque de Sabor",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Clásico (Sin sirope)",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Toque de Vainilla",
+                    "precio": 400
+                  },
+                  {
+                    "nombre": "Toque de Caramelo",
+                    "precio": 400
+                  }
+                ]
+              },
+              {
+                "id": "grp-endulzante-7",
+                "titulo": "Endulzante",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Sin endulzar",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Almíbar simple",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Stevia",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-8",
+            "nombre": "Cold Brew Artesanal 18 hrs",
+            "descripcion": "Extracción lenta en frío durante 18 horas. Cuerpo sedoso, notas chocolatadas naturales y cero amargor.",
+            "precio": 3500,
+            "imagen": "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?auto=format&fit=crop&w=800&q=90",
+            "etiqueta": "Extracción 18 hrs"
+          },
+          {
+            "id": "kai-9",
+            "nombre": "Espresso Tónica",
+            "descripcion": "Doble shot de espresso sobre agua tónica premium, rodaja de cítrico fresco y abundante hielo.",
+            "precio": 3800,
+            "imagen": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=800&q=90"
+          },
+          {
+            "id": "kai-10",
+            "nombre": "Frappé Mocha Chips",
+            "descripcion": "Café batido frozen con salsa de chocolate, leche y chispas crocantes, terminado con crema.",
+            "precio": 4200,
+            "imagen": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=800&q=90"
+          }
+        ]
+      },
+      {
+        "id": "cat-kai-granos",
+        "nombre": "Café en Grano y Molido (250g)",
+        "orden": 3,
+        "activa": true,
+        "productos": [
+          {
+            "id": "kai-11",
+            "nombre": "Café Talamanca — Costa Rica (250g)",
+            "descripcion": "Origen Costa Rica. Notas de cata a miel, frutos rojos y acidez cítrica suave. Empaque con válvula desgasificadora.",
+            "precio": 9900,
+            "imagen": "https://images.unsplash.com/photo-1587734195503-904fca47e0e9?auto=format&fit=crop&w=800&q=90",
+            "opciones": [
+              {
+                "id": "grp-molienda-11",
+                "titulo": "Tipo de Molienda",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "En Grano entero",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Cafetera Italiana (Moka)",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Prensa Francesa",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Filtro / V60",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-12",
+            "nombre": "Café Cumbre — Colombia Huila (250g)",
+            "descripcion": "Origen Huila, Colombia. Cuerpo pleno, acaramelado, notas a chocolate con leche y naranja dulce.",
+            "precio": 9900,
+            "imagen": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=800&q=90",
+            "destacado": true,
+            "etiqueta": "Origen Colombia",
+            "opciones": [
+              {
+                "id": "grp-molienda-12",
+                "titulo": "Tipo de Molienda",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "En Grano entero",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Cafetera Italiana (Moka)",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Prensa Francesa",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Filtro / V60",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-13",
+            "nombre": "Café Kaldi — Etiopía (250g)",
+            "descripcion": "Cuna mítica del café. Perfil exótico con notas florales a jazmín, bergamota y cuerpo sedoso y ligero.",
+            "precio": 10900,
+            "imagen": "https://images.unsplash.com/photo-1587734195503-904fca47e0e9?auto=format&fit=crop&w=800&q=90",
+            "opciones": [
+              {
+                "id": "grp-molienda-13",
+                "titulo": "Tipo de Molienda",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "En Grano entero",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Cafetera Italiana (Moka)",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Prensa Francesa",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Filtro / V60",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-14",
+            "nombre": "Café Altiplano — Bolivia (250g)",
+            "descripcion": "Cultivado a gran altitud en Los Yungas. Notas tostadas a frutos secos, cacao puro y panela.",
+            "precio": 9500,
+            "imagen": "https://images.unsplash.com/photo-1611854779393-1b2da9d400fe?auto=format&fit=crop&w=800&q=90",
+            "opciones": [
+              {
+                "id": "grp-molienda-14",
+                "titulo": "Tipo de Molienda",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "En Grano entero",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Cafetera Italiana (Moka)",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Prensa Francesa",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Filtro / V60",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-15",
+            "nombre": "Café Descafeinado de Especialidad (250g)",
+            "descripcion": "Proceso natural Swiss Water sin químicos. Todo el aroma y sabor del café premium sin cafeína.",
+            "precio": 9900,
+            "imagen": "https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=800&q=90",
+            "opciones": [
+              {
+                "id": "grp-molienda-15",
+                "titulo": "Tipo de Molienda",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "En Grano entero",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Cafetera Italiana (Moka)",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Prensa Francesa",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "Molido para Filtro / V60",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "cat-kai-bakery",
+        "nombre": "Pastelería & Repostería Artesanal",
+        "orden": 4,
+        "activa": true,
+        "productos": [
+          {
+            "id": "kai-16",
+            "nombre": "Cookie Artesanal Choco-Chips",
+            "descripcion": "Galleta horneada crocante por fuera y centro húmedo con trozos de chocolate semiamargo.",
+            "precio": 1800,
+            "imagen": "https://images.unsplash.com/photo-1499636136210-6f4ee915583e?auto=format&fit=crop&w=800&q=90",
+            "etiqueta": "Horneada hoy"
+          },
+          {
+            "id": "kai-17",
+            "nombre": "Brownie Fudge Chocolate y Nueces",
+            "descripcion": "Brownie intenso de cacao 70%, nueces tostadas y pizca de sal marina.",
+            "precio": 2400,
+            "imagen": "https://images.unsplash.com/photo-1606313564200-e75d5e30476c?auto=format&fit=crop&w=800&q=90"
+          },
+          {
+            "id": "kai-18",
+            "nombre": "Croissant Francés de Mantequilla",
+            "descripcion": "Masa hojaldrada crujiente y aireada, elaborada 100% con mantequilla de campo.",
+            "precio": 2200,
+            "imagen": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=90",
+            "opciones": [
+              {
+                "id": "grp-temp-18",
+                "titulo": "Temperatura",
+                "tipo": "unica",
+                "items": [
+                  {
+                    "nombre": "Tibio horneado",
+                    "precio": 0
+                  },
+                  {
+                    "nombre": "A temperatura ambiente",
+                    "precio": 0
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kai-19",
+            "nombre": "Muffin de Arándanos del Sur",
+            "descripcion": "Bizcocho esponjoso relleno de arándanos frescos y crumble dorado.",
+            "precio": 2200,
+            "imagen": "https://images.unsplash.com/photo-1586985289688-ca3cf47d3e6e?auto=format&fit=crop&w=800&q=90"
+          }
+        ]
+      },
+      {
+        "id": "cat-kai-salados",
+        "nombre": "Sándwiches & Tostones al Paso",
+        "orden": 5,
+        "activa": true,
+        "productos": [
+          {
+            "id": "kai-20",
+            "nombre": "Croissant Jamón Serrano & Mantecoso",
+            "descripcion": "Croissant tibio hojaldrado con finas láminas de jamón serrano y queso mantecoso fundido.",
+            "precio": 3900,
+            "imagen": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=90",
+            "destacado": true
+          },
+          {
+            "id": "kai-21",
+            "nombre": "Tostón Masa Madre con Palta Hass",
+            "descripcion": "Rebanada tostada de masa madre, abundante palta hass molida, mix de sésamo y aceite de oliva virgen extra.",
+            "precio": 3600,
+            "imagen": "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=90",
+            "opciones": [
+              {
+                "id": "grp-extras-21",
+                "titulo": "Agregados",
+                "tipo": "multiple",
+                "items": [
+                  {
+                    "nombre": "Huevo pochado o frito",
+                    "precio": 800
+                  },
+                  {
+                    "nombre": "Tomates cherry confitados",
+                    "precio": 500
+                  }
+                ]
+              }
+            ]
           }
         ]
       }
