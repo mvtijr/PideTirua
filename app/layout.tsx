@@ -3,13 +3,14 @@ import InstallPWA from "@/components/InstallPWA";
 import "./globals.css";
 
 export const viewport: Viewport = {
-  themeColor: "#16a34a",
+  themeColor: "#EA580C",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://pidetirua.cl"),
   title: "PideTirúa — Sabores de nuestra tierra | Tirúa y Quidico",
   description:
     "Plataforma de pedidos con retiro en local y cartas digitales QR de la comuna de Tirúa y Quidico (Región del Biobío, Chile). Revisa el menú digital y realiza tu pedido directo al WhatsApp de cada local.",
@@ -19,12 +20,49 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "PideTirúa",
   },
+  openGraph: {
+    title: "PideTirúa — Sabores de nuestra tierra | Tirúa y Quidico",
+    description:
+      "Plataforma gastronómica de Tirúa y Quidico. Revisa cartas digitales, pide antes de salir y coordina directo por WhatsApp con cada restaurante.",
+    url: "https://pidetirua.cl",
+    siteName: "PideTirúa",
+    locale: "es_CL",
+    type: "website",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "PideTirúa — Sabores de Nuestra Tierra",
+        type: "image/jpeg",
+      },
+      {
+        url: "/og-image-square.jpg",
+        width: 1024,
+        height: 1024,
+        alt: "Logo Oficial PideTirúa",
+        type: "image/jpeg",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "PideTirúa — Sabores de nuestra tierra | Tirúa y Quidico",
+    description:
+      "Plataforma gastronómica de Tirúa y Quidico. Revisa cartas digitales y pide directo por WhatsApp.",
+    images: ["/og-image.jpg"],
+  },
   icons: {
     icon: [
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512x512.png", sizes: "512x512", type: "image/png" },
     ],
-    apple: [{ url: "/icon-192x192.png", sizes: "192x192", type: "image/png" }],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/icon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
   },
 };
 
@@ -41,12 +79,20 @@ export default function RootLayout({
           content="width=device-width, initial-scale=1.0, viewport-fit=cover"
         />
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#16a34a" />
+        <meta name="theme-color" content="#EA580C" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="PideTirúa" />
-        <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <meta property="og:site_name" content="PideTirúa" />
+        <meta property="og:image" content="https://pidetirua.cl/og-image.jpg" />
+        <meta property="og:image:secure_url" content="https://pidetirua.cl/og-image.jpg" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

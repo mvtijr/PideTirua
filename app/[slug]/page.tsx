@@ -33,9 +33,44 @@ export async function generateMetadata({
     };
   }
 
+  const portada = local.banner_url || local.fotoPortada || "/og-image.jpg";
+  const logoLocal = local.logo_url || local.logo;
+
   return {
     title: `${local.nombre} — Carta Digital QR | PideTirúa`,
     description: `${local.rubro} en ${local.ubicacion}. Revisa el menú digital de ${local.nombre} y pide directo a su WhatsApp.`,
+    openGraph: {
+      title: `${local.nombre} — Carta Digital QR | PideTirúa`,
+      description: `${local.rubro} en ${local.ubicacion}. Revisa la carta digital completa y realiza tu pedido directo.`,
+      url: `https://pidetirua.cl/${local.slug}`,
+      siteName: "PideTirúa",
+      locale: "es_CL",
+      type: "website",
+      images: [
+        {
+          url: portada,
+          width: 1200,
+          height: 630,
+          alt: `Carta digital ${local.nombre}`,
+        },
+        ...(logoLocal
+          ? [
+              {
+                url: logoLocal,
+                width: 512,
+                height: 512,
+                alt: `Logo ${local.nombre}`,
+              },
+            ]
+          : []),
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${local.nombre} — Carta Digital QR | PideTirúa`,
+      description: `${local.rubro} en ${local.ubicacion}.`,
+      images: [portada],
+    },
   };
 }
 
