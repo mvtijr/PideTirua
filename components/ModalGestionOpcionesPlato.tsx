@@ -20,6 +20,101 @@ interface ModalGestionOpcionesPlatoProps {
   onGuardar: (productoId: string, opciones: GrupoOpcion[]) => Promise<void>;
 }
 
+const PLANTILLAS_RAPIDAS = [
+  {
+    id: "leche",
+    nombre: "Tipo de Leche",
+    icono: "🥛",
+    grupo: {
+      titulo: "Tipo de Leche",
+      tipo: "unica" as const,
+      items: [
+        { nombre: "Leche Entera", precio: 0 },
+        { nombre: "Leche Descremada", precio: 0 },
+        { nombre: "Leche Sin Lactosa", precio: 0 },
+        { nombre: "Bebida de Avena", precio: 500 },
+        { nombre: "Bebida de Almendras", precio: 500 },
+      ],
+    },
+  },
+  {
+    id: "endulzante",
+    nombre: "Endulzante",
+    icono: "🍬",
+    grupo: {
+      titulo: "Endulzante",
+      tipo: "unica" as const,
+      items: [
+        { nombre: "Sin azúcar", precio: 0 },
+        { nombre: "1 cdta de Azúcar", precio: 0 },
+        { nombre: "2 cdtas de Azúcar", precio: 0 },
+        { nombre: "Stevia", precio: 0 },
+        { nombre: "Sucralosa", precio: 0 },
+      ],
+    },
+  },
+  {
+    id: "sabor",
+    nombre: "Toque de Sabor",
+    icono: "🍯",
+    grupo: {
+      titulo: "Toque de Sabor (Siropes)",
+      tipo: "multiple" as const,
+      items: [
+        { nombre: "Sirope de Vainilla", precio: 400 },
+        { nombre: "Sirope de Caramelo", precio: 400 },
+        { nombre: "Sirope de Avellana", precio: 400 },
+        { nombre: "Salsa de Chocolate", precio: 400 },
+      ],
+    },
+  },
+  {
+    id: "agregados",
+    nombre: "Agregados y Extras",
+    icono: "✨",
+    grupo: {
+      titulo: "Agregados y Extras",
+      tipo: "multiple" as const,
+      items: [
+        { nombre: "Shot extra de Café Espresso", precio: 800 },
+        { nombre: "Crema Chantilly", precio: 500 },
+        { nombre: "Canela en polvo", precio: 0 },
+        { nombre: "Cacao espolvoreado", precio: 0 },
+        { nombre: "Hielo extra (Iced)", precio: 0 },
+      ],
+    },
+  },
+  {
+    id: "tamano",
+    nombre: "Tamaño",
+    icono: "📏",
+    grupo: {
+      titulo: "Tamaño",
+      tipo: "unica" as const,
+      items: [
+        { nombre: "Tamaño Normal (8 oz / 240 ml)", precio: 0 },
+        { nombre: "Tamaño Grande (12 oz / 350 ml)", precio: 600 },
+      ],
+    },
+  },
+  {
+    id: "salsas",
+    nombre: "Salsas y Aderezos",
+    icono: "🍔",
+    grupo: {
+      titulo: "Salsas y Aderezos",
+      tipo: "multiple" as const,
+      items: [
+        { nombre: "Mayonesa casera", precio: 0 },
+        { nombre: "Kétchup", precio: 0 },
+        { nombre: "Mostaza", precio: 0 },
+        { nombre: "Ají verde picado", precio: 0 },
+        { nombre: "Salsa BBQ", precio: 300 },
+      ],
+    },
+  },
+];
+
 export default function ModalGestionOpcionesPlato({
   isOpen,
   onClose,
@@ -53,6 +148,11 @@ export default function ModalGestionOpcionesPlato({
   }, [isOpen, onClose]);
 
   if (!isOpen || !producto) return null;
+
+  const handleAplicarPlantilla = (plantilla: (typeof PLANTILLAS_RAPIDAS)[number]) => {
+    setGrupos((prev) => [...prev, JSON.parse(JSON.stringify(plantilla.grupo))]);
+    setError(null);
+  };
 
   const handleAgregarGrupo = () => {
     setGrupos((prev) => [
@@ -233,9 +333,40 @@ export default function ModalGestionOpcionesPlato({
         {/* Contenido scrolleable */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           <p className="text-xs text-stone-600 leading-relaxed">
-            Configura grupos de opciones para que el cliente elija aderezos,
-            acompañamientos o extras al añadir este plato a su pedido.
+            Configura opciones para que el cliente personalice su café o plato (tipo de leche, endulzante, sabor, agregados o salsas) antes de añadirlo a su pedido.
           </p>
+
+          {/* Atajos Rápidos / Plantillas de 1 Clic */}
+          <div className="rounded-2xl border border-amber-200/80 bg-amber-50/60 p-3.5 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-amber-900 flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-amber-600" />
+                Plantillas Rápidas (1 Clic para añadir):
+              </span>
+              <span className="text-[10px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">
+                Cafetería & Restaurante
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5">
+              {PLANTILLAS_RAPIDAS.map((plantilla) => (
+                <button
+                  key={plantilla.id}
+                  type="button"
+                  onClick={() => handleAplicarPlantilla(plantilla)}
+                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-xl border border-amber-300/80 bg-white px-2.5 py-1 text-xs font-bold text-stone-800 shadow-2xs hover:bg-amber-100 hover:border-amber-400 active:scale-95 transition"
+                  title={`Añadir plantilla de ${plantilla.nombre}`}
+                >
+                  <span>{plantilla.icono}</span>
+                  <span>+ {plantilla.nombre}</span>
+                </button>
+              ))}
+            </div>
+
+            <p className="text-[10px] text-amber-800/90 leading-tight">
+              💡 Puedes agregar cualquiera de estas plantillas y luego modificar nombres, precios extra (+$) o eliminar lo que no ocupes con el botón de papelera.
+            </p>
+          </div>
 
           {error && (
             <div className="rounded-xl border border-rose-300 bg-rose-50 p-3 text-xs font-bold text-rose-700">

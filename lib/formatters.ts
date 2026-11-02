@@ -119,9 +119,14 @@ export function formatWhatsAppMessage({
   const emojiModalidad =
     datos.tipoEntrega === "Retiro en local" ? "🛍️" : "🍽️";
 
+  const textoModalidad =
+    datos.tipoEntrega === "Retiro en local"
+      ? "Retiro al paso en mostrador (para llevar, sin delivery)"
+      : "Servirse en el local (pedido anticipado / en mesa, sin delivery)";
+
   const etiquetaUbicacion =
     datos.tipoEntrega === "Consumo en mesa"
-      ? "🪑 *Número de mesa:*"
+      ? "🪑 *Mesa o aviso de llegada:*"
       : "🏪 *Sucursal de retiro:*";
 
   const valorUbicacion =
@@ -179,7 +184,7 @@ export function formatWhatsAppMessage({
     ...(datos.telefonoCliente?.trim()
       ? [`📞 *Teléfono:* ${datos.telefonoCliente.trim()}`]
       : []),
-    `${emojiModalidad} *Modalidad:* ${datos.tipoEntrega}`,
+    `${emojiModalidad} *Modalidad:* ${textoModalidad}`,
     lineaHorario,
     `${etiquetaUbicacion} ${valorUbicacion}`,
     `💳 *Método de pago:* ${datos.metodoPago}`,

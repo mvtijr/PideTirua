@@ -10,6 +10,7 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Flame,
   Dices,
   Sparkles,
@@ -298,7 +299,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
           {/* Subtítulo descriptivo sin rodeos */}
           <p className="font-body text-sm sm:text-base text-stone-600 max-w-2xl mx-auto mt-3 leading-relaxed">
-            Revisa las cartas digitales de restaurantes, cafeterías y locales comunales, personaliza tus pedidos y coordina tu retiro o consumo en mesa directo por WhatsApp, sin intermediarios.
+            Revisa las cartas digitales de restaurantes y cafeterías de Tirúa. Pide antes de salir y elige: retiro al paso en mostrador sin filas o comida caliente servida en mesa al llegar, coordinado directo por WhatsApp sin intermediarios ni delivery.
           </p>
 
           {/* Barra de Búsqueda Integrada */}
@@ -467,7 +468,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               </span>
             </div>
             <p className="font-body text-xs sm:text-sm text-stone-600 mt-1">
-              Selecciona un local para revisar su carta completa y hacer tu pedido con retiro en local o consumo en mesa.
+              Selecciona un local para revisar su carta completa y hacer tu pedido anticipado: para retirar al paso o para llegar y servirte directo en mesa.
             </p>
           </div>
 
@@ -517,8 +518,49 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </div>
         </div>
 
-        {/* Pestañas Horizontales de Categorías */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+        {/* 1. Selector Desplegable en Móvil (Visible solo en smartphones) */}
+        <div className="sm:hidden w-full">
+          <label htmlFor="categoria-select-mobile" className="sr-only">
+            Filtrar por Categoría
+          </label>
+          <div className="relative">
+            <select
+              id="categoria-select-mobile"
+              value={categoriaActiva}
+              onChange={(e) => setCategoriaActiva(e.target.value as CategoriaFiltro)}
+              className="w-full appearance-none rounded-2xl border-2 border-[#EA580C]/40 bg-white py-3 pl-4 pr-10 text-xs font-black uppercase tracking-wider text-stone-900 shadow-xs focus:border-[#EA580C] focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20"
+            >
+              {CATEGORIAS_DIRECTORIO.map((cat) => (
+                <option key={cat} value={cat} className="py-2 text-stone-900 font-bold">
+                  {ICONOS_CATEGORIA[cat] || "🍴"} {cat === "Todos" ? "Todas las Categorías" : cat}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-[#EA580C]">
+              <ChevronDown className="h-5 w-5" />
+            </div>
+          </div>
+          {hayFiltrosActivos && (
+            <div className="mt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setBusqueda("");
+                  setCategoriaActiva("Todos");
+                  setSectorActivo("Todos");
+                  setSoloAbiertos(false);
+                }}
+                className="text-[11px] font-bold text-stone-500 hover:text-[#EA580C] flex items-center gap-1"
+              >
+                <X className="h-3 w-3" />
+                <span>Limpiar filtros</span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 2. Pestañas Horizontales en Tablet y Escritorio (sm:flex) */}
+        <div className="hidden sm:flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
           {CATEGORIAS_DIRECTORIO.map((cat) => {
             const activa = categoriaActiva === cat;
             return (
@@ -729,11 +771,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               <div>
                 <TopDownLetters
                   as="h3"
-                  text="RETIRO EN LOCAL Y EN MESA"
+                  text="RETIRO AL PASO O SERVIRSE EN MESA"
                   className="font-display text-xl text-stone-900 tracking-wide uppercase"
                 />
                 <p className="font-body text-xs text-stone-600 mt-1 leading-relaxed">
-                  Pide con anticipación desde tu celular y retira tu comida caliente y lista sin filas en el mostrador.
+                  <strong>Pide antes de salir (sin delivery):</strong> encarga con anticipación para retirar en mostrador sin filas, o para que tu comida esté servida y lista en tu mesa apenas llegues al local (o pide directo a tu mesa sin esperas).
                 </p>
               </div>
             </div>
@@ -817,7 +859,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           </div>
 
           <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
-            Plataforma comunal de cartas digitales QR y pedidos con retiro en local y en mesa para locales gastronómicos de Tirúa y Quidico, Región del Biobío, Chile.
+            Plataforma comunal de cartas digitales QR y pedidos anticipados (retiro al paso o para servirse en mesa, sin delivery) para locales gastronómicos de Tirúa y Quidico, Región del Biobío, Chile.
           </p>
 
           <p className="text-[11px] text-stone-400">

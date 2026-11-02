@@ -823,19 +823,19 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
                     Modalidades de Pedido
                   </span>
                   <p className={`text-[11px] sm:text-xs ${theme.infoSub}`}>
-                    Retiro en local y Consumo en mesa • WhatsApp
+                    Retiro al paso o servirse en mesa (sin delivery) • WhatsApp
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Modalidades de atención exclusivas: Retiro en local y Consumo en mesa */}
+            {/* Modalidades de atención exclusivas: Retiro al paso o Servir en local */}
             <div className="mt-3.5 flex items-center justify-between gap-3">
               <div
                 className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full ${theme.modalityBadge}`}
               >
                 <Store className={`h-4 w-4 ${theme.modalityIcon}`} />
-                <span>Retiro en local y Consumo en mesa</span>
+                <span>🛍️ Retiro al paso en mostrador • 🍽️ Servirse en local</span>
               </div>
             </div>
           </div>
@@ -891,7 +891,7 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
                     Carta Digital Oficial • {local.nombre}
                   </span>
                   <span className="block text-[11px] sm:text-xs font-semibold text-stone-600 mt-0.5">
-                    Retiro en local y consumo en mesa
+                    🛍️ Retiro al paso • 🍽️ Servirse en local (sin delivery)
                   </span>
                 </div>
               </div>

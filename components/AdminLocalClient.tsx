@@ -4184,7 +4184,7 @@ export default function AdminLocalClient({
             <p className="text-xs text-stone-600 leading-relaxed">
               {local.abierto
                 ? "Al cerrar el local, tu carta digital quedará en modo 'Solo Lectura'. Los comensales podrán ver los platos y precios, pero no podrán armar pedidos ni enviar comandas a cocina ni a WhatsApp."
-                : "Al abrir el local, tu carta quedará inmediatamente activa en el portal de Tirúa. Los clientes podrán realizar pedidos para retiro o consumo en mesa."}
+                : "Al abrir el local, tu carta quedará inmediatamente activa en el portal de Tirúa. Los clientes podrán realizar pedidos anticipados para retiro al paso o servirse en mesa (sin delivery)."}
             </p>
 
             <div className="flex flex-col-reverse sm:flex-row items-center gap-2 pt-2">

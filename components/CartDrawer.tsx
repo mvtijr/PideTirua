@@ -59,10 +59,21 @@ interface CartDrawerProps {
 const MODALIDADES_PEDIDO: {
   valor: TipoEntrega;
   etiqueta: string;
+  subtitulo: string;
   icono: typeof Store;
 }[] = [
-  { valor: "Retiro en local", etiqueta: "Retiro en local", icono: Store },
-  { valor: "Consumo en mesa", etiqueta: "Consumo en mesa", icono: Utensils },
+  {
+    valor: "Retiro en local",
+    etiqueta: "Retiro al paso",
+    subtitulo: "Para llevar en mostrador",
+    icono: Store,
+  },
+  {
+    valor: "Consumo en mesa",
+    etiqueta: "Servirse en local",
+    subtitulo: "Listo en mesa al llegar",
+    icono: Utensils,
+  },
 ];
 
 const METODOS_PAGO: {
@@ -343,12 +354,12 @@ export default function CartDrawer({
 
   const placeholderUbicacion =
     tipoEntrega === "Consumo en mesa"
-      ? "Ej: Mesa 4 (Terraza interior)"
+      ? "Ej: Llego en 15 min, somos 2 personas (o Mesa 4 si ya estás sentado)"
       : "Ej: Retiro en 20 min / Retira Juan (opcional)";
 
   const labelUbicacion =
     tipoEntrega === "Consumo en mesa"
-      ? "Número de mesa *"
+      ? "Aviso de llegada o número de mesa *"
       : "Hora o referencia para el retiro (opcional)";
 
   const handleEnviarWhatsApp = async (e: React.FormEvent) => {
@@ -387,7 +398,9 @@ export default function CartDrawer({
     }
 
     if (tipoEntrega === "Consumo en mesa" && !direccionOMesa.trim()) {
-      setErrorValidacion("Por favor indica tu número de mesa.");
+      setErrorValidacion(
+        "Por favor indica tu aviso de llegada (ej: 'Llego en 15 min') o número de mesa si ya estás en el local."
+      );
       return;
     }
 
@@ -1114,13 +1127,18 @@ export default function CartDrawer({
               )}
             </div>
 
-            {/* 2. Selector de Modalidad (Retiro en local o Consumo en mesa) */}
+            {/* 2. Selector de Modalidad (Retiro al paso o Servirse en mesa) */}
             <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                Modalidad del pedido
-              </label>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                  Modalidad del pedido (Sin delivery)
+                </label>
+                <span className="text-[10px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">
+                  Sin costo de envío
+                </span>
+              </div>
               <div className="grid grid-cols-2 gap-2.5">
-                {MODALIDADES_PEDIDO.map(({ valor, etiqueta, icono: Icon }) => {
+                {MODALIDADES_PEDIDO.map(({ valor, etiqueta, subtitulo, icono: Icon }) => {
                   const seleccionado = tipoEntrega === valor;
                   return (
                     <button
@@ -1130,28 +1148,48 @@ export default function CartDrawer({
                         setTipoEntrega(valor);
                         setErrorValidacion(null);
                       }}
-                      className={`flex flex-col items-center justify-center gap-1.5 rounded-xl border p-3 text-center text-xs font-bold transition ${
+                      className={`flex flex-col items-center justify-center gap-1 rounded-2xl border p-3 text-center transition active:scale-95 ${
                         seleccionado
                           ? theme.drawerOptionActive
-                          : "border-outline-variant/50 bg-white text-on-surface-variant hover:border-secondary"
+                          : "border-stone-200 bg-white text-stone-700 hover:border-stone-300"
                       }`}
                     >
                       <Icon
                         className={`h-5 w-5 ${
                           seleccionado
                             ? theme.drawerOptionIconActive
-                            : "text-outline"
+                            : "text-stone-500"
                         }`}
                       />
-                      <span>{etiqueta}</span>
+                      <span className="text-xs font-black">{etiqueta}</span>
+                      <span className="text-[10px] text-stone-500 font-medium leading-tight">
+                        {subtitulo}
+                      </span>
                     </button>
                   );
                 })}
               </div>
-              <p className="mt-1.5 text-xs text-on-surface-variant">
-                Modalidad seleccionada:{" "}
-                <strong className={theme.drawerLabel}>{tipoEntrega}</strong>
-              </p>
+
+              {/* Banner explicativo contextual según modalidad */}
+              {tipoEntrega === "Consumo en mesa" ? (
+                <div className="mt-2.5 rounded-2xl border border-amber-300 bg-amber-50/90 p-3 text-xs text-amber-950 space-y-1">
+                  <p className="font-bold flex items-center gap-1 text-amber-900">
+                    <span>🍽️ Servirse en el local:</span>
+                  </p>
+                  <p className="text-[11px] leading-relaxed text-stone-700">
+                    <strong>Pide antes de llegar:</strong> Pides con anticipación para que cuando entres al local tu comida o café esté caliente y listo en la mesa (¡sin esperar preparación ni filas!). O si ya estás sentado, pide directo desde tu mesa.
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-2.5 rounded-2xl border border-stone-200 bg-stone-50 p-3 text-xs text-stone-700 space-y-1">
+                  <p className="font-bold flex items-center gap-1 text-stone-900">
+                    <span>🛍️ Retiro al paso en mostrador:</span>
+                  </p>
+                  <p className="text-[11px] leading-relaxed text-stone-600">
+                    Pide con anticipación desde tu celular y pasa a retirar tu pedido empacado para llevar directo en el mostrador sin filas.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* 3. Inputs del cliente */}
