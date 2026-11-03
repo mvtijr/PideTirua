@@ -138,7 +138,7 @@ REGLAS ESTRICTAS:
       const nombreLocal = sanitizeString(String(body.nombre_local || "Nuestro Local")).trim();
       const rubro = sanitizeString(String(body.rubro || "Gastronomía")).trim();
       const platosDestacados = sanitizeString(String(body.platos_destacados || "")).trim();
-      const link = sanitizeString(String(body.link || "https://pidetirua.vercel.app")).trim();
+      const link = sanitizeString(String(body.link || "https://pidetirua.cl")).trim();
 
       if (!apiKey) {
         const fallback = getFallbackSocialPost(nombreLocal, rubro, platosDestacados, link);
