@@ -27,6 +27,7 @@ interface WhatsAppOrderPayload {
   local: Local;
   items: ItemCarrito[];
   datos: DatosCheckout;
+  codigoRetiro?: string;
 }
 
 /**
@@ -113,6 +114,7 @@ export function formatWhatsAppMessage({
   local,
   items,
   datos,
+  codigoRetiro,
 }: WhatsAppOrderPayload): string {
   const { total } = calcularTotalesCarrito(items);
 
@@ -173,6 +175,9 @@ export function formatWhatsAppMessage({
   const lineasMensaje = [
     `🌊 *¡Hola ${local.nombre}!*`,
     `Te envío un nuevo pedido desde *PideTirúa* 📲`,
+    ...(codigoRetiro
+      ? [`🔖 *CÓDIGO DE RETIRO: #${codigoRetiro.replace(/^#/, "")}*`]
+      : []),
     ``,
     `━━━━━━━━━━━━━━━━━━━━`,
     `🛒 *DETALLE DEL PEDIDO:*`,

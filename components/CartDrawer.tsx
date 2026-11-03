@@ -459,12 +459,6 @@ export default function CartDrawer({
       total,
     };
 
-    const url = buildWhatsAppCheckoutUrl({
-      local,
-      items,
-      datos: datosCheckout,
-    });
-
     if (enviandoPedido) return;
     setEnviandoPedido(true);
 
@@ -500,6 +494,13 @@ export default function CartDrawer({
     } finally {
       clearTimeout(timeoutId);
     }
+
+    const url = buildWhatsAppCheckoutUrl({
+      local,
+      items,
+      datos: datosCheckout,
+      codigoRetiro: codigoGenerado,
+    });
 
     const infoConfirmacion: PedidoConfirmadoInfo = {
       pedidoId: pedidoIdRetornado,
