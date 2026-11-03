@@ -6,8 +6,11 @@ import {
 } from "@/lib/pedidos";
 import { EstadoPedido, ItemPedidoGuardado } from "@/types/local";
 import {
+  addPhoneToBlacklist,
   checkRateLimit,
   getClientIp,
+  isPhoneBlacklisted,
+  normalizePhone,
   recordFailedAttempt,
   sanitizeString,
 } from "@/lib/security";
@@ -53,7 +56,7 @@ export async function POST(req: NextRequest) {
     const ip = getClientIp(req);
     const rateLimitStatus = checkRateLimit(
       `checkout:${ip}`,
-      30,
+      5,
       10 * 60 * 1000,
       10 * 60 * 1000
     );
@@ -63,7 +66,7 @@ export async function POST(req: NextRequest) {
         {
           ok: false,
           error:
-            "Has realizado demasiados pedidos en poco tiempo. Por favor espera unos minutos.",
+            "Has alcanzado el límite de 5 pedidos consecutivos desde esta conexión. Por favor espera unos minutos antes de volver a ordenar.",
         },
         { status: 429 }
       );
@@ -116,6 +119,47 @@ export async function POST(req: NextRequest) {
 
     const clienteLimpio = sanitizeString(cliente_nombre, 80) || "Cliente";
     const clienteTelefonoLimpio = sanitizeString(cliente_telefono, 40);
+    const telefonoNormalizado = normalizePhone(clienteTelefonoLimpio);
+
+    // Rate Limiting por número de teléfono: máximo 5 pedidos por cada 15 minutos
+    if (telefonoNormalizado) {
+      const phoneRateLimit = checkRateLimit(
+        `checkout:tel:${telefonoNormalizado}`,
+        5,
+        15 * 60 * 1000,
+        15 * 60 * 1000
+      );
+
+      if (!phoneRateLimit.allowed) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error:
+              "Has alcanzado el límite de 5 pedidos recientes con este número de teléfono. Por favor espera unos minutos o confirma tu orden previa por WhatsApp.",
+          },
+          { status: 429 }
+        );
+      }
+
+      // Verificación de Lista Negra (Blacklist):
+      // Si el número fue reportado por no presentarse o bromas, se restringe el pago en efectivo
+      if (isPhoneBlacklisted(telefonoNormalizado)) {
+        if (
+          metodo_pago !== "Transferencia" &&
+          metodo_pago !== "Transferencia Bancaria"
+        ) {
+          return NextResponse.json(
+            {
+              ok: false,
+              error:
+                "Este número de teléfono tiene restringidos los pedidos con pago en efectivo debido a comandas previas no retiradas. Por favor selecciona 'Transferencia Bancaria' para procesar tu pedido.",
+            },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
     const horaRetiroLimpia = sanitizeString(hora_retiro, 40) || "lo_antes_posible";
     const tipoEntregaLimpio =
       tipo_entrega === "Consumo en mesa" || tipo_entrega === "Mesa"
@@ -210,6 +254,15 @@ export async function PATCH(req: NextRequest) {
     const result = await actualizarEstadoPedidoEnSupabase(pedidoId, estado);
     if (!result.ok) {
       return NextResponse.json(result, { status: 500 });
+    }
+
+    // Si se solicitó bloquear el número por comanda cancelada o broma
+    if (estado === "cancelado" && body.bloquearTelefono && body.telefono) {
+      addPhoneToBlacklist(
+        String(body.telefono),
+        String(body.motivoBloqueo || "Comanda no retirada / broma"),
+        isSuperAdmin ? "superadmin" : "admin"
+      );
     }
 
     return NextResponse.json(result);

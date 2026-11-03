@@ -157,3 +157,74 @@ export function sanitizeString(input: unknown, maxLength = 255): string {
     .trim()
     .slice(0, maxLength);
 }
+
+/**
+ * Normaliza un número telefónico chileno a solo dígitos (ej: "569XXXXXXXX").
+ */
+export function normalizePhone(rawPhone: unknown): string {
+  if (typeof rawPhone !== "string") return "";
+  const digits = rawPhone.replace(/\D/g, "");
+  if (digits.length === 9 && digits.startsWith("9")) {
+    return `56${digits}`;
+  }
+  if (digits.length === 11 && digits.startsWith("569")) {
+    return digits;
+  }
+  return digits;
+}
+
+export interface BlacklistEntry {
+  telefono: string;
+  motivo: string;
+  fecha: string;
+  bloqueadoPor: string;
+}
+
+// Almacén en memoria de números bloqueados por no presentación, bromas o fraude
+const blacklistStore = new Map<string, BlacklistEntry>();
+
+/**
+ * Verifica si un número de teléfono está en la lista negra.
+ */
+export function isPhoneBlacklisted(rawPhone: string): boolean {
+  const norm = normalizePhone(rawPhone);
+  if (!norm) return false;
+  return blacklistStore.has(norm);
+}
+
+/**
+ * Registra un número telefónico en la lista negra de la plataforma.
+ */
+export function addPhoneToBlacklist(
+  rawPhone: string,
+  motivo = "No se presentó a retirar comanda en efectivo",
+  bloqueadoPor = "admin"
+): { ok: boolean; telefono: string } {
+  const norm = normalizePhone(rawPhone);
+  if (!norm) return { ok: false, telefono: "" };
+
+  blacklistStore.set(norm, {
+    telefono: norm,
+    motivo,
+    fecha: new Date().toISOString(),
+    bloqueadoPor,
+  });
+
+  return { ok: true, telefono: norm };
+}
+
+/**
+ * Elimina un número de teléfono de la lista negra.
+ */
+export function removePhoneFromBlacklist(rawPhone: string): boolean {
+  const norm = normalizePhone(rawPhone);
+  if (!norm) return false;
+  return blacklistStore.delete(norm);
+}
+
+/**
+ * Obtiene todos los registros actuales de la lista negra.
+ */
+export function getBlacklistedPhones(): BlacklistEntry[] {
+  return Array.from(blacklistStore.values());
+}

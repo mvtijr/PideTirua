@@ -285,7 +285,12 @@ export default function KitchenMonitor({
 
   const handleCambiarEstado = async (
     pedido: Pedido,
-    nuevoEstado: EstadoPedido
+    nuevoEstado: EstadoPedido,
+    extraData?: {
+      bloquearTelefono?: boolean;
+      telefono?: string;
+      motivoBloqueo?: string;
+    }
   ) => {
     setActualizandoId(pedido.id);
     const estadoAnterior = pedido.estado;
@@ -302,6 +307,7 @@ export default function KitchenMonitor({
         body: JSON.stringify({
           pedidoId: pedido.id,
           estado: nuevoEstado,
+          ...(extraData || {}),
         }),
       });
       const data = await res.json();
@@ -802,7 +808,18 @@ export default function KitchenMonitor({
                             `¿Deseas descartar o cancelar la comanda #${codigoCorto} de ${pedido.cliente_nombre}? Se quitará de la pantalla y no sumará en el cierre de caja.`
                           );
                           if (confirmar) {
-                            void handleCambiarEstado(pedido, "cancelado");
+                            const tel = pedido.cliente_telefono?.trim();
+                            const bloquear = tel
+                              ? window.confirm(
+                                  `¿Deseas también bloquear el número ${tel} para que no pueda volver a pedir en efectivo? (Solo se le permitirá pedir con transferencia previa).`
+                                )
+                              : false;
+
+                            void handleCambiarEstado(pedido, "cancelado", {
+                              bloquearTelefono: bloquear,
+                              telefono: tel,
+                              motivoBloqueo: `Comanda #${codigoCorto} en ${localNombre} descartada por no presentación`,
+                            });
                           }
                         }}
                         className="mt-1 flex w-full items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition disabled:opacity-50"
