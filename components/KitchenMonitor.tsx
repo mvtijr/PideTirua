@@ -19,6 +19,7 @@ import {
   Store,
   PackageCheck,
   MessageCircle,
+  XCircle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { EstadoPedido, Pedido } from "@/types/local";
@@ -791,6 +792,25 @@ export default function KitchenMonitor({
                           )}
                         </button>
                       )}
+
+                      {/* Botón de Cancelar Comanda (Broma, no presentación o error) */}
+                      <button
+                        type="button"
+                        disabled={actualizandoId === pedido.id}
+                        onClick={() => {
+                          const confirmar = window.confirm(
+                            `¿Deseas descartar o cancelar la comanda #${codigoCorto} de ${pedido.cliente_nombre}? Se quitará de la pantalla y no sumará en el cierre de caja.`
+                          );
+                          if (confirmar) {
+                            void handleCambiarEstado(pedido, "cancelado");
+                          }
+                        }}
+                        className="mt-1 flex w-full items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition disabled:opacity-50"
+                        title="Cancelar comanda por broma o descarte"
+                      >
+                        <XCircle className="h-3.5 w-3.5" />
+                        <span>Descartar / Cancelar comanda</span>
+                      </button>
                     </div>
                   </div>
                 ) : (
