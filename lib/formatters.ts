@@ -188,6 +188,11 @@ export function formatWhatsAppMessage({
     lineaHorario,
     `${etiquetaUbicacion} ${valorUbicacion}`,
     `💳 *Método de pago:* ${datos.metodoPago}`,
+    ...(datos.metodoPago === "Transferencia Bancaria"
+      ? [
+          `📎 *Comprobante:* Adjunto foto o voucher de la transferencia aquí abajo 👇`,
+        ]
+      : []),
   ];
 
   if (datos.notasAdicionales.trim()) {

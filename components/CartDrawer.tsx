@@ -734,9 +734,14 @@ export default function CartDrawer({
                     )}
                   </button>
 
-                  <p className="text-[11px] text-emerald-950 font-medium text-center">
-                    💡 Adjunta el comprobante de transferencia en el chat de WhatsApp a continuación.
-                  </p>
+                  <div className="rounded-xl border border-emerald-300 bg-emerald-100/90 p-3 text-center space-y-1">
+                    <p className="text-xs font-black text-emerald-950">
+                      📸 Envía el voucher al WhatsApp del local
+                    </p>
+                    <p className="text-[11px] text-emerald-900 leading-relaxed font-medium">
+                      Adjunta la foto o captura de tu transferencia en el chat de WhatsApp que se acaba de abrir para que el local confirme y comience tu preparación de inmediato.
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -1372,7 +1377,7 @@ export default function CartDrawer({
                       <span>Transferencia directa CuentaRUT</span>
                     </div>
                     <p className="text-stone-600 leading-relaxed font-medium">
-                      Al presionar <strong>Enviar pedido a WhatsApp</strong>, registraremos tu comanda en cocina y te mostraremos de inmediato los datos de la CuentaRUT de <strong>{local.nombre}</strong> con botón de copiado rápido para que transfieras tranquilamente.
+                      Al presionar <strong>Enviar pedido a WhatsApp</strong>, se abrirá el chat con tu comanda y te mostraremos los datos de CuentaRUT con botón de copiado rápido para que transfieras y adjuntes tu voucher directamente en el chat.
                     </p>
                     <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
