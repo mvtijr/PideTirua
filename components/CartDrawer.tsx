@@ -17,6 +17,8 @@ import {
   MessageCircle,
   Eye,
   AlertCircle,
+  AlertTriangle,
+  ShieldCheck,
   Copy,
   CheckCircle2,
   Landmark,
@@ -36,6 +38,7 @@ import {
 import {
   buildWhatsAppCheckoutUrl,
   calcularTotalesCarrito,
+  estaEnUltimaLlamadaCocina,
   formatCLP,
   formatPhoneDisplay,
   formatWhatsAppMessage,
@@ -88,6 +91,8 @@ const METODOS_PAGO: {
     icono: CreditCard,
   },
 ];
+
+export const LIMITE_MAX_EFECTIVO = 25000;
 
 const LS_KEY_NOMBRE = "pidetirua_nombre";
 const LS_KEY_DIRECCION = "pidetirua_direccion";
@@ -352,6 +357,17 @@ export default function CartDrawer({
 
   const { total, totalUnidades } = calcularTotalesCarrito(items);
 
+  // Si el total supera el límite de efectivo ($25.000), cambiar automáticamente a Transferencia Bancaria
+  useEffect(() => {
+    if (total > LIMITE_MAX_EFECTIVO && metodoPago === "Efectivo") {
+      setMetodoPago("Transferencia Bancaria");
+    }
+  }, [total, metodoPago]);
+
+  const enUltimaLlamada = estaEnUltimaLlamadaCocina(
+    local.horario || local.horarioEntrega
+  );
+
   const placeholderUbicacion =
     tipoEntrega === "Consumo en mesa"
       ? "Ej: Llego en 15 min, somos 2 personas (o Mesa 4 si ya estás sentado)"
@@ -401,6 +417,16 @@ export default function CartDrawer({
       setErrorValidacion(
         "Por favor indica tu aviso de llegada (ej: 'Llego en 15 min') o número de mesa si ya estás en el local."
       );
+      return;
+    }
+
+    if (metodoPago === "Efectivo" && total > LIMITE_MAX_EFECTIVO) {
+      setErrorValidacion(
+        `Por seguridad de los insumos en cocina, pedidos superiores a ${formatCLP(
+          LIMITE_MAX_EFECTIVO
+        )} deben ser pagados previamente mediante Transferencia Bancaria.`
+      );
+      setMetodoPago("Transferencia Bancaria");
       return;
     }
 
@@ -837,6 +863,17 @@ export default function CartDrawer({
                 )}
               </div>
 
+              {/* Tarjeta de Garantía de Frescura y Temperatura */}
+              <div className="rounded-2xl border border-orange-200 bg-orange-50/80 p-3 text-xs text-orange-950 space-y-1 shadow-xs">
+                <div className="flex items-center gap-1.5 font-black text-[#C2410C]">
+                  <Clock className="h-4 w-4 shrink-0" />
+                  <span>Garantía de Frescura y Temperatura</span>
+                </div>
+                <p className="text-[11px] text-stone-700 leading-relaxed font-medium">
+                  Tu comida se prepara fresca al momento. Para disfrutarla crujiente y caliente, por favor retira dentro de los 15-20 minutos posteriores a la notificación de <strong>Listo</strong>.
+                </p>
+              </div>
+
               {/* Botón Destacado de Auxilio / Reintento de WhatsApp */}
               <div className="space-y-1.5">
                 <a
@@ -970,6 +1007,24 @@ export default function CartDrawer({
                     🔴 Horario de atención: {local.horario}
                   </p>
                 )}
+              </div>
+            )}
+
+            {/* Aviso de Última Llamada de Cocina (30 min antes de cerrar) */}
+            {enUltimaLlamada && (
+              <div
+                role="status"
+                className="rounded-2xl border border-amber-300 bg-amber-50/90 p-3.5 text-xs text-amber-950 shadow-xs flex items-start gap-2.5"
+              >
+                <Clock className="h-4 w-4 shrink-0 text-amber-700 mt-0.5" />
+                <div className="space-y-0.5">
+                  <p className="font-black text-amber-900 uppercase tracking-wide text-[11px]">
+                    ⏳ Última Llamada de Cocina
+                  </p>
+                  <p className="text-[11px] leading-relaxed text-amber-900 font-medium">
+                    El local está en sus últimos 30 minutos de atención. Los pedidos ingresan con preparación exprés antes del cierre de cocina.
+                  </p>
+                </div>
               </div>
             )}
 
@@ -1346,20 +1401,28 @@ export default function CartDrawer({
                 <div className="grid grid-cols-2 gap-2.5">
                   {METODOS_PAGO.map(({ valor, etiqueta, icono: Icon }) => {
                     const activo = metodoPago === valor;
+                    const bloqueadoEfectivo = valor === "Efectivo" && total > LIMITE_MAX_EFECTIVO;
                     return (
                       <button
                         key={valor}
                         type="button"
-                        onClick={() => setMetodoPago(valor)}
+                        disabled={bloqueadoEfectivo}
+                        onClick={() => {
+                          if (!bloqueadoEfectivo) setMetodoPago(valor);
+                        }}
                         className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition ${
-                          activo
+                          bloqueadoEfectivo
+                            ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400 opacity-60"
+                            : activo
                             ? theme.drawerOptionActive
                             : "border-outline-variant/50 bg-white text-on-surface-variant hover:border-secondary"
                         }`}
                       >
                         <Icon
                           className={`h-4 w-4 shrink-0 ${
-                            activo
+                            bloqueadoEfectivo
+                              ? "text-stone-400"
+                              : activo
                               ? theme.drawerOptionIconActive
                               : "text-outline"
                           }`}
@@ -1369,6 +1432,17 @@ export default function CartDrawer({
                     );
                   })}
                 </div>
+
+                {/* Aviso de Límite de Efectivo si supera $25.000 */}
+                {total > LIMITE_MAX_EFECTIVO && (
+                  <div className="mt-2.5 rounded-2xl border border-amber-200 bg-amber-50/90 p-3 text-xs text-amber-950 flex items-start gap-2 shadow-xs">
+                    <ShieldCheck className="h-4 w-4 shrink-0 text-amber-700 mt-0.5" />
+                    <div className="text-[11px] leading-relaxed">
+                      <span className="font-bold text-amber-900">Seguridad en cocina: </span>
+                      Por resguardo de insumos, compras superiores a {formatCLP(LIMITE_MAX_EFECTIVO)} deben abonarse previamente por <strong>Transferencia Bancaria</strong>.
+                    </div>
+                  </div>
+                )}
 
                 {/* Indicador de flujo para Transferencia Bancaria */}
                 {metodoPago === "Transferencia Bancaria" && (
@@ -1407,6 +1481,12 @@ export default function CartDrawer({
                   placeholder='Ej: "Sin cebolla", "Salsa soya extra", "Para llevar bien sellado"'
                   className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
+                <div className="mt-1.5 flex items-start gap-1.5 rounded-xl bg-stone-50 border border-stone-200/80 p-2 text-[11px] text-stone-600 leading-tight">
+                  <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Aviso preventivo:</strong> Las notas son exclusivamente para preferencias de preparación (ej: <em>&quot;sin cebolla&quot;</em>, <em>&quot;salsa aparte&quot;</em>). No se consideran ingredientes o porciones extras no cobradas en la comanda.
+                  </span>
+                </div>
               </div>
             </div>
 

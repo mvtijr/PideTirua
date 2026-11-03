@@ -173,6 +173,18 @@ export async function POST(req: NextRequest) {
     const notasLimpias = sanitizeString(notas, 300);
     const totalNum = Math.max(0, Number(total) || 0);
 
+    // Protección financiera: límite de monto en efectivo ($25.000 CLP)
+    if (metodoPagoLimpio === "Efectivo" && totalNum > 25000) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Por seguridad del local, los pedidos superiores a $25.000 requieren pago por Transferencia Bancaria para asegurar la preparación de insumos en cocina.",
+        },
+        { status: 400 }
+      );
+    }
+
     const result = await crearPedidoEnSupabase({
       local_slug: slugLimpio,
       cliente_nombre: clienteLimpio,

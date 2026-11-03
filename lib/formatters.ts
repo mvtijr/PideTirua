@@ -198,6 +198,8 @@ export function formatWhatsAppMessage({
           `📎 *Comprobante:* Adjunto foto o voucher de la transferencia aquí abajo 👇`,
         ]
       : []),
+    `🕒 *Hora de pedido:* ${new Date().toLocaleTimeString("es-CL", { timeZone: "America/Santiago", hour: "2-digit", minute: "2-digit", hour12: false })} hrs`,
+    `♨️ *Garantía de frescura:* Retirar dentro de los 15-20 min posteriores al aviso de 'Listo'`,
   ];
 
   if (datos.notasAdicionales.trim()) {
@@ -222,4 +224,36 @@ export function buildWhatsAppCheckoutUrl(payload: WhatsAppOrderPayload): string 
   const mensaje = formatWhatsAppMessage(payload);
   const mensajeCodificado = encodeURIComponent(mensaje);
   return `https://wa.me/${telefonoLimpio}?text=${mensajeCodificado}`;
+}
+
+/**
+ * Determina si la cocina está en su última media hora antes del cierre ("Last Call").
+ */
+export function estaEnUltimaLlamadaCocina(horarioStr?: string): boolean {
+  if (!horarioStr) return false;
+  try {
+    const match = horarioStr.match(/(?:a|-)\s*(\d{1,2}):(\d{2})/i);
+    if (!match) return false;
+    const horaCierre = parseInt(match[1], 10);
+    const minCierre = parseInt(match[2], 10);
+
+    const ahora = new Date();
+    const chileFormatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Santiago",
+      hour: "numeric",
+      minute: "numeric",
+      hour12: false,
+    });
+    const partes = chileFormatter.formatToParts(ahora);
+    const horaActual = parseInt(partes.find((p) => p.type === "hour")?.value || "0", 10);
+    const minActual = parseInt(partes.find((p) => p.type === "minute")?.value || "0", 10);
+
+    const minutosAhora = horaActual * 60 + minActual;
+    const minutosCierre = horaCierre * 60 + minCierre;
+
+    const diferencia = minutosCierre - minutosAhora;
+    return diferencia > 0 && diferencia <= 35;
+  } catch {
+    return false;
+  }
 }

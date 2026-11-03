@@ -120,13 +120,20 @@ export async function POST(
       return response;
     }
 
-    // CONTROL DE SEGURIDAD: Verificar que quien ejecuta la mutación tenga sesión activa de Admin o SuperAdmin
+    // CONTROL DE SEGURIDAD: Verificar que quien ejecuta la mutación tenga sesión activa de Admin, KDS o SuperAdmin
     const isLocalAdmin =
       req.cookies.get(`pidetirua_admin_${slug}`)?.value === "authenticated";
+    const isStaffKds =
+      req.cookies.get(`pidetirua_kds_${slug}`)?.value === "authenticated";
     const isSuperAdmin =
       req.cookies.get("pidetirua_superadmin")?.value === "authenticated";
 
-    if (!isLocalAdmin && !isSuperAdmin) {
+    // Acciones operativas de cocina que el personal KDS puede ejecutar sin requerir el PIN del dueño
+    const isKitchenAction =
+      action === "toggle-producto-disponible" ||
+      action === "toggle-categoria-disponible";
+
+    if (!isLocalAdmin && !isSuperAdmin && (!isStaffKds || !isKitchenAction)) {
       return NextResponse.json(
         {
           ok: false,
@@ -280,6 +287,17 @@ export async function POST(
         String(categoriaId || ""),
         Boolean(activa)
       );
+      revalidatePath("/");
+      revalidatePath(`/${slug}`);
+      revalidatePath(`/admin/${slug}`);
+      return NextResponse.json(result);
+    }
+
+    if (action === "toggle-producto-disponible") {
+      const { productoId, disponible } = body;
+      const result = await updateProductoInSupabase(slug, String(productoId || ""), {
+        disponible: Boolean(disponible),
+      });
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);

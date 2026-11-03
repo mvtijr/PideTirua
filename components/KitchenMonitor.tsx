@@ -20,9 +20,13 @@ import {
   PackageCheck,
   MessageCircle,
   XCircle,
+  ShieldCheck,
+  Search,
+  X,
+  AlertTriangle,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { EstadoPedido, Pedido } from "@/types/local";
+import { EstadoPedido, Pedido, CategoriaMenu, Producto } from "@/types/local";
 import { formatCLP } from "@/lib/formatters";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
@@ -34,6 +38,14 @@ interface KitchenMonitorProps {
   panelCardBg: string;
   subtitleText: string;
   onNotify?: (msg: string) => void;
+}
+
+interface ProductoStockItem {
+  id: string;
+  nombre: string;
+  precio: number;
+  disponible: boolean;
+  categoriaNombre: string;
 }
 
 /**
@@ -150,6 +162,102 @@ export default function KitchenMonitor({
   const [estadoConexion, setEstadoConexion] = useState<
     "conectado" | "reconectando"
   >("conectado");
+
+  // Control rápido de stock de platos desde la pantalla de cocina
+  const [mostrarModalStock, setMostrarModalStock] = useState<boolean>(false);
+  const [productosStock, setProductosStock] = useState<ProductoStockItem[]>([]);
+  const [cargandoStock, setCargandoStock] = useState<boolean>(false);
+  const [guardandoStockId, setGuardandoStockId] = useState<string | null>(null);
+  const [busquedaStock, setBusquedaStock] = useState<string>("");
+
+  const cargarStockMenu = useCallback(async () => {
+    setCargandoStock(true);
+    try {
+      const res = await fetch(`/api/menu/${encodeURIComponent(localSlug)}`, {
+        cache: "no-store",
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && data.local && Array.isArray(data.local.menu)) {
+        const items: ProductoStockItem[] = [];
+        data.local.menu.forEach((cat: CategoriaMenu) => {
+          if (Array.isArray(cat.productos)) {
+            cat.productos.forEach((p: Producto) => {
+              items.push({
+                id: p.id,
+                nombre: p.nombre,
+                precio: p.precio,
+                disponible: p.disponible !== false,
+                categoriaNombre: cat.nombre,
+              });
+            });
+          }
+        });
+        setProductosStock(items);
+      }
+    } catch {
+      onNotify?.("No se pudo cargar la lista de platos.");
+    } finally {
+      setCargandoStock(false);
+    }
+  }, [localSlug, onNotify]);
+
+  const handleToggleStock = async (
+    productoId: string,
+    actualDisponible: boolean
+  ) => {
+    setGuardandoStockId(productoId);
+    const nuevoDisponible = !actualDisponible;
+    setProductosStock((prev) =>
+      prev.map((p) =>
+        p.id === productoId ? { ...p, disponible: nuevoDisponible } : p
+      )
+    );
+
+    try {
+      const res = await fetch(`/api/admin/${encodeURIComponent(localSlug)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "toggle-producto-disponible",
+          productoId,
+          disponible: nuevoDisponible,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setProductosStock((prev) =>
+          prev.map((p) =>
+            p.id === productoId ? { ...p, disponible: actualDisponible } : p
+          )
+        );
+        onNotify?.("Error al cambiar la disponibilidad del plato.");
+        return;
+      }
+      onNotify?.(
+        nuevoDisponible
+          ? "✅ Plato reactivado en la carta pública"
+          : "🔴 Plato marcado como agotado por hoy"
+      );
+    } catch {
+      setProductosStock((prev) =>
+        prev.map((p) =>
+          p.id === productoId ? { ...p, disponible: actualDisponible } : p
+        )
+      );
+      onNotify?.("Error de red al actualizar stock.");
+    } finally {
+      setGuardandoStockId(null);
+    }
+  };
+
+  const productosStockFiltrados = productosStock.filter((p) => {
+    if (!busquedaStock.trim()) return true;
+    const q = busquedaStock.toLowerCase();
+    return (
+      p.nombre.toLowerCase().includes(q) ||
+      p.categoriaNombre.toLowerCase().includes(q)
+    );
+  });
 
   const sonidoActivoRef = useRef<boolean>(true);
   const idsConocidosRef = useRef<Set<string>>(new Set());
@@ -471,6 +579,20 @@ export default function KitchenMonitor({
             )}
           </button>
 
+          {/* Botón de Stock Rápido de Cocina (Agotado por hoy) */}
+          <button
+            type="button"
+            onClick={() => {
+              setMostrarModalStock(true);
+              void cargarStockMenu();
+            }}
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-3.5 py-1.5 text-xs font-bold text-orange-950 shadow-xs transition hover:bg-orange-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C]"
+            title="Marcar platos agotados por hoy para que no se puedan pedir"
+          >
+            <Utensils className="h-3.5 w-3.5 text-[#C2410C]" />
+            <span>🍽️ Stock de Platos</span>
+          </button>
+
           <button
             type="button"
             onClick={() => playKitchenDingDongChime()}
@@ -687,6 +809,21 @@ export default function KitchenMonitor({
                   </div>
                 </div>
 
+                {/* Alerta Preventiva Regla de Oro BancoEstado */}
+                {pedido.metodo_pago.toLowerCase().includes("transferencia") && (
+                  <div className="mt-2.5 flex items-start gap-2 rounded-xl border border-emerald-300 bg-emerald-50/90 px-3 py-2 text-xs text-emerald-950 shadow-2xs">
+                    <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" />
+                    <div className="space-y-0.5">
+                      <span className="font-extrabold text-emerald-900 block text-[11px] uppercase tracking-wider">
+                        Regla de Oro BancoEstado:
+                      </span>
+                      <p className="text-[11px] text-stone-700 leading-relaxed font-medium">
+                        Verifica el abono en tu app bancaria o notificación push antes de entregar el pedido al cliente.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Detalle de Ítems de la Comanda */}
                 <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
                   <span className="mb-1.5 block text-[11px] font-extrabold uppercase tracking-wider text-slate-600">
@@ -842,6 +979,118 @@ export default function KitchenMonitor({
         </div>
       )}
       </div>
+
+      {/* Modal de Control Rápido de Stock en Cocina */}
+      {mostrarModalStock && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
+          <div className="w-full max-w-xl max-h-[85vh] flex flex-col rounded-3xl bg-white shadow-2xl border border-stone-200 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-stone-100 p-4 sm:p-5 bg-stone-50/80">
+              <div>
+                <h3 className="text-base sm:text-lg font-display uppercase tracking-wide text-stone-900 flex items-center gap-2">
+                  <span>🍽️ Control Rápido de Stock</span>
+                </h3>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Pausa en 1 clic los platos agotados para que ningún cliente los pida desde la carta pública.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMostrarModalStock(false)}
+                className="rounded-full p-2 text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Buscador */}
+            <div className="p-4 border-b border-stone-100 bg-white">
+              <div className="relative">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400" />
+                <input
+                  type="text"
+                  value={busquedaStock}
+                  onChange={(e) => setBusquedaStock(e.target.value)}
+                  placeholder="Buscar plato por nombre o categoría..."
+                  className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 focus:border-[#EA580C]"
+                />
+              </div>
+            </div>
+
+            {/* Listado */}
+            <div className="flex-1 overflow-y-auto p-4 divide-y divide-stone-100 space-y-2">
+              {cargandoStock ? (
+                <div className="py-12 flex flex-col items-center justify-center gap-2 text-stone-400 text-xs font-bold">
+                  <Loader2 className="h-6 w-6 animate-spin text-[#EA580C]" />
+                  <span>Cargando platos de la carta...</span>
+                </div>
+              ) : productosStockFiltrados.length === 0 ? (
+                <div className="py-10 text-center text-xs text-stone-500">
+                  No se encontraron platos con esa búsqueda.
+                </div>
+              ) : (
+                productosStockFiltrados.map((prod) => (
+                  <div
+                    key={prod.id}
+                    className="pt-2.5 pb-2.5 flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-bold text-stone-900 truncate">
+                          {prod.nombre}
+                        </p>
+                        {!prod.disponible && (
+                          <span className="shrink-0 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black text-rose-800 border border-rose-200">
+                            Agotado
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-stone-500">
+                        {prod.categoriaNombre} · {formatCLP(prod.precio)}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={guardandoStockId === prod.id}
+                      onClick={() =>
+                        void handleToggleStock(prod.id, prod.disponible)
+                      }
+                      className={`min-h-[38px] px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 active:scale-95 disabled:opacity-50 ${
+                        prod.disponible
+                          ? "bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200"
+                          : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs"
+                      }`}
+                    >
+                      {guardandoStockId === prod.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : prod.disponible ? (
+                        <span>Pausar (Agotado)</span>
+                      ) : (
+                        <span>Reactivar</span>
+                      )}
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-stone-100 bg-stone-50 flex items-center justify-between">
+              <span className="text-[11px] text-stone-500 font-medium">
+                {productosStock.filter((p) => !p.disponible).length} plato(s) agotado(s)
+              </span>
+              <button
+                type="button"
+                onClick={() => setMostrarModalStock(false)}
+                className="rounded-xl bg-stone-900 text-white px-4 py-2 text-xs font-bold hover:bg-stone-800 transition"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
