@@ -25,18 +25,20 @@ export async function GET(req: NextRequest) {
   }
 
   // PROTECCIÓN DE SEGURIDAD Y PRIVACIDAD DE DATOS (CERO FUGAS):
-  // Solo el dueño del local autenticado o el SuperAdmin pueden consultar los pedidos y datos de clientes
+  // Solo el dueño del local autenticado, el personal de cocina autorizado o el SuperAdmin pueden consultar pedidos
   const isLocalAdmin =
     req.cookies.get(`pidetirua_admin_${slugLimpio}`)?.value === "authenticated";
+  const isStaffKds =
+    req.cookies.get(`pidetirua_kds_${slugLimpio}`)?.value === "authenticated";
   const isSuperAdmin =
     req.cookies.get("pidetirua_superadmin")?.value === "authenticated";
 
-  if (!isLocalAdmin && !isSuperAdmin) {
+  if (!isLocalAdmin && !isSuperAdmin && !isStaffKds) {
     return NextResponse.json(
       {
         ok: false,
         error:
-          "Acceso denegado: debes iniciar sesión en el panel del local para consultar pedidos.",
+          "Acceso denegado: debes iniciar sesión en el panel del local o monitor de pedidos para consultar comandas.",
       },
       { status: 401 }
     );
@@ -165,7 +167,8 @@ export async function PATCH(req: NextRequest) {
         .getAll()
         .some(
           (c) =>
-            c.name.startsWith("pidetirua_admin_") &&
+            (c.name.startsWith("pidetirua_admin_") ||
+              c.name.startsWith("pidetirua_kds_")) &&
             c.value === "authenticated"
         );
 

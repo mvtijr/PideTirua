@@ -72,7 +72,18 @@ export function stripSensitiveLocalFields(local: Local): Local {
  * Sanitiza una lista completa de locales para consumo público.
  */
 export function sanitizeLocalesForPublic(locales: Local[]): Local[] {
-  return locales.map(stripSensitiveLocalFields);
+  return locales.map((loc) => {
+    const safe = stripSensitiveLocalFields(loc);
+    return {
+      ...safe,
+      banco: undefined,
+      tipo_cuenta: undefined,
+      numero_cuenta: undefined,
+      rut_titular: undefined,
+      nombre_titular: undefined,
+      email_transferencia: undefined,
+    };
+  });
 }
 
 

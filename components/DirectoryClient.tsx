@@ -15,6 +15,8 @@ import {
   Dices,
   Sparkles,
   Search,
+  Mic,
+  MicOff,
   X,
   Store,
   MapPin,
@@ -87,6 +89,79 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
   const [localQrModal, setLocalQrModal] = useState<Local | null>(null);
   const [mostrarRecomendador, setMostrarRecomendador] = useState(false);
   const [fotoHeroIndex, setFotoHeroIndex] = useState(0);
+  const [escuchandoVoz, setEscuchandoVoz] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  // Limpieza del listener de reconocimiento de voz al desmontar
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch {}
+      }
+    };
+  }, []);
+
+  const toggleBusquedaVoz = () => {
+    if (typeof window === "undefined") return;
+
+    const SpeechRecognition =
+      (window as unknown as { SpeechRecognition?: any }).SpeechRecognition ||
+      (window as unknown as { webkitSpeechRecognition?: any })
+        .webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert(
+        "El reconocimiento de voz no está soportado en este navegador. Puedes escribir directamente en el buscador."
+      );
+      return;
+    }
+
+    if (escuchandoVoz && recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {}
+      setEscuchandoVoz(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = "es-CL";
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        setEscuchandoVoz(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript =
+          event.results?.[0]?.[0]?.transcript?.trim() || "";
+        if (transcript) {
+          setBusqueda(transcript);
+          const el = document.getElementById("directorio-locales");
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }
+      };
+
+      recognition.onerror = () => {
+        setEscuchandoVoz(false);
+      };
+
+      recognition.onend = () => {
+        setEscuchandoVoz(false);
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch {
+      setEscuchandoVoz(false);
+    }
+  };
 
   // Selección dinámica de fotos del Hero que rota cada día y se actualiza sola al cambiar fotos en el panel admin
   const fotosHero = useMemo(() => {
@@ -446,7 +521,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                   type="text"
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
-                  placeholder="Busca café latte, pastelería, mariscos, sushi, completos..."
+                  placeholder={
+                    escuchandoVoz
+                      ? "🎙️ Escuchando... Di lo que buscas..."
+                      : "Busca café latte, pastelería, mariscos, sushi, completos..."
+                  }
                   className="min-w-0 flex-1 w-full bg-transparent text-base sm:text-sm text-stone-900 placeholder:text-stone-400 font-medium focus:outline-none py-2"
                 />
                 {busqueda && (
@@ -459,6 +538,25 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     <X className="h-4 w-4" />
                   </button>
                 )}
+                <button
+                  type="button"
+                  onClick={toggleBusquedaVoz}
+                  className={`p-2 rounded-full transition-all shrink-0 ${
+                    escuchandoVoz
+                      ? "bg-red-500 text-white animate-pulse shadow-md"
+                      : "text-stone-400 hover:text-[#EA580C] hover:bg-orange-50"
+                  }`}
+                  title={
+                    escuchandoVoz
+                      ? "Escuchando... Di tu pedido o local (ej: 'abiertos', 'mariscos')"
+                      : "Buscar por voz"
+                  }
+                  aria-label={
+                    escuchandoVoz ? "Detener búsqueda por voz" : "Buscar por voz"
+                  }
+                >
+                  <Mic className={`h-4 w-4 ${escuchandoVoz ? "animate-bounce" : ""}`} />
+                </button>
                 <button
                   type="button"
                   onClick={scrollADirectorio}

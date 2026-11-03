@@ -124,6 +124,10 @@ CREATE POLICY "Lectura publica locales activos"
   TO anon, authenticated
   USING (activo = true);
 
+-- Revocar lectura directa de la columna `pin` en locales para anon y authenticated
+-- La verificación del PIN se realiza de manera segura mediante verify_local_pin o service_role
+REVOKE SELECT (pin) ON public.locales FROM anon, authenticated;
+
 -- 2. Backend administrativo / service_role tiene acceso completo a locales
 CREATE POLICY "Gestion total locales service_role"
   ON public.locales FOR ALL
@@ -266,20 +270,24 @@ DROP POLICY IF EXISTS "Creacion anonima de pedidos" ON public.pedidos;
 DROP POLICY IF EXISTS "Permitir insertar pedidos" ON public.pedidos;
 DROP POLICY IF EXISTS "Permitir lectura realtime pedidos" ON public.pedidos;
 DROP POLICY IF EXISTS "Gestion total pedidos service_role" ON public.pedidos;
+DROP POLICY IF EXISTS "Permitir insercion anonima pedidos" ON public.pedidos;
+DROP POLICY IF EXISTS "Lectura restringida pedidos service_role" ON public.pedidos;
 
--- 1. Clientes anónimos desde el Checkout pueden insertar nuevos pedidos
-CREATE POLICY "Permitir insertar pedidos"
+-- 1. Clientes anónimos desde el Checkout pueden insertar nuevos pedidos (INSERT público)
+CREATE POLICY "Permitir insercion anonima pedidos"
   ON public.pedidos FOR INSERT
   TO anon, authenticated
-  WITH CHECK (true);
+  WITH CHECK (
+    cliente_nombre IS NOT NULL AND
+    local_slug IS NOT NULL AND
+    total >= 0
+  );
 
--- 2. Clientes y monitores KDS pueden escuchar eventos en Realtime mediante SELECT
-CREATE POLICY "Permitir lectura realtime pedidos"
-  ON public.pedidos FOR SELECT
-  TO anon, authenticated
-  USING (true);
-
--- 3. Solo el rol administrativo (service_role) o backend autenticado puede leer y gestionar pedidos
+-- 2. PROTECCIÓN ESTRICTA DE PRIVACIDAD (CERO FUGA DE DATOS PERSONALES):
+-- Los clientes anónimos NO pueden hacer SELECT directo a la tabla pedidos.
+-- Esto bloquea que un atacante ejecute supabase.from('pedidos').select('*') desde la consola
+-- del navegador para enumerar nombres, números telefónicos y direcciones de vecinos de Tirúa.
+-- El acceso a pedidos queda restringido al backend administrativo vía service_role.
 CREATE POLICY "Gestion total pedidos service_role"
   ON public.pedidos FOR ALL
   TO service_role
