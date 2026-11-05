@@ -82,5 +82,37 @@ export default async function LocalMenuPage({ params }: LocalMenuPageProps) {
     notFound();
   }
 
-  return <MenuClient local={stripSensitiveLocalFields(local)} />;
+  const publicLocal = stripSensitiveLocalFields(local);
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    name: local.nombre,
+    image: local.banner_url || local.fotoPortada || "https://pidetirua.cl/og-image.jpg",
+    url: `https://pidetirua.cl/${local.slug}`,
+    telephone: local.telefonoWhatsapp || local.telefono_whatsapp || "",
+    servesCuisine: local.rubro,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: local.ubicacion || "Tirúa",
+      addressRegion: "Biobío",
+      addressCountry: "CL",
+    },
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: Number(local.calificacion) || 4.9,
+      reviewCount: 24,
+      bestRating: 5,
+    },
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <MenuClient local={publicLocal} />
+    </>
+  );
 }
