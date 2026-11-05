@@ -63,8 +63,9 @@ export default function ModalPersonalizarPlato({
     } else {
       // Selección por defecto para plato nuevo
       grupos.forEach((grupo, idx) => {
-        if (grupo.tipo === "unica" && grupo.items.length > 0) {
-          initMap[idx] = [grupo.items[0].nombre];
+        const items = grupo.items || [];
+        if (grupo.tipo === "unica" && items.length > 0) {
+          initMap[idx] = [items[0].nombre];
         } else {
           initMap[idx] = [];
         }
@@ -106,9 +107,9 @@ export default function ModalPersonalizarPlato({
     if (!producto || !producto.opciones) return [];
     const list: OpcionSeleccionada[] = [];
 
-    producto.opciones.forEach((grupo, gIdx) => {
+    (producto.opciones || []).forEach((grupo, gIdx) => {
       const selectedNames = selecciones[gIdx] || [];
-      grupo.items.forEach((item) => {
+      (grupo.items || []).forEach((item) => {
         if (selectedNames.includes(item.nombre)) {
           list.push({
             grupoTitulo: grupo.titulo,
@@ -274,7 +275,7 @@ export default function ModalPersonalizarPlato({
                 </div>
 
                 <div className="space-y-2 pt-1">
-                  {grupo.items.map((item, iIdx) => {
+                  {(grupo.items || []).map((item, iIdx) => {
                     const estaSeleccionado = seleccionados.includes(item.nombre);
                     const itemPrecio = Number(item.precio) || 0;
 

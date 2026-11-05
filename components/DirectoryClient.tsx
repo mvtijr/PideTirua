@@ -110,8 +110,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       .forEach((loc, localIdx) => {
         const platosConFoto: Array<{ nombre: string; url: string }> = [];
 
-        loc.categorias.forEach((cat) => {
-          cat.productos.forEach((p) => {
+        (loc.categorias || []).forEach((cat) => {
+          (cat.productos || []).forEach((p) => {
             const img = p.imagen_url || p.imagen;
             if (img && img.trim() && p.disponible !== false) {
               platosConFoto.push({ nombre: p.nombre, url: img.trim() });
@@ -184,8 +184,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
     locales
       .filter((loc) => loc.activo !== false)
       .forEach((loc) => {
-        loc.categorias.forEach((cat) => {
-          cat.productos.forEach((p) => {
+        (loc.categorias || []).forEach((cat) => {
+          (cat.productos || []).forEach((p) => {
             if (esOfertaValidaHoy(p)) {
               const precioOferta =
                 typeof p.precio_oferta === "number" && p.precio_oferta > 0
@@ -199,7 +199,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 localHorario: loc.horario || loc.tiempoEstimado,
                 productoId: p.id,
                 productoNombre: p.nombre,
-                productoDescripcion: p.descripcion,
+                productoDescripcion: p.descripcion || "",
                 imagen: p.imagen_url || p.imagen,
                 precioOriginal: p.precio,
                 precioOferta,
@@ -242,7 +242,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
       const coincideCategoria =
         categoriaActiva === "Todos" ||
-        local.categoriaFiltro.includes(categoriaActiva);
+        (local.categoriaFiltro || []).includes(categoriaActiva);
 
       const coincideSector =
         sectorActivo === "Todos" || local.sector === sectorActivo;
@@ -251,16 +251,16 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       if (!query) return true;
 
       const enNombreORubro =
-        local.nombre.toLowerCase().includes(query) ||
-        local.rubro.toLowerCase().includes(query) ||
-        local.ubicacion.toLowerCase().includes(query) ||
-        local.descripcionCorta.toLowerCase().includes(query);
+        (local.nombre || "").toLowerCase().includes(query) ||
+        (local.rubro || "").toLowerCase().includes(query) ||
+        (local.ubicacion || "").toLowerCase().includes(query) ||
+        (local.descripcionCorta || "").toLowerCase().includes(query);
 
-      const enProductos = local.categorias.some((cat) =>
-        cat.productos.some(
+      const enProductos = (local.categorias || []).some((cat) =>
+        (cat.productos || []).some(
           (prod) =>
-            prod.nombre.toLowerCase().includes(query) ||
-            prod.descripcion.toLowerCase().includes(query)
+            (prod.nombre || "").toLowerCase().includes(query) ||
+            (prod.descripcion || "").toLowerCase().includes(query)
         )
       );
 

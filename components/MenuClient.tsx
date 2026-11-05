@@ -66,15 +66,15 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
   const posterFondo = getVideoPoster(videoDeFondo, bannerPrincipal);
   const posterPortada = getVideoPoster(bannerVideoUrl, bannerPrincipal);
   const telefonoDirecto = local.telefono_whatsapp || local.telefonoWhatsapp;
-  const horaApertura = (local.horario || local.horarioEntrega)
+  const horaApertura = (local.horario || local.horarioEntrega || "")
     .split(" a ")[0]
     ?.replace(/^.*·\s*/, "")
-    .trim();
+    .trim() || "12:00";
 
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
   const [hidratado, setHidratado] = useState(false);
   const [categoriaActiva, setCategoriaActiva] = useState<string>(
-    local.categorias[0]?.id ?? ""
+    local.categorias?.[0]?.id ?? ""
   );
   const [busquedaPlato, setBusquedaPlato] = useState("");
   const [drawerAbierto, setDrawerAbierto] = useState(false);
@@ -104,9 +104,9 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
       let nombrePlato = "";
       setLocal((prev) => {
         let encontrado = false;
-        const nuevasCategorias = prev.categorias.map((cat) => ({
+        const nuevasCategorias = (prev.categorias || []).map((cat) => ({
           ...cat,
-          productos: cat.productos.map((prod) => {
+          productos: (cat.productos || []).map((prod) => {
             if (prod.id === productoId) {
               encontrado = true;
               nombrePlato = prod.nombre;
@@ -135,13 +135,13 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
     (categoriaId: string, activa: boolean) => {
       let nombreCat = "";
       setLocal((prev) => {
-        const nuevasCategorias = prev.categorias.map((cat) => {
+        const nuevasCategorias = (prev.categorias || []).map((cat) => {
           if (cat.id === categoriaId) {
             nombreCat = cat.nombre;
             return {
               ...cat,
               activa,
-              productos: cat.productos.map((p) => ({
+              productos: (cat.productos || []).map((p) => ({
                 ...p,
                 disponible: activa,
               })),
@@ -710,7 +710,7 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-0.5 text-xs font-bold text-[#F8DC4B]">
                     <Star className="h-3 w-3 fill-[#F8DC4B] text-[#F8DC4B]" />
-                    {local.calificacion.toFixed(1)}
+                    {(Number(local.calificacion) || 5.0).toFixed(1)}
                   </span>
                 </div>
                 <h1 className="mt-1 truncate font-display tracking-wide uppercase text-2xl sm:text-3xl md:text-4xl lg:text-5xl leading-tight drop-shadow-md">

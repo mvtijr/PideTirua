@@ -15,8 +15,8 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
   const cardRef = useRef<HTMLElement | null>(null);
   const [enPantalla, setEnPantalla] = useState(false);
 
-  const totalProductos = local.categorias.reduce(
-    (acc, cat) => acc + cat.productos.length,
+  const totalProductos = (local.categorias || []).reduce(
+    (acc, cat) => acc + (cat.productos?.length || 0),
     0
   );
 
@@ -122,7 +122,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
           <div className="flex items-center gap-1">
             <span className="inline-flex items-center gap-1 rounded-full bg-black/60 backdrop-blur-md px-2.5 py-1 text-[11px] font-bold text-amber-300 border border-white/20">
               <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-              {local.calificacion.toFixed(1)}
+              {(Number(local.calificacion) || 5.0).toFixed(1)}
             </span>
             {onOpenQr && (
               <button

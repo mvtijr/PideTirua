@@ -5,7 +5,8 @@ import { DatosCheckout, ItemCarrito, Local, Producto } from "@/types/local";
  * Implementación determinista para evitar diferencias de hidratación SSR/CSR.
  */
 export function formatCLP(monto: number): string {
-  const entero = Math.round(monto);
+  const num = typeof monto === "number" && !isNaN(monto) ? monto : 0;
+  const entero = Math.round(num);
   const conPuntos = entero
     .toString()
     .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -15,12 +16,13 @@ export function formatCLP(monto: number): string {
 /**
  * Formatea un teléfono chileno 569XXXXXXXX para lectura humana (+56 9 XXXX XXXX).
  */
-export function formatPhoneDisplay(telefono: string): string {
-  const limpio = telefono.replace(/\D/g, "");
+export function formatPhoneDisplay(telefono?: string): string {
+  if (!telefono) return "";
+  const limpio = String(telefono).replace(/\D/g, "");
   if (limpio.length === 11 && limpio.startsWith("569")) {
     return `+56 9 ${limpio.slice(3, 7)} ${limpio.slice(7)}`;
   }
-  return `+${limpio}`;
+  return limpio ? `+${limpio}` : "";
 }
 
 interface WhatsAppOrderPayload {
@@ -92,13 +94,18 @@ export function getPrecioUnitarioItem(item: ItemCarrito): number {
 /**
  * Calcula subtotal y total general del pedido (para retiro en local o consumo en mesa).
  */
-export function calcularTotalesCarrito(items: ItemCarrito[]) {
-  const subtotal = items.reduce(
-    (acc, item) => acc + getPrecioUnitarioItem(item) * item.cantidad,
+export function calcularTotalesCarrito(items: ItemCarrito[] = []) {
+  const lista = Array.isArray(items) ? items : [];
+  const subtotal = lista.reduce(
+    (acc, item) =>
+      acc + getPrecioUnitarioItem(item) * (Number(item?.cantidad) || 1),
     0
   );
   const total = subtotal;
-  const totalUnidades = items.reduce((acc, item) => acc + item.cantidad, 0);
+  const totalUnidades = lista.reduce(
+    (acc, item) => acc + (Number(item?.cantidad) || 1),
+    0
+  );
 
   return {
     subtotal,
@@ -132,9 +139,9 @@ export function formatWhatsAppMessage({
       : "🏪 *Sucursal de retiro:*";
 
   const valorUbicacion =
-    datos.tipoEntrega === "Retiro en local" && !datos.direccionOMesa.trim()
+    datos.tipoEntrega === "Retiro en local" && !(datos.direccionOMesa || "").trim()
       ? `${local.nombre} (${local.ubicacion})`
-      : datos.direccionOMesa.trim() || "Por confirmar";
+      : (datos.direccionOMesa || "").trim() || "Por confirmar";
 
   const detalleLineas = items
     .map((item) => {
@@ -185,9 +192,9 @@ export function formatWhatsAppMessage({
     `━━━━━━━━━━━━━━━━━━━━`,
     `💰 *TOTAL A PAGAR: ${formatCLP(total)}*`,
     `━━━━━━━━━━━━━━━━━━━━`,
-    `👤 *Cliente:* ${datos.nombreCliente.trim()}`,
-    ...(datos.telefonoCliente?.trim()
-      ? [`📞 *Teléfono:* ${datos.telefonoCliente.trim()}`]
+    `👤 *Cliente:* ${(datos.nombreCliente || "").trim()}`,
+    ...((datos.telefonoCliente || "").trim()
+      ? [`📞 *Teléfono:* ${(datos.telefonoCliente || "").trim()}`]
       : []),
     `${emojiModalidad} *Modalidad:* ${textoModalidad}`,
     lineaHorario,
@@ -202,8 +209,8 @@ export function formatWhatsAppMessage({
     `♨️ *Garantía de frescura:* Retirar dentro de los 15-20 min posteriores al aviso de 'Listo'`,
   ];
 
-  if (datos.notasAdicionales.trim()) {
-    lineasMensaje.push(`📝 *Notas:* ${datos.notasAdicionales.trim()}`);
+  if ((datos.notasAdicionales || "").trim()) {
+    lineasMensaje.push(`📝 *Notas:* ${(datos.notasAdicionales || "").trim()}`);
   }
 
   lineasMensaje.push(
@@ -219,8 +226,8 @@ export function formatWhatsAppMessage({
  */
 export function buildWhatsAppCheckoutUrl(payload: WhatsAppOrderPayload): string {
   const rawTel =
-    payload.local.telefonoWhatsapp || payload.local.telefono_whatsapp || "";
-  const telefonoLimpio = rawTel.replace(/\D/g, "");
+    payload.local?.telefonoWhatsapp || payload.local?.telefono_whatsapp || "";
+  const telefonoLimpio = String(rawTel).replace(/\D/g, "");
   const mensaje = formatWhatsAppMessage(payload);
   const mensajeCodificado = encodeURIComponent(mensaje);
   return `https://wa.me/${telefonoLimpio}?text=${mensajeCodificado}`;
