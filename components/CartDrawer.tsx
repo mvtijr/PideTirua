@@ -562,6 +562,30 @@ export default function CartDrawer({
       urlWhatsApp: url,
     };
 
+    // Registrar evento de conversión de pedido en Google Analytics 4
+    if (
+      typeof window !== "undefined" &&
+      typeof (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag === "function"
+    ) {
+      try {
+        (window as unknown as { gtag: (...args: unknown[]) => void }).gtag("event", "purchase", {
+          transaction_id: codigoGenerado,
+          value: total,
+          currency: "CLP",
+          restaurant_name: local.nombre,
+          delivery_type: tipoEntrega,
+          payment_type: metodoPago,
+          items: items.map((it) => ({
+            item_name: it.producto.nombre,
+            quantity: it.cantidad,
+            price: getPrecioUnitarioItem(it),
+          })),
+        });
+      } catch {
+        // Ignorar si el bloqueador de anuncios detiene gtag
+      }
+    }
+
     try {
       localStorage.setItem(
         `${LS_KEY_ULTIMO_PEDIDO_PREFIX}${local.slug}`,
