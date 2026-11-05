@@ -287,8 +287,6 @@ export default function CartDrawer({
     };
   }, [abierto]);
 
-  if (!abierto || !isMounted) return null;
-
   const theme = getLocalTheme(local.slug);
 
   const tieneDatosBancarios = Boolean(
@@ -604,6 +602,8 @@ export default function CartDrawer({
           : `${local.nombre} (${local.ubicacion})`),
     },
   });
+
+  if (!abierto || !isMounted) return null;
 
   return (
     <div
