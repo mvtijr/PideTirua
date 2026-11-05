@@ -74,6 +74,18 @@ export default function RootLayout({
   return (
     <html lang="es-CL">
       <head>
+        {/* Google Tag Manager / Google Analytics */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtm.js?id=GTM-NMXRS2XW"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());`,
+          }}
+        />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, viewport-fit=cover"
@@ -107,6 +119,15 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#FAF8F5] font-body text-[#18181B] antialiased selection:bg-[#EA580C] selection:text-white min-h-screen w-full max-w-full overflow-x-hidden">
+        {/* Google Tag Manager (noscript fallback) */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-NMXRS2XW"
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
         <InstallPWA />
         {children}
       </body>
