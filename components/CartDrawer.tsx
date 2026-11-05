@@ -15,10 +15,7 @@ import {
   Banknote,
   FileText,
   MessageCircle,
-  Eye,
   AlertCircle,
-  AlertTriangle,
-  ShieldCheck,
   Copy,
   CheckCircle2,
   Landmark,
@@ -41,7 +38,6 @@ import {
   estaEnUltimaLlamadaCocina,
   formatCLP,
   formatPhoneDisplay,
-  formatWhatsAppMessage,
   getPrecioEfectivoProducto,
   getPrecioUnitarioItem,
 } from "@/lib/formatters";
@@ -176,7 +172,6 @@ export default function CartDrawer({
   const [notasAdicionales, setNotasAdicionales] = useState("");
   const [horaRetiroTipo, setHoraRetiroTipo] = useState<"inmediato" | "programado">("inmediato");
   const [horaRetiroValor, setHoraRetiroValor] = useState("");
-  const [mostrarVistaPrevia, setMostrarVistaPrevia] = useState(false);
   const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
   const [datosCopiados, setDatosCopiados] = useState(false);
   const [enviandoPedido, setEnviandoPedido] = useState(false);
@@ -589,20 +584,6 @@ export default function CartDrawer({
     onVaciar();
   };
 
-  const mensajePrevia = formatWhatsAppMessage({
-    local,
-    items,
-    datos: {
-      ...datosCheckout,
-      nombreCliente: nombreCliente || "Juan Pérez",
-      direccionOMesa:
-        direccionOMesa ||
-        (tipoEntrega === "Consumo en mesa"
-          ? "Mesa 3"
-          : `${local.nombre} (${local.ubicacion})`),
-    },
-  });
-
   if (!abierto || !isMounted) return null;
 
   return (
@@ -620,24 +601,20 @@ export default function CartDrawer({
       >
         {/* Cabecera del Drawer */}
         <div
-          className={`flex items-center justify-between border-b px-4 py-4 sm:px-6 ${theme.drawerHeader}`}
+          className={`flex items-center justify-between border-b px-4 py-3 sm:px-6 ${theme.drawerHeader}`}
         >
           <div>
-            <span
-              className={`text-[11px] font-bold uppercase tracking-wider ${theme.drawerHeaderSub}`}
-            >
-              {pedidoConfirmado
-                ? `Comanda Registrada • #${pedidoConfirmado.codigoRetiro}`
-                : "Pedido directo a WhatsApp"}
-            </span>
             <h2
               id="cart-drawer-title"
-              className="font-display text-2xl tracking-wide uppercase leading-tight text-stone-900"
+              className="font-display text-xl sm:text-2xl tracking-wide uppercase leading-tight text-stone-900"
             >
-              {pedidoConfirmado
-                ? `Comanda en ${local.nombre}`
-                : `Tu Pedido en ${local.nombre}`}
+              {pedidoConfirmado ? "Comanda Registrada" : "Tu Pedido"}
             </h2>
+            <p className={`text-xs font-bold ${theme.drawerHeaderSub}`}>
+              {pedidoConfirmado
+                ? `#${pedidoConfirmado.codigoRetiro} • ${local.nombre}`
+                : local.nombre}
+            </p>
           </div>
           <button
             type="button"
@@ -657,83 +634,80 @@ export default function CartDrawer({
         {/* PANTALLA POST-CHECKOUT: CONFIRMACIÓN Y RECIBO DE COMANDA */}
         {pedidoConfirmado ? (
           <div className="flex flex-1 flex-col overflow-hidden">
-            <div className="flex-1 space-y-5 overflow-y-auto px-4 py-5 sm:px-6">
+            <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
               {/* Header de Éxito */}
-              <div className="text-center space-y-1.5 pt-1">
-                <div className="mx-auto flex h-13 w-13 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-xs">
-                  <CheckCircle2 className="h-7 w-7 text-emerald-600" />
+              <div className="text-center space-y-1 pt-1">
+                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 shadow-xs">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-600" />
                 </div>
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-0.5 text-[11px] font-black uppercase tracking-wider text-emerald-800">
-                  ✓ Comanda Registrada con Éxito
-                </span>
-                <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-wide text-stone-900 leading-tight">
-                  ¡Tu pedido está en cocina!
+                <h3 className="font-display text-xl sm:text-2xl uppercase tracking-wide text-stone-900 leading-tight">
+                  ¡Pedido enviado a cocina!
                 </h3>
-                <p className="font-body text-xs text-stone-600 max-w-sm mx-auto leading-relaxed">
-                  El equipo de <strong>{local.nombre}</strong> ya tiene tu orden en el monitor de cocina.
+                <p className="font-body text-xs text-stone-600">
+                  {local.nombre} recibió tu orden en su monitor.
                 </p>
               </div>
 
               {/* Tarjeta Destacada con Código de Retiro */}
-              <div className="rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50/90 p-4 text-center space-y-1 shadow-xs">
-                <span className="text-[11px] font-extrabold uppercase tracking-widest text-amber-900">
-                  Código de Identificación / Retiro
+              <div className="rounded-2xl border-2 border-dashed border-amber-400 bg-amber-50/90 p-3.5 text-center space-y-0.5 shadow-xs">
+                <span className="text-[10px] font-extrabold uppercase tracking-widest text-amber-900">
+                  Código de Retiro
                 </span>
-                <div className="font-display text-3xl sm:text-4xl font-black tracking-widest text-stone-950 tabular-nums">
+                <div className="font-display text-3xl font-black tracking-widest text-stone-950 tabular-nums">
                   #{pedidoConfirmado.codigoRetiro}
                 </div>
                 <p className="text-[11px] text-amber-900 font-medium">
-                  Muestra este código al retirar en el local o en tu mesa.
+                  Muestra este código al retirar en el local.
                 </p>
               </div>
 
               {/* Si pagó con Transferencia Bancaria, mostrar CuentaRUT en primer plano con botón de copiado */}
               {pedidoConfirmado.metodoPago === "Transferencia" && tieneDatosBancarios && (
-                <div className="rounded-2xl border-2 border-emerald-400 bg-emerald-50/90 p-4 text-slate-900 shadow-md space-y-2.5">
-                  <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
+                <div className="rounded-2xl border-2 border-emerald-400 bg-emerald-50/90 p-3.5 text-slate-900 shadow-sm space-y-2">
+                  <div className="flex items-center justify-between border-b border-emerald-200 pb-1.5">
                     <span className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-emerald-950">
                       <Landmark className="h-4 w-4 text-emerald-700" />
-                      Datos para Transferir (Total: {formatCLP(pedidoConfirmado.total)})
+                      Datos de Transferencia ({formatCLP(pedidoConfirmado.total)})
                     </span>
-                    <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[11px] font-extrabold text-emerald-900">
+                    <span className="rounded-full bg-emerald-200 px-2 py-0.5 text-[10px] font-extrabold text-emerald-900">
                       CuentaRUT
                     </span>
                   </div>
 
-                  <dl className="grid grid-cols-1 gap-1.5 text-xs sm:grid-cols-2">
+                  <dl className="grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
                     {local.banco && (
-                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
-                        <dt className="text-[11px] font-bold uppercase text-slate-600">Banco</dt>
+                      <div className="bg-white/90 p-1.5 rounded-lg border border-emerald-100">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Banco</dt>
                         <dd className="font-bold text-slate-900">{local.banco}</dd>
                       </div>
                     )}
                     {local.tipo_cuenta && (
-                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
-                        <dt className="text-[11px] font-bold uppercase text-slate-600">Tipo de cuenta</dt>
+                      <div className="bg-white/90 p-1.5 rounded-lg border border-emerald-100">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Tipo de cuenta</dt>
                         <dd className="font-bold text-slate-900">{local.tipo_cuenta}</dd>
                       </div>
                     )}
                     {local.numero_cuenta && (
-                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
-                        <dt className="text-[11px] font-bold uppercase text-slate-600">N° de cuenta</dt>
+                      <div className="bg-white/90 p-1.5 rounded-lg border border-emerald-100">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">N° de cuenta</dt>
                         <dd className="font-black text-slate-900 tabular-nums">{local.numero_cuenta}</dd>
                       </div>
                     )}
                     {local.rut_titular && (
-                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100">
-                        <dt className="text-[11px] font-bold uppercase text-slate-600">RUT Titular</dt>
+                      <div className="bg-white/90 p-1.5 rounded-lg border border-emerald-100">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">RUT Titular</dt>
                         <dd className="font-black text-slate-900 tabular-nums">{local.rut_titular}</dd>
                       </div>
                     )}
                     {local.nombre_titular && (
-                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100 sm:col-span-2">
-                        <dt className="text-[11px] font-bold uppercase text-slate-600">Nombre del Titular</dt>
+                      <div className="bg-white/90 p-1.5 rounded-lg border border-emerald-100 sm:col-span-2">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Nombre del Titular</dt>
                         <dd className="font-bold text-slate-900">{local.nombre_titular}</dd>
                       </div>
                     )}
                     {local.email_transferencia && (
-                      <div className="bg-white/90 p-2 rounded-lg border border-emerald-100 sm:col-span-2">
-                        <dt className="text-[11px] font-bold uppercase text-slate-600">Correo para comprobante</dt>
+                      <div className="bg-white/90 p-1.5 rounded-lg border border-emerald-100 sm:col-span-2">
+                        <dt className="text-[10px] font-bold uppercase text-slate-500">Correo</dt>
                         <dd className="font-semibold text-slate-800">{local.email_transferencia}</dd>
                       </div>
                     )}
@@ -742,7 +716,7 @@ export default function CartDrawer({
                   <button
                     type="button"
                     onClick={handleCopiarDatosBancarios}
-                    className={`mt-2 flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl border px-3.5 py-2.5 text-xs font-black shadow-xs transition active:scale-[0.99] ${
+                    className={`flex w-full min-h-[40px] items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold shadow-xs transition active:scale-[0.99] ${
                       datosCopiados
                         ? "border-emerald-600 bg-emerald-700 text-white"
                         : "border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-700"
@@ -751,29 +725,24 @@ export default function CartDrawer({
                     {datosCopiados ? (
                       <>
                         <CheckCircle2 className="h-4 w-4 shrink-0" />
-                        <span>¡Datos bancarios copiados al portapapeles!</span>
+                        <span>¡Datos bancarios copiados!</span>
                       </>
                     ) : (
                       <>
                         <Copy className="h-4 w-4 shrink-0" />
-                        <span>📋 Copiar todos los datos de transferencia</span>
+                        <span>Copiar datos de transferencia</span>
                       </>
                     )}
                   </button>
 
-                  <div className="rounded-xl border border-emerald-300 bg-emerald-100/90 p-3 text-center space-y-1">
-                    <p className="text-xs font-black text-emerald-950">
-                      📸 Envía el voucher al WhatsApp del local
-                    </p>
-                    <p className="text-[11px] text-emerald-900 leading-relaxed font-medium">
-                      Adjunta la foto o captura de tu transferencia en el chat de WhatsApp que se acaba de abrir para que el local confirme y comience tu preparación de inmediato.
-                    </p>
-                  </div>
+                  <p className="text-[11px] text-emerald-900 text-center font-medium">
+                    📸 Adjunta el comprobante en el chat de WhatsApp del local
+                  </p>
                 </div>
               )}
 
               {/* Stepper Visual de Estado en Vivo (Sincronizado con Monitor de Pedidos) */}
-              <div className="rounded-2xl border border-stone-200/90 bg-white p-4 shadow-xs space-y-3">
+              <div className="rounded-2xl border border-stone-200/90 bg-white p-3.5 shadow-xs space-y-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-black uppercase tracking-wider text-stone-600">
                     Estado en Cocina
@@ -858,36 +827,22 @@ export default function CartDrawer({
 
                 {pedidoConfirmado.estado === "listo" && (
                   <div className="rounded-xl bg-emerald-600 text-white p-3 text-center text-xs font-bold shadow-md animate-in fade-in zoom-in-95 duration-300">
-                    🔔 ¡Tu comanda está lista y caliente! Pasa al mostrador o a tu mesa con el código #{pedidoConfirmado.codigoRetiro}.
+                    🔔 ¡Tu comanda está lista! Pasa al mostrador o a tu mesa con el código #{pedidoConfirmado.codigoRetiro}.
                   </div>
                 )}
               </div>
 
-              {/* Tarjeta de Garantía de Frescura y Temperatura */}
-              <div className="rounded-2xl border border-orange-200 bg-orange-50/80 p-3 text-xs text-orange-950 space-y-1 shadow-xs">
-                <div className="flex items-center gap-1.5 font-black text-[#C2410C]">
-                  <Clock className="h-4 w-4 shrink-0" />
-                  <span>Garantía de Frescura y Temperatura</span>
-                </div>
-                <p className="text-[11px] text-stone-700 leading-relaxed font-medium">
-                  Tu comida se prepara fresca al momento. Para disfrutarla crujiente y caliente, por favor retira dentro de los 15-20 minutos posteriores a la notificación de <strong>Listo</strong>.
-                </p>
-              </div>
-
               {/* Botón Destacado de Auxilio / Reintento de WhatsApp */}
-              <div className="space-y-1.5">
+              <div>
                 <a
                   href={pedidoConfirmado.urlWhatsApp}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 rounded-2xl bg-[#25D366] hover:bg-[#20bd5a] text-white py-3.5 px-4 font-bold text-sm shadow-md transition-all active:scale-[0.98]"
+                  className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-white py-3 px-4 font-bold text-sm shadow-sm transition active:scale-[0.98]"
                 >
-                  <MessageCircle className="h-5 w-5 shrink-0 fill-white" />
-                  <span>📲 Abrir comanda en WhatsApp</span>
+                  <MessageCircle className="h-4 w-4 shrink-0 fill-white" />
+                  <span>Abrir comanda en WhatsApp</span>
                 </a>
-                <p className="text-center text-[11px] text-stone-500 leading-relaxed">
-                  ¿Se cerró la ventana? Presiona el botón verde para enviar o revisar el mensaje directo con el restaurante.
-                </p>
               </div>
 
               {/* Detalles de Retiro / Entrega */}
@@ -991,20 +946,19 @@ export default function CartDrawer({
           onSubmit={handleEnviarWhatsApp}
           className="flex flex-1 flex-col overflow-hidden"
         >
-          <div className="flex-1 space-y-6 overflow-y-auto px-4 py-5 sm:px-6">
+          <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 sm:px-6">
             {/* Banner de advertencia si el local está cerrado */}
             {!local.abierto && (
               <div
                 role="alert"
-                className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs sm:text-sm font-semibold leading-relaxed text-amber-950 shadow-sm"
+                className="rounded-2xl border border-amber-300 bg-amber-50 p-3 text-xs font-semibold leading-relaxed text-amber-950 shadow-xs"
               >
                 <p>
-                  ⚠️ En este momento el local se encuentra cerrado. Puedes
-                  revisar la carta, pero no se están recibiendo pedidos.
+                  ⚠️ El local se encuentra cerrado actualmente. No se están recibiendo pedidos.
                 </p>
                 {local.horario && (
-                  <p className="mt-1 text-xs font-bold text-rose-700">
-                    🔴 Horario de atención: {local.horario}
+                  <p className="mt-0.5 text-xs font-bold text-rose-700">
+                    🔴 Horario: {local.horario}
                   </p>
                 )}
               </div>
@@ -1014,24 +968,19 @@ export default function CartDrawer({
             {enUltimaLlamada && (
               <div
                 role="status"
-                className="rounded-2xl border border-amber-300 bg-amber-50/90 p-3.5 text-xs text-amber-950 shadow-xs flex items-start gap-2.5"
+                className="rounded-xl border border-amber-300 bg-amber-50/90 p-2.5 text-xs text-amber-950 shadow-xs flex items-center gap-2"
               >
-                <Clock className="h-4 w-4 shrink-0 text-amber-700 mt-0.5" />
-                <div className="space-y-0.5">
-                  <p className="font-black text-amber-900 uppercase tracking-wide text-[11px]">
-                    ⏳ Última Llamada de Cocina
-                  </p>
-                  <p className="text-[11px] leading-relaxed text-amber-900 font-medium">
-                    El local está en sus últimos 30 minutos de atención. Los pedidos ingresan con preparación exprés antes del cierre de cocina.
-                  </p>
-                </div>
+                <Clock className="h-4 w-4 shrink-0 text-amber-700" />
+                <p className="text-[11px] leading-tight text-amber-900 font-medium">
+                  <strong>Última llamada de cocina:</strong> últimos 30 min de atención exprés.
+                </p>
               </div>
             )}
 
             {/* 1. Lista de ítems seleccionados */}
             <div>
-              <div className="mb-3 flex items-center justify-between">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-on-surface-variant">
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                   Productos ({totalUnidades})
                 </h3>
                 {items.length > 0 && (
@@ -1040,8 +989,8 @@ export default function CartDrawer({
                     onClick={onVaciar}
                     className="inline-flex items-center gap-1 text-xs font-semibold text-error hover:underline"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
-                    Vaciar carrito
+                    <Trash2 className="h-3 w-3" />
+                    Vaciar
                   </button>
                 )}
               </div>
@@ -1054,7 +1003,7 @@ export default function CartDrawer({
                   </div>
 
                   {ultimoPedidoGuardado && (
-                    <div className="rounded-2xl border border-stone-200 bg-white p-4 shadow-xs space-y-2.5">
+                    <div className="rounded-2xl border border-stone-200 bg-white p-3.5 shadow-xs space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-black uppercase tracking-wider text-stone-500">
                           Última comanda registrada
@@ -1074,10 +1023,10 @@ export default function CartDrawer({
                       <button
                         type="button"
                         onClick={() => setPedidoConfirmado(ultimoPedidoGuardado)}
-                        className="w-full rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-900 py-2.5 px-3 text-xs font-bold transition flex items-center justify-center gap-1.5"
+                        className="w-full rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-900 py-2 px-3 text-xs font-bold transition flex items-center justify-center gap-1.5"
                       >
                         <FileText className="h-3.5 w-3.5 text-[#C2410C]" />
-                        <span>Ver recibo y estado de comanda</span>
+                        <span>Ver recibo y estado</span>
                       </button>
                     </div>
                   )}
@@ -1099,7 +1048,7 @@ export default function CartDrawer({
                     return (
                       <div
                         key={itemKey}
-                        className="flex items-center justify-between gap-3 p-3.5"
+                        className="flex items-center justify-between gap-3 p-3"
                       >
                         <div className="min-w-0 flex-1">
                           <p
@@ -1109,11 +1058,11 @@ export default function CartDrawer({
                           </p>
 
                           {opcionesSeleccionadas && opcionesSeleccionadas.length > 0 && (
-                            <div className="mt-1 flex flex-wrap gap-1">
+                            <div className="mt-0.5 flex flex-wrap gap-1">
                               {opcionesSeleccionadas.map((op, opIdx) => (
                                 <span
                                   key={opIdx}
-                                  className="inline-flex items-center rounded-md bg-stone-100 px-1.5 py-0.5 text-[11px] font-medium text-stone-700 border border-stone-200"
+                                  className="inline-flex items-center rounded-md bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-700 border border-stone-200"
                                 >
                                   {op.nombre}
                                   {op.precio > 0 ? ` (+${formatCLP(op.precio)})` : ""}
@@ -1123,17 +1072,15 @@ export default function CartDrawer({
                           )}
 
                           {producto.opciones && producto.opciones.length > 0 && onEditarItem && (
-                            <div className="mt-1.5">
-                              <button
-                                type="button"
-                                onClick={() => onEditarItem(item)}
-                                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-xl bg-orange-50 hover:bg-orange-100 text-[#C2410C] px-3 py-2 text-xs font-bold transition active:scale-95"
-                                title="Modificar salsas o agregados de este plato"
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                                <span>Modificar extras / salsas</span>
-                              </button>
-                            </div>
+                            <button
+                              type="button"
+                              onClick={() => onEditarItem(item)}
+                              className="mt-1 inline-flex items-center gap-1 text-[11px] font-bold text-[#EA580C] hover:underline"
+                              title="Modificar extras de este plato"
+                            >
+                              <Pencil className="h-3 w-3" />
+                              <span>Editar extras</span>
+                            </button>
                           )}
 
                           <p className="mt-0.5 text-xs font-medium text-on-surface-variant tabular-nums">
@@ -1153,18 +1100,18 @@ export default function CartDrawer({
                         </div>
 
                         <div
-                          className={`flex items-center gap-1 rounded-xl border bg-white p-1 shadow-2xs ${theme.cardCounterBox}`}
+                          className={`flex items-center gap-1 rounded-xl border bg-white p-0.5 shadow-2xs ${theme.cardCounterBox}`}
                         >
                           <button
                             type="button"
                             onClick={() => onDisminuir(itemKey)}
-                            className={`flex min-h-[44px] min-w-[44px] h-11 w-11 sm:h-10 sm:w-10 items-center justify-center rounded-lg active:scale-90 transition ${theme.cardMinusBtn}`}
+                            className={`flex min-h-[38px] min-w-[38px] h-9 w-9 items-center justify-center rounded-lg active:scale-90 transition ${theme.cardMinusBtn}`}
                             aria-label="Disminuir cantidad"
                           >
-                            <Minus className="h-4 w-4" />
+                            <Minus className="h-3.5 w-3.5" />
                           </button>
                           <span
-                            className={`min-w-[1.75rem] text-center text-sm font-extrabold tabular-nums ${theme.cardQtyText}`}
+                            className={`min-w-[1.5rem] text-center text-sm font-extrabold tabular-nums ${theme.cardQtyText}`}
                           >
                             {cantidad}
                           </span>
@@ -1175,10 +1122,10 @@ export default function CartDrawer({
                                 ? onIncrementarItem(item)
                                 : onAgregar(producto)
                             }
-                            className={`flex min-h-[44px] min-w-[44px] h-11 w-11 sm:h-10 sm:w-10 items-center justify-center rounded-lg active:scale-90 transition ${theme.cardPlusBtn}`}
+                            className={`flex min-h-[38px] min-w-[38px] h-9 w-9 items-center justify-center rounded-lg active:scale-90 transition ${theme.cardPlusBtn}`}
                             aria-label="Aumentar cantidad"
                           >
-                            <Plus className="h-4 w-4" />
+                            <Plus className="h-3.5 w-3.5" />
                           </button>
                         </div>
                       </div>
@@ -1188,17 +1135,12 @@ export default function CartDrawer({
               )}
             </div>
 
-            {/* 2. Selector de Modalidad (Retiro al paso o Servirse en mesa) */}
+            {/* 2. Selector de Modalidad */}
             <div>
-              <div className="mb-2 flex items-center justify-between">
-                <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                  Modalidad del pedido (Sin delivery)
-                </label>
-                <span className="text-[10px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">
-                  Sin costo de envío
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-2.5">
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                Modalidad del pedido
+              </label>
+              <div className="grid grid-cols-2 gap-2">
                 {MODALIDADES_PEDIDO.map(({ valor, etiqueta, subtitulo, icono: Icon }) => {
                   const seleccionado = tipoEntrega === valor;
                   return (
@@ -1209,64 +1151,41 @@ export default function CartDrawer({
                         setTipoEntrega(valor);
                         setErrorValidacion(null);
                       }}
-                      className={`flex flex-col items-center justify-center gap-1 rounded-2xl border p-3 text-center transition active:scale-95 ${
+                      className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 px-3 text-center transition active:scale-95 ${
                         seleccionado
                           ? theme.drawerOptionActive
                           : "border-stone-200 bg-white text-stone-700 hover:border-stone-300"
                       }`}
                     >
                       <Icon
-                        className={`h-5 w-5 ${
+                        className={`h-4 w-4 shrink-0 ${
                           seleccionado
                             ? theme.drawerOptionIconActive
                             : "text-stone-500"
                         }`}
                       />
-                      <span className="text-xs font-black">{etiqueta}</span>
-                      <span className="text-[10px] text-stone-500 font-medium leading-tight">
-                        {subtitulo}
-                      </span>
+                      <div className="text-left">
+                        <span className="block text-xs font-black leading-tight">{etiqueta}</span>
+                        <span className="block text-[10px] text-stone-500 font-medium leading-none">
+                          {subtitulo}
+                        </span>
+                      </div>
                     </button>
                   );
                 })}
               </div>
-
-              {/* Banner explicativo contextual según modalidad */}
-              {tipoEntrega === "Consumo en mesa" ? (
-                <div className="mt-2.5 rounded-2xl border border-amber-300 bg-amber-50/90 p-3 text-xs text-amber-950 space-y-1">
-                  <p className="font-bold flex items-center gap-1 text-amber-900">
-                    <span>🍽️ Servirse en el local:</span>
-                  </p>
-                  <p className="text-[11px] leading-relaxed text-stone-700">
-                    <strong>Pide antes de llegar:</strong> Pides con anticipación para que cuando entres al local tu comida o café esté caliente y listo en la mesa (¡sin esperar preparación ni filas!). O si ya estás sentado, pide directo desde tu mesa.
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-2.5 rounded-2xl border border-stone-200 bg-stone-50 p-3 text-xs text-stone-700 space-y-1">
-                  <p className="font-bold flex items-center gap-1 text-stone-900">
-                    <span>🛍️ Retiro al paso en mostrador:</span>
-                  </p>
-                  <p className="text-[11px] leading-relaxed text-stone-600">
-                    Pide con anticipación desde tu celular y pasa a retirar tu pedido empacado para llevar directo en el mostrador sin filas.
-                  </p>
-                </div>
-              )}
             </div>
 
             {/* 3. Inputs del cliente */}
-            <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">
-                Datos para el pedido
-              </h3>
-
+            <div className="space-y-3">
               {/* Nombre del cliente */}
               <div>
                 <label
                   htmlFor="nombreCliente"
-                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
+                  className={`mb-1 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
                 >
                   <User className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
-                  Nombre del cliente *
+                  Tu nombre *
                 </label>
                 <input
                   id="nombreCliente"
@@ -1277,7 +1196,7 @@ export default function CartDrawer({
                     if (errorValidacion) setErrorValidacion(null);
                   }}
                   placeholder="Ej: Camila Nahuelpán"
-                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
               </div>
 
@@ -1285,7 +1204,7 @@ export default function CartDrawer({
               <div>
                 <label
                   htmlFor="telefonoCliente"
-                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
+                  className={`mb-1 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
                 >
                   <Phone className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
                   Teléfono / WhatsApp *
@@ -1299,26 +1218,20 @@ export default function CartDrawer({
                     setTelefonoCliente(e.target.value);
                     if (errorValidacion) setErrorValidacion(null);
                   }}
-                  placeholder="Ej: +56 9 8765 4321 o 987654321"
-                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
+                  placeholder="+56 9 1234 5678"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
-                <p className="mt-1 text-[11px] text-stone-500">
-                  El local usará este número para avisarte por WhatsApp en el momento exacto en que tu pedido esté listo para retirar.
-                </p>
-                <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
-                  <span>✓ Tus datos quedan guardados en tu celular para tus próximos pedidos</span>
-                </p>
               </div>
 
               {/* Programación de Hora de Retiro */}
-              <div className="rounded-2xl border border-stone-200/90 bg-stone-50/80 p-3.5 space-y-2.5">
+              <div className="rounded-xl border border-stone-200/90 bg-stone-50/70 p-3 space-y-2">
                 <div className="flex items-center justify-between gap-2">
                   <span className={`flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}>
                     <Clock className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
-                    ¿Cuándo pasas a retirar tu pedido?
+                    Horario de retiro
                   </span>
                   {horaRetiroTipo === "inmediato" && (
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-extrabold text-amber-900 border border-amber-300">
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-extrabold text-amber-900 border border-amber-300">
                       ~{local.tiempo_estimado || "20-30 min"}
                     </span>
                   )}
@@ -1328,10 +1241,10 @@ export default function CartDrawer({
                   <button
                     type="button"
                     onClick={() => setHoraRetiroTipo("inmediato")}
-                    className={`flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border py-2.5 px-3 text-xs font-black transition active:scale-[0.98] ${
+                    className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 px-2.5 text-xs font-bold transition active:scale-[0.98] ${
                       horaRetiroTipo === "inmediato"
                         ? "border-[#EA580C] bg-[#EA580C] text-white shadow-xs"
-                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
+                        : "border-stone-200 bg-white text-stone-700 hover:bg-stone-50"
                     }`}
                   >
                     <span>⚡ Lo antes posible</span>
@@ -1340,10 +1253,10 @@ export default function CartDrawer({
                   <button
                     type="button"
                     onClick={handleSeleccionarProgramado}
-                    className={`flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border py-2.5 px-3 text-xs font-black transition active:scale-[0.98] ${
+                    className={`flex items-center justify-center gap-1.5 rounded-lg border py-2 px-2.5 text-xs font-bold transition active:scale-[0.98] ${
                       horaRetiroTipo === "programado"
                         ? "border-[#EA580C] bg-[#EA580C] text-white shadow-xs"
-                        : "border-stone-200 bg-white text-stone-700 hover:border-stone-300 hover:bg-stone-50"
+                        : "border-stone-200 bg-white text-stone-700 hover:bg-stone-50"
                     }`}
                   >
                     <span>🕒 Programar hora</span>
@@ -1351,21 +1264,13 @@ export default function CartDrawer({
                 </div>
 
                 {horaRetiroTipo === "programado" && (
-                  <div className="pt-1 space-y-1.5">
-                    <label htmlFor="horaRetiroInput" className="sr-only">
-                      Hora estimada de retiro
-                    </label>
-                    <input
-                      id="horaRetiroInput"
-                      type="time"
-                      value={horaRetiroValor}
-                      onChange={(e) => setHoraRetiroValor(e.target.value)}
-                      className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 font-mono text-base sm:text-sm font-bold text-stone-900 shadow-xs focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20"
-                    />
-                    <p className="text-[11px] font-medium text-stone-500">
-                      Indica la hora aproximada en que vendrás a buscar tu comida
-                    </p>
-                  </div>
+                  <input
+                    id="horaRetiroInput"
+                    type="time"
+                    value={horaRetiroValor}
+                    onChange={(e) => setHoraRetiroValor(e.target.value)}
+                    className="w-full rounded-lg border border-stone-200/90 bg-white px-3 py-2 font-mono text-sm font-bold text-stone-900 shadow-xs focus:border-[#EA580C] focus:outline-none"
+                  />
                 )}
               </div>
 
@@ -1373,7 +1278,7 @@ export default function CartDrawer({
               <div>
                 <label
                   htmlFor="direccionOMesa"
-                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
+                  className={`mb-1 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
                 >
                   <MapPin className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`} />
                   {labelUbicacion}
@@ -1387,18 +1292,18 @@ export default function CartDrawer({
                     if (errorValidacion) setErrorValidacion(null);
                   }}
                   placeholder={placeholderUbicacion}
-                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
               </div>
 
               {/* Método de pago */}
               <div>
                 <span
-                  className={`mb-1.5 block text-xs font-bold ${theme.drawerLabel}`}
+                  className={`mb-1 block text-xs font-bold ${theme.drawerLabel}`}
                 >
                   Método de pago
                 </span>
-                <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-2 gap-2">
                   {METODOS_PAGO.map(({ valor, etiqueta, icono: Icon }) => {
                     const activo = metodoPago === valor;
                     const bloqueadoEfectivo = valor === "Efectivo" && total > LIMITE_MAX_EFECTIVO;
@@ -1410,23 +1315,15 @@ export default function CartDrawer({
                         onClick={() => {
                           if (!bloqueadoEfectivo) setMetodoPago(valor);
                         }}
-                        className={`flex min-h-[44px] items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-bold transition ${
+                        className={`flex items-center justify-center gap-2 rounded-xl border py-2.5 px-3 text-xs font-bold transition ${
                           bloqueadoEfectivo
                             ? "cursor-not-allowed border-stone-200 bg-stone-100 text-stone-400 opacity-60"
                             : activo
                             ? theme.drawerOptionActive
-                            : "border-outline-variant/50 bg-white text-on-surface-variant hover:border-secondary"
+                            : "border-stone-200 bg-white text-stone-700 hover:border-stone-300"
                         }`}
                       >
-                        <Icon
-                          className={`h-4 w-4 shrink-0 ${
-                            bloqueadoEfectivo
-                              ? "text-stone-400"
-                              : activo
-                              ? theme.drawerOptionIconActive
-                              : "text-outline"
-                          }`}
-                        />
+                        <Icon className="h-4 w-4 shrink-0" />
                         <span>{etiqueta}</span>
                       </button>
                     );
@@ -1435,30 +1332,17 @@ export default function CartDrawer({
 
                 {/* Aviso de Límite de Efectivo si supera $25.000 */}
                 {total > LIMITE_MAX_EFECTIVO && (
-                  <div className="mt-2.5 rounded-2xl border border-amber-200 bg-amber-50/90 p-3 text-xs text-amber-950 flex items-start gap-2 shadow-xs">
-                    <ShieldCheck className="h-4 w-4 shrink-0 text-amber-700 mt-0.5" />
-                    <div className="text-[11px] leading-relaxed">
-                      <span className="font-bold text-amber-900">Seguridad en cocina: </span>
-                      Por resguardo de insumos, compras superiores a {formatCLP(LIMITE_MAX_EFECTIVO)} deben abonarse previamente por <strong>Transferencia Bancaria</strong>.
-                    </div>
-                  </div>
+                  <p className="mt-1.5 text-[11px] font-semibold text-amber-800">
+                    * Pedidos superiores a {formatCLP(LIMITE_MAX_EFECTIVO)} deben abonarse vía Transferencia.
+                  </p>
                 )}
 
                 {/* Indicador de flujo para Transferencia Bancaria */}
                 {metodoPago === "Transferencia Bancaria" && (
-                  <div className="mt-3 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-3.5 space-y-2 text-xs">
-                    <div className="flex items-center gap-2 text-emerald-900 font-extrabold">
-                      <Landmark className="h-4 w-4 text-emerald-700 shrink-0" />
-                      <span>Transferencia directa CuentaRUT</span>
-                    </div>
-                    <p className="text-stone-600 leading-relaxed font-medium">
-                      Al presionar <strong>Enviar pedido a WhatsApp</strong>, se abrirá el chat con tu comanda y te mostraremos los datos de CuentaRUT con botón de copiado rápido para que transfieras y adjuntes tu voucher directamente en el chat.
-                    </p>
-                    <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-emerald-800">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
-                      <span>Sin comisiones intermediarias · Tu pedido queda reservado en cocina</span>
-                    </div>
-                  </div>
+                  <p className="mt-1.5 text-[11px] font-medium text-emerald-800 flex items-center gap-1">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+                    <span>Los datos de CuentaRUT se mostrarán al enviar el pedido.</span>
+                  </p>
                 )}
               </div>
 
@@ -1466,57 +1350,26 @@ export default function CartDrawer({
               <div>
                 <label
                   htmlFor="notasAdicionales"
-                  className={`mb-1.5 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
+                  className={`mb-1 flex items-center gap-1.5 text-xs font-bold ${theme.drawerLabel}`}
                 >
                   <FileText
                     className={`h-3.5 w-3.5 ${theme.drawerLabelIcon}`}
                   />
-                  Notas adicionales (opcional)
+                  Notas para la cocina (opcional)
                 </label>
-                <textarea
+                <input
                   id="notasAdicionales"
-                  rows={2}
+                  type="text"
                   value={notasAdicionales}
                   onChange={(e) => setNotasAdicionales(e.target.value)}
-                  placeholder='Ej: "Sin cebolla", "Salsa soya extra", "Para llevar bien sellado"'
-                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-base sm:text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
+                  placeholder="Ej: Sin cebolla, salsas aparte"
+                  className="w-full rounded-xl border border-stone-200/90 bg-white px-3.5 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:border-[#EA580C] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#EA580C]/20 shadow-xs"
                 />
-                <div className="mt-1.5 flex items-start gap-1.5 rounded-xl bg-stone-50 border border-stone-200/80 p-2 text-[11px] text-stone-600 leading-tight">
-                  <AlertTriangle className="h-3.5 w-3.5 text-amber-600 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Aviso preventivo:</strong> Las notas son exclusivamente para preferencias de preparación (ej: <em>&quot;sin cebolla&quot;</em>, <em>&quot;salsa aparte&quot;</em>). No se consideran ingredientes o porciones extras no cobradas en la comanda.
-                  </span>
-                </div>
               </div>
             </div>
 
-            {/* Vista previa opcional del mensaje de WhatsApp */}
-            <div className="rounded-2xl border border-stone-200/90 bg-white p-3.5 shadow-xs">
-              <button
-                type="button"
-                onClick={() => setMostrarVistaPrevia((prev) => !prev)}
-                className={`flex w-full items-center justify-between text-xs font-bold ${theme.drawerLabel}`}
-              >
-                <span className="inline-flex items-center gap-1.5">
-                  <Eye className="h-3.5 w-3.5 text-[#25D366]" />
-                  Ver formato del mensaje WhatsApp (
-                  {formatPhoneDisplay(local.telefonoWhatsapp)})
-                </span>
-                <span className="underline">
-                  {mostrarVistaPrevia ? "Ocultar" : "Mostrar"}
-                </span>
-              </button>
-              {mostrarVistaPrevia && (
-                <pre
-                  className={`mt-2.5 max-h-48 overflow-y-auto whitespace-pre-wrap rounded-xl p-3 font-mono text-[11px] leading-relaxed ${theme.drawerPreviewBox}`}
-                >
-                  {mensajePrevia}
-                </pre>
-              )}
-            </div>
-
             {errorValidacion && (
-              <div className="flex items-start gap-2 rounded-2xl border border-rose-200 bg-rose-50 p-3 text-xs font-semibold text-rose-800">
+              <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-2.5 text-xs font-semibold text-rose-800">
                 <AlertCircle className="h-4 w-4 shrink-0 text-rose-600" />
                 <span>{errorValidacion}</span>
               </div>
@@ -1526,7 +1379,7 @@ export default function CartDrawer({
           {/* Resumen de Total y Botón de Checkout a WhatsApp */}
           <div className="border-t border-stone-200/90 bg-white p-4 sm:px-6 safe-bottom">
             <div
-              className={`mb-3 flex items-center justify-between text-base font-extrabold ${theme.drawerLabel}`}
+              className={`mb-2.5 flex items-center justify-between text-base font-extrabold ${theme.drawerLabel}`}
             >
               <span>Total a pagar</span>
               <span className={`text-xl tabular-nums ${theme.drawerItemTotal}`}>
@@ -1542,7 +1395,7 @@ export default function CartDrawer({
                 local.activo === false ||
                 items.length === 0
               }
-              className="flex w-full min-h-[56px] items-center justify-center gap-2.5 rounded-full bg-[#25D366] px-5 py-4 text-base font-extrabold uppercase tracking-wide text-white shadow-lg shadow-[#25D366]/25 transition hover:bg-[#20bd5a] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-stone-300 disabled:opacity-65 disabled:shadow-none"
+              className="flex w-full min-h-[52px] items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3.5 text-base font-extrabold uppercase tracking-wide text-white shadow-md shadow-[#25D366]/20 transition hover:bg-[#20bd5a] active:scale-[0.99] disabled:cursor-not-allowed disabled:bg-stone-300 disabled:opacity-65 disabled:shadow-none"
             >
               {enviandoPedido ? (
                 <>
@@ -1556,7 +1409,7 @@ export default function CartDrawer({
                     {local.activo === false
                       ? "Servicio Suspendido"
                       : local.abierto
-                      ? "Enviar pedido a WhatsApp"
+                      ? `Pedir por WhatsApp • ${formatCLP(total)}`
                       : "Local Cerrado por ahora"}
                   </span>
                 </>
