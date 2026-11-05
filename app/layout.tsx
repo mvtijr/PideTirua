@@ -10,7 +10,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://pidetirua.cl"),
+  metadataBase: new URL("https://www.pidetirua.cl"),
+  alternates: {
+    canonical: "https://www.pidetirua.cl",
+  },
   title: "PideTirúa — Sabores de nuestra tierra | Tirúa y Quidico",
   description:
     "Plataforma de pedidos con retiro en local y cartas digitales QR de la comuna de Tirúa y Quidico (Región del Biobío, Chile). Revisa el menú digital y realiza tu pedido directo al WhatsApp de cada local.",
@@ -119,8 +122,8 @@ gtag('config', 'G-C636MXRRBH');`,
               "@graph": [
                 {
                   "@type": "WebSite",
-                  "@id": "https://pidetirua.cl/#website",
-                  "url": "https://pidetirua.cl",
+                  "@id": "https://www.pidetirua.cl/#website",
+                  "url": "https://www.pidetirua.cl",
                   "name": "PideTirúa",
                   "alternateName": ["Pide Tirua", "pidetirua.cl"],
                   "description": "Plataforma gastronómica de Tirúa y Quidico",
@@ -128,12 +131,12 @@ gtag('config', 'G-C636MXRRBH');`,
                 },
                 {
                   "@type": "Organization",
-                  "@id": "https://pidetirua.cl/#organization",
+                  "@id": "https://www.pidetirua.cl/#organization",
                   "name": "PideTirúa",
-                  "url": "https://pidetirua.cl",
+                  "url": "https://www.pidetirua.cl",
                   "logo": {
                     "@type": "ImageObject",
-                    "url": "https://pidetirua.cl/logo-pidetirua.jpg",
+                    "url": "https://www.pidetirua.cl/logo-pidetirua.jpg",
                     "width": "1024",
                     "height": "1024"
                   }

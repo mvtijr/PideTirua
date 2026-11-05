@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin/", "/pedidos/", "/api/", "/superadmin/"],
     },
-    sitemap: "https://pidetirua.cl/sitemap.xml",
+    sitemap: "https://www.pidetirua.cl/sitemap.xml",
   };
 }

@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { getAllLocales } from "@/lib/locales";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://pidetirua.cl";
+  const baseUrl = "https://www.pidetirua.cl";
   const locales = getAllLocales().filter((l) => l.activo !== false);
 
   const localUrls: MetadataRoute.Sitemap = locales.map((local) => ({
