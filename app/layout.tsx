@@ -74,16 +74,17 @@ export default function RootLayout({
   return (
     <html lang="es-CL">
       <head>
-        {/* Google Tag Manager / Google Analytics */}
+        {/* Google tag (gtag.js) — Google Analytics & Tag Manager */}
         <script
           async
-          src="https://www.googletagmanager.com/gtm.js?id=GTM-NMXRS2XW"
+          src="https://www.googletagmanager.com/gtag/js?id=G-C636MXRRBH"
         />
         <script
           dangerouslySetInnerHTML={{
             __html: `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());`,
+gtag('js', new Date());
+gtag('config', 'G-C636MXRRBH');`,
           }}
         />
         <meta
