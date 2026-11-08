@@ -1171,7 +1171,7 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
             onClick={() => setDrawerAbierto(true)}
             className="w-full flex items-center justify-between gap-3 rounded-2xl border border-stone-200/90 bg-white/95 backdrop-blur-md p-3 shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] text-left"
           >
-            <div className="flex items-center gap-2.5">
+            <span className="flex items-center gap-2.5">
               <span
                 className={`flex h-8 w-8 items-center justify-center rounded-xl text-base ${
                   pedidoActivo.estado === "listo"
@@ -1187,7 +1187,7 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
                   ? "🔥"
                   : "⏳"}
               </span>
-              <div>
+              <span className="block text-left">
                 <span className="block text-xs font-black text-stone-900 leading-tight">
                   {pedidoActivo.estado === "listo"
                     ? "¡Tu comida está lista para retirar!"
@@ -1198,8 +1198,8 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
                 <span className="block text-[11px] font-bold text-[#C2410C] tabular-nums mt-0.5">
                   #{pedidoActivo.codigoRetiro} • Toca para ver recibo
                 </span>
-              </div>
-            </div>
+              </span>
+            </span>
             <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-stone-700">
               Ver ➔
             </span>

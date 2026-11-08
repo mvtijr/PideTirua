@@ -819,10 +819,18 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
       {/* 5. BANNER COMPACTO: RECOMENDADOR DE PLATOS */}
       <div className="max-w-[1240px] mx-auto px-4 sm:px-6 my-6 sm:my-8">
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Abrir recomendador de platos: ¿No sabes qué pedir hoy? Descúbrelo en 2 toques"
           onClick={() => setMostrarRecomendador(true)}
-          className="group relative w-full overflow-hidden rounded-3xl border border-stone-300 bg-white p-5 sm:p-6 text-left shadow-xs transition-all duration-300 hover:shadow-md hover:border-orange-300"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setMostrarRecomendador(true);
+            }
+          }}
+          className="group relative w-full overflow-hidden rounded-3xl border border-stone-300 bg-white p-5 sm:p-6 text-left shadow-xs transition-all duration-300 hover:shadow-md hover:border-orange-300 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C]"
         >
           <GradientBackground
             gradientType="linear-gradient"
@@ -865,7 +873,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               <ArrowRight className="h-3.5 w-3.5" />
             </div>
           </div>
-        </button>
+        </div>
       </div>
 
       {/* 6. IDENTIDAD TERRITORIAL: TIRÚA Y CALETA QUIDICO */}

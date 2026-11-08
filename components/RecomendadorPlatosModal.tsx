@@ -456,17 +456,17 @@ export default function RecomendadorPlatosModal({
                   onClick={() => seleccionarConQuien("solo")}
                   className="flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 sm:p-5 text-center transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-orange-100 text-[#C2410C] border border-orange-200/60 group-hover:scale-105 transition">
+                  <span className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-orange-100 text-[#C2410C] border border-orange-200/60 group-hover:scale-105 transition">
                     <User className="h-6 w-6 sm:h-7 sm:w-7" />
-                  </div>
-                  <div>
+                  </span>
+                  <span className="block">
                     <span className="block font-display text-lg sm:text-xl tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       Solo yo
                     </span>
                     <span className="block font-body text-xs text-stone-500 mt-0.5">
                       Porción individual
                     </span>
-                  </div>
+                  </span>
                 </button>
 
                 <button
@@ -474,17 +474,17 @@ export default function RecomendadorPlatosModal({
                   onClick={() => seleccionarConQuien("pareja")}
                   className="flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 sm:p-5 text-center transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-rose-100 text-rose-700 border border-rose-200/60 group-hover:scale-105 transition">
+                  <span className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-rose-100 text-rose-700 border border-rose-200/60 group-hover:scale-105 transition">
                     <Users className="h-6 w-6 sm:h-7 sm:w-7" />
-                  </div>
-                  <div>
+                  </span>
+                  <span className="block">
                     <span className="block font-display text-lg sm:text-xl tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       En pareja
                     </span>
                     <span className="block font-body text-xs text-stone-500 mt-0.5">
                       Para 2 personas
                     </span>
-                  </div>
+                  </span>
                 </button>
 
                 <button
@@ -492,17 +492,17 @@ export default function RecomendadorPlatosModal({
                   onClick={() => seleccionarConQuien("grupo")}
                   className="flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 sm:p-5 text-center transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-sky-100 text-[#0284C7] border border-sky-200/60 group-hover:scale-105 transition">
+                  <span className="flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-sky-100 text-[#0284C7] border border-sky-200/60 group-hover:scale-105 transition">
                     <Users className="h-6 w-6 sm:h-7 sm:w-7" />
-                  </div>
-                  <div>
+                  </span>
+                  <span className="block">
                     <span className="block font-display text-lg sm:text-xl tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       En grupo
                     </span>
                     <span className="block font-body text-xs text-stone-500 mt-0.5">
                       Familia o amigos
                     </span>
-                  </div>
+                  </span>
                 </button>
               </div>
             </div>
@@ -526,17 +526,17 @@ export default function RecomendadorPlatosModal({
                   onClick={() => seleccionarAntojo("rapido")}
                   className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-[#C2410C] border border-orange-200/60 group-hover:scale-105 transition">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-[#C2410C] border border-orange-200/60 group-hover:scale-105 transition">
                     <Zap className="h-6 w-6" />
-                  </div>
-                  <div>
+                  </span>
+                  <span className="block">
                     <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       Rápido y contundente
                     </span>
                     <span className="block font-body text-xs text-stone-500 leading-snug mt-0.5">
                       Burgers, sándwiches, papas y chorrillanas
                     </span>
-                  </div>
+                  </span>
                 </button>
 
                 <button
@@ -544,17 +544,17 @@ export default function RecomendadorPlatosModal({
                   onClick={() => seleccionarAntojo("sushi")}
                   className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700 border border-rose-200/60 group-hover:scale-105 transition">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-700 border border-rose-200/60 group-hover:scale-105 transition">
                     <Sparkles className="h-6 w-6" />
-                  </div>
-                  <div>
+                  </span>
+                  <span className="block">
                     <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       Sushi / Fusión
                     </span>
                     <span className="block font-body text-xs text-stone-500 leading-snug mt-0.5">
                       Rolls tempura, handrolls y combinaciones
                     </span>
-                  </div>
+                  </span>
                 </button>
 
                 <button
@@ -562,17 +562,17 @@ export default function RecomendadorPlatosModal({
                   onClick={() => seleccionarAntojo("pescados")}
                   className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-[#0284C7] border border-sky-200/60 group-hover:scale-105 transition">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-sky-100 text-[#0284C7] border border-sky-200/60 group-hover:scale-105 transition">
                     <Fish className="h-6 w-6" />
-                  </div>
-                  <div>
+                  </span>
+                  <span className="block">
                     <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       Pescados / Tradicional
                     </span>
                     <span className="block font-body text-xs text-stone-500 leading-snug mt-0.5">
                       Reineta fresca, mariscos y sazón marina
                     </span>
-                  </div>
+                  </span>
                 </button>
 
                 <button
@@ -580,17 +580,17 @@ export default function RecomendadorPlatosModal({
                   onClick={() => seleccionarAntojo("economico")}
                   className="flex items-center gap-3.5 rounded-2xl border-2 border-stone-200/90 bg-white p-4 text-left transition hover:border-[#EA580C] hover:bg-orange-50/40 hover:shadow-md active:scale-95 group shadow-xs"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200/60 group-hover:scale-105 transition">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200/60 group-hover:scale-105 transition">
                     <Coins className="h-6 w-6" />
-                  </div>
-                  <div>
+                  </span>
+                  <span className="block">
                     <span className="block font-display text-lg tracking-wide uppercase text-stone-900 group-hover:text-[#C2410C] transition-colors">
                       Económico
                     </span>
                     <span className="block font-body text-xs text-stone-500 leading-snug mt-0.5">
                       Platos ricos y promociones al mejor precio
                     </span>
-                  </div>
+                  </span>
                 </button>
               </div>
 

@@ -31,8 +31,8 @@ export default function FloatingCartBar({
           onClick={onOpenDrawer}
           className={`flex w-full min-h-[56px] items-center justify-between px-4 py-3.5 transition-all active:scale-[0.99] shadow-xl ${theme.floatingBtn}`}
         >
-          <div className="flex items-center gap-3">
-            <div
+          <span className="flex items-center gap-3">
+            <span
               className={`relative flex h-10 w-10 items-center justify-center rounded-full font-extrabold ${theme.floatingIconBox}`}
             >
               <ShoppingBag className="h-5 w-5" />
@@ -41,32 +41,32 @@ export default function FloatingCartBar({
               >
                 {totalUnidades}
               </span>
-            </div>
-            <div className="text-left">
-              <p className={`text-xs font-medium ${theme.floatingSubText}`}>
+            </span>
+            <span className="text-left block">
+              <span className={`block text-xs font-medium ${theme.floatingSubText}`}>
                 {totalUnidades === 1
                   ? "1 producto seleccionado"
                   : `${totalUnidades} productos seleccionados`}
-              </p>
-              <p className="text-sm font-extrabold tracking-tight sm:text-base">
+              </span>
+              <span className="block text-sm font-extrabold tracking-tight sm:text-base">
                 Ver carrito y pedir
-              </p>
-            </div>
-          </div>
+              </span>
+            </span>
+          </span>
 
-          <div className="flex items-center gap-2">
-            <div className="text-right">
+          <span className="flex items-center gap-2">
+            <span className="text-right block">
               <span
                 className={`block text-[11px] font-semibold uppercase tracking-wider ${theme.floatingSubText}`}
               >
                 Total parcial
               </span>
-              <span className="text-base font-black sm:text-lg tabular-nums">
+              <span className="block text-base font-black sm:text-lg tabular-nums">
                 {formatCLP(subtotal)}
               </span>
-            </div>
+            </span>
             <ChevronRight className={`h-5 w-5 ${theme.floatingChevron}`} />
-          </div>
+          </span>
         </button>
       </div>
     </div>
