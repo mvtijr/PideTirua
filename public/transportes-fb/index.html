@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fuentealba Bastida | Transportes y Logística SpA - Conectamos Destinos, Entregamos Confianza</title>
+  <meta name="description" content="Empresa líder en transporte de carga por carretera y logística en Chile. Monitoreo satelital GPS 24/7, flota moderna FTL, LTL y refrigerada. Cotiza en menos de 2 horas.">
+  
+  <link rel="icon" type="image/jpeg" href="assets/logo-fb.jpg">
+
+  <!-- Google Fonts: Oswald (Headings estilo Trucky) & Roboto (Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Roboto:wght@300;400;500;700;900&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Material Symbols & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            fb: {
+              navy: '#071D3A',
+              navyDark: '#041224',
+              navyLight: '#0E284D',
+              navyAlt: '#0A1E3C',
+              gold: '#8E7037',
+              goldText: '#94753B',
+              goldLight: '#A88544',
+              goldGlow: '#C5A059',
+              goldDark: '#755A27',
+              charcoal: '#151D28',
+              charcoalDark: '#0C131D',
+              smoke: '#F8FAFC',
+              smokeAlt: '#F1F5F9',
+              white: '#FFFFFF'
+            }
+          },
+          fontFamily: {
+            heading: ['Nortune', 'Oswald', 'Montserrat', 'sans-serif'],
+            display: ['Nortune', 'Oswald', 'Montserrat', 'sans-serif'],
+            nortune: ['Nortune', 'sans-serif'],
+            okine: ['"MADE Okine Sans"', 'sans-serif'],
+            body: ['"MADE Okine Sans"', 'sans-serif'],
+            sans: ['"MADE Okine Sans"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+        /* Tipografía para Títulos: Nortune */
+    @font-face {
+      font-family: 'Nortune';
+      src: url('assets/fonts/Nortune-Black.ttf') format('truetype');
+      font-weight: 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* Tipografía Oficial para Demás Textos: MADE Okine Sans (MadeType) */
+    @font-face {
+      font-family: 'MADE Okine Sans';
+      src: url('assets/fonts/MADEOkineSans-Light.woff2') format('woff2'),
+           url('assets/fonts/MADEOkineSans-Light.woff') format('woff'),
+           url('assets/fonts/MADEOkineSans-Light.otf') format('opentype');
+      font-weight: 300;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'MADE Okine Sans';
+      src: url('assets/fonts/MADEOkineSans-Regular.woff2') format('woff2'),
+           url('assets/fonts/MADEOkineSans-Regular.woff') format('woff'),
+           url('assets/fonts/MADEOkineSans-Regular.otf') format('opentype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'MADE Okine Sans';
+      src: url('assets/fonts/MADEOkineSans-Medium.woff2') format('woff2'),
+           url('assets/fonts/MADEOkineSans-Medium.woff') format('woff'),
+           url('assets/fonts/MADEOkineSans-Medium.otf') format('opentype');
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'MADE Okine Sans';
+      src: url('assets/fonts/MADEOkineSans-Bold.woff2') format('woff2'),
+           url('assets/fonts/MADEOkineSans-Bold.woff') format('woff'),
+           url('assets/fonts/MADEOkineSans-Bold.otf') format('opentype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: 'MADE Okine Sans';
+      src: url('assets/fonts/MADEOkineSans-Black.woff2') format('woff2'),
+           url('assets/fonts/MADEOkineSans-Black.woff') format('woff'),
+           url('assets/fonts/MADEOkineSans-Black.otf') format('opentype');
+      font-weight: 900;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    /* Estilos globales y scrollbar con la paleta oficial FB */
+    /* Estilos globales: Todos los textos usan MADE Okine Sans por defecto */
+    *, body, p, span, a, button, input, select, textarea, label, li, td, th {
+      font-family: 'MADE Okine Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background-color: #FFFFFF;
+      color: #071D3A;
+      overflow-x: hidden;
+    }
+
+    /* Exclusivamente los títulos usan Nortune */
+    h1, h2, h3, h4, h5,
+    h1 *, h2 *, h3 *, h4 *, h5 *,
+    .font-nortune {
+      font-family: 'Nortune', 'Oswald', sans-serif !important;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: #8E7037 #071D3A;
+    }
+    ::-webkit-scrollbar {
+      width: 12px;
+      height: 12px;
+      display: block !important;
+    }
+    ::-webkit-scrollbar-track {
+      background: #071D3A;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #8E7037;
+      border-radius: 4px;
+      border: 2px solid #071D3A;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #A88544;
+    }
+    .hero-bg-trucky {
+      background-image: url('assets/hero-full-scene.jpg');
+      background-size: cover;
+      background-position: center center;
+    }
+    .banner-fast-safe {
+      background-image: url('assets/hero-truck.jpg');
+      background-size: cover;
+      background-position: center center;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-fb-gold selection:text-white">
+
+  <!-- ==========================================
+       1. HEADER AZUL MARINO OSCURO (#071D3A)
+       ========================================== -->
+  <header class="w-full bg-fb-navy text-white sticky top-0 z-50 shadow-lg border-b border-fb-gold/40">
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- LOGO BRAND (Estilo Trucky con Colores FB) -->
+        <a href="#inicio" class="flex items-center gap-3.5 group">
+          <div class="w-12 h-12 rounded-full overflow-hidden bg-white p-0.5 shadow-md flex-shrink-0 border-2 border-fb-gold group-hover:scale-105 transition-transform">
+            <img src="assets/logo-fb.jpg" alt="Logo Fuentealba Bastida" class="w-full h-full object-cover rounded-full">
+          </div>
+          <div class="flex flex-col">
+            <span class="font-heading font-black text-2xl sm:text-3xl text-white tracking-wider leading-none">
+              FUENTEALBA BASTIDA
+            </span>
+            <span class="text-[10px] tracking-[0.25em] text-fb-goldLight font-bold uppercase mt-1">
+              TRANSPORTES Y LOGÍSTICA SpA
+            </span>
+            <span class="text-[9px] tracking-widest text-slate-300 uppercase hidden sm:block">
+              CONECTAMOS DESTINOS, ENTREGAMOS CONFIANZA
+            </span>
+          </div>
+        </a>
+
+        <!-- NAVEGACIÓN DESKTOP -->
+        <nav class="hidden lg:flex items-center gap-7 font-heading text-sm font-semibold tracking-wider text-white">
+          <a href="#inicio" class="text-fb-goldLight hover:text-white transition-colors py-1">INICIO</a>
+          <a href="#compromiso" class="hover:text-fb-goldLight transition-colors py-1">NOSOTROS</a>
+          <a href="#servicios" class="hover:text-fb-goldLight transition-colors py-1">SERVICIOS</a>
+          <a href="#claves" class="hover:text-fb-goldLight transition-colors py-1">CLAVES</a>
+          <a href="#flota-destacada" class="hover:text-fb-goldLight transition-colors py-1">FLOTA</a>
+          <a href="#cotizacion" class="hover:text-fb-goldLight transition-colors py-1">COTIZAR</a>
+          <a href="#contacto" class="hover:text-fb-goldLight transition-colors py-1">CONTACTO</a>
+        </nav>
+
+        <!-- CTA O TELÉFONO RÁPIDO DERECHA -->
+        <div class="hidden sm:flex items-center gap-3">
+          <a href="tel:+56926108718" class="flex items-center gap-1.5 text-xs font-bold tracking-wider text-fb-goldLight hover:text-white uppercase bg-fb-navyDark px-3.5 py-2 rounded border border-fb-gold/30">
+            <span class="material-symbols-outlined text-[16px] text-fb-goldLight">phone</span>
+            <span>+569 2610 8718</span>
+          </a>
+          <a href="#cotizacion" class="px-4 py-2 bg-fb-gold hover:bg-fb-goldLight text-white font-heading text-xs font-bold tracking-wider rounded uppercase shadow-md transition-all">
+            COTIZAR
+          </a>
+        </div>
+
+        <!-- HAMBURGER MÓVIL -->
+        <div class="flex items-center gap-2 lg:hidden">
+          <button onclick="toggleMobileMenu()" class="p-2 text-white hover:bg-fb-navyLight rounded focus:outline-none" aria-label="Abrir Menú">
+            <span class="material-symbols-outlined text-[28px]">menu</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- MENÚ MÓVIL DESPLEGABLE -->
+    <div id="mobile-menu" class="hidden lg:hidden bg-fb-navyDark border-t border-fb-gold/30 px-6 py-4 space-y-3 font-heading text-sm tracking-wider text-white">
+      <a href="#inicio" onclick="toggleMobileMenu()" class="block hover:text-fb-goldLight">INICIO</a>
+      <a href="#compromiso" onclick="toggleMobileMenu()" class="block hover:text-fb-goldLight">NOSOTROS</a>
+      <a href="#servicios" onclick="toggleMobileMenu()" class="block hover:text-fb-goldLight">SERVICIOS</a>
+      <a href="#claves" onclick="toggleMobileMenu()" class="block hover:text-fb-goldLight">CLAVES</a>
+      <a href="#flota-destacada" onclick="toggleMobileMenu()" class="block hover:text-fb-goldLight">FLOTA</a>
+      <a href="#cotizacion" onclick="toggleMobileMenu()" class="block hover:text-fb-goldLight">COTIZAR ENVÍO</a>
+      <a href="#contacto" onclick="toggleMobileMenu()" class="block hover:text-fb-goldLight">CONTACTO</a>
+    </div>
+  </header>
+
+      <!-- ==========================================
+       2. HERO OFICIAL (SISTEMA DE 2 CAPAS: FONDO CINEMÁTICO + LOGO 3D EN CAPA FRONTAL)
+       Fondo: Ruta y camión en movimiento al atardecer sin texto (formato 21:9).
+       Primer plano: Logotipo oficial 3D en alta definición con transparencia pura.
+       ========================================== -->
+    <!-- ==========================================
+       2. HERO SECTION CINEMÁTICO 4K ULTRA-HD
+          Logotipo 3D Oficial integrado en escena de carretera al atardecer
+       ========================================== -->
+    <!-- ==========================================
+       2. HERO SECTION CINEMÁTICO EN 2 CAPAS
+          Capa 1 (Fondo): Ruta y camiones al atardecer en formato 21:9
+          Capa 2 (Frontal): Logotipo 3D Oficial con transparencia y máxima nitidez
+       ========================================== -->
+  <section id="inicio" class="relative w-full aspect-[16/9] min-h-[460px] sm:min-h-[500px] md:min-h-[560px] lg:min-h-[620px] max-h-[850px] flex items-center overflow-hidden bg-fb-navyDark group">
+    
+    <!-- CAPA 1: Fondo Cinemático de la Ruta y Camiones al Atardecer (Sin Texto) -->
+    <div class="absolute inset-0 z-0">
+      <picture>
+        <source srcset="assets/hero-bg-truck-34-4k.webp" type="image/webp">
+        <img src="assets/hero-bg-truck-34-4k.jpg" 
+             alt="Camiones de carga de Fuentealba Bastida en autopista al atardecer" 
+             class="w-full h-full object-cover object-center select-none pointer-events-none"
+             loading="eager"
+             fetchpriority="high">
+      </picture>
+      
+      <!-- Sutil gradiente para máxima legibilidad sin opacar los camiones -->
+      <div class="absolute inset-0 bg-gradient-to-r from-[#071D3A]/45 via-transparent to-transparent pointer-events-none"></div>
+      <div class="absolute inset-x-0 bottom-0 h-24 sm:h-32 bg-gradient-to-t from-[#071D3A]/85 via-[#071D3A]/20 to-transparent pointer-events-none"></div>
+    </div>
+
+    <!-- H1 accesible para SEO -->
+    <h1 class="sr-only">Fuentealba Bastida - Transportes y Logística SpA | La Empresa en que Puedes Confiar</h1>
+
+    <!-- CAPA 2: Contenedor Frontal con Logo 3D en Alta Definición y Acciones -->
+    <div class="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 py-6 flex flex-col justify-center items-start">
+      
+      <!-- Insignia Superior: Flota Propia & Monitoreo 24/7 -->
+      <div class="inline-flex items-center gap-2 px-3 py-1 bg-fb-navy/85 border border-fb-gold/40 rounded-sm shadow-xl backdrop-blur-md mb-2 sm:mb-3">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span class="text-fb-goldLight text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+          Flota Propia en Ruta • Monitoreo GPS 24/7
+        </span>
+      </div>
+
+      <!-- LOGO 3D OFICIAL EN ALTA DEFINICIÓN (Capa Frontal con Transparencia Pura) -->
+      <div class="mb-2 sm:mb-3 max-w-[220px] xs:max-w-[260px] sm:max-w-[360px] md:max-w-[460px] lg:max-w-[540px] xl:max-w-[580px] transition-transform duration-500 hover:scale-[1.02]">
+        <picture>
+          <source srcset="assets/logo-fb-3d-hd.webp" type="image/webp">
+          <img src="assets/logo-fb-3d-hd.png" 
+               alt="Fuentealba Bastida - Transportes y Logística SpA (Logotipo 3D Oficial)" 
+               class="w-full h-auto object-contain filter drop-shadow-[0_12px_24px_rgba(0,0,0,0.85)] select-none">
+        </picture>
+      </div>
+
+      <!-- Slogan Corporativo Integrado -->
+      <div class="inline-flex items-center gap-2 mb-3 sm:mb-4">
+        <span class="w-6 h-0.5 bg-fb-gold inline-block"></span>
+        <span class="hero-slogan font-bold text-xs sm:text-sm text-fb-goldLight uppercase tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+          LA EMPRESA EN QUE PUEDES CONFIAR
+        </span>
+      </div>
+
+      <!-- Botones de Acción (CTA) -->
+      <div class="flex flex-wrap items-center gap-3">
+        <a href="#cotizacion" class="px-5 sm:px-6 py-2 sm:py-2.5 bg-fb-gold hover:bg-fb-goldLight text-white font-bold text-xs sm:text-sm uppercase tracking-wider shadow-2xl transition-all rounded-sm border border-fb-goldLight/30 backdrop-blur-sm hover:scale-[1.02]">
+          SOLICITAR COTIZACIÓN
+        </a>
+        <a href="#tracking-box" class="px-4 sm:px-5 py-2 sm:py-2.5 bg-fb-navy/85 hover:bg-fb-navy text-white font-bold text-xs sm:text-sm uppercase tracking-wider border border-fb-gold/50 backdrop-blur-md shadow-2xl transition-all rounded-sm hover:border-fb-goldLight">
+          RASTREAR GUÍA
+        </a>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ==========================================
+       3. BLOQUE DIVIDIDO: NUESTRO COMPROMISO (AZUL MARINO OSCURO #071D3A / CARBÓN)
+       ========================================== -->
+  <section id="compromiso" class="w-full grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+    
+    <!-- Columna Izquierda: Fondo Azul Marino Oscuro #071D3A con WebGL GlassFold en Fondo (z-0) -->
+    <div class="lg:col-span-7 relative bg-fb-navy text-white p-8 sm:p-12 lg:p-16 flex flex-col justify-center items-start border-r border-fb-gold/20 overflow-hidden">
+      <!-- WebGL GlassFold Shader: Fondo Animado Estrictamente en Capa z-0 -->
+      <canvas id="canvas-glass-compromiso" class="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-40" style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;"></canvas>
+      
+      <!-- Contenedor Frontal en z-10: 100% Nítido y Legible -->
+      <div class="relative z-10 w-full">
+        <div class="inline-flex items-center gap-2 mb-2">
+          <span class="w-8 h-1 bg-fb-gold"></span>
+          <span class="text-fb-goldLight font-heading text-xs uppercase tracking-widest font-bold">Valores Corporativos</span>
+        </div>
+        <h2 class="font-heading font-black text-3xl sm:text-4xl text-white mb-4">
+          NUESTRO COMPROMISO
+        </h2>
+        <p class="font-armstrong font-bold text-xs sm:text-sm text-fb-goldGlow uppercase leading-relaxed mb-4">
+          LA SEGURIDAD Y LA PUNTUALIDAD SON EL MOTOR QUE IMPULSA TODO LO QUE HACEMOS EN FUENTEALBA BASTIDA. "CUIDAR TU CARGA COMO SI FUERA NUESTRA" ES UN VALOR INNEGOCIABLE DE NUESTRO EQUIPO OPERATIVO.
+        </p>
+        <p class="text-slate-200 text-xs sm:text-sm leading-relaxed mb-6 font-normal">
+          Fuentealba Bastida SpA está comprometida a brindar un transporte terrestre transparente, seguro y de alta fidelidad. Operamos con una flota propia moderna, conductores profesionales certificados con control de fatiga y pólizas de seguro de carga integrales para proteger cada envío desde el origen hasta su destino final.
+        </p>
+        <a href="#cotizacion" class="px-6 py-2.5 bg-fb-gold hover:bg-fb-goldLight text-white font-heading font-bold text-xs uppercase tracking-wider shadow transition-colors rounded-sm inline-block">
+          LEER MÁS
+        </a>
+      </div>
+    </div>
+
+    <!-- Columna Derecha: Fondo Carbón Oscuro con Imagen de Flota (40% ancho) -->
+    <div class="lg:col-span-5 bg-fb-charcoalDark p-6 sm:p-10 flex items-center justify-center relative min-h-[300px]">
+      <div class="w-full h-full flex items-center justify-center relative group">
+        <img src="assets/team-brochure.jpg" alt="Flota y Operaciones Fuentealba Bastida" class="max-h-[320px] w-auto object-cover rounded shadow-2xl group-hover:scale-105 transition-transform duration-500 border border-fb-gold/30">
+        <div class="absolute bottom-4 right-4 bg-fb-gold text-white text-[10px] font-heading font-bold uppercase px-3 py-1 shadow">
+          FLOTA HOMOLOGADA
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ==========================================
+       4. BLOQUE OSCURO: CLAVES DEL ÉXITO & SERVICIOS INTEGRALES
+       ========================================== -->
+  <section id="claves" class="relative w-full bg-fb-charcoal text-white py-14 lg:py-20 border-t border-b border-fb-gold/30 overflow-hidden">
+    <!-- WebGL GlassFold Shader: Fondo Animado Estrictamente en Capa z-0 -->
+    <canvas id="canvas-glass-claves" class="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-35" style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;"></canvas>
+    
+    <!-- Contenedor Frontal en z-10: 100% Nítido y Legible -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+        
+        <!-- Columna Izquierda: Claves del Éxito -->
+        <div class="lg:col-span-6 flex flex-col items-start justify-between">
+          <div>
+            <h3 class="font-heading font-black text-2xl sm:text-3xl text-white mb-4">
+              CLAVES DE NUESTRO ÉXITO
+            </h3>
+            <p class="font-armstrong font-bold text-xs sm:text-sm text-fb-goldGlow uppercase leading-relaxed mb-4">
+              MIENTRAS LA MAYORÍA DE LAS EMPRESAS DE LOGÍSTICA SE ENFOCAN EN UN SOLO SERVICIO, EN FUENTEALBA BASTIDA CUBRIMOS TODAS LAS MODALIDADES DE TU CADENA DE SUMINISTRO.
+            </p>
+            <p class="text-slate-300 text-xs sm:text-sm leading-relaxed mb-6 font-normal">
+              Entendemos que cada industria posee requerimientos únicos. Gestionamos desde traslados de cargas masivas punto a punto hasta fletes de alta precisión con temperatura controlada, respaldados por telemetría GPS continua y reportes de recepción en tiempo real.
+            </p>
+          </div>
+          <a href="#cotizacion" class="px-6 py-2.5 bg-fb-gold hover:bg-fb-goldLight text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow rounded-sm">
+            LEER MÁS
+          </a>
+        </div>
+
+        <!-- Columna Derecha: Servicios Integrales (Lista Estilo Trucky) -->
+        <div class="lg:col-span-6 flex flex-col justify-start">
+          <h3 class="font-heading font-black text-2xl sm:text-3xl text-white mb-4">
+            SERVICIOS INTEGRALES
+          </h3>
+          <ul class="divide-y divide-white/10 font-heading text-xs sm:text-sm tracking-wider text-white">
+            <li class="py-3 flex items-center justify-between hover:text-fb-goldLight transition-colors cursor-pointer">
+              <span>CARGA COMPLETA (FTL - EXCLUSIVO)</span>
+              <span class="material-symbols-outlined text-[16px] text-fb-gold">chevron_right</span>
+            </li>
+            <li class="py-3 flex items-center justify-between hover:text-fb-goldLight transition-colors cursor-pointer">
+              <span>CARGA CONSOLIDADA (LTL - POR PALLET)</span>
+              <span class="material-symbols-outlined text-[16px] text-fb-gold">chevron_right</span>
+            </li>
+            <li class="py-3 flex items-center justify-between hover:text-fb-goldLight transition-colors cursor-pointer">
+              <span>TRANSPORTE REFRIGERADO & CLIMATIZADO (-25°C A +15°C)</span>
+              <span class="material-symbols-outlined text-[16px] text-fb-gold">chevron_right</span>
+            </li>
+            <li class="py-3 flex items-center justify-between hover:text-fb-goldLight transition-colors cursor-pointer">
+              <span>CARGA SOBREDIMENSIONADA Y MAQUINARIA PESADA</span>
+              <span class="material-symbols-outlined text-[16px] text-fb-gold">chevron_right</span>
+            </li>
+            <li class="py-3 flex items-center justify-between hover:text-fb-goldLight transition-colors cursor-pointer">
+              <span>ALMACENAJE, CROSS-DOCKING Y ÚLTIMA MILLA</span>
+              <span class="material-symbols-outlined text-[16px] text-fb-gold">chevron_right</span>
+            </li>
+            <li class="py-3 flex items-center justify-between hover:text-fb-goldLight transition-colors cursor-pointer">
+              <span>FLOTAS DEDICADAS B2B Y ENLACES PORTUARIOS</span>
+              <span class="material-symbols-outlined text-[16px] text-fb-gold">chevron_right</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       5. BANNER HORIZONTAL WIDE: MAKING TRANSPORTATION FAST AND SAFE
+       ========================================== -->
+  <section class="relative w-full h-[380px] sm:h-[440px] banner-fast-safe flex items-center px-4 sm:px-8 lg:px-16 overflow-hidden">
+    <!-- Scrim azul marino oscuro a la derecha -->
+    <div class="absolute inset-0 bg-gradient-to-r from-black/20 via-[#071D3A]/60 to-[#071D3A]/95"></div>
+
+    <div class="relative z-10 max-w-lg ml-auto text-left py-6 pr-2 sm:pr-6">
+      <h2 class="font-heading font-black text-3xl sm:text-4xl lg:text-5xl text-white tracking-wide leading-tight mb-4">
+        HACIENDO EL TRANSPORTE RÁPIDO Y SEGURO
+      </h2>
+      <p class="font-armstrong text-slate-200 text-xs sm:text-sm leading-relaxed mb-6 font-normal">
+        Desde el primer día, operamos bajo principios innegociables de seguridad vial, cumplimiento estricto de ventanas horarias y atención personalizada de personas a personas. Nuestra flota moderna en carretera garantiza que tus compromisos comerciales se cumplan sin contratiempos.
+      </p>
+      <a href="#cotizacion" class="px-6 py-2.5 bg-fb-gold hover:bg-fb-goldLight text-white font-heading font-bold text-xs uppercase tracking-wider shadow transition-colors inline-block rounded-sm">
+        COTIZAR EN LÍNEA
+      </a>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       6. SECCIÓN TRES TARJETAS: QUIÉNES SOMOS, ¿POR QUÉ ELEGIRNOS?, ¿QUÉ HACEMOS?
+          (FONDO BLANCO CON SHADER GLASSS-FOLD DETRÁS DEL TEXTO)
+       ========================================== -->
+  <section id="servicios" class="relative w-full bg-white py-16 lg:py-24 text-[#071D3A] overflow-hidden">
+    <!-- WebGL GlassFold Shader: Fondo Animado Exclusivo en Sección Blanca (z-0 y detrás de todo) -->
+    <canvas id="canvas-glass-servicios" class="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-20" style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;"></canvas>
+    
+    <!-- Contenedor Superior en z-10: 100% Legibilidad y Contraste -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+        
+        <!-- Columna 1: QUIÉNES SOMOS -->
+        <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 shadow-lg hover:shadow-2xl flex flex-col justify-between items-start border-t-4 border-fb-gold rounded-sm relative z-10 transition-all duration-300 hover:-translate-y-1">
+          <div>
+            <h3 class="font-heading font-black text-2xl text-fb-navy mb-3">
+              QUIÉNES SOMOS
+            </h3>
+            <p class="font-armstrong font-bold text-xs sm:text-sm text-fb-goldText uppercase leading-snug mb-3">
+              CON UNA FLOTA MODERNA QUE VA DESDE CAMIONES 3/4 URBANOS HASTA TRACTOCAMIONES DE ALTO TONELAJE, CUBRIMOS CUALQUIER REQUERIMIENTO DE CARGA.
+            </p>
+            <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6 font-normal">
+              Fuentealba Bastida es un operador logístico chileno con base en la Región Metropolitana y Biobío, enfocado en optimizar los tiempos de flete y resguardar la mercadería de nuestros clientes corporativos en todo el territorio nacional.
+            </p>
+          </div>
+          <a href="#cotizacion" class="px-5 py-2 bg-fb-navy hover:bg-fb-gold text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow rounded-sm">
+            LEER MÁS
+          </a>
+        </div>
+
+        <!-- Columna 2: ¿POR QUÉ ELEGIRNOS? -->
+        <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 shadow-lg hover:shadow-2xl flex flex-col justify-between items-start border-t-4 border-fb-gold rounded-sm relative z-10 transition-all duration-300 hover:-translate-y-1">
+          <div>
+            <h3 class="font-heading font-black text-2xl text-fb-navy mb-3">
+              ¿POR QUÉ ELEGIRNOS?
+            </h3>
+            <p class="font-armstrong font-bold text-xs sm:text-sm text-fb-goldText uppercase leading-snug mb-3">
+              CADA CONDUCTOR DE NUESTRO EQUIPO CUENTA CON AÑOS DE EXPERIENCIA EN RUTA, MILES DE KILÓMETROS RECORRIDOS Y CAPACITACIÓN VIAL RIGUROSA.
+            </p>
+            <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6 font-normal">
+              Equipamos nuestras unidades con telemetría satelital en tiempo real, alarmas de apertura y corte de combustible remoto. Además, brindamos contacto directo permanente con el Jefe de Operaciones sin contestadores automáticos.
+            </p>
+          </div>
+          <a href="#cotizacion" class="px-5 py-2 bg-fb-navy hover:bg-fb-gold text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow rounded-sm">
+            LEER MÁS
+          </a>
+        </div>
+
+        <!-- Columna 3: ¿QUÉ HACEMOS? -->
+        <div class="bg-white/95 backdrop-blur-md p-6 sm:p-8 shadow-lg hover:shadow-2xl flex flex-col justify-between items-start border-t-4 border-fb-gold rounded-sm relative z-10 transition-all duration-300 hover:-translate-y-1">
+          <div>
+            <h3 class="font-heading font-black text-2xl text-fb-navy mb-3">
+              ¿QUÉ HACEMOS?
+            </h3>
+            <p class="font-armstrong font-bold text-xs sm:text-sm text-fb-goldText uppercase leading-snug mb-3">
+              ENTENDEMOS EL VALOR CRÍTICO DE CADA DESPACHO: REGISTRAMOS UN 99.4% DE PUNTUALIDAD ON-TIME EN TODAS NUESTRAS RUTAS TRONCALES.
+            </p>
+            <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-6 font-normal">
+              Conectamos las faenas mineras y puertos del Norte Grande, el eje logístico central de Santiago, Valparaíso y San Antonio, y la macrozona Sur de Biobío, Araucanía y Los Lagos con frecuencias programadas y salidas continuas.
+            </p>
+          </div>
+          <a href="#cotizacion" class="px-5 py-2 bg-fb-navy hover:bg-fb-gold text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors shadow rounded-sm">
+            LEER MÁS
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       7. SECCIÓN DIVIDIDA: 3 CAJAS CON ÍCONOS DORADOS + FOTO DEL CAMIÓN
+       ========================================== -->
+  <section id="flota-destacada" class="w-full grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+    
+    <!-- Columna Izquierda: 3 Items con Iconos en Azul Marino & Dorado (45% ancho) -->
+    <div class="lg:col-span-5 bg-fb-navy text-white p-8 sm:p-12 lg:p-14 flex flex-col justify-center gap-6 border-r border-fb-gold/20">
+      
+      <!-- Item 1: Paquete / Caja -->
+      <div class="flex items-center gap-5 group">
+        <div class="w-14 h-14 bg-fb-gold flex items-center justify-center text-white shrink-0 shadow rounded-sm">
+          <span class="material-symbols-outlined text-[30px]">inventory_2</span>
+        </div>
+        <div>
+          <h4 class="font-heading font-bold text-base sm:text-lg text-white uppercase group-hover:text-fb-goldLight transition-colors">
+            SERVICIOS DE CARGA POR CARRETERA
+          </h4>
+          <p class="font-armstrong text-slate-300 text-xs leading-normal">
+            Flota de furgones cerrados, ramplas planas y sider para carga general y pallets.
+          </p>
+        </div>
+      </div>
+
+      <!-- Item 2: Camión -->
+      <div class="flex items-center gap-5 group">
+        <div class="w-14 h-14 bg-fb-gold flex items-center justify-center text-white shrink-0 shadow rounded-sm">
+          <span class="material-symbols-outlined text-[30px]">local_shipping</span>
+        </div>
+        <div>
+          <h4 class="font-heading font-bold text-base sm:text-lg text-white uppercase group-hover:text-fb-goldLight transition-colors">
+            TRANSPORTE ESPECIAL Y REFRIGERADO
+          </h4>
+          <p class="font-armstrong text-slate-300 text-xs leading-normal">
+            Control estricto de temperatura Thermo King y camas bajas para maquinaria pesada.
+          </p>
+        </div>
+      </div>
+
+      <!-- Item 3: Chat / Soporte -->
+      <div class="flex items-center gap-5 group">
+        <div class="w-14 h-14 bg-fb-gold flex items-center justify-center text-white shrink-0 shadow rounded-sm">
+          <span class="material-symbols-outlined text-[30px]">chat</span>
+        </div>
+        <div>
+          <h4 class="font-heading font-bold text-base sm:text-lg text-white uppercase group-hover:text-fb-goldLight transition-colors">
+            GESTIÓN LOGÍSTICA Y MONITOREO 24/7
+          </h4>
+          <p class="font-armstrong text-slate-300 text-xs leading-normal">
+            Telemetría satelital activa y ejecutivos asignados para asistencia ininterrumpida.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Columna Derecha: Foto del Camión Real en Faena (55% ancho) -->
+    <div class="lg:col-span-7 bg-fb-charcoalDark relative min-h-[320px] overflow-hidden">
+      <img src="assets/hero-truck.jpg" alt="Camión Fuentealba Bastida en Ruta" class="w-full h-full object-cover object-center">
+      <div class="absolute inset-0 bg-gradient-to-r from-fb-navy/80 via-transparent to-transparent"></div>
+    </div>
+
+  </section>
+
+  <!-- ==========================================
+       8. SECCIÓN MAPA + BLOQUE AZUL MARINO OSCURO DE CONTACTO
+       ========================================== -->
+  <section id="contacto" class="w-full grid grid-cols-1 lg:grid-cols-12 overflow-hidden border-t border-fb-gold/30">
+    
+    <!-- Columna Izquierda: Mapa de Operaciones y Cobertura (65% ancho) -->
+    <div class="lg:col-span-8 bg-[#E2E8F0] relative min-h-[360px] flex flex-col justify-between p-6 sm:p-8">
+      
+      <!-- Simulación de Mapa Gráfico con Pin y Rutas -->
+      <div class="w-full h-full rounded bg-slate-200 border border-slate-300 relative overflow-hidden flex flex-col justify-between p-6">
+        
+        <!-- Fondo de Mapa Ilustrado con Cuadrícula -->
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#071D3A_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        
+        <!-- Header del Mapa -->
+        <div class="relative z-10 flex flex-wrap items-center justify-between gap-2 bg-white/95 backdrop-blur-sm p-3 rounded shadow-sm border border-slate-300">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-fb-navy text-[24px]">location_on</span>
+            <span class="font-heading font-bold text-sm text-fb-navy">BASES OPERATIVAS: SANTIAGO & REGIÓN DEL BIOBÍO</span>
+          </div>
+          <span class="text-xs font-heading font-bold text-fb-gold bg-amber-50 px-2 py-0.5 rounded border border-fb-gold/30 uppercase">
+            COBERTURA NACIONAL
+          </span>
+        </div>
+
+        <!-- Pin Central de Santiago con Colores FB -->
+        <div class="relative z-10 my-auto text-center py-6">
+          <div class="inline-flex flex-col items-center">
+            <div class="w-11 h-11 bg-fb-navy border-2 border-fb-gold rounded-full flex items-center justify-center text-fb-goldLight shadow-xl animate-bounce">
+              <span class="material-symbols-outlined text-[24px]">local_shipping</span>
+            </div>
+            <div class="bg-fb-navy text-white px-3 py-1 rounded text-xs font-heading font-bold mt-1 shadow border border-fb-gold/30">
+              HUB CENTRAL SANTIAGO - CHILE
+            </div>
+          </div>
+        </div>
+
+        <!-- Resumen de Rutas Troncales -->
+        <div class="relative z-10 grid grid-cols-3 gap-2 bg-white/95 backdrop-blur-sm p-3 rounded shadow-sm text-[11px] font-heading font-semibold text-slate-800 border border-slate-300">
+          <div><strong class="text-fb-goldText">NORTE:</strong> Antofagasta, Calama, Copiapó</div>
+          <div><strong class="text-fb-goldText">CENTRO:</strong> Valparaíso, San Antonio, Rancagua</div>
+          <div><strong class="text-fb-goldText">SUR:</strong> Concepción, Temuco, Puerto Montt</div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Columna Derecha: Tarjeta Azul Marino CONTACTS (35% ancho - Paleta Oficial) -->
+    <div class="lg:col-span-4 bg-fb-navy text-white p-8 sm:p-10 flex flex-col justify-between border-l border-fb-gold/30">
+      <div>
+        <div class="inline-flex items-center gap-2 mb-2">
+          <span class="w-6 h-1 bg-fb-gold"></span>
+          <span class="text-fb-goldLight font-heading text-xs uppercase tracking-widest font-bold">Canales Oficiales</span>
+        </div>
+        <h3 class="font-heading font-black text-2xl sm:text-3xl text-white mb-4">
+          CONTACTO
+        </h3>
+        
+        <div class="space-y-3 text-xs sm:text-sm font-normal mb-6">
+          <p class="font-armstrong font-bold text-fb-goldLight tracking-wider">
+            BASE CENTRAL: SANTIAGO & BIOBÍO, CHILE
+          </p>
+          <p class="text-slate-200">
+            Atención comercial de Lunes a Sábado de 08:00 a 20:00 hrs. Central de emergencias en carretera disponible las 24 horas del día.
+          </p>
+          <div class="pt-2 flex items-center gap-2 font-bold text-white">
+            <span class="material-symbols-outlined text-[18px] text-fb-gold">phone</span>
+            <a href="tel:+56926108718" class="hover:text-fb-goldLight transition-colors">+569 2610 8718</a>
+          </div>
+          <div class="flex items-center gap-2 text-slate-200">
+            <span class="material-symbols-outlined text-[18px] text-fb-gold">mail</span>
+            <a href="mailto:fbtransportespa@gmail.com" class="hover:text-fb-goldLight transition-colors">fbtransportespa@gmail.com</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Redes Sociales Cuadradas con Acento Dorado -->
+      <div class="flex items-center gap-2 pt-4 border-t border-white/10">
+        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-fb-navyDark hover:bg-fb-gold text-white flex items-center justify-center rounded shadow transition-colors border border-fb-gold/30" title="Instagram">
+          <span class="material-symbols-outlined text-[20px]">photo_camera</span>
+        </a>
+        <a href="https://wa.me/56926108718" target="_blank" rel="noopener noreferrer" class="w-10 h-10 bg-fb-navyDark hover:bg-emerald-600 text-white flex items-center justify-center rounded shadow transition-colors border border-fb-gold/30" title="WhatsApp">
+          <span class="material-symbols-outlined text-[20px]">chat</span>
+        </a>
+        <a href="mailto:fbtransportespa@gmail.com" class="w-10 h-10 bg-fb-navyDark hover:bg-fb-gold text-white flex items-center justify-center rounded shadow transition-colors border border-fb-gold/30" title="Correo">
+          <span class="material-symbols-outlined text-[20px]">mail</span>
+        </a>
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- ==========================================
+       9. FORMULARIO DE COTIZACIÓN RÁPIDA (LEAD GEN B2B) & TRACKING
+       ========================================== -->
+  <section id="cotizacion" class="relative w-full bg-[#F8F9FA] py-16 lg:py-24 border-t border-slate-200 overflow-hidden">
+    <!-- WebGL GlassFold Shader: Fondo Animado Exclusivo en Sección Blanca (z-0 y detrás de todo) -->
+    <canvas id="canvas-glass-cotizacion" class="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-20" style="position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0;"></canvas>
+    
+    <!-- Contenedor Superior en z-10: 100% Legibilidad y Contraste -->
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <span class="font-heading font-bold text-xs uppercase tracking-widest text-fb-goldText">Cotización Inmediata B2B</span>
+        <h2 class="font-heading font-black text-3xl sm:text-4xl text-[#071D3A] tracking-wide mt-1">
+          SOLICITA TU PRESUPUESTO EN MENOS DE 2 HORAS
+        </h2>
+        <p class="font-armstrong text-slate-600 text-xs sm:text-sm mt-2 font-normal">
+          Completa los datos de tu carga y recibe una propuesta formal ajustada al cubicaje, ruta y requerimientos específicos de tu empresa.
+        </p>
+      </div>
+
+      <div class="bg-white p-6 sm:p-10 shadow-xl border-t-4 border-fb-gold rounded-sm relative z-10">
+        <form id="quote-form" onsubmit="event.preventDefault(); submitQuote();" class="space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block font-heading font-bold text-xs uppercase text-fb-navy mb-1">Nombre Completo / Razón Social *</label>
+              <input type="text" id="contact-name" required placeholder="Ej: Distribuidora Central SpA" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 text-sm focus:border-fb-gold focus:bg-white focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-heading font-bold text-xs uppercase text-fb-navy mb-1">RUT Empresa (Opcional)</label>
+              <input type="text" id="contact-rut" placeholder="Ej: 76.890.123-K" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 text-sm focus:border-fb-gold focus:bg-white focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block font-heading font-bold text-xs uppercase text-fb-navy mb-1">Correo Electrónico Corporativo *</label>
+              <input type="email" id="contact-email" required placeholder="contacto@empresa.cl" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 text-sm focus:border-fb-gold focus:bg-white focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-heading font-bold text-xs uppercase text-fb-navy mb-1">Teléfono / WhatsApp *</label>
+              <input type="tel" id="contact-phone" required placeholder="+56 9 2610 8718" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 text-sm focus:border-fb-gold focus:bg-white focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block font-heading font-bold text-xs uppercase text-fb-navy mb-1">Ciudad / Comuna de Origen *</label>
+              <input type="text" id="origin-city" required placeholder="Ej: Santiago (CD Pudahuel)" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 text-sm focus:border-fb-gold focus:bg-white focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-heading font-bold text-xs uppercase text-fb-navy mb-1">Ciudad / Comuna de Destino *</label>
+              <input type="text" id="destination-city" required placeholder="Ej: Concepción / Faena Minera" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 text-sm focus:border-fb-gold focus:bg-white focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <label class="block font-heading font-bold text-xs uppercase text-fb-navy mb-1">Tipo de Servicio *</label>
+              <select id="service-type" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 text-sm focus:border-fb-gold focus:bg-white focus:outline-none">
+                <option value="FTL">Carga Completa (FTL - Camión Exclusivo)</option>
+                <option value="LTL">Carga Consolidada (LTL - Por Pallet)</option>
+                <option value="Refrigerada">Transporte Refrigerado / Cadena de Frío</option>
+                <option value="Sobredimensionada">Carga Sobredimensionada y Maquinaria</option>
+                <option value="Distribucion">Almacenaje y Distribución 3PL</option>
+                <option value="Express">Servicio Dedicado Express</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-heading font-bold text-xs uppercase text-fb-navy mb-1">Peso o Volumen Estimado *</label>
+              <input type="text" id="cargo-specs" required placeholder="Ej: 8 Pallets / 5.000 kg / 25 m³" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 text-sm focus:border-fb-gold focus:bg-white focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-heading font-bold text-xs uppercase text-fb-navy mb-1">Requerimientos Especiales (Ventana horaria, rampa, escolta)</label>
+            <textarea id="special-requirements" rows="3" placeholder="Indica si requieres grúa horquilla, entrega con cita en retail o seguros ampliados..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 text-sm focus:border-fb-gold focus:bg-white focus:outline-none"></textarea>
+          </div>
+
+          <button type="submit" class="w-full py-4 bg-fb-navy hover:bg-fb-gold text-white font-heading font-bold text-sm sm:text-base uppercase tracking-widest shadow-lg transition-all flex items-center justify-center gap-2 rounded-sm">
+            <span class="material-symbols-outlined text-[20px] text-fb-goldLight">send</span>
+            <span>RECIBIR PRESUPUESTO EN MENOS DE 2 HORAS</span>
+          </button>
+
+          <!-- Banner de éxito dinámico -->
+          <div id="quote-success" class="hidden p-4 rounded bg-emerald-50 border border-emerald-200 text-emerald-800 text-center font-bold text-sm">
+          </div>
+        </form>
+        </div>
+      </div>
+
+      <!-- WIDGET RASTREO SATELITAL RÁPIDO EN AZUL MARINO (EN CAPA z-10) -->
+      <div id="tracking-box" class="relative z-10 mt-8 bg-fb-navy text-white p-6 sm:p-8 rounded-lg shadow-xl border-2 border-fb-gold/50 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-fb-gold text-[32px]">satellite_alt</span>
+            <div>
+              <h4 class="font-heading font-bold text-base uppercase text-white">RASTREAR ORDEN DE TRANSPORTE (OT)</h4>
+              <p class="text-slate-300 text-xs">Monitoreo satelital GPS en tiempo real de tu carga en ruta</p>
+            </div>
+          </div>
+        </div>
+        <div class="w-full md:w-auto">
+          <form onsubmit="event.preventDefault(); simulateTracking();" class="flex w-full md:w-auto gap-2">
+            <input type="text" id="tracking-code" value="FB-2025-9842" placeholder="Ej: FB-2025-9842" class="px-3 py-2 bg-fb-navyDark border border-fb-gold/40 text-white text-xs font-mono uppercase focus:outline-none focus:border-fb-gold">
+            <button type="submit" class="px-5 py-2 bg-fb-gold hover:bg-fb-goldLight text-white font-heading font-bold text-xs uppercase tracking-wider transition-colors whitespace-nowrap rounded-sm">
+              CONSULTAR
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div id="tracking-result" class="hidden mt-4 p-4 rounded bg-fb-navyDark text-white border border-fb-gold/30 text-xs">
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==========================================
+       10. FOOTER BOTTOM BAR EN AZUL MARINO OSCURO (#041224)
+       ========================================== -->
+  <footer class="w-full bg-fb-navyDark text-slate-400 py-6 border-t border-fb-gold/20 font-heading text-xs tracking-wider">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+      <div>
+        © 2026 FUENTEALBA BASTIDA TRANSPORTES Y LOGÍSTICA SpA. TODOS LOS DERECHOS RESERVADOS.
+      </div>
+      <div class="flex items-center gap-5 text-slate-300">
+        <a href="#inicio" class="hover:text-fb-goldLight">INICIO</a>
+        <a href="#servicios" class="hover:text-fb-goldLight">SERVICIOS</a>
+        <a href="#contacto" class="hover:text-fb-goldLight">CONTACTO</a>
+        <a href="#cotizacion" class="hover:text-fb-goldLight">COTIZAR</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- BOTÓN FLOTANTE WHATSAPP -->
+  <a href="https://wa.me/56926108718?text=Hola%2C%20necesito%20cotizar%20un%20servicio%20de%20transporte%20de%20carga%20con%20Fuentealba%20Bastida" target="_blank" rel="noopener noreferrer" class="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-2xl transition-all duration-300 hover:scale-110" title="Contactar a Central WhatsApp">
+    <span class="material-symbols-outlined text-[30px]">chat</span>
+    <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-fb-gold border-2 border-white flex items-center justify-center text-[9px] font-black text-white">1</span>
+  </a>
+
+  <!-- SCRIPTS Y LÓGICA DE INTERACCIÓN -->
+  <script>
+    function toggleMobileMenu() {
+      const m = document.getElementById('mobile-menu');
+      if (m) m.classList.toggle('hidden');
+    }
+
+    function prevSlide() {
+      const hero = document.getElementById('inicio');
+      hero.style.opacity = '0.85';
+      setTimeout(() => { hero.style.opacity = '1'; }, 200);
+    }
+
+    function nextSlide() {
+      prevSlide();
+    }
+
+    function simulateTracking() {
+      const codeInput = document.getElementById('tracking-code');
+      const code = (codeInput && codeInput.value.trim()) || 'FB-2025-9842';
+      const resultBox = document.getElementById('tracking-result');
+      if (resultBox) {
+        resultBox.innerHTML = `
+          <div class="flex items-center justify-between border-b border-white/10 pb-2">
+            <span class="font-heading text-sm text-fb-goldGlow font-bold uppercase flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px] animate-pulse">local_shipping</span> Guía ${code} • En Tránsito Seguro
+            </span>
+            <span class="text-slate-300 font-heading text-xs">ETA Estimado: Hoy 18:30 hrs</span>
+          </div>
+          <p class="font-bold text-white text-sm pt-2">Ruta 5 Sur - KM 240 (Región del Maule)</p>
+          <div class="w-full bg-fb-navy h-2 rounded overflow-hidden mt-1.5 border border-fb-gold/20">
+            <div class="bg-fb-gold h-full w-3/4 rounded transition-all duration-1000"></div>
+          </div>
+          <div class="flex justify-between text-slate-400 text-xs pt-1.5 font-heading">
+            <span>Santiago CD (Salida 08:30)</span>
+            <span>Concepción CD (Destino 18:30)</span>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-white/10 text-slate-300 text-xs">
+            <span>Conductor Asignado: <strong class="text-white">M. Bastida (A5 Certificado)</strong></span>
+            <span>Temp. Frío: <strong class="text-fb-goldLight">-18.2°C (Estable)</strong></span>
+          </div>
+        `;
+        resultBox.classList.remove('hidden');
+        resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    function submitQuote() {
+      const name = document.getElementById('contact-name').value;
+      const rut = document.getElementById('contact-rut').value || 'No informado';
+      const email = document.getElementById('contact-email').value;
+      const phone = document.getElementById('contact-phone').value;
+      const origin = document.getElementById('origin-city').value;
+      const dest = document.getElementById('destination-city').value;
+      const service = document.getElementById('service-type').value;
+      const cargo = document.getElementById('cargo-specs').value;
+      const reqs = document.getElementById('special-requirements').value || 'Sin notas';
+
+      const waText = encodeURIComponent(
+        `*SOLICITUD DE COTIZACIÓN - FUENTEALBA BASTIDA*\n\n` +
+        `👤 *Contacto:* ${name}\n` +
+        `🏢 *RUT:* ${rut}\n` +
+        `📧 *Correo:* ${email}\n` +
+        `📞 *Teléfono:* ${phone}\n` +
+        `📍 *Ruta:* ${origin} ➔ ${dest}\n` +
+        `📦 *Servicio:* ${service}\n` +
+        `⚖️ *Carga:* ${cargo}\n` +
+        `📝 *Detalles:* ${reqs}`
+      );
+
+      const waLink = `https://wa.me/56926108718?text=${waText}`;
+
+      const successBox = document.getElementById('quote-success');
+      if (successBox) {
+        successBox.innerHTML = `
+          <div class="flex flex-col gap-2">
+            <div class="text-emerald-700 font-heading font-bold text-base">
+              ¡SOLICITUD RECIBIDA CON ÉXITO!
+            </div>
+            <p class="text-xs text-slate-600 font-normal">Un coordinador comercial te contactará en menos de 2 horas hábiles.</p>
+            <div class="pt-2">
+              <a href="${waLink}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-bold text-xs uppercase tracking-wider rounded shadow transition-all">
+                <span class="material-symbols-outlined text-[16px]">chat</span>
+                <span>Acelerar Atención vía WhatsApp Directo</span>
+              </a>
+            </div>
+          </div>
+        `;
+        successBox.classList.remove('hidden');
+        successBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  </script>
+
+  <!-- WebGL GlassFold Shader Engine (Three Colors, Zero Dependencies) -->
+  <script>
+    (function() {
+      const VERTEX_SHADER = `
+        attribute vec2 position;
+        varying vec2 vUv;
+        void main() {
+          vUv = position * 0.5 + 0.5;
+          gl_Position = vec4(position, 0.0, 1.0);
+        }
+      `;
+
+      const FRAGMENT_SHADER = `
+        precision highp float;
+        uniform float u_time;
+        uniform vec3 u_color1;
+        uniform vec3 u_color2;
+        uniform vec3 u_color3;
+        uniform float u_scale;
+        uniform float u_noise;
+        uniform vec2 u_resolution;
+        varying vec2 vUv;
+
+        float grain(vec2 st) {
+          return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453);
+        }
+
+        vec2 centered(vec2 uv) {
+          vec2 p = uv - 0.5;
+          p.x *= u_resolution.x / max(u_resolution.y, 1.0);
+          return p;
+        }
+
+        mat2 rot(float a) {
+          float s = sin(a);
+          float c = cos(a);
+          return mat2(c, -s, s, c);
+        }
+
+        vec3 shade(vec2 uv, float time) {
+          vec2 q = rot(0.6) * centered(uv) * 2.0 * u_scale;
+          float t = time * 0.6;
+          float pixel = 2.0 * u_scale / max(u_resolution.y, 1.0);
+
+          vec3 color = mix(u_color2, u_color2 * 0.45, clamp(length(centered(uv)) * 1.3, 0.0, 1.0));
+
+          for (int i = 0; i < 6; i++) {
+            float fi = float(i);
+            float bend = mod(fi, 2.0) * 2.0 - 1.0;
+
+            float crease = (fi - 2.5) * 0.4
+                         + 0.26 * sin(q.x * (1.05 + 0.12 * fi) + fi * 1.9 + t * (0.25 + 0.05 * fi))
+                         + 0.1 * bend * q.x * q.x;
+            float s = q.y - crease;
+            float pane = smoothstep(-pixel, pixel, s);
+            float back = max(s, 0.0);
+
+            float body = exp(-back * 1.7);
+            float fresnel = exp(-back * 8.0);
+            float rim = exp(-back * 80.0);
+            float inner = exp(-pow((back - 0.045) / 0.014, 2.0));
+            float bloom = exp(-abs(s) * 20.0);
+
+            vec3 tint = mix(u_color1, u_color3, clamp(fresnel * 0.6 + 0.08 + 0.14 * sin(fi * 2.1 + q.x * 0.8 + t * 0.2), 0.0, 1.0));
+            vec3 light = tint * pane * (body * 0.42 + fresnel * 0.4)
+                       + u_color3 * (pane * (rim * 0.6 + inner * 0.12) + bloom * 0.1);
+
+            color += light * (1.0 - color);
+          }
+
+          return clamp(color, 0.0, 1.0);
+        }
+
+        void main() {
+          vec3 color = shade(vUv, u_time);
+          if (u_noise > 0.001) {
+            float g = grain(vUv * 200.0 + u_time * 0.1);
+            color *= 1.0 - u_noise * 0.4 + u_noise * g * 0.4;
+          }
+          gl_FragColor = vec4(color, 1.0);
+        }
+      `;
+
+      function hexToVec3(hex) {
+        const h = hex.replace("#", "");
+        const full = h.length === 3 ? h.split("").map(c => c + c).join("") : h;
+        const n = parseInt(full, 16);
+        return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+      }
+
+      function compileShader(gl, type, source) {
+        const s = gl.createShader(type);
+        gl.shaderSource(s, source);
+        gl.compileShader(s);
+        return s;
+      }
+
+      function initGlassFoldCanvas(canvasId, config) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const gl = canvas.getContext("webgl", { antialias: false, alpha: false });
+        if (!gl) return;
+
+        const program = gl.createProgram();
+        gl.attachShader(program, compileShader(gl, gl.VERTEX_SHADER, VERTEX_SHADER));
+        gl.attachShader(program, compileShader(gl, gl.FRAGMENT_SHADER, FRAGMENT_SHADER));
+        gl.linkProgram(program);
+        gl.useProgram(program);
+
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+          gl.STATIC_DRAW
+        );
+        const position = gl.getAttribLocation(program, "position");
+        gl.enableVertexAttribArray(position);
+        gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+        const u = {
+          time: gl.getUniformLocation(program, "u_time"),
+          color1: gl.getUniformLocation(program, "u_color1"),
+          color2: gl.getUniformLocation(program, "u_color2"),
+          color3: gl.getUniformLocation(program, "u_color3"),
+          scale: gl.getUniformLocation(program, "u_scale"),
+          noise: gl.getUniformLocation(program, "u_noise"),
+          resolution: gl.getUniformLocation(program, "u_resolution"),
+        };
+
+        const resize = () => {
+          const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+          const width = Math.max(1, Math.round(canvas.clientWidth * dpr));
+          const height = Math.max(1, Math.round(canvas.clientHeight * dpr));
+          if (canvas.width !== width || canvas.height !== height) {
+            canvas.width = width;
+            canvas.height = height;
+          }
+          gl.viewport(0, 0, width, height);
+        };
+
+        let elapsed = 0;
+        let last = null;
+        let isVisible = false;
+
+        const draw = (now) => {
+          if (!isVisible) return;
+          if (last !== null) elapsed += Math.min((now - last) / 1000, 0.1) * config.speed;
+          last = now;
+
+          resize();
+          gl.uniform1f(u.time, elapsed);
+          gl.uniform3fv(u.color1, hexToVec3(config.color1));
+          gl.uniform3fv(u.color2, hexToVec3(config.color2));
+          gl.uniform3fv(u.color3, hexToVec3(config.color3));
+          gl.uniform1f(u.scale, config.scale);
+          gl.uniform1f(u.noise, config.noise);
+          gl.uniform2f(u.resolution, canvas.width, canvas.height);
+          gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+          requestAnimationFrame(draw);
+        };
+
+        // Pause animation when not in viewport to save 100% GPU / battery
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              if (!isVisible) {
+                isVisible = true;
+                last = performance.now();
+                requestAnimationFrame(draw);
+              }
+            } else {
+              isVisible = false;
+            }
+          });
+        }, { threshold: 0.1 });
+
+        observer.observe(canvas);
+      }
+
+      // Inicialización WebGL GlassFold como fondo en las secciones solicitadas (estrictamente en capa z-0 detrás de los textos)
+      document.addEventListener('DOMContentLoaded', () => {
+        // 1. Apartado: Nuestro Compromiso (Azul marino con reflejos oro)
+        initGlassFoldCanvas('canvas-glass-compromiso', {
+          color1: '#0E284D', // Azul marino medio
+          color2: '#071D3A', // Azul marino corporativo
+          color3: '#C5A059', // Reflejos dorados en los pliegues
+          speed: 0.22,
+          scale: 1.2,
+          noise: 0.04
+        });
+
+        // 2. Apartado: Claves de Nuestro Éxito & Servicios Integrales (Carbón con aristas oro)
+        initGlassFoldCanvas('canvas-glass-claves', {
+          color1: '#122542', // Azul marino carbón
+          color2: '#1F2937', // Fondo carbón oficial
+          color3: '#C5A059', // Aristas doradas luminosas
+          speed: 0.20,
+          scale: 1.2,
+          noise: 0.04
+        });
+
+        // 3. Apartado Blanco: Sección de Servicios (Quiénes Somos / Por Qué Elegirnos / Qué Hacemos)
+        initGlassFoldCanvas('canvas-glass-servicios', {
+          color1: '#071D3A', // Azul marino corporativo
+          color2: '#0E284D', // Azul marino intermedio
+          color3: '#C5A059', // Reflejos dorados en las aristas de cristal
+          speed: 0.20,
+          scale: 1.1,
+          noise: 0.04
+        });
+
+        // 4. Apartado Blanco: Sección de Cotización Rápida B2B
+        initGlassFoldCanvas('canvas-glass-cotizacion', {
+          color1: '#071D3A', // Azul marino corporativo
+          color2: '#0A1E3C', // Azul marino noche
+          color3: '#8E7037', // Acento bronce / dorado oficial
+          speed: 0.18,
+          scale: 1.0,
+          noise: 0.04
+        });
+      });
+    })();
+  </script>
+</body>
+
+</html>

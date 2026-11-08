@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <title>PideTirúa — Video de Presentación Oficial</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      @font-face {
+        font-family: 'Bebas Neue';
+        src: local('Bebas Neue'), local('BebasNeue-Regular');
+      }
+      @font-face {
+        font-family: 'Montserrat';
+        src: local('Montserrat'), local('Montserrat-Regular');
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0d0f12;
+        color: #1c1917;
+        font-family: "Montserrat", system-ui, sans-serif;
+        overflow: hidden;
+      }
+      #root {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #faf8f5;
+      }
+      .font-display {
+        font-family: "Bebas Neue", system-ui, sans-serif;
+        letter-spacing: 0.05em;
+      }
+      .clip {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      /* Estilos Comunes */
+      .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 9999px;
+        font-size: 18px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .caption-bar {
+        position: absolute;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        max-width: 1300px;
+        width: 90%;
+        padding: 18px 40px;
+        border-radius: 9999px;
+        background: rgba(18, 20, 24, 0.92);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+        color: #ffffff;
+        text-align: center;
+        font-size: 26px;
+        font-weight: 700;
+        backdrop-filter: blur(14px);
+        z-index: 50;
+      }
+
+      /* Escena 1: Costa de Tirúa */
+      #scene-1 {
+        background: #000;
+      }
+      .s1-bg-img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .s1-overlay {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.8) 100%);
+      }
+      .s1-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #fff;
+        padding: 0 40px;
+      }
+      .s1-title {
+        font-size: 110px;
+        margin: 16px 0 0 0;
+        line-height: 0.95;
+        text-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      }
+
+      /* Escena 2: Cartas Digitales / Teléfono */
+      #scene-2 {
+        background: #faf8f5;
+      }
+      .s2-grid {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        align-items: center;
+        padding: 60px 100px;
+        gap: 60px;
+      }
+      .phone-shell {
+        position: relative;
+        width: 380px;
+        height: 740px;
+        background: #18181b;
+        border-radius: 54px;
+        padding: 14px;
+        box-shadow: 0 35px 80px rgba(0, 0, 0, 0.25), 0 0 0 4px rgba(255, 255, 255, 0.1);
+        margin: 0 auto;
+      }
+      .phone-screen {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background: #faf8f5;
+        border-radius: 42px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      .phone-notch {
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 110px;
+        height: 24px;
+        background: #18181b;
+        border-radius: 20px;
+        z-index: 30;
+      }
+      .phone-header {
+        height: 180px;
+        background: url('assets/dish1.jpg') center/cover no-repeat;
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        padding: 16px;
+      }
+      .phone-header::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+      }
+      .phone-header-info {
+        position: relative;
+        z-index: 10;
+        color: white;
+      }
+      .dish-item {
+        display: flex;
+        gap: 12px;
+        padding: 12px;
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e7e5e4;
+        margin: 10px 14px 0 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      }
+      .dish-img {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+        object-fit: cover;
+      }
+
+      /* Escena 3: WhatsApp */
+      #scene-3 {
+        background: #f4f4f5;
+      }
+      .s3-grid {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        padding: 60px 100px;
+        gap: 60px;
+      }
+      .wa-card {
+        background: #efeae2;
+        border-radius: 28px;
+        padding: 30px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.12);
+        border: 1px solid #d4d4d8;
+        position: relative;
+      }
+      .wa-bubble {
+        background: #dcf8c6;
+        padding: 22px 26px;
+        border-radius: 22px 22px 4px 22px;
+        color: #111b21;
+        font-size: 20px;
+        line-height: 1.5;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.07);
+      }
+
+      /* Escena 4: Retiro y Mesa */
+      #scene-4 {
+        background: #faf8f5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 100px;
+      }
+      .s4-cards {
+        display: flex;
+        gap: 40px;
+        margin-top: 40px;
+        width: 100%;
+        max-width: 1200px;
+        justify-content: center;
+      }
+      .mod-card {
+        flex: 1;
+        background: white;
+        border-radius: 32px;
+        border: 2px solid #e7e5e4;
+        padding: 40px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.06);
+        text-align: center;
+      }
+
+      /* Escena 5: Logo y Cierre */
+      #scene-5 {
+        background: #121316;
+        color: white;
+      }
+      .s5-center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .logo-ring {
+        width: 190px;
+        height: 190px;
+        border-radius: 50%;
+        border: 4px solid #ea580c;
+        padding: 8px;
+        box-shadow: 0 0 70px rgba(234, 88, 12, 0.5);
+        background: white;
+      }
+      .logo-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 50%;
+      }
+      .cta-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: #ea580c;
+        color: white;
+        padding: 18px 48px;
+        border-radius: 9999px;
+        font-size: 28px;
+        font-weight: 800;
+        margin-top: 30px;
+        box-shadow: 0 10px 30px rgba(234, 88, 12, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-root="true"
+      data-composition-id="main"
+      data-width="1920"
+      data-height="1080"
+      data-duration="40"
+    >
+      <!-- Audio Elements inside composition root -->
+      <audio
+        id="bgm"
+        src="assets/music/bgm.mp3"
+        data-start="0"
+        data-duration="40"
+        data-track-index="1"
+        data-volume="0.75"
+      ></audio>
+      <audio
+        id="sfx-switch"
+        src="assets/sfx/switch.ogg"
+        data-start="6.2"
+        data-duration="0.31"
+        data-track-index="2"
+        data-volume="0.7"
+      ></audio>
+      <audio
+        id="sfx-click"
+        src="assets/sfx/click.ogg"
+        data-start="16.5"
+        data-duration="0.09"
+        data-track-index="2"
+        data-volume="0.7"
+      ></audio>
+      <audio
+        id="sfx-bell"
+        src="assets/sfx/bell.ogg"
+        data-start="32.5"
+        data-duration="1.48"
+        data-track-index="2"
+        data-volume="0.85"
+      ></audio>
+
+      <!-- Subtítulo / Voz en Off Flotante Dinámico -->
+      <div id="voice-caption" class="caption-bar">
+        <span id="caption-text">¿Con ganas de algo rico para retirar al paso o disfrutar en mesa?</span>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- ESCENA 1 (00:00 - 00:06): Sabores de nuestra tierra -->
+      <!-- ========================================== -->
+      <video
+        id="s1-bg-video"
+        class="clip s1-bg-img"
+        src="assets/video-bg-intro.mp4"
+        data-start="0"
+        data-duration="6"
+        data-track-index="3"
+        muted
+        playsinline
+      ></video>
+      <section
+        id="scene-1"
+        class="clip"
+        data-start="0"
+        data-duration="6"
+        data-track-index="4"
+        style="background: transparent;"
+      >
+        <div class="s1-overlay"></div>
+        <div class="s1-content">
+          <div id="s1-badge" class="badge-pill" style="background: rgba(234, 88, 12, 0.95); color: white;">
+            <span>🇨🇱 Costa de Tirúa &amp; Quidico</span>
+          </div>
+          <h1 id="s1-title" class="font-display s1-title">
+            SABORES DE NUESTRA TIERRA
+          </h1>
+          <p id="s1-sub" style="font-size: 30px; font-weight: 600; opacity: 0.95; margin-top: 14px; max-width: 850px;">
+            La mejor gastronomía local en un solo lugar
+          </p>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- ESCENA 2 (00:06 - 00:15): Cartas digitales actualizadas -->
+      <!-- ========================================== -->
+      <section
+        id="scene-2"
+        class="clip"
+        data-start="6"
+        data-duration="9"
+        data-track-index="5"
+      >
+        <div class="s2-grid">
+          <!-- Columna Izquierda: Información Editorial -->
+          <div id="s2-left" style="display: flex; flex-direction: column; align-items: flex-start;">
+            <div class="badge-pill" style="background: #c2410c; color: white;">
+              <span>📱 Vitrina Gastronómica Oficial</span>
+            </div>
+            <h2 class="font-display" style="font-size: 82px; margin: 20px 0 10px 0; line-height: 0.95; color: #18181b;">
+              CARTAS DIGITALES ACTUALIZADAS
+            </h2>
+            <p style="font-size: 24px; color: #44403c; line-height: 1.45; margin: 10px 0 25px 0;">
+              Explora menús completos en alta definición, con fotos reales, precios del día y stock en vivo.
+            </p>
+            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+              <span class="badge-pill" style="background: #f5f5f4; border: 1px solid #a8a29e; color: #1c1917;">
+                🟢 Stock en Tiempo Real
+              </span>
+              <span class="badge-pill" style="background: #f5f5f4; border: 1px solid #a8a29e; color: #1c1917;">
+                ⚡ Sin Descargar Apps
+              </span>
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Mockup de Teléfono -->
+          <div id="s2-phone-box" style="display: flex; justify-content: center;" data-layout-ignore="true">
+            <div id="s2-phone" class="phone-shell">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                <div class="phone-header" style="background: url('assets/banner-gastronomia.jpg') center/cover no-repeat;">
+                  <div class="phone-header-info">
+                    <span style="font-size: 11px; font-weight: 800; background: #ea580c; padding: 2px 8px; border-radius: 99px;">
+                      VITRINA DIGITAL
+                    </span>
+                    <h3 class="font-display" style="margin: 4px 0 0 0; font-size: 26px;">
+                      GASTRONOMÍA DE TIRÚA
+                    </h3>
+                  </div>
+                </div>
+                <div style="padding: 10px 14px 4px 14px;">
+                  <span style="font-size: 13px; font-weight: 800; text-transform: uppercase; color: #ea580c;">
+                    Platos Destacados
+                  </span>
+                </div>
+                <div id="dish-list" style="display: flex; flex-direction: column;">
+                  <!-- Plato 1: Empanada -->
+                  <div class="dish-item">
+                    <img src="assets/dish-empanada.jpg" alt="Empanada de Horno" class="dish-img" />
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-weight: 800; font-size: 14px; color: #1c1917;">Empanada de Horno</div>
+                      <div style="font-size: 11px; color: #78716c; margin: 2px 0;">Receta tradicional de campo</div>
+                      <div style="font-weight: 900; font-size: 15px; color: #ea580c;">$3.500</div>
+                    </div>
+                  </div>
+                  <!-- Plato 2: Paila Marina -->
+                  <div class="dish-item">
+                    <img src="assets/dish-paila.jpg" alt="Paila Marina Especial" class="dish-img" />
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-weight: 800; font-size: 14px; color: #1c1917;">Paila Marina Especial</div>
+                      <div style="font-size: 11px; color: #78716c; margin: 2px 0;">Mariscos frescos de la costa</div>
+                      <div style="font-weight: 900; font-size: 15px; color: #ea580c;">$8.900</div>
+                    </div>
+                  </div>
+                  <!-- Plato 3: Sushi Roll -->
+                  <div class="dish-item">
+                    <img src="assets/dish-sushi.jpg" alt="Tabla Sushi Roll" class="dish-img" />
+                    <div style="flex: 1; min-width: 0;">
+                      <div style="font-weight: 800; font-size: 14px; color: #1c1917;">Tabla Sushi Roll</div>
+                      <div style="font-size: 11px; color: #78716c; margin: 2px 0;">Rolls tempura crocantes</div>
+                      <div style="font-weight: 900; font-size: 15px; color: #ea580c;">$9.500</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- ESCENA 3 (00:15 - 00:24): Pedido directo por WhatsApp -->
+      <!-- ========================================== -->
+      <section
+        id="scene-3"
+        class="clip"
+        data-start="15"
+        data-duration="9"
+        data-track-index="5"
+      >
+        <div class="s3-grid">
+          <!-- Columna Izquierda: Tarjeta de Resumen -->
+          <div id="s3-left">
+            <div class="badge-pill" style="background: #15803d; color: white;">
+              <span>💬 Conexión Directa a Cocina</span>
+            </div>
+            <h2 class="font-display" style="font-size: 82px; margin: 20px 0 10px 0; line-height: 0.95; color: #18181b;">
+              PEDIDO DIRECTO POR WHATSAPP
+            </h2>
+            <p style="font-size: 24px; color: #44403c; line-height: 1.45; margin: 10px 0 25px 0;">
+              Sin comisiones extra, sin cobros sorpresa y sin intermediarios. Tu comanda llega limpia directo al WhatsApp del cocinero.
+            </p>
+            <div class="badge-pill" style="background: #18181b; color: #f8dc4b; font-size: 18px; padding: 12px 28px;">
+              ⚡ 0% COMISIÓN • TRATO DIRECTO
+            </div>
+          </div>
+
+          <!-- Columna Derecha: Tarjeta Estilo WhatsApp Chat -->
+          <div id="s3-right" style="display: flex; justify-content: center;" data-layout-ignore="true">
+            <div class="wa-card" style="width: 520px;">
+              <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 20px; border-bottom: 1px solid #d4d4d8; padding-bottom: 14px;">
+                <div style="width: 48px; height: 48px; border-radius: 50%; background: #15803d; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; font-weight: 800;">
+                  W
+                </div>
+                <div>
+                  <div style="font-weight: 800; font-size: 18px; color: #111b21;">WhatsApp Cocina • Tirúa</div>
+                  <div style="font-size: 13px; color: #15803d; font-weight: 700;">En línea para recibir pedidos</div>
+                </div>
+              </div>
+              <div class="wa-bubble">
+                <div style="font-weight: 800; margin-bottom: 8px;">👋 ¡Hola! Nuevo pedido desde PideTirúa:</div>
+                <div style="margin-bottom: 4px;">• 1x Paila Marina Especial — $8.900</div>
+                <div style="margin-bottom: 4px;">• 1x Empanada de Horno — $3.500</div>
+                <div style="border-top: 1px dashed #8696a0; margin: 10px 0; padding-top: 8px; font-weight: 800; color: #047857;">
+                  Total comanda: $12.400
+                </div>
+                <div style="font-size: 13px; color: #475569;">Modalidad: Retiro en Local • Cliente: Matías</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- ESCENA 4 (00:24 - 00:32): Sin filas • Retiro o en mesa -->
+      <!-- ========================================== -->
+      <section
+        id="scene-4"
+        class="clip"
+        data-start="24"
+        data-duration="8"
+        data-track-index="6"
+      >
+        <div class="badge-pill" style="background: #c2410c; color: white;">
+          <span>⏱️ Máxima Rapidez y Flexibilidad</span>
+        </div>
+        <h2 class="font-display" style="font-size: 86px; margin: 20px 0 0 0; color: #18181b; text-align: center;">
+          SIN FILAS • RETIRO O EN MESA
+        </h2>
+        <div class="s4-cards">
+          <!-- Tarjeta 1: Retiro -->
+          <div id="s4-card-1" class="mod-card">
+            <div style="font-size: 54px; margin-bottom: 12px;">🏪</div>
+            <h3 class="font-display" style="font-size: 40px; margin: 0 0 8px 0; color: #ea580c;">
+              RETIRO AL PASO
+            </h3>
+            <p style="font-size: 18px; color: #57534e; margin: 0 0 20px 0;">
+              Pide desde tu casa o camino al local y retira tu comida caliente en mostrador sin filas.
+            </p>
+            <div style="display: inline-block; background: #ffedd5; color: #9a3412; font-weight: 800; font-size: 15px; padding: 8px 20px; border-radius: 99px;">
+              🔥 Comanda #TR-408 lista
+            </div>
+          </div>
+
+          <!-- Tarjeta 2: En mesa -->
+          <div id="s4-card-2" class="mod-card">
+            <div style="font-size: 54px; margin-bottom: 12px;">🍽️</div>
+            <h3 class="font-display" style="font-size: 40px; margin: 0 0 8px 0; color: #18181b;">
+              CONSUMO EN MESA
+            </h3>
+            <p style="font-size: 18px; color: #57534e; margin: 0 0 20px 0;">
+              Pide directo a tu mesa sin levantarte ni hacer filas y disfruta de una atención ágil.
+            </p>
+            <div style="display: inline-block; background: #e0f2fe; color: #0369a1; font-weight: 800; font-size: 15px; padding: 8px 20px; border-radius: 99px;">
+              🍽️ Servicio Directo a Mesa
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- ESCENA 5 (00:32 - 00:40): Logo Oficial y Llamado Web -->
+      <!-- ========================================== -->
+      <section
+        id="scene-5"
+        class="clip"
+        data-start="32"
+        data-duration="8"
+        data-track-index="7"
+      >
+        <div class="s5-center">
+          <div id="s5-logo" class="logo-ring">
+            <img src="assets/logo-pidetirua.jpg" alt="Logo Oficial PideTirúa" class="logo-img" />
+          </div>
+          <h2 id="s5-title" class="font-display" style="font-size: 96px; margin: 26px 0 6px 0; color: #ffffff; letter-spacing: 0.06em;">
+            PIDE • DISFRUTA • APOYA LOCAL
+          </h2>
+          <p id="s5-sub" style="font-size: 24px; color: #a1a1aa; max-width: 800px; margin: 0 0 10px 0;">
+            La vitrina gastronómica oficial de Tirúa y Quidico
+          </p>
+          <div id="s5-cta" class="cta-button">
+            <span>👉 pide-tirua.vercel.app</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Timeline Animation Script -->
+    <script>
+      const tl = gsap.timeline({ paused: true });
+
+      // Cambios de subtítulos / locución sincronizados a los tiempos
+      tl.call(() => {
+        const el = document.getElementById("caption-text");
+        if (el) el.textContent = "¿Con ganas de algo rico para retirar al paso o disfrutar en mesa?";
+      }, null, 0.0);
+
+      tl.call(() => {
+        const el = document.getElementById("caption-text");
+        if (el) el.textContent = "Llegó PideTirúa: la vitrina digital donde encuentras la mejor gastronomía local en un solo lugar.";
+      }, null, 6.0);
+
+      tl.call(() => {
+        const el = document.getElementById("caption-text");
+        if (el) el.textContent = "Elige tus platos favoritos y pide directo a la cocina por WhatsApp, sin comisiones extra ni intermediarios.";
+      }, null, 15.0);
+
+      tl.call(() => {
+        const el = document.getElementById("caption-text");
+        if (el) el.textContent = "Coordina tu retiro sin filas o pide directo a tu mesa de forma rápida y sencilla.";
+      }, null, 24.0);
+
+      tl.call(() => {
+        const el = document.getElementById("caption-text");
+        if (el) el.textContent = "PideTirúa: pide, disfruta y apoya el comercio local. Ingresa ya a pide-tirua.vercel.app.";
+      }, null, 32.0);
+
+      // --- ESCENA 1 ANIMATIONS (0 - 6s) ---
+      tl.fromTo("#s1-badge", { y: -30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: "power3.out" }, 0.4);
+      tl.fromTo("#s1-title", { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 0.6);
+      tl.fromTo("#s1-sub", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 0.9);
+
+      // --- ESCENA 2 ANIMATIONS (6 - 15s) ---
+      tl.fromTo("#s2-left", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 6.2);
+      tl.fromTo("#s2-phone-box", { y: 60, opacity: 0 }, { y: 0, opacity: 1, duration: 0.9, ease: "back.out(1.2)" }, 6.4);
+      // Movimiento continuo suave del mockup durante la escena (evita dead stretch)
+      tl.to("#s2-phone", { y: -16, duration: 3.5, ease: "sine.inOut", yoyo: true, repeat: 1 }, 7.5);
+      tl.to("#dish-list", { y: -25, duration: 4.0, ease: "power1.inOut" }, 8.5);
+
+      // --- ESCENA 3 ANIMATIONS (15 - 24s) ---
+      tl.fromTo("#s3-left", { x: -60, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 15.2);
+      tl.fromTo("#s3-right", { scale: 0.92, opacity: 0 }, { scale: 1.0, opacity: 1, duration: 0.8, ease: "back.out(1.3)" }, 15.5);
+      tl.to("#s3-right", { y: -12, duration: 3.5, ease: "sine.inOut", yoyo: true, repeat: 1 }, 17.0);
+
+      // --- ESCENA 4 ANIMATIONS (24 - 32s) ---
+      tl.fromTo("#s4-card-1", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 24.3);
+      tl.fromTo("#s4-card-2", { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 24.6);
+      tl.to("#s4-card-1", { y: -8, duration: 3.0, ease: "sine.inOut", yoyo: true, repeat: 1 }, 25.5);
+      tl.to("#s4-card-2", { y: -12, duration: 3.2, ease: "sine.inOut", yoyo: true, repeat: 1 }, 25.7);
+
+      // --- ESCENA 5 ANIMATIONS (32 - 40s) ---
+      tl.fromTo("#s5-logo", { scale: 0.5, opacity: 0 }, { scale: 1.0, opacity: 1, duration: 0.9, ease: "back.out(1.4)" }, 32.3);
+      tl.fromTo("#s5-title", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 32.6);
+      tl.fromTo("#s5-sub", { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }, 32.9);
+      tl.fromTo("#s5-cta", { scale: 0.85, opacity: 0 }, { scale: 1.0, opacity: 1, duration: 0.8, ease: "back.out(1.2)" }, 33.3);
+      tl.to("#s5-cta", { scale: 1.06, duration: 1.8, ease: "sine.inOut", yoyo: true, repeat: 2 }, 34.5);
+
+      // Registrar la línea de tiempo única de la composición
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = tl;
+    </script>
+  </body>
+</html>

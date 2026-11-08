@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "historyId": "d5ad0dc0-2620-4fee-93e3-58032254190b",
+  "currentRevision": "789be144-9f7d-4c9f-9379-71c28d05bb27",
+  "pendingChanges": false,
+  "files": {
+    "assets/banner-gastronomia.jpg": {
+      "hash": "3a861c8ca38902a44070c98cd735b59748ea486f67c0862f376e0a59e95b038f",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\3a\\3a861c8ca38902a44070c98cd735b59748ea486f67c0862f376e0a59e95b038f"
+    },
+    "assets/bg-mar-tirua.jpg": {
+      "hash": "4dfce38424e4e18713cbe8bcbed4e019bf582c42307ba38f288483f5f9de1c3d",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\4d\\4dfce38424e4e18713cbe8bcbed4e019bf582c42307ba38f288483f5f9de1c3d"
+    },
+    "assets/dish-empanada.jpg": {
+      "hash": "c92c07ed16080b75a80d3ee3d744d2932755ada0103dd8988225d80afc9ccf44",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\c9\\c92c07ed16080b75a80d3ee3d744d2932755ada0103dd8988225d80afc9ccf44"
+    },
+    "assets/dish-paila.jpg": {
+      "hash": "3849340b45bfc225405adef061aa267e3deccf6345d63e228e12ef982e4af423",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\38\\3849340b45bfc225405adef061aa267e3deccf6345d63e228e12ef982e4af423"
+    },
+    "assets/dish-sushi.jpg": {
+      "hash": "4dfdae4157f8a6228d59969e29482b0e27cbf7019cf2818eb8ec215bb0f500a6",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\4d\\4dfdae4157f8a6228d59969e29482b0e27cbf7019cf2818eb8ec215bb0f500a6"
+    },
+    "assets/dish1.jpg": {
+      "hash": "10157a482c0cbb2b209023892164881a1be550fddc2bbcfaf2065123f4dcc7b1",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\10\\10157a482c0cbb2b209023892164881a1be550fddc2bbcfaf2065123f4dcc7b1"
+    },
+    "assets/dish2.jpg": {
+      "hash": "8d3fbf8cbc238f56218eb7297e48828de9e451a13d6cd2424d2463336dc427c0",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\8d\\8d3fbf8cbc238f56218eb7297e48828de9e451a13d6cd2424d2463336dc427c0"
+    },
+    "assets/dish3.jpg": {
+      "hash": "8e60092c818994540752ec08332f485ccd049da08b5d84712caa3f6c922a5a21",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\8e\\8e60092c818994540752ec08332f485ccd049da08b5d84712caa3f6c922a5a21"
+    },
+    "assets/logo-pidetirua.jpg": {
+      "hash": "f5adbc548d059c7caa3257f2c294433a4769a999ddc6ad14e753ed8ab9212462",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\f5\\f5adbc548d059c7caa3257f2c294433a4769a999ddc6ad14e753ed8ab9212462"
+    },
+    "assets/sfx/bell.ogg": {
+      "hash": "94b8bb5f2d43ab65e4bcc32b28562416e9bc2c51d9fd4be1e333660ee52f977f",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\94\\94b8bb5f2d43ab65e4bcc32b28562416e9bc2c51d9fd4be1e333660ee52f977f"
+    },
+    "assets/sfx/click.ogg": {
+      "hash": "59175ac17cd49a68dd736285738441287636112a84a6f7ce0d89921bda5a5360",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\59\\59175ac17cd49a68dd736285738441287636112a84a6f7ce0d89921bda5a5360"
+    },
+    "assets/sfx/switch.ogg": {
+      "hash": "efdd1d1e2904fb2d81259cd96bb80101caceae94be02baa4b5310714a6708b19",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\ef\\efdd1d1e2904fb2d81259cd96bb80101caceae94be02baa4b5310714a6708b19"
+    },
+    "index.html": {
+      "hash": "39e142a4e52ffcf38ae080a274e5c3c4bb807cdd727ff81ec2d88c78901ff483",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\39\\39e142a4e52ffcf38ae080a274e5c3c4bb807cdd727ff81ec2d88c78901ff483"
+    },
+    "assets/music/bgm.mp3": {
+      "hash": "aa56ab1cdcbef6b05566c6a7c114323078580ccf6a740a9e6c6b6c4b40b4389f",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\aa\\aa56ab1cdcbef6b05566c6a7c114323078580ccf6a740a9e6c6b6c4b40b4389f"
+    },
+    "assets/video-bg-intro.mp4": {
+      "hash": "6f33760ffe0e4985ed89f03cc6bd8dcff3eb3468e9ed4703e8b47ae7c73186b4",
+      "content": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\6f\\6f33760ffe0e4985ed89f03cc6bd8dcff3eb3468e9ed4703e8b47ae7c73186b4"
+    }
+  },
+  "revisions": {
+    "789be144-9f7d-4c9f-9379-71c28d05bb27": {
+      "actor": {
+        "kind": "outside",
+        "name": "Outside"
+      },
+      "label": "Changed outside the app",
+      "startedAt": 1793481356432,
+      "endedAt": 1793481356437,
+      "files": {
+        "index.html": {
+          "before": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\1b\\1b4dfb847d5f7950ddcd248e4a467719f139c9538fa3387fc192ebcd2d66058b",
+          "after": "C:\\Users\\Informatico\\.cache\\hyperframes\\history\\d5ad0dc0-2620-4fee-93e3-58032254190b\\blobs\\39\\39e142a4e52ffcf38ae080a274e5c3c4bb807cdd727ff81ec2d88c78901ff483"
+        }
+      }
+    }
+  },
+  "checks": {
+    "latest": {
+      "revision": null,
+      "id": "14ec31ee-5583-4acc-bb3c-eded5ec874b1"
+    },
+    "revisions": {},
+    "unversioned": [
+      {
+        "id": "14ec31ee-5583-4acc-bb3c-eded5ec874b1",
+        "scope": "project",
+        "report": "C:\\Users\\Informatico\\Documents\\antigravity\\joyful-davinci\\brag-output\\composition-reels\\.hyperframes\\artifacts\\checks\\14ec31ee-5583-4acc-bb3c-eded5ec874b1.json",
+        "metadata": {
+          "ok": true,
+          "browserSkipped": false,
+          "options": {
+            "samples": 9,
+            "atTransitions": false,
+            "maxIssues": 80,
+            "collapseStatic": true,
+            "tolerance": 2,
+            "timeout": 10000,
+            "contrast": true,
+            "strict": false,
+            "snapshots": false,
+            "browserGpuMode": "auto"
+          }
+        },
+        "createdAt": 1793480265404,
+        "contentHash": "296891eca9e6ba627df5e2e0cbc626923bb15358ab605eb1e1ce8cb347ef4e7b",
+        "revision": null,
+        "inputFingerprint": "e47554422fb528ace880ff2efe3ad87439a9c5b01df85e7565d33ca9b0867558",
+        "inputScope": "local-project-files",
+        "attribution": "unversioned"
+      }
+    ]
+  },
+  "snapshots": {
+    "latest": null,
+    "revisions": {},
+    "unversioned": []
+  },
+  "renders": {
+    "latest": {
+      "id": "475d8e9e-6f62-4396-9f05-4b42558f929d",
+      "completedAt": 1793481514899,
+      "output": "C:\\Users\\Informatico\\Documents\\antigravity\\joyful-davinci\\brag-output\\brag-reels.mp4",
+      "status": "completed",
+      "revision": "789be144-9f7d-4c9f-9379-71c28d05bb27"
+    },
+    "retainedRevisions": [
+      "789be144-9f7d-4c9f-9379-71c28d05bb27",
+      "3a7b4c5c-afe7-41d8-9153-28c5c28e73a6"
+    ]
+  },
+  "pendingArtifactCleanup": []
+}

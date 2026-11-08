@@ -381,46 +381,51 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </div>
       </header>
 
-      {/* 2. HERO PRINCIPAL GASTRONÓMICO CON FOTO SANGRADA (OPCIÓN 3) */}
-      <section className="relative w-full pt-10 pb-10 sm:pt-16 sm:pb-16 overflow-hidden bg-[#FAF8F5] border-b border-stone-200/80">
-        <GradientBackground
-          gradientType="radial-gradient"
-          gradientOrigin="top-middle"
-          gradientSize="140% 120%"
-          colors={[
-            { color: "rgba(254, 240, 218, 0.7)", stop: "0%" },
-            { color: "rgba(254, 215, 170, 0.35)", stop: "30%" },
-            { color: "rgba(250, 248, 245, 0.85)", stop: "65%" },
-            { color: "rgba(250, 248, 245, 1)", stop: "100%" },
-          ]}
-          noiseIntensity={0.65}
-          noisePatternAlpha={34}
-          noisePatternSize={90}
-          noisePatternRefreshInterval={0}
-        />
+      <main id="main-content">
+        {/* 2. HERO PRINCIPAL GASTRONÓMICO CON FOTO SANGRADA (OPCIÓN 3) */}
+        <section className="relative w-full min-h-[480px] sm:min-h-[440px] pt-10 pb-10 sm:pt-16 sm:pb-16 overflow-hidden bg-[#FAF8F5] border-b border-stone-200/80">
+          <GradientBackground
+            gradientType="radial-gradient"
+            gradientOrigin="top-middle"
+            gradientSize="140% 120%"
+            colors={[
+              { color: "rgba(254, 240, 218, 0.7)", stop: "0%" },
+              { color: "rgba(254, 215, 170, 0.35)", stop: "30%" },
+              { color: "rgba(250, 248, 245, 0.85)", stop: "65%" },
+              { color: "rgba(250, 248, 245, 1)", stop: "100%" },
+            ]}
+            noiseIntensity={0.65}
+            noisePatternAlpha={34}
+            noisePatternSize={90}
+            noisePatternRefreshInterval={0}
+          />
 
-        {/* Fondo fotográfico con fundido orgánico (sin línea de separación ni cortes duros) */}
-        <div
-          className="absolute right-0 top-0 bottom-0 w-full lg:w-7/12 overflow-hidden pointer-events-none z-0 opacity-40 lg:opacity-100 transition-opacity duration-700"
-          style={{
-            maskImage:
-              "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
-            WebkitMaskImage:
-              "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
-          }}
-        >
-          {fotosHero.map((foto, idx) => (
-            <img
-              key={`${foto.localSlug}-${foto.url}`}
-              src={foto.url}
-              alt={foto.alt}
-              className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-in-out ${
-                idx === fotoHeroIndex
-                  ? "opacity-100 scale-100"
-                  : "opacity-0 scale-105"
-              }`}
-            />
-          ))}
+          {/* Fondo fotográfico con fundido orgánico (sin línea de separación ni cortes duros) */}
+          <div
+            className="absolute right-0 top-0 bottom-0 w-full lg:w-7/12 overflow-hidden pointer-events-none z-0 opacity-40 lg:opacity-100 transition-opacity duration-700"
+            style={{
+              maskImage:
+                "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
+              WebkitMaskImage:
+                "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
+            }}
+          >
+            {fotosHero.map((foto, idx) => (
+              <img
+                key={`${foto.localSlug}-${foto.url}`}
+                src={foto.url}
+                alt={foto.alt}
+                loading={idx === 0 ? "eager" : "lazy"}
+                // @ts-ignore
+                fetchPriority={idx === 0 ? "high" : "auto"}
+                decoding={idx === 0 ? "sync" : "async"}
+                className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-in-out ${
+                  idx === fotoHeroIndex
+                    ? "opacity-100 scale-100"
+                    : "opacity-0 scale-105"
+                }`}
+              />
+            ))}
           {/* Suave degradado vertical en la parte inferior para fundir con la división de sección */}
           <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FAF8F5] to-transparent opacity-80" />
         </div>
@@ -994,6 +999,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
         </div>
       </section>
 
+      </main>
+
       {/* 8. FOOTER ARTESANAL */}
       <footer className="bg-[#FAF8F5] py-12 text-center text-stone-600">
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 space-y-6">
@@ -1048,11 +1055,11 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             </span>
           </div>
 
-          <p className="text-xs text-stone-500 max-w-md mx-auto leading-relaxed">
+          <p className="text-xs text-stone-600 max-w-md mx-auto leading-relaxed">
             Plataforma comunal de cartas digitales QR y pedidos anticipados (retiro al paso o para servirse en mesa, sin delivery) para locales gastronómicos de Tirúa y Quidico, Región del Biobío, Chile.
           </p>
 
-          <p className="text-[11px] text-stone-400">
+          <p className="text-[11px] text-stone-600">
             © {new Date().getFullYear()} PideTirúa. Todos los derechos reservados.
           </p>
         </div>

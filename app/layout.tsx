@@ -1,6 +1,20 @@
 import type { Metadata, Viewport } from "next";
+import { Bebas_Neue, Montserrat } from "next/font/google";
 import InstallPWA from "@/components/InstallPWA";
 import "./globals.css";
+
+const bebasNeue = Bebas_Neue({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-bebas-neue",
+  display: "swap",
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
 
 export const viewport: Viewport = {
   themeColor: "#EA580C",
@@ -77,7 +91,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es-CL">
+    <html lang="es-CL" className={`${bebasNeue.variable} ${montserrat.variable}`}>
       <head>
         {/* Google tag (gtag.js) — Google Analytics & Tag Manager */}
         <script
@@ -145,18 +159,7 @@ gtag('config', 'G-C636MXRRBH');`,
             })
           }}
         />
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin=""
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap"
-          rel="stylesheet"
-        />
+
       </head>
       <body className="bg-[#FAF8F5] font-body text-[#18181B] antialiased selection:bg-[#EA580C] selection:text-white min-h-screen w-full max-w-full overflow-x-hidden">
         {/* Google Tag Manager (noscript fallback) */}
