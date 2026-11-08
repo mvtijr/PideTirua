@@ -303,7 +303,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           >
             <div className="relative w-9 h-9 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-stone-300 shadow-sm bg-white p-0.5 group-hover:scale-105 transition-transform shrink-0">
               <img
-                src="/logo-pidetirua.jpg"
+                src="/logo-pidetirua.jpg?v=2"
                 alt="PideTirúa"
                 width={48}
                 height={48}
@@ -371,7 +371,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             <button
               type="button"
               onClick={scrollADirectorio}
-              className="inline-flex min-h-[38px] sm:min-h-[40px] items-center gap-1.5 sm:gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white text-[11px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest px-2.5 sm:px-5 py-1.5 sm:py-2.5 shadow-sm transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C] shrink-0"
+              className="inline-flex min-h-[38px] sm:min-h-[40px] items-center gap-1.5 sm:gap-2 rounded-full bg-[#C2410C] hover:bg-[#9a3412] text-white text-[11px] sm:text-xs font-black uppercase tracking-wider sm:tracking-widest px-2.5 sm:px-5 py-1.5 sm:py-2.5 shadow-sm transition-all hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C] shrink-0"
             >
               <Store className="h-3.5 w-3.5 shrink-0" />
               <span className="hidden sm:inline">VER </span>
@@ -589,7 +589,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute top-2 left-2">
-                    <span className="rounded-full bg-[#EA580C] px-2.5 py-0.5 text-[11px] font-black text-white uppercase tracking-wider shadow-sm">
+                    <span className="rounded-full bg-[#C2410C] px-2.5 py-0.5 text-[11px] font-black text-white uppercase tracking-wider shadow-sm">
                       {oferta.textoPromo}
                     </span>
                   </div>
@@ -754,7 +754,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 onClick={() => setCategoriaActiva(cat)}
                 className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
                   activa
-                    ? "bg-[#EA580C] text-white shadow-xs"
+                    ? "bg-[#C2410C] text-white shadow-xs"
                     : "bg-white border border-stone-200 text-stone-700 hover:border-stone-400"
                 }`}
               >
@@ -941,7 +941,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
                 <button
                   type="button"
                   onClick={scrollADirectorio}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#EA580C] hover:bg-[#c2410c] text-white text-xs font-black uppercase tracking-wider px-6 py-3 transition shadow-lg hover:scale-105 active:scale-95"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#C2410C] hover:bg-[#9a3412] text-white text-xs font-black uppercase tracking-wider px-6 py-3 transition shadow-lg hover:scale-105 active:scale-95"
                 >
                   <span>EXPLORAR RESTAURANTES</span>
                   <ArrowRight className="h-4 w-4" />
@@ -1054,7 +1054,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
           <div className="flex items-center justify-center gap-2.5">
             <img
-              src="/logo-pidetirua.jpg"
+              src="/logo-pidetirua.jpg?v=2"
               alt="Logo PideTirúa"
               className="w-10 h-10 rounded-full object-contain border border-stone-300 bg-white shadow-xs"
             />
@@ -1126,10 +1126,10 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
             <Link
               href={`/${localQrModal.slug}`}
-              title={`Ir a la carta digital de ${localQrModal.nombre}`}
-              aria-label={`Ir a la carta digital de ${localQrModal.nombre}`}
+              title={`ABRIR CARTA DIGITAL — ${localQrModal.nombre}`}
+              aria-label={`ABRIR CARTA DIGITAL — ${localQrModal.nombre}`}
               onClick={() => setLocalQrModal(null)}
-              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#EA580C] px-4 py-3 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#c2410c] transition"
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-[#C2410C] px-4 py-3 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#9a3412] transition"
             >
               <span>IR AL MENÚ MÓVIL</span>
               <ArrowRight className="h-4 w-4" />

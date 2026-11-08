@@ -205,9 +205,9 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              title={`Enviar mensaje por WhatsApp a ${local.nombre}`}
-              aria-label={`Enviar mensaje por WhatsApp a ${local.nombre}`}
-              className="min-h-[44px] bg-[#128C7E] hover:bg-[#075E54] text-white font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all shadow-sm"
+              title={`WhatsApp — Enviar mensaje directo a ${local.nombre}`}
+              aria-label={`WhatsApp — Enviar mensaje directo a ${local.nombre}`}
+              className="min-h-[44px] bg-[#075E54] hover:bg-[#054c44] text-white font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all shadow-sm"
             >
               <MessageCircle className="h-3.5 w-3.5 fill-white text-white" />
               <span>WhatsApp</span>

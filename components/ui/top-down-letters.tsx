@@ -1,7 +1,6 @@
 "use client";
 
-import React, { ElementType } from "react";
-import { motion, type Variants } from "motion/react";
+import React, { ElementType, useEffect, useRef, useState } from "react";
 
 export interface TopDownLettersProps {
   text: string;
@@ -21,74 +20,73 @@ export function TopDownLetters({
   as: Component = "h2",
   staggerDuration = 0.02,
   delay = 0,
-  dropDistance = -26,
-  once = false,
+  dropDistance = -20,
+  once = true,
   id,
   children,
 }: TopDownLettersProps) {
+  const containerRef = useRef<HTMLElement | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    if (typeof window !== "undefined" && "IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            if (once) observer.disconnect();
+          } else if (!once) {
+            setIsVisible(false);
+          }
+        },
+        { rootMargin: "-10px 0px -10px 0px", threshold: 0.15 }
+      );
+
+      observer.observe(el);
+      return () => observer.disconnect();
+    } else {
+      setIsVisible(true);
+    }
+  }, [once]);
+
   const words = text.split(" ");
-
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: staggerDuration,
-        delayChildren: delay,
-      },
-    },
-  };
-
-  const letterVariants: Variants = {
-    hidden: {
-      opacity: 0,
-      y: dropDistance,
-      rotateX: 35,
-      filter: "blur(2px)",
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      rotateX: 0,
-      filter: "blur(0px)",
-      transition: {
-        type: "spring",
-        damping: 14,
-        stiffness: 150,
-        mass: 0.6,
-      },
-    },
-  };
+  let globalLetterIndex = 0;
 
   return (
-    <Component id={id} className={className}>
-      <motion.span
-        className="inline-block"
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once, amount: 0.25, margin: "-10px 0px -10px 0px" }}
-      >
-        <span className="sr-only">{text}</span>
-        <span aria-hidden="true" className="inline">
-          {words.map((word, wordIndex) => (
-            <span
-              key={`${word}-${wordIndex}`}
-              className="inline-block whitespace-nowrap mr-[0.26em] last:mr-0"
-            >
-              {word.split("").map((letter, letterIndex) => (
-                <motion.span
-                  key={`${letter}-${letterIndex}`}
-                  variants={letterVariants}
-                  className="inline-block"
+    <Component ref={containerRef} id={id} className={className}>
+      <span className="sr-only">{text}</span>
+      <span aria-hidden="true" className="inline-block">
+        {words.map((word, wordIndex) => (
+          <span
+            key={`${word}-${wordIndex}`}
+            className="inline-block whitespace-nowrap mr-[0.26em] last:mr-0"
+          >
+            {word.split("").map((letter) => {
+              const currentIdx = globalLetterIndex++;
+              const animDelay = delay + currentIdx * staggerDuration;
+              return (
+                <span
+                  key={`${letter}-${currentIdx}`}
+                  className="inline-block transition-all duration-400 ease-out"
+                  style={{
+                    opacity: isVisible ? 1 : 0,
+                    transform: isVisible
+                      ? "translateY(0) rotateX(0deg)"
+                      : `translateY(${dropDistance}px) rotateX(25deg)`,
+                    transitionDelay: `${animDelay}s`,
+                    willChange: "transform, opacity",
+                  }}
                 >
                   {letter}
-                </motion.span>
-              ))}
-            </span>
-          ))}
-        </span>
-      </motion.span>
+                </span>
+              );
+            })}
+          </span>
+        ))}
+      </span>
       {children}
     </Component>
   );

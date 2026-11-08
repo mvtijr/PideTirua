@@ -11,136 +11,112 @@ interface NoiseProps {
   intensity?: number;
 }
 
+let globalPatternCanvas: HTMLCanvasElement | null = null;
+
+function getSharedPatternCanvas(patternSize = 80, intensity = 1, patternAlpha = 40): HTMLCanvasElement | null {
+  if (typeof document === 'undefined') return null;
+  if (globalPatternCanvas) return globalPatternCanvas;
+
+  try {
+    const patternCanvas = document.createElement('canvas');
+    patternCanvas.width = patternSize;
+    patternCanvas.height = patternSize;
+    const patternCtx = patternCanvas.getContext('2d');
+    if (!patternCtx) return null;
+
+    const patternData = patternCtx.createImageData(patternSize, patternSize);
+    const patternPixelDataLength = patternSize * patternSize * 4;
+    for (let i = 0; i < patternPixelDataLength; i += 4) {
+      const value = Math.random() * 255 * intensity;
+      patternData.data[i] = value;
+      patternData.data[i + 1] = value;
+      patternData.data[i + 2] = value;
+      patternData.data[i + 3] = patternAlpha;
+    }
+    patternCtx.putImageData(patternData, 0, 0);
+    globalPatternCanvas = patternCanvas;
+    return globalPatternCanvas;
+  } catch {
+    return null;
+  }
+}
+
 // Noise component integrated into the background
 function Noise({
-  patternSize = 100,
-  patternScaleX = 1, // How much to scale the noise pattern tiling horizontally
-  patternScaleY = 1, // How much to scale the noise pattern tiling vertically
-  patternRefreshInterval = 0, // Default to static noise (0 = zero CPU overhead)
-  patternAlpha = 50,
+  patternSize = 80,
+  patternScaleX = 1,
+  patternScaleY = 1,
+  patternRefreshInterval = 0,
+  patternAlpha = 40,
   intensity = 1,
 }: NoiseProps) {
   const grainRef = useRef<HTMLCanvasElement | null>(null);
-  // Ref to store the CSS dimensions of the canvas to avoid repeated getBoundingClientRect in loop
   const canvasCssSizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
 
   useEffect(() => {
     const canvas = grainRef.current;
     if (!canvas) return;
 
-    // Check prefers-reduced-motion
-    const prefersReducedMotion =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const effectiveRefreshInterval = prefersReducedMotion ? 0 : patternRefreshInterval;
-
     const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      console.error("Failed to get 2D context for noise canvas.");
-      return;
-    }
+    if (!ctx) return;
 
-    let frame = 0;
-    const patternCanvas = document.createElement('canvas');
-    patternCanvas.width = patternSize;
-    patternCanvas.height = patternSize;
-
-    const patternCtx = patternCanvas.getContext('2d');
-    if (!patternCtx) {
-      console.error("Failed to get 2D context for pattern sub-canvas.");
-      return;
-    }
-    const patternData = patternCtx.createImageData(patternSize, patternSize);
-    const patternPixelDataLength = patternSize * patternSize * 4; // 4 for R, G, B, A
+    let patternCanvas = getSharedPatternCanvas(patternSize, intensity, patternAlpha);
+    if (!patternCanvas) return;
 
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
-      let newCssWidth = window.innerWidth; // Fallback
-      let newCssHeight = window.innerHeight; // Fallback
+      let newCssWidth = window.innerWidth;
+      let newCssHeight = window.innerHeight;
 
       if (canvas.parentElement) {
         const parentRect = canvas.parentElement.getBoundingClientRect();
         newCssWidth = parentRect.width;
         newCssHeight = parentRect.height;
       }
-      
-      canvasCssSizeRef.current = { width: newCssWidth, height: newCssHeight };
 
+      canvasCssSizeRef.current = { width: newCssWidth, height: newCssHeight };
       canvas.width = newCssWidth * dpr;
       canvas.height = newCssHeight * dpr;
-      
-      // Set the transformation matrix to account for DPR.
-      // This allows drawing commands to use CSS pixel units.
-      // Subsequent ctx.scale for pattern will be relative to this.
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    const updatePattern = () => {
-      for (let i = 0; i < patternPixelDataLength; i += 4) {
-        const value = Math.random() * 255 * intensity;
-        patternData.data[i] = value;
-        patternData.data[i + 1] = value;
-        patternData.data[i + 2] = value;
-        patternData.data[i + 3] = patternAlpha;
-      }
-      patternCtx.putImageData(patternData, 0, 0);
     };
 
     const drawGrain = () => {
       const { width: cssWidth, height: cssHeight } = canvasCssSizeRef.current;
-      if (cssWidth === 0 || cssHeight === 0) return; // Don't draw if canvas has no dimensions
+      if (cssWidth === 0 || cssHeight === 0) return;
 
-      // Clear using CSS pixel dimensions (context is already scaled by DPR)
       ctx.clearRect(0, 0, cssWidth, cssHeight);
-
       ctx.save();
-      
-      // Scale the context for tiling the pattern.
-      // This affects how the pattern is repeated.
-      // Using Math.max to prevent division by zero if scale is 0.
       const safePatternScaleX = Math.max(0.001, patternScaleX);
       const safePatternScaleY = Math.max(0.001, patternScaleY);
       ctx.scale(safePatternScaleX, safePatternScaleY);
 
-      const fillPattern = ctx.createPattern(patternCanvas, 'repeat');
-      if (fillPattern) {
-        ctx.fillStyle = fillPattern;
-        // Fill a rectangle that, in the *scaled* coordinate system,
-        // corresponds to the original cssWidth/cssHeight.
-        ctx.fillRect(0, 0, cssWidth / safePatternScaleX, cssHeight / safePatternScaleY);
+      if (patternCanvas) {
+        const fillPattern = ctx.createPattern(patternCanvas, 'repeat');
+        if (fillPattern) {
+          ctx.fillStyle = fillPattern;
+          ctx.fillRect(0, 0, cssWidth / safePatternScaleX, cssHeight / safePatternScaleY);
+        }
       }
-      
       ctx.restore();
     };
 
-    let animationFrameId: number;
-    const loop = () => {
-      // Only update and draw if dimensions are valid
-      if (canvasCssSizeRef.current.width > 0 && canvasCssSizeRef.current.height > 0) {
-        if (frame % effectiveRefreshInterval === 0) {
-          updatePattern();
-          drawGrain();
-        }
-      }
-      frame++;
-      animationFrameId = window.requestAnimationFrame(loop);
+    let rafId: number | null = null;
+    const handleResize = () => {
+      resize();
+      drawGrain();
     };
 
-    window.addEventListener('resize', resize);
-    resize(); // Initial setup: size canvas and draw first frame if needed
-    if (effectiveRefreshInterval > 0) { // Start loop only if refresh is meaningful
-      loop();
-    } else { // if refresh interval is 0 or less, draw once statically
-      updatePattern();
+    window.addEventListener('resize', handleResize);
+
+    // Yield to browser main thread before drawing noise texture
+    rafId = window.requestAnimationFrame(() => {
+      resize();
       drawGrain();
-    }
+    });
 
     return () => {
-      window.removeEventListener('resize', resize);
-      if (animationFrameId) {
-        window.cancelAnimationFrame(animationFrameId);
-      }
+      window.removeEventListener('resize', handleResize);
+      if (rafId) window.cancelAnimationFrame(rafId);
     };
   }, [patternSize, patternScaleX, patternScaleY, patternRefreshInterval, patternAlpha, intensity]);
 

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Montserrat } from "next/font/google";
+import Script from "next/script";
 import InstallPWA from "@/components/InstallPWA";
 import "./globals.css";
 
@@ -93,19 +94,6 @@ export default function RootLayout({
   return (
     <html lang="es-CL" className={`${bebasNeue.variable} ${montserrat.variable}`}>
       <head>
-        {/* Google tag (gtag.js) — Google Analytics & Tag Manager */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-C636MXRRBH"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-C636MXRRBH');`,
-          }}
-        />
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, viewport-fit=cover"
@@ -171,6 +159,23 @@ gtag('config', 'G-C636MXRRBH');`,
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
+        {/* Google Analytics diferido (lazyOnload) para cero impacto en Total Blocking Time (TBT) */}
+        <Script
+          strategy="lazyOnload"
+          src="https://www.googletagmanager.com/gtag/js?id=G-C636MXRRBH"
+        />
+        <Script
+          id="gtag-init"
+          strategy="lazyOnload"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-C636MXRRBH');
+            `,
+          }}
+        />
         <InstallPWA />
         {children}
       </body>
