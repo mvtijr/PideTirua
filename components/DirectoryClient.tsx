@@ -295,7 +295,12 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
       <header className="sticky top-0 z-50 w-full bg-[#FAF8F5]/95 backdrop-blur-md border-b border-stone-200/80 transition-all">
         <div className="max-w-[1240px] mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
           {/* Logo Circular Vintage */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-3 min-w-0 shrink group">
+          <Link
+            href="/"
+            title="PideTirúa — Volver a la portada principal"
+            aria-label="PideTirúa — Volver a la portada principal"
+            className="flex items-center gap-2 sm:gap-3 min-w-0 shrink group"
+          >
             <div className="relative w-9 h-9 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-stone-300 shadow-sm bg-white p-0.5 group-hover:scale-105 transition-transform shrink-0">
               <img
                 src="/logo-pidetirua.jpg"
@@ -320,6 +325,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           <nav className="hidden md:flex items-center gap-7">
             <a
               href="#directorio-locales"
+              title="Explorar el directorio de locales gastronómicos de Tirúa"
+              aria-label="Explorar el directorio de locales gastronómicos de Tirúa"
               onClick={scrollHaciaId("directorio-locales")}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#C2410C] transition-colors"
             >
@@ -328,6 +335,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             {ofertasDelDia.length > 0 && (
               <a
                 href="#ofertas-hoy"
+                title="Ver las ofertas y promociones del día en Tirúa"
+                aria-label="Ver las ofertas y promociones del día en Tirúa"
                 onClick={scrollHaciaId("ofertas-hoy")}
                 className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#C2410C] transition-colors flex items-center gap-1.5"
               >
@@ -337,6 +346,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             )}
             <a
               href="#historia-comuna"
+              title="Conocer la tradición culinaria y sabores locales de Tirúa y Quidico"
+              aria-label="Conocer la tradición culinaria y sabores locales de Tirúa y Quidico"
               onClick={scrollHaciaId("historia-comuna")}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#C2410C] transition-colors"
             >
@@ -603,6 +614,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
                     <Link
                       href={`/${oferta.localSlug}`}
+                      title={`Pedir oferta en ${oferta.localNombre}`}
+                      aria-label={`Pedir oferta en ${oferta.localNombre}`}
                       className="inline-flex min-h-[36px] items-center justify-center rounded-full bg-[#18181B] hover:bg-[#EA580C] text-white text-xs font-black uppercase tracking-wider px-4 py-2 transition shadow-xs active:scale-95"
                     >
                       PEDIR
@@ -987,6 +1000,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           <div className="flex flex-wrap justify-center items-center gap-6 text-[11px] font-bold tracking-widest uppercase text-stone-700">
             <a
               href="#directorio-locales"
+              title="Ir al directorio de locales gastronómicos de Tirúa"
+              aria-label="Ir al directorio de locales gastronómicos de Tirúa"
               onClick={scrollHaciaId("directorio-locales")}
               className="hover:text-[#C2410C] transition"
             >
@@ -995,6 +1010,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             {ofertasDelDia.length > 0 && (
               <a
                 href="#ofertas-hoy"
+                title="Ver las mejores ofertas y promociones del día"
+                aria-label="Ver las mejores ofertas y promociones del día"
                 onClick={scrollHaciaId("ofertas-hoy")}
                 className="hover:text-[#C2410C] transition"
               >
@@ -1003,12 +1020,19 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             )}
             <a
               href="#historia-comuna"
+              title="Conocer la tradición culinaria y sabores locales de Tirúa"
+              aria-label="Conocer la tradición culinaria y sabores locales de Tirúa"
               onClick={scrollHaciaId("historia-comuna")}
               className="hover:text-[#C2410C] transition"
             >
               SABORES LOCALES
             </a>
-            <Link href="/superadmin" className="hover:text-[#C2410C] transition">
+            <Link
+              href="/superadmin"
+              title="Acceso al panel de administración general de PideTirúa"
+              aria-label="Acceso al panel de administración general de PideTirúa"
+              className="hover:text-[#C2410C] transition"
+            >
               PANEL ADMIN
             </Link>
           </div>
@@ -1087,6 +1111,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
             <Link
               href={`/${localQrModal.slug}`}
+              title={`Ir a la carta digital de ${localQrModal.nombre}`}
+              aria-label={`Ir a la carta digital de ${localQrModal.nombre}`}
               onClick={() => setLocalQrModal(null)}
               className="flex w-full items-center justify-center gap-2 rounded-full bg-[#EA580C] px-4 py-3 text-xs font-black uppercase tracking-wider text-white shadow-md hover:bg-[#c2410c] transition"
             >

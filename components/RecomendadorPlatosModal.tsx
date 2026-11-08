@@ -734,6 +734,8 @@ export default function RecomendadorPlatosModal({
 
                             <Link
                               href={`/${item.localSlug}`}
+                              title={`Pedir ${item.producto.nombre} en ${item.localNombre}`}
+                              aria-label={`Pedir ${item.producto.nombre} en ${item.localNombre}`}
                               onClick={handleCerrar}
                               className="inline-flex min-h-[40px] items-center gap-2 rounded-full bg-[#18181B] hover:bg-[#EA580C] px-5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-xs transition-all active:scale-95 shrink-0"
                             >

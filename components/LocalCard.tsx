@@ -188,6 +188,8 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
           <div className="grid grid-cols-2 gap-2 pt-1">
             <Link
               href={`/${local.slug}`}
+              title={`Ver carta digital y pedir en ${local.nombre}`}
+              aria-label={`Ver carta digital y pedir en ${local.nombre}`}
               className="min-h-[44px] bg-stone-100 hover:bg-[#18181B] hover:text-white text-stone-900 font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all"
             >
               <span>Ver Carta</span>
@@ -203,6 +205,8 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
               )}`}
               target="_blank"
               rel="noopener noreferrer"
+              title={`Enviar mensaje por WhatsApp a ${local.nombre}`}
+              aria-label={`Enviar mensaje por WhatsApp a ${local.nombre}`}
               className="min-h-[44px] bg-[#25D366] hover:bg-[#20bd5a] text-white font-body text-xs font-bold uppercase tracking-wider py-2 px-3 rounded-full flex items-center justify-center gap-1.5 transition-all shadow-sm"
             >
               <MessageCircle className="h-3.5 w-3.5 fill-white text-white" />

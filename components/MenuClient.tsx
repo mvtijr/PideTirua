@@ -654,6 +654,8 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
             <div className="absolute left-3.5 right-3.5 top-3.5 sm:left-6 sm:right-6 sm:top-5 flex items-center justify-between">
               <Link
                 href="/"
+                title="Volver al directorio de locales de PideTirúa"
+                aria-label="Volver al directorio de locales de PideTirúa"
                 className={`inline-flex items-center gap-2 rounded-full pl-2.5 pr-4 py-2 text-xs font-bold backdrop-blur-md transition shadow-md hover:scale-105 active:scale-95 ${theme.backBtn}`}
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
@@ -1133,6 +1135,8 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
               Menú digital interactivo impulsado por{" "}
               <Link
                 href="/"
+                title="Volver a la portada de PideTirúa"
+                aria-label="Volver a la portada de PideTirúa"
                 className={`font-bold hover:underline ${theme.footerLink}`}
               >
                 PideTirúa
@@ -1141,6 +1145,8 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
             <span>·</span>
             <Link
               href={`/admin/${local.slug}`}
+              title={`Acceso a panel de administración de ${local.nombre}`}
+              aria-label={`Acceso a panel de administración de ${local.nombre}`}
               className={`font-semibold opacity-80 hover:opacity-100 hover:underline ${theme.footerLink}`}
             >
               Panel Admin Local

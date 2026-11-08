@@ -166,6 +166,8 @@ export default function SearchInput({
                     <Link
                       key={loc.id}
                       href={`/${loc.slug}`}
+                      title={`Ver carta digital y horarios de ${loc.nombre}`}
+                      aria-label={`Ver carta digital y horarios de ${loc.nombre}`}
                       onClick={() => setDropdownAbierto(false)}
                       className="flex items-center justify-between rounded-xl p-2 hover:bg-amber-50 transition group"
                     >
@@ -214,6 +216,8 @@ export default function SearchInput({
                     <Link
                       key={`${item.localSlug}-${item.producto.id}-${idx}`}
                       href={`/${item.localSlug}`}
+                      title={`Ver plato ${item.producto.nombre} en ${item.localNombre}`}
+                      aria-label={`Ver plato ${item.producto.nombre} en ${item.localNombre}`}
                       onClick={() => setDropdownAbierto(false)}
                       className="flex items-center justify-between rounded-xl p-2 hover:bg-amber-50 transition group"
                     >
