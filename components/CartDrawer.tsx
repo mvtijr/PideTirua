@@ -1188,12 +1188,12 @@ export default function CartDrawer({
                             : "text-stone-500"
                         }`}
                       />
-                      <div className="text-left">
+                      <span className="block text-left">
                         <span className="block text-xs font-black leading-tight">{etiqueta}</span>
                         <span className="block text-[10px] text-stone-500 font-medium leading-none">
                           {subtitulo}
                         </span>
-                      </div>
+                      </span>
                     </button>
                   );
                 })}

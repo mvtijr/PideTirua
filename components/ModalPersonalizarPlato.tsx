@@ -294,9 +294,9 @@ export default function ModalPersonalizarPlato({
                             : "border-stone-200 hover:border-stone-300 bg-stone-50/50 hover:bg-stone-50"
                         }`}
                       >
-                        <div className="flex items-center gap-3 min-w-0">
+                        <span className="flex items-center gap-3 min-w-0">
                           {/* Radio o Checkbox visual */}
-                          <div
+                          <span
                             className={`flex h-5 w-5 shrink-0 items-center justify-center border transition-all ${
                               esUnica ? "rounded-full" : "rounded-md"
                             } ${
@@ -308,7 +308,7 @@ export default function ModalPersonalizarPlato({
                             {estaSeleccionado && (
                               <Check className="h-3.5 w-3.5 stroke-[3]" />
                             )}
-                          </div>
+                          </span>
                           <span
                             className={`text-sm truncate font-medium ${
                               estaSeleccionado
@@ -318,7 +318,7 @@ export default function ModalPersonalizarPlato({
                           >
                             {item.nombre}
                           </span>
-                        </div>
+                        </span>
 
                         <span
                           className={`text-xs font-bold shrink-0 ml-2 tabular-nums ${

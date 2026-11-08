@@ -39,7 +39,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
           observer.disconnect();
         }
       },
-      { rootMargin: "300px" }
+      { rootMargin: "0px" }
     );
 
     observer.observe(el);
@@ -68,7 +68,7 @@ export default function LocalCard({ local, onOpenQr }: LocalCardProps) {
               <video
                 src={videoSrc}
                 poster={posterSrc}
-                preload="metadata"
+                preload="none"
                 autoPlay
                 loop
                 muted

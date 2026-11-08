@@ -46,7 +46,7 @@ const FOTOS_HERO_FALLBACK = [
     nombreLocal: "Kai Coffee Tirúa",
     plato: "Café Latte & Repostería Artesanal",
     icono: "☕",
-    url: "https://images.unsplash.com/photo-1561047029-3000c68339ca?auto=format&fit=crop&w=1200&q=85",
+    url: "https://images.unsplash.com/photo-1561047029-3000c68339ca?auto=format&fit=crop&w=720&q=75",
     alt: "Café de Especialidad en Kai Coffee Tirúa",
   },
   {
@@ -54,7 +54,7 @@ const FOTOS_HERO_FALLBACK = [
     nombreLocal: "Sushi Burger Tirúa",
     plato: "Tabla Costera 40 Piezas Tempura",
     icono: "🍣",
-    url: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1200&q=85",
+    url: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=720&q=75",
     alt: "Sushi Costero en Sushi Burger Tirúa",
   },
   {
@@ -62,7 +62,7 @@ const FOTOS_HERO_FALLBACK = [
     nombreLocal: "Río Mar Tirúa",
     plato: "Salmón a la Plancha & Once Costera",
     icono: "🐟",
-    url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=1200&q=85",
+    url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=720&q=75",
     alt: "Salmón a la Plancha en Río Mar Tirúa",
   },
   {
@@ -70,7 +70,7 @@ const FOTOS_HERO_FALLBACK = [
     nombreLocal: "Las Tranqueras Tirúa",
     plato: "Pollo Asado con Papas Caseras",
     icono: "🍗",
-    url: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=1200&q=85",
+    url: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=720&q=75",
     alt: "Pollo Asado en Las Tranqueras Tirúa",
   },
 ];
@@ -297,8 +297,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           {/* Logo Circular Vintage */}
           <Link
             href="/"
-            title="PideTirúa — Volver a la portada principal"
-            aria-label="PideTirúa — Volver a la portada principal"
+            title="PIDETIRÚA — Sabores de nuestra tierra"
+            aria-label="PIDETIRÚA — Sabores de nuestra tierra"
             className="flex items-center gap-2 sm:gap-3 min-w-0 shrink group"
           >
             <div className="relative w-9 h-9 sm:w-12 sm:h-12 rounded-full overflow-hidden border-2 border-stone-300 shadow-sm bg-white p-0.5 group-hover:scale-105 transition-transform shrink-0">
@@ -325,8 +325,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           <nav className="hidden md:flex items-center gap-7">
             <a
               href="#directorio-locales"
-              title="Explorar el directorio de locales gastronómicos de Tirúa"
-              aria-label="Explorar el directorio de locales gastronómicos de Tirúa"
+              title={`RESTAURANTES (${locales.length}) — Directorio gastronómico`}
+              aria-label={`RESTAURANTES (${locales.length}) — Directorio gastronómico`}
               onClick={scrollHaciaId("directorio-locales")}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#C2410C] transition-colors"
             >
@@ -335,8 +335,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             {ofertasDelDia.length > 0 && (
               <a
                 href="#ofertas-hoy"
-                title="Ver las ofertas y promociones del día en Tirúa"
-                aria-label="Ver las ofertas y promociones del día en Tirúa"
+                title="OFERTAS DEL DÍA — Promociones gastronómicas activas"
+                aria-label="OFERTAS DEL DÍA — Promociones gastronómicas activas"
                 onClick={scrollHaciaId("ofertas-hoy")}
                 className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#C2410C] transition-colors flex items-center gap-1.5"
               >
@@ -346,8 +346,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             )}
             <a
               href="#historia-comuna"
-              title="Conocer la tradición culinaria y sabores locales de Tirúa y Quidico"
-              aria-label="Conocer la tradición culinaria y sabores locales de Tirúa y Quidico"
+              title="TIRÚA Y QUIDICO — Conocer sabores locales y territorio"
+              aria-label="TIRÚA Y QUIDICO — Conocer sabores locales y territorio"
               onClick={scrollHaciaId("historia-comuna")}
               className="text-[11px] font-bold tracking-[0.18em] uppercase text-stone-700 hover:text-[#C2410C] transition-colors"
             >
@@ -361,8 +361,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
               type="button"
               onClick={() => setMostrarRecomendador(true)}
               className="inline-flex min-h-[38px] sm:min-h-[40px] items-center gap-1.5 rounded-full border border-stone-300 bg-white hover:border-orange-300 hover:bg-orange-50/50 text-stone-800 text-[11px] font-bold uppercase tracking-wider px-2.5 sm:px-3.5 py-1.5 sm:py-2 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#EA580C] shrink-0"
-              title="¿No sabes qué comer? Descúbrelo con el recomendador"
-              aria-label="¿No sabes qué comer? Descúbrelo con el recomendador"
+              title="¿Qué comer? — Recomendador de platos"
+              aria-label="¿Qué comer? — Recomendador de platos"
             >
               <Dices className="h-3.5 w-3.5 text-[#C2410C] shrink-0" />
               <span className="hidden sm:inline">¿Qué comer?</span>
@@ -899,7 +899,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             <div className="lg:col-span-6 relative flex items-center justify-center min-h-[260px] sm:min-h-[300px]">
               <div className="w-36 xs:w-44 sm:w-56 bg-white p-2 sm:p-2.5 pb-4 sm:pb-6 rounded-xl shadow-2xl transform -rotate-6 hover:rotate-0 transition-transform duration-300 border border-stone-200">
                 <img
-                  src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=800&q=85"
+                  src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&w=720&q=75"
                   alt="Caleta Quidico"
                   className="w-full h-32 sm:h-44 object-cover rounded"
                 />
@@ -910,7 +910,7 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
 
               <div className="w-36 xs:w-44 sm:w-56 bg-white p-2 sm:p-2.5 pb-4 sm:pb-6 rounded-xl shadow-2xl transform rotate-6 hover:rotate-0 transition-transform duration-300 border border-stone-200 -ml-8 sm:-ml-16 mt-6 sm:mt-10 z-20">
                 <img
-                  src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=85"
+                  src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=720&q=75"
                   alt="Gastronomía de Tirúa"
                   className="w-full h-32 sm:h-44 object-cover rounded"
                 />
@@ -1015,8 +1015,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
           <div className="flex flex-wrap justify-center items-center gap-6 text-[11px] font-bold tracking-widest uppercase text-stone-700">
             <a
               href="#directorio-locales"
-              title="Ir al directorio de locales gastronómicos de Tirúa"
-              aria-label="Ir al directorio de locales gastronómicos de Tirúa"
+              title="NUESTROS LOCALES — Directorio gastronómico"
+              aria-label="NUESTROS LOCALES — Directorio gastronómico"
               onClick={scrollHaciaId("directorio-locales")}
               className="hover:text-[#C2410C] transition"
             >
@@ -1025,8 +1025,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             {ofertasDelDia.length > 0 && (
               <a
                 href="#ofertas-hoy"
-                title="Ver las mejores ofertas y promociones del día"
-                aria-label="Ver las mejores ofertas y promociones del día"
+                title="OFERTAS DEL DÍA — Promociones gastronómicas"
+                aria-label="OFERTAS DEL DÍA — Promociones gastronómicas"
                 onClick={scrollHaciaId("ofertas-hoy")}
                 className="hover:text-[#C2410C] transition"
               >
@@ -1035,8 +1035,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             )}
             <a
               href="#historia-comuna"
-              title="Conocer la tradición culinaria y sabores locales de Tirúa"
-              aria-label="Conocer la tradición culinaria y sabores locales de Tirúa"
+              title="SABORES LOCALES — Tradición culinaria de Tirúa"
+              aria-label="SABORES LOCALES — Tradición culinaria de Tirúa"
               onClick={scrollHaciaId("historia-comuna")}
               className="hover:text-[#C2410C] transition"
             >
@@ -1044,8 +1044,8 @@ export default function DirectoryClient({ locales }: DirectoryClientProps) {
             </a>
             <Link
               href="/superadmin"
-              title="Acceso al panel de administración general de PideTirúa"
-              aria-label="Acceso al panel de administración general de PideTirúa"
+              title="PANEL ADMIN — Panel de administración general"
+              aria-label="PANEL ADMIN — Panel de administración general"
               className="hover:text-[#C2410C] transition"
             >
               PANEL ADMIN
