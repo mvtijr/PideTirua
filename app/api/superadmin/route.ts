@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import {
   ensurePlatosBucketVideoSupport,
   fetchAllLocales,
@@ -149,6 +149,7 @@ export async function POST(req: NextRequest) {
         slug,
         Boolean(activo)
       );
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -282,6 +283,7 @@ export async function POST(req: NextRequest) {
           typeof fecha_ultimo_pago === "string" ? fecha_ultimo_pago : undefined,
       });
 
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);

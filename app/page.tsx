@@ -6,11 +6,11 @@ import {
   HomeFooter,
 } from "@/components/HomeEditorialFooter";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// ISR de 30s + invalidación inmediata vía revalidatePath en /api/admin y /api/superadmin
+export const revalidate = 30;
 
 export default async function DirectorioComunalPage() {
-  const locales = await fetchActiveLocales();
+  const locales = await fetchActiveLocales(true);
   const publicLocales = sanitizeLocalesForPublic(locales);
 
   // Recorta campos profundos (grupos de opciones) no utilizados en la portada para minimizar hidratación SSR

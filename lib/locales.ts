@@ -23,11 +23,16 @@ const PLATOS_IMAGES_BUCKET = "platos";
  * el cliente administrativo (service_role) para tener permisos plenos de escritura
  * y omitir restricciones RLS. Si se ejecuta en el cliente, utiliza getSupabaseClient().
  */
-async function getEffectiveSupabaseClient() {
+async function getEffectiveSupabaseClient(useIsrCache = false) {
   if (typeof window === "undefined") {
     try {
-      const { getSupabaseAdminClient } = await import("@/lib/supabase-server");
-      return getSupabaseAdminClient();
+      const {
+        getSupabaseAdminClient,
+        getSupabaseCacheableAdminClient,
+      } = await import("@/lib/supabase-server");
+      return useIsrCache
+        ? getSupabaseCacheableAdminClient()
+        : getSupabaseAdminClient();
     } catch {
       return getSupabaseClient();
     }
@@ -575,9 +580,9 @@ async function seedRelationalTablesIfEmpty(): Promise<void> {
   await supabase.from("productos").upsert(productosRows, { onConflict: "id" });
 }
 
-async function readSupabaseCloudState(): Promise<Local[] | null> {
+async function readSupabaseCloudState(useIsrCache = false): Promise<Local[] | null> {
   try {
-    const supabase = await getEffectiveSupabaseClient();
+    const supabase = await getEffectiveSupabaseClient(useIsrCache);
     const { data, error } = await supabase.storage
       .from(STORAGE_BUCKET)
       .download(STORAGE_STATE_FILE);
@@ -763,12 +768,12 @@ function mergeRowsWithStaticLocales(
 /**
  * Obtiene todos los locales (incluyendo activos y suspendidos) con sus categorías y productos desde Supabase.
  */
-export async function fetchAllLocales(): Promise<Local[]> {
+export async function fetchAllLocales(useIsrCache = false): Promise<Local[]> {
   const staticLocales = getAllLocales();
 
   // 1. Intentar leer estado unificado en Storage (locales-state.json) que contiene el estado vivo con ofertas y cambios en tiempo real
   try {
-    const cloudState = await readSupabaseCloudState();
+    const cloudState = await readSupabaseCloudState(useIsrCache);
     if (cloudState && Array.isArray(cloudState) && cloudState.length > 0) {
       return cloudState;
     }
@@ -778,7 +783,7 @@ export async function fetchAllLocales(): Promise<Local[]> {
 
   // 2. Intentar consultar tablas relacionales de Supabase
   try {
-    const supabase = await getEffectiveSupabaseClient();
+    const supabase = await getEffectiveSupabaseClient(useIsrCache);
     const queryPromise = supabase
       .from("locales")
       .select("*, categorias(*, productos(*))");
@@ -806,8 +811,8 @@ export async function fetchAllLocales(): Promise<Local[]> {
  * Obtiene los locales activos para la portada comunal (/)
  * manteniendo sincronizadas todas sus categorías y productos en tiempo real.
  */
-export async function fetchActiveLocales(): Promise<Local[]> {
-  const locales = await fetchAllLocales();
+export async function fetchActiveLocales(useIsrCache = false): Promise<Local[]> {
+  const locales = await fetchAllLocales(useIsrCache);
   return locales.filter((loc) => loc.activo !== false);
 }
 
@@ -817,10 +822,11 @@ export async function fetchActiveLocales(): Promise<Local[]> {
  */
 export async function fetchLocalBySlug(
   slug: string,
-  soloActivos: boolean = false
+  soloActivos: boolean = false,
+  useIsrCache = false
 ): Promise<Local | undefined> {
   const cleanSlug = slug.toLowerCase().trim();
-  const allLocales = await fetchAllLocales();
+  const allLocales = await fetchAllLocales(useIsrCache);
   const found = allLocales.find((l) => l.slug.toLowerCase() === cleanSlug);
 
   if (found) {

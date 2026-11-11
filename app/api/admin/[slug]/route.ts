@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import {
   createCategoriaInSupabase,
   createProductoInSupabase,
@@ -147,6 +147,7 @@ export async function POST(
     if (action === "toggle-abierto") {
       const { abierto } = body;
       const result = await updateLocalAbiertoInSupabase(slug, Boolean(abierto));
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -163,6 +164,7 @@ export async function POST(
         direccion: typeof direccion === "string" ? direccion : undefined,
         pin: typeof pin === "string" ? pin : undefined,
       });
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -176,6 +178,7 @@ export async function POST(
         slug,
         String(nuevoPin || "")
       );
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -200,6 +203,7 @@ export async function POST(
         slug,
         typeof nombre === "string" ? nombre : ""
       );
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -212,6 +216,7 @@ export async function POST(
         slug,
         String(categoriaId || "")
       );
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -237,6 +242,7 @@ export async function POST(
         email_transferencia:
           typeof email_transferencia === "string" ? email_transferencia : "",
       });
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -274,6 +280,7 @@ export async function POST(
               : null
             : undefined,
       });
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -287,6 +294,7 @@ export async function POST(
         String(categoriaId || ""),
         Boolean(activa)
       );
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -298,6 +306,7 @@ export async function POST(
       const result = await updateProductoInSupabase(slug, String(productoId || ""), {
         disponible: Boolean(disponible),
       });
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -357,6 +366,7 @@ export async function POST(
         opciones: Array.isArray(opciones) ? opciones : undefined,
       });
 
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -406,6 +416,7 @@ export async function POST(
           ? { opciones: Array.isArray(opciones) ? opciones : [] }
           : {}),
       });
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
@@ -415,6 +426,7 @@ export async function POST(
     if (action === "delete-producto") {
       const { productoId } = body;
       const result = await deleteProductoInSupabase(slug, String(productoId));
+      revalidateTag("locales-catalog");
       revalidatePath("/");
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);

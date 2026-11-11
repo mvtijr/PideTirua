@@ -48,3 +48,50 @@ export function getSupabaseAdminClient(): SupabaseClient {
   }
   return supabaseAdminInstance;
 }
+
+let supabaseCacheableInstance: SupabaseClient | null = null;
+
+/**
+ * Cliente de lectura pública en servidor compatible con ISR (`revalidate`) de Next.js:
+ * permite caché en Edge/CDN e invalidación inmediata mediante `revalidateTag("locales-catalog")`.
+ */
+export function getSupabaseCacheableAdminClient(): SupabaseClient {
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_URL;
+
+  const serviceRoleKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    "";
+
+  if (!supabaseCacheableInstance) {
+    supabaseCacheableInstance = createClient(
+      supabaseUrl,
+      serviceRoleKey,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+        global: {
+          fetch: (url, options = {}) => {
+            const method = (options.method || "GET").toUpperCase();
+            if (method === "GET") {
+              const cleanOptions = { ...options };
+              delete cleanOptions.cache;
+              return fetch(url, {
+                ...cleanOptions,
+                next: { revalidate: 30, tags: ["locales-catalog"] },
+              });
+            }
+            return fetch(url, {
+              ...options,
+              cache: "no-store",
+            });
+          },
+        },
+      }
+    );
+  }
+  return supabaseCacheableInstance;
+}

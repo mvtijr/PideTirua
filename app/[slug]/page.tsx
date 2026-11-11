@@ -7,8 +7,8 @@ import {
 } from "@/lib/locales";
 import MenuClient from "@/components/MenuClient";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// ISR de 30s + invalidación inmediata vía revalidatePath en /api/admin y /api/superadmin
+export const revalidate = 30;
 
 interface LocalMenuPageProps {
   params: Promise<{ slug: string }>;
@@ -25,7 +25,7 @@ export async function generateMetadata({
   params,
 }: LocalMenuPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const local = await fetchLocalBySlug(slug, true);
+  const local = await fetchLocalBySlug(slug, true, true);
 
   if (!local) {
     return {
@@ -76,7 +76,7 @@ export async function generateMetadata({
 
 export default async function LocalMenuPage({ params }: LocalMenuPageProps) {
   const { slug } = await params;
-  const local = await fetchLocalBySlug(slug, true);
+  const local = await fetchLocalBySlug(slug, true, true);
 
   if (!local) {
     notFound();
