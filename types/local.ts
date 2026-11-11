@@ -5,6 +5,14 @@ export type CategoriaFiltro =
   | "Pescados y Mariscos"
   | "Cafetería";
 
+export const CATEGORIAS_DIRECTORIO: CategoriaFiltro[] = [
+  "Todos",
+  "Sushi",
+  "Comida Rápida",
+  "Pescados y Mariscos",
+  "Cafetería",
+];
+
 export type SectorComuna = "Tirúa Centro" | "Quidico";
 
 export type TipoEntrega = "Retiro en local" | "Consumo en mesa";

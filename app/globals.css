@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   html,
   body {
     margin: 0;
@@ -120,7 +124,7 @@ p,
 a,
 div,
 span {
-  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-montserrat), "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -134,14 +138,14 @@ h5,
 h6,
 .font-display,
 .font-heading {
-  font-family: "Bebas Neue", "Montserrat", sans-serif;
+  font-family: var(--font-bebas-neue), "Bebas Neue", "Montserrat", sans-serif;
   letter-spacing: 0.03em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 .font-body {
-  font-family: "Montserrat", sans-serif;
+  font-family: var(--font-montserrat), "Montserrat", sans-serif;
 }
 
 article .overflow-hidden img {
@@ -183,9 +187,13 @@ a,
   button,
   a,
   .filter-chip,
-  .coverflow-card {
+  .coverflow-card,
+  .td-word,
+  .td-immediate {
     transition: none !important;
+    animation: none !important;
     transform: none !important;
+    opacity: 1 !important;
   }
 }
 
@@ -271,6 +279,36 @@ video::-webkit-media-controls-start-playback-button {
 }
 video::-moz-media-controls {
   display: none !important;
+}
+
+/* Animación CSS ultra ligera para títulos editoriales (cero runtime JS / GPU composited) */
+@keyframes td-drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.td-immediate {
+  animation: td-drop-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.td-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--td-d, 0ms);
+}
+
+.td-visible .td-word {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 

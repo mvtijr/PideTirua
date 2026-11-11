@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bebas_Neue, Montserrat } from "next/font/google";
-import Script from "next/script";
+import GoogleAnalyticsDeferred from "@/components/GoogleAnalyticsDeferred";
 import InstallPWA from "@/components/InstallPWA";
 import "./globals.css";
 
@@ -159,23 +159,8 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
-        {/* Google Analytics diferido (lazyOnload) para cero impacto en Total Blocking Time (TBT) */}
-        <Script
-          strategy="lazyOnload"
-          src="https://www.googletagmanager.com/gtag/js?id=G-C636MXRRBH"
-        />
-        <Script
-          id="gtag-init"
-          strategy="lazyOnload"
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-C636MXRRBH');
-            `,
-          }}
-        />
+        {/* Google Analytics diferido a primera interacción o tiempo ocioso para cero impacto en bootup/TBT */}
+        <GoogleAnalyticsDeferred gaId="G-C636MXRRBH" />
         <InstallPWA />
         {children}
       </body>

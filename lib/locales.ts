@@ -1,6 +1,7 @@
 import localesData from "@/data/locales.json";
 import {
   CategoriaFiltro,
+  CATEGORIAS_DIRECTORIO,
   CategoriaMenu,
   GrupoOpcion,
   Local,
@@ -10,13 +11,7 @@ import {
 } from "@/types/local";
 import { getSupabaseClient } from "@/lib/supabase";
 
-export const CATEGORIAS_DIRECTORIO: CategoriaFiltro[] = [
-  "Todos",
-  "Sushi",
-  "Comida Rápida",
-  "Pescados y Mariscos",
-  "Cafetería",
-];
+export { CATEGORIAS_DIRECTORIO };
 
 const STORAGE_BUCKET = "pidetirua-db";
 const STORAGE_STATE_FILE = "locales-state.json";
