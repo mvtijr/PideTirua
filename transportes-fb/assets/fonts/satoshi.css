@@ -1,0 +1,48 @@
+/* Satoshi */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('assets/fonts/satoshi-0.woff2') format('woff2'),
+       url('assets/fonts/satoshi-1.woff2') format('woff'),
+       url('assets/fonts/satoshi-2.woff2') format('truetype');
+  font-weight: 300;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('assets/fonts/satoshi-3.woff2') format('woff2'),
+       url('assets/fonts/satoshi-4.woff2') format('woff'),
+       url('assets/fonts/satoshi-5.woff2') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('assets/fonts/satoshi-6.woff2') format('woff2'),
+       url('assets/fonts/satoshi-7.woff2') format('woff'),
+       url('assets/fonts/satoshi-8.woff2') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('assets/fonts/satoshi-9.woff2') format('woff2'),
+       url('assets/fonts/satoshi-10.woff2') format('woff'),
+       url('assets/fonts/satoshi-11.woff2') format('truetype');
+  font-weight: 700;
+  font-display: swap;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Satoshi';
+  src: url('assets/fonts/satoshi-12.woff2') format('woff2'),
+       url('assets/fonts/satoshi-13.woff2') format('woff'),
+       url('assets/fonts/satoshi-14.woff2') format('truetype');
+  font-weight: 900;
+  font-display: swap;
+  font-style: normal;
+}
+
+
