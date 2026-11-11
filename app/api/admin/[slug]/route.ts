@@ -7,6 +7,7 @@ import {
   deleteProductoInSupabase,
   establecerNuevoPinPersonalInSupabase,
   fetchLocalBySlug,
+  obtenerTokenCocina,
   toggleCategoriaActivaInSupabase,
   updateLocalAbiertoInSupabase,
   updateLocalAjustesBasicosInSupabase,
@@ -19,16 +20,30 @@ import {
 } from "@/lib/locales";
 import {
   checkRateLimit,
+  cookieNameAdmin,
+  createSessionToken,
   getClientIp,
+  getSessionCookieOptions,
+  isKdsAuthorized,
+  isLocalAdminAuthorized,
   recordFailedAttempt,
   resetRateLimit,
 } from "@/lib/security";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
+  if (!isLocalAdminAuthorized(req.cookies, slug)) {
+    return NextResponse.json(
+      { ok: false, error: "Acceso no autorizado. Inicia sesión con tu PIN." },
+      { status: 401 }
+    );
+  }
+
   const local = await fetchLocalBySlug(slug);
 
   if (!local) {
@@ -38,7 +53,10 @@ export async function GET(
     );
   }
 
-  return NextResponse.json({ ok: true, local });
+  return NextResponse.json(
+    { ok: true, local, tokenCocina: obtenerTokenCocina(local) },
+    { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
+  );
 }
 
 export async function POST(
@@ -106,34 +124,30 @@ export async function POST(
         esTemporal: resultado.esTemporal,
         requiereCambioPin: resultado.requiereCambioPin,
       });
-      response.cookies.set(`pidetirua_admin_${slug}`, "authenticated", {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 días
-        sameSite: "lax",
-      });
+      response.cookies.set(
+        cookieNameAdmin(slug),
+        createSessionToken("admin", slug, 60 * 60 * 24 * 7),
+        getSessionCookieOptions(60 * 60 * 24 * 7)
+      );
       return response;
     }
 
     if (action === "logout") {
       const response = NextResponse.json({ ok: true });
-      response.cookies.delete(`pidetirua_admin_${slug}`);
+      response.cookies.delete(cookieNameAdmin(slug));
       return response;
     }
 
-    // CONTROL DE SEGURIDAD: Verificar que quien ejecuta la mutación tenga sesión activa de Admin, KDS o SuperAdmin
-    const isLocalAdmin =
-      req.cookies.get(`pidetirua_admin_${slug}`)?.value === "authenticated";
-    const isStaffKds =
-      req.cookies.get(`pidetirua_kds_${slug}`)?.value === "authenticated";
-    const isSuperAdmin =
-      req.cookies.get("pidetirua_superadmin")?.value === "authenticated";
+    // CONTROL DE SEGURIDAD: Verificar firma HMAC de sesión activa de Admin, KDS o SuperAdmin
+    const isAdminOrSuper = isLocalAdminAuthorized(req.cookies, slug);
+    const isKitchenSession = isKdsAuthorized(req.cookies, slug);
 
     // Acciones operativas de cocina que el personal KDS puede ejecutar sin requerir el PIN del dueño
     const isKitchenAction =
       action === "toggle-producto-disponible" ||
       action === "toggle-categoria-disponible";
 
-    if (!isLocalAdmin && !isSuperAdmin && (!isStaffKds || !isKitchenAction)) {
+    if (!isAdminOrSuper && (!isKitchenSession || !isKitchenAction)) {
       return NextResponse.json(
         {
           ok: false,

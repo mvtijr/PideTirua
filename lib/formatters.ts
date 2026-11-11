@@ -80,8 +80,10 @@ export function getPrecioEfectivoProducto(producto: Producto): number {
  * base/oferta del plato más todos los extras/modificadores seleccionados.
  */
 export function getPrecioUnitarioItem(item: ItemCarrito): number {
-  if (typeof item.precioUnitarioFinal === "number" && item.precioUnitarioFinal > 0) {
-    return item.precioUnitarioFinal;
+  if (!item?.producto || typeof item.producto.precio !== "number") {
+    return typeof item?.precioUnitarioFinal === "number"
+      ? item.precioUnitarioFinal
+      : 0;
   }
   const base = getPrecioEfectivoProducto(item.producto);
   const extras = (item.opcionesSeleccionadas || []).reduce(

@@ -153,11 +153,7 @@ interface SupabaseLocalRow {
 }
 
 function getTodayDateISO(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
+  return getFechaHoyChile();
 }
 
 function normalizeStaticLocal(raw: Local): Local {
@@ -737,6 +733,65 @@ export async function uploadPlatoFotoInSupabase(
   }
 }
 
+/**
+ * Genera una URL firmada para subir videos de portada directo al bucket `platos`
+ * omitiendo el límite de 4.5 MB de Vercel y sin requerir permisos anónimos RLS.
+ */
+export async function createSignedVideoUploadInSupabase(
+  slug: string,
+  fileName: string
+): Promise<{
+  ok: boolean;
+  path?: string;
+  token?: string;
+  publicUrl?: string;
+  error?: string;
+}> {
+  try {
+    const supabase = await getEffectiveSupabaseClient();
+    await ensurePlatosBucketVideoSupport();
+
+    const safeSlug =
+      slug
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, "-")
+        .replace(/-+/g, "-") || "negocio";
+    const safeName = fileName
+      .toLowerCase()
+      .replace(/[^a-z0-9.-]/g, "-")
+      .replace(/-+/g, "-");
+    const storagePath = `${safeSlug}/banner-video-${Date.now()}-${safeName}`;
+
+    const { data, error } = await supabase.storage
+      .from(PLATOS_IMAGES_BUCKET)
+      .createSignedUploadUrl(storagePath);
+
+    if (error || !data?.token) {
+      return {
+        ok: false,
+        error: error?.message || "No se pudo generar URL firmada de subida",
+      };
+    }
+
+    const { data: pubData } = supabase.storage
+      .from(PLATOS_IMAGES_BUCKET)
+      .getPublicUrl(storagePath);
+
+    return {
+      ok: true,
+      path: data.path || storagePath,
+      token: data.token,
+      publicUrl: pubData.publicUrl,
+    };
+  } catch (err) {
+    console.error("Error generando signed upload URL:", err);
+    return {
+      ok: false,
+      error: "Error al preparar la subida de video",
+    };
+  }
+}
+
 function mergeRowsWithStaticLocales(
   rows: SupabaseLocalRow[],
   staticLocales: Local[]
@@ -834,13 +889,6 @@ export async function fetchLocalBySlug(
     return found;
   }
 
-  const staticLocales = getAllLocales();
-  const fallbackLocal = staticLocales.find(
-    (l) => l.slug.toLowerCase() === cleanSlug
-  );
-  if (fallbackLocal && (!soloActivos || fallbackLocal.activo !== false)) {
-    return fallbackLocal;
-  }
   return undefined;
 }
 

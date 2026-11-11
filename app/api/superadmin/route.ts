@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
 import {
+  createSignedVideoUploadInSupabase,
   ensurePlatosBucketVideoSupport,
   fetchAllLocales,
   generarPinTemporalInSupabase,
@@ -13,8 +14,12 @@ import {
 } from "@/lib/locales";
 import { PlanComercial, SectorComuna } from "@/types/local";
 import {
+  COOKIE_SUPERADMIN,
   checkRateLimit,
+  createSessionToken,
   getClientIp,
+  getSessionCookieOptions,
+  isSuperAdminAuthorized,
   recordFailedAttempt,
   resetRateLimit,
 } from "@/lib/security";
@@ -22,16 +27,17 @@ import {
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
-  const isSuperAdmin =
-    req.cookies.get("pidetirua_superadmin")?.value === "authenticated";
-  if (!isSuperAdmin) {
+  if (!isSuperAdminAuthorized(req.cookies)) {
     return NextResponse.json(
       { ok: false, error: "Acceso no autorizado a SuperAdmin" },
       { status: 401 }
     );
   }
   const locales = await fetchAllLocales();
-  return NextResponse.json({ ok: true, locales });
+  return NextResponse.json(
+    { ok: true, locales },
+    { headers: { "Cache-Control": "no-store, no-cache, must-revalidate" } }
+  );
 }
 
 export async function POST(req: NextRequest) {
@@ -85,24 +91,22 @@ export async function POST(req: NextRequest) {
       resetRateLimit(rateLimitKey);
 
       const response = NextResponse.json({ ok: true });
-      response.cookies.set("pidetirua_superadmin", "authenticated", {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: "lax",
-      });
+      response.cookies.set(
+        COOKIE_SUPERADMIN,
+        createSessionToken("superadmin", "", 60 * 60 * 24 * 7),
+        getSessionCookieOptions(60 * 60 * 24 * 7)
+      );
       return response;
     }
 
     if (action === "logout") {
       const response = NextResponse.json({ ok: true });
-      response.cookies.delete("pidetirua_superadmin");
+      response.cookies.delete(COOKIE_SUPERADMIN);
       return response;
     }
 
-    // CONTROL DE SEGURIDAD: Solo usuarios con cookie activa de SuperAdmin pueden ejecutar mutaciones de plataforma
-    const isSuperAdmin =
-      req.cookies.get("pidetirua_superadmin")?.value === "authenticated";
-    if (!isSuperAdmin) {
+    // CONTROL DE SEGURIDAD: Verificar firma HMAC de sesión SuperAdmin
+    if (!isSuperAdminAuthorized(req.cookies)) {
       return NextResponse.json(
         {
           ok: false,
@@ -115,6 +119,18 @@ export async function POST(req: NextRequest) {
 
     if (action === "ensure-video-bucket") {
       const res = await ensurePlatosBucketVideoSupport();
+      return NextResponse.json(res);
+    }
+
+    if (action === "get-signed-video-upload-url") {
+      const { slug, fileName } = body;
+      const res = await createSignedVideoUploadInSupabase(
+        typeof slug === "string" ? slug : "negocio",
+        typeof fileName === "string" ? fileName : "banner.mp4"
+      );
+      if (!res.ok) {
+        return NextResponse.json(res, { status: 500 });
+      }
       return NextResponse.json(res);
     }
 

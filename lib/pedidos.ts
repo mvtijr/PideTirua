@@ -28,11 +28,25 @@ function normalizePedidoRow(row: Record<string, unknown>): Pedido {
       typeof itemObj.subtotal === "number"
         ? itemObj.subtotal
         : cantidad * precio;
+    const opciones = Array.isArray(itemObj.opciones)
+      ? itemObj.opciones
+          .map((op) => {
+            const o = (op || {}) as Record<string, unknown>;
+            return {
+              grupoTitulo: String(o.grupoTitulo || "").trim(),
+              nombre: String(o.nombre || "").trim(),
+              precio: Number(o.precio) || 0,
+            };
+          })
+          .filter((o) => Boolean(o.nombre))
+      : undefined;
+
     return {
       nombre: String(itemObj.nombre || "Producto"),
       cantidad,
       precio,
       subtotal,
+      ...(opciones && opciones.length > 0 ? { opciones } : {}),
     };
   });
 
@@ -182,7 +196,8 @@ export async function crearPedidoEnSupabase(
 }
 
 export async function listarPedidosPorLocalEnSupabase(
-  localSlug: string
+  localSlug: string,
+  limit = 500
 ): Promise<Pedido[]> {
   try {
     const supabase = getSupabaseAdminClient();
@@ -191,7 +206,7 @@ export async function listarPedidosPorLocalEnSupabase(
       .select("*")
       .eq("local_slug", localSlug)
       .order("created_at", { ascending: false })
-      .limit(100);
+      .limit(limit);
 
     if (error || !data) {
       return [];
@@ -202,6 +217,27 @@ export async function listarPedidosPorLocalEnSupabase(
     );
   } catch {
     return [];
+  }
+}
+
+export async function obtenerPedidoPorIdEnSupabase(
+  pedidoId: string
+): Promise<Pedido | null> {
+  try {
+    const supabase = getSupabaseAdminClient();
+    const { data, error } = await supabase
+      .from("pedidos")
+      .select("*")
+      .eq("id", pedidoId)
+      .maybeSingle();
+
+    if (error || !data) {
+      return null;
+    }
+
+    return normalizePedidoRow(data as Record<string, unknown>);
+  } catch {
+    return null;
   }
 }
 

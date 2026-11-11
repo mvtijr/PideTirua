@@ -170,13 +170,14 @@ export default function AdminLocalClient({
   const brand = getAdminBrandPalette(initialLocal.slug);
 
   const [local, setLocal] = useState<Local>(initialLocal);
+  const [tokenCocinaActual, setTokenCocinaActual] = useState<
+    string | undefined
+  >(tokenCocina);
   const [esSuperAdmin, setEsSuperAdmin] = useState<boolean>(initialSuperAdmin);
   const [autenticado, setAutenticado] = useState<boolean>(
     initialAuthenticated || initialSuperAdmin
   );
-  const [verificandoSesion, setVerificandoSesion] = useState<boolean>(
-    !initialAuthenticated && !initialSuperAdmin
-  );
+  const [verificandoSesion, setVerificandoSesion] = useState<boolean>(false);
 
   // Estado del bloqueo por PIN
   const [pin, setPin] = useState<string>("");
@@ -447,37 +448,17 @@ export default function AdminLocalClient({
   useEffect(() => {
     if (initialAuthenticated || initialSuperAdmin) {
       setAutenticado(true);
-      try {
-        document.cookie = `pidetirua_admin_${initialLocal.slug}=authenticated; path=/; max-age=604800; SameSite=Lax`;
-      } catch {}
       if (initialSuperAdmin) setEsSuperAdmin(true);
-      setVerificandoSesion(false);
-      return;
-    }
-    try {
-      const sesionSuperAdmin =
-        localStorage.getItem("pidetirua_superadmin_session") === "authenticated";
-
-      if (sesionSuperAdmin) {
-        setEsSuperAdmin(true);
-        setAutenticado(true);
-        localStorage.setItem(sessionKey, "authenticated");
-        document.cookie = `pidetirua_admin_${initialLocal.slug}=authenticated; path=/; max-age=604800; SameSite=Lax`;
-        setVerificandoSesion(false);
-        return;
+    } else {
+      try {
+        localStorage.removeItem(sessionKey);
+      } catch {
+        // Ignorar errores de acceso a localStorage
       }
-
-      const guardado = localStorage.getItem(sessionKey);
-      if (guardado === "authenticated") {
-        setAutenticado(true);
-        document.cookie = `pidetirua_admin_${initialLocal.slug}=authenticated; path=/; max-age=604800; SameSite=Lax`;
-      }
-    } catch {
-      // Ignorar errores de acceso a localStorage
-    } finally {
-      setVerificandoSesion(false);
+      setAutenticado(false);
     }
-  }, [initialAuthenticated, initialSuperAdmin, initialLocal.slug, sessionKey]);
+    setVerificandoSesion(false);
+  }, [initialAuthenticated, initialSuperAdmin, sessionKey]);
 
   const mostrarToast = (mensaje = "Cambio guardado") => {
     setToastMensaje(mensaje);
@@ -526,10 +507,33 @@ export default function AdminLocalClient({
       }
 
       try {
-        localStorage.setItem(sessionKey, "authenticated");
-        document.cookie = `pidetirua_admin_${local.slug}=authenticated; path=/; max-age=604800; SameSite=Lax`;
+        const resAdmin = await fetch(`/api/admin/${local.slug}`, {
+          cache: "no-store",
+        });
+        if (resAdmin.ok) {
+          const adminData = await resAdmin.json();
+          if (adminData?.ok && adminData.local) {
+            const loc = adminData.local as Local;
+            setLocal(loc);
+            setTelefonoWhatsapp(
+              loc.telefono_whatsapp || loc.telefonoWhatsapp || ""
+            );
+            setHorarioAtencion(loc.horario || loc.horarioEntrega || "");
+            setDireccionLocal(loc.direccionDetalle || "");
+            setNuevoPinSeguridad(loc.pin || "");
+            setBanco(loc.banco || "");
+            setTipoCuenta(loc.tipo_cuenta || "");
+            setNumeroCuenta(loc.numero_cuenta || "");
+            setRutTitular(loc.rut_titular || "");
+            setNombreTitular(loc.nombre_titular || "");
+            setEmailTransferencia(loc.email_transferencia || "");
+            if (adminData.tokenCocina) {
+              setTokenCocinaActual(String(adminData.tokenCocina));
+            }
+          }
+        }
       } catch {
-        // Ignorar errores en modo privado
+        // Ignorar fallo no crítico de hidratación secundaria
       }
 
       setAutenticado(true);
@@ -631,7 +635,7 @@ export default function AdminLocalClient({
 
   const obtenerUrlKdsTablet = () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "https://pidetirua.cl";
-    const token = tokenCocina || local.token_cocina || "";
+    const token = tokenCocinaActual || local.token_cocina || "";
     return `${origin}/pedidos/${local.slug}${token ? `?token=${token}` : ""}`;
   };
 
@@ -680,7 +684,6 @@ export default function AdminLocalClient({
   const handleCerrarSesion = async () => {
     try {
       localStorage.removeItem(sessionKey);
-      document.cookie = `pidetirua_admin_${local.slug}=; path=/; max-age=0`;
       await fetch(`/api/admin/${local.slug}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -794,6 +797,7 @@ export default function AdminLocalClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "describe_dish",
+          slug: local.slug,
           nombre: nombreLimpio,
           categoria: categoriaNombre,
         }),
@@ -838,6 +842,7 @@ export default function AdminLocalClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "social_post",
+          slug: local.slug,
           nombre_local: local.nombre,
           rubro: local.rubro,
           platos_destacados: platosDestacadosNombres,

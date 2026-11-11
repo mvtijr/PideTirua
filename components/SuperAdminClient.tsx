@@ -300,20 +300,15 @@ export default function SuperAdminClient({
   useEffect(() => {
     if (initialAuthenticated) {
       setAutenticado(true);
-      setVerificandoSesion(false);
-      return;
-    }
-    try {
-      const guardado = localStorage.getItem(SESSION_KEY);
-      if (guardado === "authenticated") {
-        setAutenticado(true);
-        void recargarLocales();
+    } else {
+      try {
+        localStorage.removeItem(SESSION_KEY);
+      } catch {
+        // Ignorar
       }
-    } catch {
-      // Ignorar
-    } finally {
-      setVerificandoSesion(false);
+      setAutenticado(false);
     }
+    setVerificandoSesion(false);
   }, [initialAuthenticated]);
 
   const mostrarToast = (msg: string) => {
@@ -360,14 +355,6 @@ export default function SuperAdminClient({
         return;
       }
 
-      try {
-        localStorage.setItem(SESSION_KEY, "authenticated");
-        document.cookie =
-          "pidetirua_superadmin=authenticated; path=/; max-age=604800; SameSite=Lax";
-      } catch {
-        // Ignorar
-      }
-
       setAutenticado(true);
       void recargarLocales();
       mostrarToast("Sesión SuperAdmin iniciada");
@@ -381,7 +368,6 @@ export default function SuperAdminClient({
   const handleLogoutSuperAdmin = async () => {
     try {
       localStorage.removeItem(SESSION_KEY);
-      document.cookie = "pidetirua_superadmin=; path=/; max-age=0";
       await fetch("/api/superadmin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -519,54 +505,49 @@ export default function SuperAdminClient({
     setErrorForm(null);
 
     try {
-      const supabase = getSupabaseClient();
       const ext = file.name.toLowerCase().endsWith(".webm") ? "webm" : "mp4";
       const contentType =
         file.type || (ext === "webm" ? "video/webm" : "video/mp4");
-      const safeName = file.name
-        .toLowerCase()
-        .replace(/[^a-z0-9.-]/g, "-")
-        .replace(/-+/g, "-");
-      const storagePath = `${slugRef}/banner-video-${Date.now()}-${safeName}`;
 
-      let { error: uploadErr } = await supabase.storage
+      const signedRes = await fetch("/api/superadmin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "get-signed-video-upload-url",
+          slug: slugRef,
+          fileName: file.name,
+        }),
+      });
+      const signedData = await signedRes.json();
+      if (!signedRes.ok || !signedData.ok || !signedData.path || !signedData.token) {
+        throw new Error(
+          signedData?.error || "No se pudo autorizar la subida de video"
+        );
+      }
+
+      const supabase = getSupabaseClient();
+      const { error: uploadErr } = await supabase.storage
         .from("platos")
-        .upload(storagePath, file, {
+        .uploadToSignedUrl(signedData.path, signedData.token, file, {
           contentType,
           upsert: true,
           cacheControl: "3600",
         });
 
       if (uploadErr) {
-        await fetch("/api/superadmin", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "ensure-video-bucket" }),
-        }).catch(() => {});
-
-        const retry = await supabase.storage
-          .from("platos")
-          .upload(storagePath, file, {
-            contentType,
-            upsert: true,
-            cacheControl: "3600",
-          });
-        uploadErr = retry.error;
-      }
-
-      if (uploadErr) {
         throw new Error(uploadErr.message);
       }
 
-      const { data: pubData } = supabase.storage
-        .from("platos")
-        .getPublicUrl(storagePath);
+      const publicUrl =
+        signedData.publicUrl ||
+        supabase.storage.from("platos").getPublicUrl(signedData.path).data
+          ?.publicUrl;
 
-      if (!pubData?.publicUrl) {
+      if (!publicUrl) {
         throw new Error("No se pudo obtener la URL pública del video");
       }
 
-      setFormBannerVideoUrl(pubData.publicUrl);
+      setFormBannerVideoUrl(String(publicUrl));
       mostrarToast("🎥 Video de Portada subido al bucket 'platos'");
     } catch (err) {
       setErrorForm(

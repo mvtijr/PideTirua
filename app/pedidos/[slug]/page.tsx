@@ -6,6 +6,7 @@ import {
   stripSensitiveLocalFields,
   verifyTokenCocinaInSupabase,
 } from "@/lib/locales";
+import { isKdsAuthorized } from "@/lib/security";
 import PedidosStaffClient from "@/components/PedidosStaffClient";
 
 export const dynamic = "force-dynamic";
@@ -54,21 +55,13 @@ export default async function PedidosPage({
   const queryParams = searchParams ? await searchParams : {};
   const tokenQuery = typeof queryParams.token === "string" ? queryParams.token : undefined;
 
-  const local = await fetchLocalBySlug(slug, true);
+  const local = await fetchLocalBySlug(slug);
   if (!local) {
     notFound();
   }
 
   const cookieStore = await cookies();
-  const kdsCookie = cookieStore.get(`pidetirua_kds_${local.slug}`);
-  const adminCookie = cookieStore.get(`pidetirua_admin_${local.slug}`);
-  const superAdminCookie = cookieStore.get("pidetirua_superadmin");
-
-  // Si ya tiene cookie de KDS, o si es el dueño/superadmin autenticado:
-  let initialAuthenticated =
-    kdsCookie?.value === "authenticated" ||
-    adminCookie?.value === "authenticated" ||
-    superAdminCookie?.value === "authenticated";
+  let initialAuthenticated = isKdsAuthorized(cookieStore, local.slug);
 
   // Si viene con token válido en la URL:
   if (!initialAuthenticated && tokenQuery) {

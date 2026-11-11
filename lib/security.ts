@@ -222,6 +222,125 @@ export function removePhoneFromBlacklist(rawPhone: string): boolean {
   return blacklistStore.delete(norm);
 }
 
+export const COOKIE_SUPERADMIN = "pidetirua_superadmin";
+export const cookieNameAdmin = (slug: string) =>
+  `pidetirua_admin_${slug.toLowerCase().trim()}`;
+export const cookieNameKds = (slug: string) =>
+  `pidetirua_kds_${slug.toLowerCase().trim()}`;
+
+export type SessionRole = "superadmin" | "admin" | "kds";
+
+interface CookieGetter {
+  get(name: string): { value: string } | undefined;
+}
+
+function getSessionSigningKey(): Buffer {
+  const source =
+    process.env.SESSION_SECRET ||
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPERADMIN_KEY ||
+    "pidetirua-local-dev-signing-key";
+  return crypto.createHash("sha256").update(source).digest();
+}
+
+/**
+ * Crea un token de sesión firmado con HMAC-SHA256 con expiración y alcance por rol/slug.
+ */
+export function createSessionToken(
+  role: SessionRole,
+  slug = "",
+  ttlSeconds = 60 * 60 * 24 * 7
+): string {
+  const payload = {
+    r: role,
+    s: slug.toLowerCase().trim(),
+    e: Date.now() + ttlSeconds * 1000,
+  };
+  const payloadB64 = Buffer.from(JSON.stringify(payload), "utf-8").toString(
+    "base64url"
+  );
+  const sigB64 = crypto
+    .createHmac("sha256", getSessionSigningKey())
+    .update(payloadB64)
+    .digest("base64url");
+  return `${payloadB64}.${sigB64}`;
+}
+
+/**
+ * Verifica integridad HMAC-SHA256, expiración, rol y slug del token de sesión.
+ */
+export function verifySessionToken(
+  token: string | undefined,
+  expectedRole: SessionRole,
+  expectedSlug?: string
+): boolean {
+  if (!token || typeof token !== "string") return false;
+  const parts = token.split(".");
+  if (parts.length !== 2) return false;
+  const [payloadB64, sigB64] = parts;
+  if (!payloadB64 || !sigB64) return false;
+
+  try {
+    const expectedSig = crypto
+      .createHmac("sha256", getSessionSigningKey())
+      .update(payloadB64)
+      .digest("base64url");
+    if (!timingSafeCompare(sigB64, expectedSig)) {
+      return false;
+    }
+
+    const decoded = JSON.parse(
+      Buffer.from(payloadB64, "base64url").toString("utf-8")
+    ) as { r?: unknown; s?: unknown; e?: unknown };
+
+    if (decoded.r !== expectedRole) return false;
+    if (typeof decoded.e !== "number" || Date.now() >= decoded.e) return false;
+
+    if (expectedSlug !== undefined) {
+      const cleanExpected = expectedSlug.toLowerCase().trim();
+      if (String(decoded.s || "") !== cleanExpected) return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function getSessionCookieOptions(maxAgeSeconds = 60 * 60 * 24 * 7) {
+  return {
+    path: "/",
+    maxAge: maxAgeSeconds,
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+  };
+}
+
+export function isSuperAdminAuthorized(cookies: CookieGetter): boolean {
+  return verifySessionToken(
+    cookies.get(COOKIE_SUPERADMIN)?.value,
+    "superadmin"
+  );
+}
+
+export function isLocalAdminAuthorized(
+  cookies: CookieGetter,
+  slug: string
+): boolean {
+  if (isSuperAdminAuthorized(cookies)) return true;
+  return verifySessionToken(
+    cookies.get(cookieNameAdmin(slug))?.value,
+    "admin",
+    slug
+  );
+}
+
+export function isKdsAuthorized(cookies: CookieGetter, slug: string): boolean {
+  if (isLocalAdminAuthorized(cookies, slug)) return true;
+  return verifySessionToken(cookies.get(cookieNameKds(slug))?.value, "kds", slug);
+}
+
 /**
  * Obtiene todos los registros actuales de la lista negra.
  */

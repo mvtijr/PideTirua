@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { fetchAllLocales } from "@/lib/locales";
+import { isSuperAdminAuthorized } from "@/lib/security";
 import SuperAdminClient from "@/components/SuperAdminClient";
 
 export const dynamic = "force-dynamic";
@@ -14,8 +15,7 @@ export const metadata: Metadata = {
 
 export default async function SuperAdminPage() {
   const cookieStore = await cookies();
-  const superAdminCookie = cookieStore.get("pidetirua_superadmin");
-  const initialAuthenticated = superAdminCookie?.value === "authenticated";
+  const initialAuthenticated = isSuperAdminAuthorized(cookieStore);
   const locales = initialAuthenticated ? await fetchAllLocales() : [];
 
   return (

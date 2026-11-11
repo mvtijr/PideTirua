@@ -1,9 +1,11 @@
 import { MetadataRoute } from "next";
-import { getAllLocales } from "@/lib/locales";
+import { fetchActiveLocales } from "@/lib/locales";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export const revalidate = 60;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.pidetirua.cl";
-  const locales = getAllLocales().filter((l) => l.activo !== false);
+  const locales = await fetchActiveLocales(true);
 
   const localUrls: MetadataRoute.Sitemap = locales.map((local) => ({
     url: `${baseUrl}/${local.slug}`,

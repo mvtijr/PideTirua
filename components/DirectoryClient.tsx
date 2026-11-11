@@ -817,23 +817,29 @@ export default function DirectoryClient({
           <div className="rounded-3xl border border-dashed border-stone-300 bg-white p-12 text-center max-w-md mx-auto my-6">
             <UtensilsCrossed className="mx-auto h-10 w-10 text-stone-400" />
             <h3 className="mt-3 font-display text-2xl text-stone-900 tracking-wide uppercase">
-              NO ENCONTRAMOS RESULTADOS
+              {locales.length === 0
+                ? "LOCALES ACTUALIZANDO CARTA"
+                : "NO ENCONTRAMOS RESULTADOS"}
             </h3>
             <p className="mt-1 font-body text-xs text-stone-600">
-              No hay locales que coincidan con tu búsqueda o filtros actuales.
+              {locales.length === 0
+                ? "En este momento no hay locales activos publicados en el directorio. Vuelve en unos minutos."
+                : "No hay locales que coincidan con tu búsqueda o filtros actuales."}
             </p>
-            <button
-              type="button"
-              onClick={() => {
-                setBusqueda("");
-                setCategoriaActiva("Todos");
-                setSectorActivo("Todos");
-                setSoloAbiertos(false);
-              }}
-              className="mt-4 rounded-full bg-[#18181B] text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 hover:bg-[#EA580C] transition"
-            >
-              Restablecer filtros
-            </button>
+            {locales.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setBusqueda("");
+                  setCategoriaActiva("Todos");
+                  setSectorActivo("Todos");
+                  setSoloAbiertos(false);
+                }}
+                className="mt-4 rounded-full bg-[#18181B] text-white text-xs font-bold uppercase tracking-wider px-5 py-2.5 hover:bg-[#EA580C] transition"
+              >
+                Restablecer filtros
+              </button>
+            )}
           </div>
         )}
       </section>

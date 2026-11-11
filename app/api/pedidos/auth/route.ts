@@ -6,7 +6,10 @@ import {
 } from "@/lib/locales";
 import {
   checkRateLimit,
+  cookieNameKds,
+  createSessionToken,
   getClientIp,
+  getSessionCookieOptions,
   recordFailedAttempt,
   resetRateLimit,
 } from "@/lib/security";
@@ -35,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     if (action === "logout") {
       const response = NextResponse.json({ ok: true });
-      response.cookies.delete(`pidetirua_kds_${localSlug}`);
+      response.cookies.delete(cookieNameKds(localSlug));
       return response;
     }
 
@@ -102,13 +105,11 @@ export async function POST(req: NextRequest) {
       localSlug: local.slug,
     });
 
-    response.cookies.set(`pidetirua_kds_${localSlug}`, "authenticated", {
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30, // 30 días
-      httpOnly: false, // Accesible por cliente para sincronizar sesión
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-    });
+    response.cookies.set(
+      cookieNameKds(localSlug),
+      createSessionToken("kds", localSlug, 60 * 60 * 24 * 30),
+      getSessionCookieOptions(60 * 60 * 24 * 30)
+    );
 
     return response;
   } catch (err: unknown) {

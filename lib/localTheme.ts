@@ -72,7 +72,7 @@ export interface LocalTheme {
 
 export function getVideoPoster(videoSrc?: string, fallback?: string): string {
   if (!videoSrc) return fallback || "";
-  if (videoSrc.endsWith(".mp4")) {
+  if (videoSrc.startsWith("/videos/") && videoSrc.endsWith(".mp4")) {
     return videoSrc.replace(/\.mp4$/, "-poster.jpg");
   }
   return fallback || "";

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
+  fetchActiveLocales,
   fetchLocalBySlug,
-  getAllLocales,
   stripSensitiveLocalFields,
 } from "@/lib/locales";
 import MenuClient from "@/components/MenuClient";
@@ -15,7 +15,7 @@ interface LocalMenuPageProps {
 }
 
 export async function generateStaticParams() {
-  const locales = getAllLocales();
+  const locales = await fetchActiveLocales(true);
   return locales.map((local) => ({
     slug: local.slug,
   }));

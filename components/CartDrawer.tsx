@@ -468,6 +468,7 @@ export default function CartDrawer({
       items: items.map((item) => {
         const precioUnitario = getPrecioUnitarioItem(item);
         return {
+          productoId: item.producto.id,
           nombre: item.producto.nombre,
           cantidad: item.cantidad,
           precio: precioUnitario,

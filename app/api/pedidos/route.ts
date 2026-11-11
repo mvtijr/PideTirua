@@ -3,13 +3,23 @@ import {
   actualizarEstadoPedidoEnSupabase,
   crearPedidoEnSupabase,
   listarPedidosPorLocalEnSupabase,
+  obtenerPedidoPorIdEnSupabase,
 } from "@/lib/pedidos";
-import { EstadoPedido, ItemPedidoGuardado } from "@/types/local";
+import { fetchLocalBySlug } from "@/lib/locales";
+import { getPrecioEfectivoProducto } from "@/lib/formatters";
+import {
+  EstadoPedido,
+  ItemPedidoGuardado,
+  OpcionSeleccionada,
+  Producto,
+} from "@/types/local";
 import {
   addPhoneToBlacklist,
   checkRateLimit,
   getClientIp,
+  isKdsAuthorized,
   isPhoneBlacklisted,
+  isSuperAdminAuthorized,
   normalizePhone,
   recordFailedAttempt,
   sanitizeString,
@@ -27,16 +37,9 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // PROTECCIÓN DE SEGURIDAD Y PRIVACIDAD DE DATOS (CERO FUGAS):
-  // Solo el dueño del local autenticado, el personal de cocina autorizado o el SuperAdmin pueden consultar pedidos
-  const isLocalAdmin =
-    req.cookies.get(`pidetirua_admin_${slugLimpio}`)?.value === "authenticated";
-  const isStaffKds =
-    req.cookies.get(`pidetirua_kds_${slugLimpio}`)?.value === "authenticated";
-  const isSuperAdmin =
-    req.cookies.get("pidetirua_superadmin")?.value === "authenticated";
-
-  if (!isLocalAdmin && !isSuperAdmin && !isStaffKds) {
+  // PROTECCIÓN DE SEGURIDAD Y PRIVACIDAD DE DATOS:
+  // Solo sesión HMAC válida del dueño del local, cocina KDS del mismo slug o SuperAdmin
+  if (!isKdsAuthorized(req.cookies, slugLimpio)) {
     return NextResponse.json(
       {
         ok: false,
@@ -83,7 +86,6 @@ export async function POST(req: NextRequest) {
       metodo_pago,
       notas,
       items,
-      total,
     } = body;
 
     const slugLimpio = sanitizeString(local_slug, 50).toLowerCase();
@@ -94,21 +96,104 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const itemsLimpios: ItemPedidoGuardado[] = Array.isArray(items)
-      ? items.slice(0, 50).map((it: Record<string, unknown>) => {
-          const cantidad = Math.max(1, Math.min(99, Number(it.cantidad) || 1));
-          const precio = Math.max(0, Number(it.precio) || 0);
-          return {
-            nombre: sanitizeString(it.nombre, 80) || "Producto",
-            cantidad,
-            precio,
-            subtotal:
-              typeof it.subtotal === "number" && it.subtotal > 0
-                ? Math.min(it.subtotal, cantidad * precio)
-                : cantidad * precio,
-          };
-        })
-      : [];
+    const local = await fetchLocalBySlug(slugLimpio, true);
+    if (!local) {
+      return NextResponse.json(
+        { ok: false, error: "Este local no existe o no se encuentra activo." },
+        { status: 404 }
+      );
+    }
+
+    const productosById = new Map<string, Producto>();
+    const productosByNombre = new Map<string, Producto>();
+    for (const cat of local.categorias || []) {
+      for (const prod of cat.productos || []) {
+        if (prod.id) productosById.set(prod.id, prod);
+        if (prod.nombre) {
+          productosByNombre.set(prod.nombre.trim().toLowerCase(), prod);
+        }
+      }
+    }
+
+    const rawItems = Array.isArray(items) ? items.slice(0, 50) : [];
+    const itemsLimpios: ItemPedidoGuardado[] = [];
+
+    for (const rawIt of rawItems) {
+      const it = (rawIt || {}) as Record<string, unknown>;
+      const cantidad = Math.max(1, Math.min(99, Math.round(Number(it.cantidad) || 1)));
+      const productoId =
+        typeof it.productoId === "string" ? it.productoId.trim() : "";
+      const nombreLimpio = sanitizeString(it.nombre, 80);
+
+      const prodServer =
+        (productoId && productosById.get(productoId)) ||
+        (nombreLimpio && productosByNombre.get(nombreLimpio.toLowerCase())) ||
+        undefined;
+
+      if (!prodServer) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error:
+              "Uno de los productos del carrito ya no está en la carta actualizada. Recarga el menú antes de enviar tu pedido.",
+          },
+          { status: 400 }
+        );
+      }
+
+      const opcionesLimpias: OpcionSeleccionada[] = [];
+      let extrasUnitarios = 0;
+
+      if (Array.isArray(it.opciones) && Array.isArray(prodServer.opciones)) {
+        for (const rawOp of it.opciones.slice(0, 20)) {
+          const opObj = (rawOp || {}) as Record<string, unknown>;
+          const grupoTituloReq = sanitizeString(opObj.grupoTitulo, 80);
+          const nombreOpReq = sanitizeString(opObj.nombre, 80);
+          if (!nombreOpReq) continue;
+
+          const grupoMatch =
+            prodServer.opciones.find(
+              (g) =>
+                g.titulo.trim().toLowerCase() === grupoTituloReq.toLowerCase()
+            ) ||
+            prodServer.opciones.find((g) =>
+              g.items?.some(
+                (itemOp) =>
+                  itemOp.nombre.trim().toLowerCase() ===
+                  nombreOpReq.toLowerCase()
+              )
+            );
+          const itemOpMatch = grupoMatch?.items?.find(
+            (itemOp) =>
+              itemOp.nombre.trim().toLowerCase() === nombreOpReq.toLowerCase()
+          );
+
+          if (itemOpMatch) {
+            const precioOp = Math.max(0, Number(itemOpMatch.precio) || 0);
+            extrasUnitarios += precioOp;
+            opcionesLimpias.push({
+              grupoTitulo: grupoMatch?.titulo || grupoTituloReq,
+              nombre: itemOpMatch.nombre,
+              precio: precioOp,
+            });
+          }
+        }
+      }
+
+      const baseUnitPrice = Math.max(
+        0,
+        Number(getPrecioEfectivoProducto(prodServer)) || 0
+      );
+      const precioUnitarioReal = baseUnitPrice + extrasUnitarios;
+
+      itemsLimpios.push({
+        nombre: prodServer.nombre,
+        cantidad,
+        precio: precioUnitarioReal,
+        subtotal: precioUnitarioReal * cantidad,
+        ...(opcionesLimpias.length > 0 ? { opciones: opcionesLimpias } : {}),
+      });
+    }
 
     if (itemsLimpios.length === 0) {
       return NextResponse.json(
@@ -171,7 +256,10 @@ export async function POST(req: NextRequest) {
         ? "Transferencia"
         : "Efectivo";
     const notasLimpias = sanitizeString(notas, 300);
-    const totalNum = Math.max(0, Number(total) || 0);
+    const totalNum = itemsLimpios.reduce(
+      (acc, item) => acc + (Number(item.subtotal) || 0),
+      0
+    );
 
     // Protección financiera: límite de monto en efectivo ($25.000 CLP)
     if (metodoPagoLimpio === "Efectivo" && totalNum > 25000) {
@@ -215,30 +303,6 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const isSuperAdmin =
-      req.cookies.get("pidetirua_superadmin")?.value === "authenticated";
-    const hasAdminCookie =
-      isSuperAdmin ||
-      req.cookies
-        .getAll()
-        .some(
-          (c) =>
-            (c.name.startsWith("pidetirua_admin_") ||
-              c.name.startsWith("pidetirua_kds_")) &&
-            c.value === "authenticated"
-        );
-
-    if (!hasAdminCookie) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error:
-            "Acceso no autorizado. Se requiere sesión de cocina o administración.",
-        },
-        { status: 401 }
-      );
-    }
-
     const body = await req.json();
     const { pedidoId, estado } = body;
 
@@ -246,6 +310,26 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json(
         { ok: false, error: "pedidoId es requerido" },
         { status: 400 }
+      );
+    }
+
+    const pedidoExistente = await obtenerPedidoPorIdEnSupabase(pedidoId);
+    if (!pedidoExistente) {
+      return NextResponse.json(
+        { ok: false, error: "Pedido no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    const isSuperAdmin = isSuperAdminAuthorized(req.cookies);
+    if (!isKdsAuthorized(req.cookies, pedidoExistente.local_slug)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "Acceso no autorizado. Se requiere sesión válida de cocina o administración para este local.",
+        },
+        { status: 401 }
       );
     }
 
@@ -269,9 +353,12 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Si se solicitó bloquear el número por comanda cancelada o broma
-    if (estado === "cancelado" && body.bloquearTelefono && body.telefono) {
+    const telefonoParaBloquear =
+      pedidoExistente.cliente_telefono ||
+      (typeof body.telefono === "string" ? body.telefono : "");
+    if (estado === "cancelado" && body.bloquearTelefono && telefonoParaBloquear) {
       addPhoneToBlacklist(
-        String(body.telefono),
+        String(telefonoParaBloquear),
         String(body.motivoBloqueo || "Comanda no retirada / broma"),
         isSuperAdmin ? "superadmin" : "admin"
       );

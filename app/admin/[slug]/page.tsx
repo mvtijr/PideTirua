@@ -6,6 +6,7 @@ import {
   obtenerTokenCocina,
   stripSensitiveLocalFields,
 } from "@/lib/locales";
+import { isLocalAdminAuthorized, isSuperAdminAuthorized } from "@/lib/security";
 import AdminLocalClient from "@/components/AdminLocalClient";
 
 export const dynamic = "force-dynamic";
@@ -79,11 +80,8 @@ export default async function AdminLocalPage({
   }
 
   const cookieStore = await cookies();
-  const sesionCookie = cookieStore.get(`pidetirua_admin_${local.slug}`);
-  const superAdminCookie = cookieStore.get("pidetirua_superadmin");
-  const isSuperAdmin = superAdminCookie?.value === "authenticated";
-  const initialAuthenticated =
-    sesionCookie?.value === "authenticated" || isSuperAdmin;
+  const isSuperAdmin = isSuperAdminAuthorized(cookieStore);
+  const initialAuthenticated = isLocalAdminAuthorized(cookieStore, local.slug);
 
   const tokenCocina = isSuperAdmin || initialAuthenticated ? obtenerTokenCocina(local) : undefined;
 

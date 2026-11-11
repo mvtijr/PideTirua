@@ -177,9 +177,14 @@ export default function KitchenMonitor({
         cache: "no-store",
       });
       const data = await res.json();
-      if (res.ok && data.ok && data.local && Array.isArray(data.local.menu)) {
+      const cats = Array.isArray(data.local?.categorias)
+        ? data.local.categorias
+        : Array.isArray(data.local?.menu)
+        ? data.local.menu
+        : [];
+      if (res.ok && data.ok && data.local) {
         const items: ProductoStockItem[] = [];
-        data.local.menu.forEach((cat: CategoriaMenu) => {
+        cats.forEach((cat: CategoriaMenu) => {
           if (Array.isArray(cat.productos)) {
             cat.productos.forEach((p: Producto) => {
               items.push({
@@ -833,17 +838,31 @@ export default function KitchenMonitor({
                     {pedido.items.map((item, idx) => (
                       <li
                         key={`${pedido.id}-item-${idx}`}
-                        className="flex items-center justify-between gap-2 py-1.5 font-bold text-slate-900"
+                        className="py-1.5 font-bold text-slate-900"
                       >
-                        <span>
-                          <strong className="mr-1.5 inline-block rounded-md bg-slate-900 px-1.5 py-0.5 text-xs font-black text-white">
-                            {item.cantidad}x
-                          </strong>
-                          {item.nombre}
-                        </span>
-                        <span className="shrink-0 font-extrabold text-slate-700 tabular-nums">
-                          {formatCLP(item.subtotal || item.precio * item.cantidad)}
-                        </span>
+                        <div className="flex items-center justify-between gap-2">
+                          <span>
+                            <strong className="mr-1.5 inline-block rounded-md bg-slate-900 px-1.5 py-0.5 text-xs font-black text-white">
+                              {item.cantidad}x
+                            </strong>
+                            {item.nombre}
+                          </span>
+                          <span className="shrink-0 font-extrabold text-slate-700 tabular-nums">
+                            {formatCLP(item.subtotal || item.precio * item.cantidad)}
+                          </span>
+                        </div>
+                        {item.opciones && item.opciones.length > 0 && (
+                          <div className="mt-1 pl-7 flex flex-wrap gap-1">
+                            {item.opciones.map((op, opIdx) => (
+                              <span
+                                key={`${pedido.id}-item-${idx}-op-${opIdx}`}
+                                className="inline-flex items-center rounded-md bg-amber-100/90 border border-amber-300/80 px-2 py-0.5 text-[11px] font-bold text-amber-950"
+                              >
+                                + {op.nombre}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </li>
                     ))}
                   </ul>

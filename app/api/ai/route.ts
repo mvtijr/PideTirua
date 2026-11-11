@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { checkRateLimit, getClientIp, sanitizeString } from "@/lib/security";
+import {
+  checkRateLimit,
+  getClientIp,
+  isLocalAdminAuthorized,
+  isSuperAdminAuthorized,
+  sanitizeString,
+  verifySessionToken,
+} from "@/lib/security";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +77,31 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json().catch(() => ({}));
     const action = String(body.action || "").trim();
+    const bodySlug =
+      typeof body.slug === "string" ? body.slug.trim().toLowerCase() : "";
+
+    const tieneSesionAdmin =
+      isSuperAdminAuthorized(req.cookies) ||
+      (bodySlug
+        ? isLocalAdminAuthorized(req.cookies, bodySlug)
+        : req.cookies
+            .getAll()
+            .some(
+              (c) =>
+                c.name.startsWith("pidetirua_admin_") &&
+                verifySessionToken(
+                  c.value,
+                  "admin",
+                  c.name.slice("pidetirua_admin_".length)
+                )
+            ));
+
+    if (!tieneSesionAdmin) {
+      return NextResponse.json(
+        { error: "Acceso no autorizado. Inicia sesión como administrador." },
+        { status: 401 }
+      );
+    }
 
     const apiKey = process.env.GEMINI_API_KEY?.trim() || "";
 

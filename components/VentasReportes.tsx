@@ -106,29 +106,47 @@ export default function VentasReportes({
     };
   }, [localSlug, cargarPedidos]);
 
-  // Cálculos de métricas del mes actual
-  const now = new Date();
-  const mesActual = now.getMonth();
-  const anioActual = now.getFullYear();
+  // Cálculos de métricas del mes actual en zona horaria de Chile
+  const [anioChileStr, mesChileStr] = useMemo(() => {
+    try {
+      const formatted = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "America/Santiago",
+        year: "numeric",
+        month: "2-digit",
+      }).format(new Date());
+      return formatted.split("-");
+    } catch {
+      const d = new Date();
+      return [String(d.getFullYear()), String(d.getMonth() + 1).padStart(2, "0")];
+    }
+  }, []);
+  const anioActual = Number(anioChileStr) || new Date().getFullYear();
+  const mesActual = (Number(mesChileStr) || new Date().getMonth() + 1) - 1;
 
   const nombreMes = useMemo(() => {
     try {
-      const nom = now.toLocaleDateString("es-CL", { month: "long" });
+      const nom = new Date().toLocaleDateString("es-CL", {
+        timeZone: "America/Santiago",
+        month: "long",
+      });
       return nom.charAt(0).toUpperCase() + nom.slice(1);
     } catch {
       return "Mes Actual";
     }
-  }, [now]);
+  }, []);
 
-  // Excluir pedidos cancelados y filtrar por el mes corriente
+  // Excluir pedidos cancelados y filtrar por el mes corriente (America/Santiago)
   const pedidosMes = useMemo(() => {
     return pedidos.filter((p) => {
       if (p.estado === "cancelado") return false;
       try {
-        const fecha = new Date(p.created_at);
-        return (
-          fecha.getMonth() === mesActual && fecha.getFullYear() === anioActual
-        );
+        const yyyymm = new Intl.DateTimeFormat("en-CA", {
+          timeZone: "America/Santiago",
+          year: "numeric",
+          month: "2-digit",
+        }).format(new Date(p.created_at));
+        const [pAnio, pMes] = yyyymm.split("-").map(Number);
+        return pAnio === anioActual && pMes - 1 === mesActual;
       } catch {
         return false;
       }
