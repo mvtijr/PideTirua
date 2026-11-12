@@ -285,7 +285,11 @@ export default function PedidosStaffClient({
           {validandoPin && (
             <div className="flex items-center justify-center gap-2 text-xs font-bold text-[#EA580C] pt-1">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Verificando PIN de personal...</span>
+              <span>
+                {tokenFromQuery && pin.length === 0
+                  ? "Verificando enlace de acceso..."
+                  : "Verificando PIN de personal..."}
+              </span>
             </div>
           )}
 

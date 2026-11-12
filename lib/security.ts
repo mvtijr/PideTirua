@@ -11,7 +11,7 @@ const rateLimitStore = new Map<string, RateLimitRecord>();
 
 // Limpieza periódica de registros vencidos cada 15 minutos para evitar fuga de memoria
 if (typeof setInterval !== "undefined") {
-  setInterval(() => {
+  const cleanupTimer = setInterval(() => {
     const now = Date.now();
     for (const [key, record] of rateLimitStore.entries()) {
       if (now > record.lockedUntil && now - record.firstAttemptAt > 3600000) {
@@ -19,6 +19,7 @@ if (typeof setInterval !== "undefined") {
       }
     }
   }, 15 * 60 * 1000);
+  cleanupTimer.unref?.();
 }
 
 /**

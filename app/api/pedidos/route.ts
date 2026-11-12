@@ -14,11 +14,13 @@ import {
   Producto,
 } from "@/types/local";
 import {
-  addPhoneToBlacklist,
+  addPhoneToBlacklistPersistent,
+  isPhoneBlacklistedPersistent,
+} from "@/lib/blacklist";
+import {
   checkRateLimit,
   getClientIp,
   isKdsAuthorized,
-  isPhoneBlacklisted,
   isSuperAdminAuthorized,
   normalizePhone,
   recordFailedAttempt,
@@ -121,13 +123,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const productosById = new Map<string, Producto>();
-    const productosByNombre = new Map<string, Producto>();
+    if (local.abierto === false) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "En este momento el local se encuentra cerrado y no está recibiendo pedidos.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const productosById = new Map<string, { prod: Producto; disponible: boolean }>();
+    const productosByNombre = new Map<
+      string,
+      { prod: Producto; disponible: boolean }
+    >();
     for (const cat of local.categorias || []) {
+      const categoriaActiva = cat.activa !== false;
       for (const prod of cat.productos || []) {
-        if (prod.id) productosById.set(prod.id, prod);
+        const entry = {
+          prod,
+          disponible: categoriaActiva && prod.disponible !== false,
+        };
+        if (prod.id) productosById.set(prod.id, entry);
         if (prod.nombre) {
-          productosByNombre.set(prod.nombre.trim().toLowerCase(), prod);
+          productosByNombre.set(prod.nombre.trim().toLowerCase(), entry);
         }
       }
     }
@@ -142,12 +163,12 @@ export async function POST(req: NextRequest) {
         typeof it.productoId === "string" ? it.productoId.trim() : "";
       const nombreLimpio = sanitizeString(it.nombre, 80);
 
-      const prodServer =
+      const entryServer =
         (productoId && productosById.get(productoId)) ||
         (nombreLimpio && productosByNombre.get(nombreLimpio.toLowerCase())) ||
         undefined;
 
-      if (!prodServer) {
+      if (!entryServer) {
         return NextResponse.json(
           {
             ok: false,
@@ -157,6 +178,18 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+
+      if (!entryServer.disponible) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: `El producto "${entryServer.prod.nombre}" está agotado o no disponible en este momento. Retíralo del carrito para continuar.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      const prodServer = entryServer.prod;
 
       const opcionesLimpias: OpcionSeleccionada[] = [];
       let extrasUnitarios = 0;
@@ -243,9 +276,9 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Verificación de Lista Negra (Blacklist):
+      // Verificación de Lista Negra (Blacklist persistente):
       // Si el número fue reportado por no presentarse o bromas, se restringe el pago en efectivo
-      if (isPhoneBlacklisted(telefonoNormalizado)) {
+      if (await isPhoneBlacklistedPersistent(telefonoNormalizado)) {
         if (
           metodo_pago !== "Transferencia" &&
           metodo_pago !== "Transferencia Bancaria"
@@ -374,10 +407,11 @@ export async function PATCH(req: NextRequest) {
       pedidoExistente.cliente_telefono ||
       (typeof body.telefono === "string" ? body.telefono : "");
     if (estado === "cancelado" && body.bloquearTelefono && telefonoParaBloquear) {
-      addPhoneToBlacklist(
+      await addPhoneToBlacklistPersistent(
         String(telefonoParaBloquear),
         String(body.motivoBloqueo || "Comanda no retirada / broma"),
-        isSuperAdmin ? "superadmin" : "admin"
+        isSuperAdmin ? "superadmin" : "admin",
+        pedidoExistente.local_slug
       );
     }
 

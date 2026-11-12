@@ -19,6 +19,10 @@ import {
   verifyLocalPinInSupabase,
 } from "@/lib/locales";
 import {
+  listBlacklistedPhonesPersistent,
+  removePhoneFromBlacklistPersistent,
+} from "@/lib/blacklist";
+import {
   checkRateLimit,
   cookieNameAdmin,
   createSessionToken,
@@ -26,6 +30,7 @@ import {
   getSessionCookieOptions,
   isKdsAuthorized,
   isLocalAdminAuthorized,
+  isSuperAdminAuthorized,
   recordFailedAttempt,
   resetRateLimit,
 } from "@/lib/security";
@@ -435,6 +440,25 @@ export async function POST(
       revalidatePath(`/${slug}`);
       revalidatePath(`/admin/${slug}`);
       return NextResponse.json(result);
+    }
+
+    if (action === "list-blacklist") {
+      const scopeSlug = isSuperAdminAuthorized(req.cookies) ? undefined : slug;
+      const blacklist = await listBlacklistedPhonesPersistent(scopeSlug);
+      return NextResponse.json({ ok: true, blacklist });
+    }
+
+    if (action === "unblock-phone") {
+      const scopeSlug = isSuperAdminAuthorized(req.cookies) ? undefined : slug;
+      const telefono = String(body.telefono || "").trim();
+      if (!telefono) {
+        return NextResponse.json(
+          { ok: false, error: "Teléfono requerido" },
+          { status: 400 }
+        );
+      }
+      const removed = await removePhoneFromBlacklistPersistent(telefono, scopeSlug);
+      return NextResponse.json({ ok: true, removed });
     }
 
     if (action === "delete-producto") {

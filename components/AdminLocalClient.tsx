@@ -269,6 +269,12 @@ export default function AdminLocalClient({
   );
   const [mostrarPinClaro, setMostrarPinClaro] = useState<boolean>(false);
   const [guardandoAjustes, setGuardandoAjustes] = useState<boolean>(false);
+  const [blacklistItems, setBlacklistItems] = useState<
+    Array<{ telefono: string; motivo: string; fecha: string; bloqueadoPor: string }>
+  >([]);
+  const [cargandoBlacklist, setCargandoBlacklist] = useState<boolean>(false);
+  const [desbloqueandoTel, setDesbloqueandoTel] = useState<string | null>(null);
+  const [blacklistCargada, setBlacklistCargada] = useState<boolean>(false);
 
   // Estado de Gestión de Categorías
   const [nombreCategoriaCrear, setNombreCategoriaCrear] = useState<string>("");
@@ -527,6 +533,16 @@ export default function AdminLocalClient({
             setRutTitular(loc.rut_titular || "");
             setNombreTitular(loc.nombre_titular || "");
             setEmailTransferencia(loc.email_transferencia || "");
+            setTiempoEstimado(
+              loc.tiempo_estimado || loc.tiempoEstimado || "20-30 min"
+            );
+            setMensajeEmergencia(loc.mensaje_emergencia || "");
+            setEmergenciaActiva(Boolean(loc.mensaje_emergencia));
+            if (Array.isArray(loc.categorias) && loc.categorias.length > 0) {
+              setNuevoCategoriaId((prev) =>
+                prev === "__nueva__" ? loc.categorias[0].id : prev
+              );
+            }
             if (adminData.tokenCocina) {
               setTokenCocinaActual(String(adminData.tokenCocina));
             }
@@ -775,6 +791,55 @@ export default function AdminLocalClient({
     } finally {
       setGuardandoAjustes(false);
       setGuardandoId(null);
+    }
+  };
+
+  // Consultar y gestionar teléfonos restringidos para pago en efectivo (Blacklist)
+  const cargarBlacklist = async () => {
+    if (cargandoBlacklist) return;
+    setCargandoBlacklist(true);
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "list-blacklist" }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok && Array.isArray(data.blacklist)) {
+        setBlacklistItems(data.blacklist);
+        setBlacklistCargada(true);
+      } else {
+        mostrarToast(data.error || "No se pudo consultar la lista negra");
+      }
+    } catch {
+      mostrarToast("Error de conexión al consultar lista negra");
+    } finally {
+      setCargandoBlacklist(false);
+    }
+  };
+
+  const handleDesbloquearTelefono = async (telefono: string) => {
+    if (desbloqueandoTel) return;
+    setDesbloqueandoTel(telefono);
+    try {
+      const res = await fetch(`/api/admin/${local.slug}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "unblock-phone", telefono }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        setBlacklistItems((prev) =>
+          prev.filter((item) => item.telefono !== telefono)
+        );
+        mostrarToast(`Teléfono ${telefono} desbloqueado para pago en efectivo`);
+      } else {
+        mostrarToast(data.error || "No se pudo desbloquear el teléfono");
+      }
+    } catch {
+      mostrarToast("Error de conexión al desbloquear teléfono");
+    } finally {
+      setDesbloqueandoTel(null);
     }
   };
 
@@ -2910,6 +2975,82 @@ export default function AdminLocalClient({
                 </section>
               </div>
             </div>
+
+            {/* BLOQUE: TELÉFONOS RESTRINGIDOS EN EFECTIVO (BLACKLIST) */}
+            <section
+              className={`no-print rounded-3xl border p-5 shadow-sm ${brand.panelCardBg}`}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <span
+                    className={`inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider ${brand.accentText}`}
+                  >
+                    <ShieldCheck className="h-4 w-4" />
+                    Control de Fraude y Lista Negra
+                  </span>
+                  <h3 className="mt-0.5 text-base sm:text-lg font-display uppercase tracking-wide text-stone-900">
+                    📵 Teléfonos restringidos en efectivo
+                  </h3>
+                  <p className={`mt-0.5 text-xs ${brand.subtitleText}`}>
+                    Clientes bloqueados desde el Monitor de Cocina solo podrán pagar mediante Transferencia Bancaria.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={cargandoBlacklist}
+                  onClick={() => void cargarBlacklist()}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-bold text-stone-800 shadow-xs transition hover:bg-stone-50 active:scale-95 disabled:opacity-50"
+                >
+                  {cargandoBlacklist ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                  )}
+                  <span>
+                    {blacklistCargada ? "Actualizar lista" : "Ver números bloqueados"}
+                  </span>
+                </button>
+              </div>
+
+              {blacklistCargada && (
+                <div className="mt-4 space-y-2">
+                  {blacklistItems.length === 0 ? (
+                    <p className="rounded-2xl border border-dashed border-stone-200 bg-stone-50/70 px-4 py-3 text-xs text-stone-600">
+                      No hay números bloqueados en la lista negra actualmente.
+                    </p>
+                  ) : (
+                    blacklistItems.map((entry) => (
+                      <div
+                        key={entry.telefono}
+                        className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-stone-200 bg-white px-4 py-2.5 text-xs"
+                      >
+                        <div className="min-w-0">
+                          <p className="font-mono font-bold text-stone-900">
+                            +{entry.telefono}
+                          </p>
+                          <p className="text-[11px] text-stone-500">
+                            {entry.motivo}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          disabled={desbloqueandoTel === entry.telefono}
+                          onClick={() => void handleDesbloquearTelefono(entry.telefono)}
+                          className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1.5 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 disabled:opacity-50"
+                        >
+                          {desbloqueandoTel === entry.telefono ? (
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                          ) : (
+                            <Check className="h-3 w-3" />
+                          )}
+                          <span>Desbloquear</span>
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </section>
           </div>
         )}
 

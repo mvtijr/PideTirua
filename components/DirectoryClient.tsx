@@ -57,12 +57,12 @@ const FOTOS_HERO_FALLBACK = [
     alt: "Café de Especialidad en Kai Coffee Tirúa",
   },
   {
-    localSlug: "sushi-burger",
-    nombreLocal: "Sushi Burger Tirúa",
+    localSlug: "benditosushi",
+    nombreLocal: "Bendito Sushi",
     plato: "Tabla Costera 40 Piezas Tempura",
     icono: "🍣",
     url: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=720&q=75",
-    alt: "Sushi Costero en Sushi Burger Tirúa",
+    alt: "Sushi Costero en Bendito Sushi Tirúa",
   },
   {
     localSlug: "rio-mar",

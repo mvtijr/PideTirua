@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import {
   fetchLocalBySlug,
   stripSensitiveLocalFields,
-  verifyTokenCocinaInSupabase,
 } from "@/lib/locales";
 import { isKdsAuthorized } from "@/lib/security";
 import PedidosStaffClient from "@/components/PedidosStaffClient";
@@ -61,19 +60,13 @@ export default async function PedidosPage({
   }
 
   const cookieStore = await cookies();
-  let initialAuthenticated = isKdsAuthorized(cookieStore, local.slug);
+  const initialAuthenticated = isKdsAuthorized(cookieStore, local.slug);
 
-  // Si viene con token válido en la URL:
-  if (!initialAuthenticated && tokenQuery) {
-    const tokenValido = await verifyTokenCocinaInSupabase(local.slug, tokenQuery);
-    if (tokenValido) {
-      initialAuthenticated = true;
-    }
-  }
+  const safeLocal = stripSensitiveLocalFields(local);
 
   return (
     <PedidosStaffClient
-      local={stripSensitiveLocalFields(local)}
+      local={initialAuthenticated ? safeLocal : { ...safeLocal, categorias: [] }}
       initialAuthenticated={initialAuthenticated}
       tokenFromQuery={tokenQuery}
     />

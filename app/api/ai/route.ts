@@ -62,6 +62,59 @@ function getFallbackSocialPost(
 ¡No te quedes sin tu pedido! 🚀`;
 }
 
+const GEMINI_FALLBACK_MODELS = [
+  "gemini-flash-lite-latest",
+  "gemini-3.1-flash-lite",
+  "gemini-3-flash-preview",
+] as const;
+
+/**
+ * Ejecuta generación de texto con modelos Gemini vigentes y presupuesto de tiempo acotado.
+ */
+async function generateWithGeminiModels(
+  apiKey: string,
+  prompt: string,
+  minLength: number,
+  stripOuterQuotes = false
+): Promise<string | null> {
+  if (!apiKey) return null;
+
+  const preferred = process.env.GEMINI_MODEL?.trim();
+  const candidates = Array.from(
+    new Set([...(preferred ? [preferred] : []), ...GEMINI_FALLBACK_MODELS])
+  );
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const deadline = Date.now() + 7000;
+
+  for (const modelName of candidates) {
+    const remainingMs = deadline - Date.now();
+    if (remainingMs < 800) break;
+
+    try {
+      const model = genAI.getGenerativeModel({ model: modelName });
+      const result = await Promise.race([
+        model.generateContent(prompt),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Timeout Gemini")), remainingMs)
+        ),
+      ]);
+
+      let texto = result.response.text().trim();
+      if (stripOuterQuotes) {
+        texto = texto.replace(/^["']|["']$/g, "").trim();
+      }
+      if (texto.length > minLength) {
+        return texto;
+      }
+    } catch (err) {
+      console.warn(`Gemini (${modelName}) fallback:`, err);
+    }
+  }
+
+  return null;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
@@ -119,17 +172,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Si no hay API key de Gemini configurada, devolvemos el fallback gastronómico de inmediato
-      if (!apiKey) {
-        const fallback = getFallbackDishDescription(nombre, categoria);
-        return NextResponse.json({ ok: true, descripcion: fallback, isFallback: true });
-      }
-
-      try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        const prompt = `Actúa como un redactor gastronómico experto en Chile.
+      const prompt = `Actúa como un redactor gastronómico experto en Chile.
 Escribe una descripción breve, irresistible y apetitosa para un plato de restaurante en una plataforma de pedidos online.
 Nombre del plato: "${nombre}".
 Categoría: "${categoria || 'Plato de la carta'}".
@@ -140,22 +183,11 @@ REGLAS ESTRICTAS:
 - No uses comillas, ni títulos, ni viñetas. Solo el párrafo descriptivo directo.
 - Enfócate en la frescura, textura o sabor característico.`;
 
-        const result = await Promise.race([
-          model.generateContent(prompt),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout Gemini")), 4000)
-          ),
-        ]);
-
-        const texto = result.response.text().trim().replace(/^["']|["']$/g, "");
-        if (texto && texto.length > 10) {
-          return NextResponse.json({ ok: true, descripcion: texto, isFallback: false });
-        }
-      } catch (err) {
-        console.warn("Gemini describe_dish fallback:", err);
+      const texto = await generateWithGeminiModels(apiKey, prompt, 10, true);
+      if (texto) {
+        return NextResponse.json({ ok: true, descripcion: texto, isFallback: false });
       }
 
-      // En caso de error o respuesta vacía de Gemini
       return NextResponse.json({
         ok: true,
         descripcion: getFallbackDishDescription(nombre, categoria),
@@ -172,16 +204,7 @@ REGLAS ESTRICTAS:
       const platosDestacados = sanitizeString(String(body.platos_destacados || "")).trim();
       const link = sanitizeString(String(body.link || "https://pidetirua.cl")).trim();
 
-      if (!apiKey) {
-        const fallback = getFallbackSocialPost(nombreLocal, rubro, platosDestacados, link);
-        return NextResponse.json({ ok: true, post: fallback, isFallback: true });
-      }
-
-      try {
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        const prompt = `Actúa como especialista en marketing digital gastronómico en Chile.
+      const prompt = `Actúa como especialista en marketing digital gastronómico en Chile.
 Escribe una publicación corta y altamente atractiva para Estados de WhatsApp, Instagram y Facebook de un restaurante en Tirúa.
 Local: "${nombreLocal}".
 Rubro: "${rubro}".
@@ -194,19 +217,9 @@ REGLAS ESTRICTAS:
 - Tono: Cercano, entusiasta, chileno y convocante.
 - No agregues hashtags excesivos (máximo 2 o 3 al final, ej: #PideTirúa #Tirúa).`;
 
-        const result = await Promise.race([
-          model.generateContent(prompt),
-          new Promise<never>((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout Gemini")), 4000)
-          ),
-        ]);
-
-        const texto = result.response.text().trim();
-        if (texto && texto.length > 20) {
-          return NextResponse.json({ ok: true, post: texto, isFallback: false });
-        }
-      } catch (err) {
-        console.warn("Gemini social_post fallback:", err);
+      const texto = await generateWithGeminiModels(apiKey, prompt, 20, false);
+      if (texto) {
+        return NextResponse.json({ ok: true, post: texto, isFallback: false });
       }
 
       return NextResponse.json({

@@ -500,12 +500,25 @@ export default function CartDrawer({
         signal: controller.signal,
         body: JSON.stringify(payloadPedido),
       });
-      if (resp.ok) {
-        const data = await resp.json();
-        if (data.ok && data.pedido?.id) {
+      let data: { ok?: boolean; error?: string; pedido?: { id?: string } } | null = null;
+      try {
+        data = await resp.json();
+      } catch {
+        data = null;
+      }
+
+      if (resp.ok && data?.ok) {
+        if (data.pedido?.id) {
           pedidoIdRetornado = data.pedido.id;
           codigoGenerado = `TR-${data.pedido.id.slice(-4).toUpperCase()}`;
         }
+      } else if (resp.status >= 400 && resp.status < 500) {
+        setErrorValidacion(
+          data?.error ||
+            "No pudimos procesar tu pedido. Revisa tu carrito e intenta nuevamente."
+        );
+        setEnviandoPedido(false);
+        return;
       }
     } catch {
       // Si la llamada a Supabase falla o supera los 3.5s (por señal 4G inestable),

@@ -87,7 +87,11 @@ export default async function AdminLocalPage({
 
   return (
     <AdminLocalClient
-      initialLocal={initialAuthenticated ? local : stripSensitiveLocalFields(local)}
+      initialLocal={
+        initialAuthenticated
+          ? local
+          : { ...stripSensitiveLocalFields(local), categorias: [] }
+      }
       initialAuthenticated={initialAuthenticated}
       initialSuperAdmin={isSuperAdmin}
       tokenCocina={tokenCocina}

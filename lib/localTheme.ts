@@ -193,6 +193,7 @@ export function getLocalTheme(slug: string): LocalTheme {
         logoBg: "#f8dc4b",
       });
 
+    case "benditosushi":
     case "sushi-burger":
       return createEditorialTheme({
         accent: "#D93829",

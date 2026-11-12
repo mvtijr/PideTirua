@@ -951,7 +951,13 @@ export async function updateLocalAjustesBasicosInSupabase(
   }
 
   if (Object.keys(updateRow).length > 0) {
-    await supabase.from("locales").update(updateRow).eq("slug", slug);
+    const { error: updateErr } = await supabase
+      .from("locales")
+      .update(updateRow)
+      .eq("slug", slug);
+    if (updateErr) {
+      console.error("Error actualizando ajustes básicos en locales:", updateErr);
+    }
   }
 
   const locales = await fetchAllLocales();
@@ -969,6 +975,7 @@ export async function updateLocalAjustesBasicosInSupabase(
       typeof updateRow.horario === "string" ? updateRow.horario : loc.horario;
     const nuevoPin =
       typeof updateRow.pin === "string" ? updateRow.pin : loc.pin;
+    const cambioPin = typeof updateRow.pin === "string";
 
     return {
       ...loc,
@@ -979,6 +986,13 @@ export async function updateLocalAjustesBasicosInSupabase(
       horario: nuevoHorario,
       horarioEntrega: `Horario · ${nuevoHorario}`,
       pin: nuevoPin,
+      ...(cambioPin
+        ? {
+            pin_temporal: undefined,
+            pin_temporal_expira: undefined,
+            requiere_cambio_pin: false,
+          }
+        : {}),
     };
   });
 
@@ -1667,6 +1681,7 @@ export async function generarPinTemporalInSupabase(
   const ahora = new Date();
   const fechaExpira = new Date(ahora.getTime() + 3 * 60 * 1000); // 3 minutos exactos
   const horaExpiraFormateada = fechaExpira.toLocaleTimeString("es-CL", {
+    timeZone: "America/Santiago",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -1816,7 +1831,13 @@ export async function updateLocalPinBySuperAdminInSupabase(
   const locales = await fetchAllLocales();
   const actualizados = locales.map((loc) =>
     loc.slug.toLowerCase() === slug.toLowerCase()
-      ? { ...loc, pin: pinLimpio }
+      ? {
+          ...loc,
+          pin: pinLimpio,
+          pin_temporal: undefined,
+          pin_temporal_expira: undefined,
+          requiere_cambio_pin: false,
+        }
       : loc
   );
   await writeSupabaseCloudState(actualizados);
@@ -1966,30 +1987,78 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
   }
 
   // Si es un local nuevo sin categorías, crear una categoría inicial por defecto
+  const catInicial: CategoriaMenu = {
+    id: `cat-${slugLimpio}-1`,
+    local_id: localId,
+    nombre: "Especialidades de la Casa",
+    orden: 1,
+    activa: true,
+    productos: [],
+  };
+
   if (!existing || existing.categorias.length === 0) {
-    const catInicialId = `cat-${slugLimpio}-1`;
     await supabase.from("categorias").upsert(
       {
-        id: catInicialId,
+        id: catInicial.id,
         local_id: localId,
-        nombre: "Especialidades de la Casa",
-        orden: 1,
+        nombre: catInicial.nombre,
+        orden: catInicial.orden,
       },
       { onConflict: "id" }
     );
   }
 
-  const localesActualizados = await fetchAllLocales();
-  await writeSupabaseCloudState(localesActualizados);
+  const categoriasFinales: CategoriaMenu[] =
+    existing && existing.categorias.length > 0
+      ? existing.categorias
+      : [catInicial];
 
-  const localGuardado = localesActualizados.find(
-    (l) => l.slug.toLowerCase() === slugLimpio
-  );
+  const localPersistido: Local = {
+    ...(existing || {}),
+    id: localId,
+    slug: slugLimpio,
+    nombre: rowToUpsert.nombre,
+    rubro: rowToUpsert.rubro,
+    categoriaFiltro: rowToUpsert.categoria_filtro,
+    sector: rowToUpsert.sector,
+    ubicacion: rowToUpsert.ubicacion,
+    direccion: rowToUpsert.direccion,
+    direccionDetalle: rowToUpsert.direccion,
+    telefonoWhatsapp: rowToUpsert.telefono_whatsapp,
+    telefono_whatsapp: rowToUpsert.telefono_whatsapp,
+    horario: rowToUpsert.horario,
+    horarioEntrega: `Lun a Dom · ${rowToUpsert.horario}`,
+    tiempoEstimado: rowToUpsert.tiempo_estimado,
+    tiempo_estimado: rowToUpsert.tiempo_estimado,
+    calificacion: rowToUpsert.calificacion,
+    descripcionCorta: rowToUpsert.descripcion_corta,
+    fotoPortada: rowToUpsert.foto_portada,
+    banner_url: rowToUpsert.banner_url,
+    banner_video_url: bannerVideoFinal || undefined,
+    videoPortada: bannerVideoFinal || undefined,
+    videoFondo: bannerVideoFinal || undefined,
+    logo: rowToUpsert.logo,
+    logo_url: rowToUpsert.logo_url,
+    abierto: rowToUpsert.abierto,
+    activo: rowToUpsert.activo,
+    plan: rowToUpsert.plan,
+    precio_mensual: rowToUpsert.precio_mensual,
+    dia_cobro: rowToUpsert.dia_cobro,
+    fecha_ultimo_pago: rowToUpsert.fecha_ultimo_pago,
+    pin: rowToUpsert.pin,
+    categorias: categoriasFinales,
+  };
+
+  const localesActualizados = existing
+    ? todos.map((l) => (l.id === existing.id ? localPersistido : l))
+    : [...todos, localPersistido];
+
+  await writeSupabaseCloudState(localesActualizados);
 
   return {
     ok: true,
     locales: localesActualizados,
-    local: localGuardado,
+    local: localPersistido,
   };
 }
 
