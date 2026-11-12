@@ -173,16 +173,21 @@ export default function KitchenMonitor({
   const cargarStockMenu = useCallback(async () => {
     setCargandoStock(true);
     try {
-      const res = await fetch(`/api/menu/${encodeURIComponent(localSlug)}`, {
-        cache: "no-store",
-      });
+      const res = await fetch(
+        `/api/pedidos?local_slug=${encodeURIComponent(localSlug)}&include_menu=1`,
+        {
+          cache: "no-store",
+        }
+      );
       const data = await res.json();
-      const cats = Array.isArray(data.local?.categorias)
+      const cats = Array.isArray(data.categorias)
+        ? data.categorias
+        : Array.isArray(data.local?.categorias)
         ? data.local.categorias
         : Array.isArray(data.local?.menu)
         ? data.local.menu
         : [];
-      if (res.ok && data.ok && data.local) {
+      if (res.ok && data.ok) {
         const items: ProductoStockItem[] = [];
         cats.forEach((cat: CategoriaMenu) => {
           if (Array.isArray(cat.productos)) {
@@ -198,6 +203,8 @@ export default function KitchenMonitor({
           }
         });
         setProductosStock(items);
+      } else {
+        onNotify?.(data?.error || "No se pudo cargar la lista de platos.");
       }
     } catch {
       onNotify?.("No se pudo cargar la lista de platos.");

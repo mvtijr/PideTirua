@@ -5,7 +5,7 @@ import {
   listarPedidosPorLocalEnSupabase,
   obtenerPedidoPorIdEnSupabase,
 } from "@/lib/pedidos";
-import { fetchLocalBySlug } from "@/lib/locales";
+import { fetchLocalBySlug, stripSensitiveLocalFields } from "@/lib/locales";
 import { getPrecioEfectivoProducto } from "@/lib/formatters";
 import {
   EstadoPedido,
@@ -51,7 +51,24 @@ export async function GET(req: NextRequest) {
   }
 
   const pedidos = await listarPedidosPorLocalEnSupabase(slugLimpio);
-  return NextResponse.json({ ok: true, pedidos });
+  const includeMenu = req.nextUrl.searchParams.get("include_menu") === "1";
+
+  if (includeMenu) {
+    const local = await fetchLocalBySlug(slugLimpio);
+    const safeLocal = local ? stripSensitiveLocalFields(local) : undefined;
+    const categorias = Array.isArray(safeLocal?.categorias)
+      ? safeLocal.categorias
+      : [];
+    return NextResponse.json(
+      { ok: true, pedidos, categorias },
+      { headers: { "Cache-Control": "no-store" } }
+    );
+  }
+
+  return NextResponse.json(
+    { ok: true, pedidos },
+    { headers: { "Cache-Control": "no-store" } }
+  );
 }
 
 export async function POST(req: NextRequest) {
