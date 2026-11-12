@@ -106,8 +106,9 @@ export default function VentasReportes({
     };
   }, [localSlug, cargarPedidos]);
 
-  // Cálculos de métricas del mes actual en zona horaria de Chile
+  // Cálculos de métricas del mes actual en zona horaria de Chile (se recalcula al actualizar pedidos)
   const [anioChileStr, mesChileStr] = useMemo(() => {
+    void pedidos;
     try {
       const formatted = new Intl.DateTimeFormat("en-CA", {
         timeZone: "America/Santiago",
@@ -119,11 +120,12 @@ export default function VentasReportes({
       const d = new Date();
       return [String(d.getFullYear()), String(d.getMonth() + 1).padStart(2, "0")];
     }
-  }, []);
+  }, [pedidos]);
   const anioActual = Number(anioChileStr) || new Date().getFullYear();
   const mesActual = (Number(mesChileStr) || new Date().getMonth() + 1) - 1;
 
   const nombreMes = useMemo(() => {
+    void pedidos;
     try {
       const nom = new Date().toLocaleDateString("es-CL", {
         timeZone: "America/Santiago",
@@ -133,7 +135,7 @@ export default function VentasReportes({
     } catch {
       return "Mes Actual";
     }
-  }, []);
+  }, [pedidos]);
 
   // Excluir pedidos cancelados y filtrar por el mes corriente (America/Santiago)
   const pedidosMes = useMemo(() => {

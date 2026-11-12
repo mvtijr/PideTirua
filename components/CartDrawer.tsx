@@ -329,11 +329,14 @@ export default function CartDrawer({
   const handleSeleccionarProgramado = () => {
     setHoraRetiroTipo("programado");
     if (!horaRetiroValor) {
-      const ahora = new Date();
-      ahora.setMinutes(ahora.getMinutes() + 35);
-      const hh = String(ahora.getHours()).padStart(2, "0");
-      const mm = String(ahora.getMinutes()).padStart(2, "0");
-      setHoraRetiroValor(`${hh}:${mm}`);
+      const futuro = new Date(Date.now() + 35 * 60 * 1000);
+      const horaChile = new Intl.DateTimeFormat("es-CL", {
+        timeZone: "America/Santiago",
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      }).format(futuro);
+      setHoraRetiroValor(horaChile);
     }
   };
 

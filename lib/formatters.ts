@@ -210,7 +210,7 @@ export function formatWhatsAppMessage({
     .map((item) => {
       const precioUnitario = getPrecioUnitarioItem(item);
       const enOferta =
-        item.producto.es_oferta &&
+        esOfertaValidaHoy(item.producto) &&
         typeof item.producto.precio_oferta === "number" &&
         item.producto.precio_oferta > 0;
       const tagPromo = enOferta

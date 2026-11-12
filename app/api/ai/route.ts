@@ -202,7 +202,7 @@ REGLAS ESTRICTAS:
       const nombreLocal = sanitizeString(String(body.nombre_local || "Nuestro Local")).trim();
       const rubro = sanitizeString(String(body.rubro || "Gastronomía")).trim();
       const platosDestacados = sanitizeString(String(body.platos_destacados || "")).trim();
-      const link = sanitizeString(String(body.link || "https://pidetirua.cl")).trim();
+      const link = sanitizeString(String(body.link || "https://www.pidetirua.cl")).trim();
 
       const prompt = `Actúa como especialista en marketing digital gastronómico en Chile.
 Escribe una publicación corta y altamente atractiva para Estados de WhatsApp, Instagram y Facebook de un restaurante en Tirúa.

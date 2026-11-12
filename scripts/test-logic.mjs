@@ -153,6 +153,75 @@ test("Guardas CSS sticky/overflow-x-clip y logica de categorias/blacklist", () =
   );
 });
 
+// 6. formatWhatsAppMessage no marca promo cuando fecha_oferta ya expiro
+test("formatWhatsAppMessage solo etiqueta PROMO cuando la oferta esta vigente hoy", () => {
+  const hoyChile = formatters.getFechaHoyChile();
+  const baseLocal = {
+    slug: "test-local",
+    nombre: "Local Test",
+    ubicacion: "Tirua",
+    telefonoWhatsapp: "56912345678",
+  };
+  const datos = {
+    nombreCliente: "Ana",
+    telefonoCliente: "+56912345678",
+    tipoEntrega: "Retiro en local",
+    direccionOMesa: "",
+    metodoPago: "Efectivo",
+    notasAdicionales: "",
+    horaRetiroTipo: "inmediato",
+    horaRetiroValor: "",
+  };
+
+  const msgVencida = formatters.formatWhatsAppMessage({
+    local: baseLocal,
+    codigoRetiro: "T-01",
+    datos,
+    items: [
+      {
+        id: "p1",
+        cantidad: 1,
+        producto: {
+          id: "p1",
+          nombre: "Chupe de Jaiba",
+          precio: 12000,
+          disponible: true,
+          es_oferta: true,
+          precio_oferta: 9500,
+          fecha_oferta: "2020-01-01",
+          texto_promo: "OFERTA AYER",
+        },
+      },
+    ],
+  });
+  assert.equal(msgVencida.includes("[PROMO:"), false, "Oferta vencida no debe imprimir tag PROMO");
+  assert.equal(msgVencida.includes("12.000"), true, "Oferta vencida debe cobrar precio normal");
+
+  const msgVigente = formatters.formatWhatsAppMessage({
+    local: baseLocal,
+    codigoRetiro: "T-02",
+    datos,
+    items: [
+      {
+        id: "p2",
+        cantidad: 1,
+        producto: {
+          id: "p2",
+          nombre: "Paila Marina",
+          precio: 14000,
+          disponible: true,
+          es_oferta: true,
+          precio_oferta: 10990,
+          fecha_oferta: hoyChile,
+          texto_promo: "SOLO HOY",
+        },
+      },
+    ],
+  });
+  assert.equal(msgVigente.includes("[PROMO: SOLO HOY]"), true, "Oferta vigente debe imprimir tag PROMO");
+  assert.equal(msgVigente.includes("10.990"), true, "Oferta vigente debe cobrar precio oferta");
+});
+
 console.log(`Resultado: ${passed} pruebas aprobadas.`);
 if (process.exitCode && process.exitCode !== 0) {
   process.exit(process.exitCode);

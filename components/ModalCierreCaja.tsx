@@ -85,14 +85,18 @@ export default function ModalCierreCaja({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Fecha de hoy en formato de Chile
+  // Fecha de hoy en formato de Chile (se recalcula al abrir o actualizar pedidos)
   const fechaChileISO = useMemo(() => {
+    void isOpen;
+    void pedidos;
     return new Date().toLocaleDateString("en-CA", {
       timeZone: "America/Santiago",
     }); // YYYY-MM-DD
-  }, []);
+  }, [isOpen, pedidos]);
 
   const fechaFormateada = useMemo(() => {
+    void isOpen;
+    void pedidos;
     return new Date().toLocaleDateString("es-CL", {
       timeZone: "America/Santiago",
       weekday: "long",
@@ -100,7 +104,7 @@ export default function ModalCierreCaja({
       month: "long",
       day: "numeric",
     });
-  }, []);
+  }, [isOpen, pedidos]);
 
   // Filtrar comandas de hoy que no estén canceladas
   const pedidosHoy = useMemo(() => {

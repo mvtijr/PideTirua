@@ -302,7 +302,7 @@ export default function AdminLocalClient({
   // Estado del Generador de Cartel QR para Mesas
   const [mostrarCartelQr, setMostrarCartelQr] = useState<boolean>(false);
   const [publicOrigin, setPublicOrigin] = useState<string>(
-    "https://pidetirua.cl"
+    "https://www.pidetirua.cl"
   );
   const [descargandoQr, setDescargandoQr] = useState<boolean>(false);
 
