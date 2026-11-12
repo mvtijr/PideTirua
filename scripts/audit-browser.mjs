@@ -5,11 +5,24 @@ import { spawn, execSync } from "node:child_process";
 
 const BASE = (process.env.BASE_URL || "https://www.pidetirua.cl").replace(/\/$/, "");
 const PROBE_SLUG = process.env.PROBE_SLUG || "kai-coffee";
-const CHROME_PATH =
-  process.env.CHROME_PATH ||
-  (process.platform === "win32"
-    ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-    : "/usr/bin/google-chrome");
+function resolveChromePath() {
+  if (process.env.CHROME_PATH) return process.env.CHROME_PATH;
+  const candidates =
+    process.platform === "win32"
+      ? [
+          "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+          "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+        ]
+      : [
+          "/usr/bin/google-chrome",
+          "/usr/bin/google-chrome-stable",
+          "/usr/bin/chromium",
+          "/usr/bin/chromium-browser",
+        ];
+  return candidates.find((p) => fs.existsSync(p)) || candidates[0];
+}
+
+const CHROME_PATH = resolveChromePath();
 const CDP_PORT = Number(process.env.CDP_PORT || 9245);
 const CHROME_PROFILE = fs.mkdtempSync(path.join(os.tmpdir(), "pidetirua-cdp-"));
 const NAV_TIMEOUT_MS = 10000;
@@ -164,9 +177,23 @@ try {
     }
   });
 
+  let probeMenuActive = false;
+  try {
+    const probeMenuRes = await fetch(`${BASE}/api/menu/${PROBE_SLUG}`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    probeMenuActive = probeMenuRes.status === 200;
+  } catch {}
+
   const routes = [
     { path: "/", label: "home-desktop", w: 1440, h: 900 },
     { path: "/", label: "home-mobile", w: 390, h: 844 },
+    ...(probeMenuActive
+      ? [
+          { path: `/${PROBE_SLUG}`, label: "storefront-desktop", w: 1440, h: 900 },
+          { path: `/${PROBE_SLUG}`, label: "storefront-mobile", w: 390, h: 844 },
+        ]
+      : []),
     { path: `/admin/${PROBE_SLUG}`, label: "admin-mobile", w: 390, h: 844 },
     { path: `/pedidos/${PROBE_SLUG}`, label: "kds-mobile", w: 390, h: 844 },
     { path: "/superadmin", label: "superadmin-desktop", w: 1440, h: 900 },
@@ -197,7 +224,12 @@ try {
         if (stickyEl) {
           const scrollable = docEl.scrollHeight > docEl.clientHeight + 200;
           if (scrollable) {
-            window.scrollTo({ top: 300, behavior: "instant" });
+            const naturalTop = stickyEl.getBoundingClientRect().top + window.scrollY;
+            const targetY = Math.min(
+              docEl.scrollHeight - docEl.clientHeight,
+              Math.max(300, Math.round(naturalTop + 120))
+            );
+            window.scrollTo({ top: targetY, behavior: "instant" });
             const rect = stickyEl.getBoundingClientRect();
             stickyOk = Math.abs(rect.top) <= 2;
             window.scrollTo({ top: 0, behavior: "instant" });

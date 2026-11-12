@@ -34,6 +34,8 @@ import {
   MessageCircle,
   Calendar,
   AlertTriangle,
+  Activity,
+  RefreshCw,
 } from "lucide-react";
 import { Local, PlanComercial, SectorComuna } from "@/types/local";
 import {
@@ -56,6 +58,36 @@ interface DatosCobroSuperAdmin {
   banco: string;
   cuenta: string;
   correo: string;
+}
+
+interface SystemHealthReport {
+  ok: boolean;
+  status: "ok" | "degraded" | "error";
+  timestamp: string;
+  latencyMs: number;
+  commit: string | null;
+  checks: {
+    storage: boolean;
+    sqlLocales: boolean;
+    sqlPedidos: boolean;
+    syncDriftCount: number;
+  };
+  locales: {
+    total: number;
+    activos: number;
+    abiertos: number;
+  };
+  pedidosCount: number | null;
+  adminDetails?: {
+    driftSlugs: string[];
+    errors: string[];
+    env: {
+      hasServiceRoleKey: boolean;
+      hasGeminiApiKey: boolean;
+      hasCustomAuthSecret: boolean;
+      hasCustomSuperAdminKey: boolean;
+    };
+  };
 }
 
 const SESSION_KEY = "pidetirua_superadmin_session";
@@ -168,6 +200,9 @@ export default function SuperAdminClient({
 
   // Toast de feedback
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
+  const [saludSistema, setSaludSistema] = useState<SystemHealthReport | null>(null);
+  const [cargandoSalud, setCargandoSalud] = useState<boolean>(false);
+  const [errorSalud, setErrorSalud] = useState<string | null>(null);
   const [guardandoSlug, setGuardandoSlug] = useState<string | null>(null);
   const [registrandoPagoSlug, setRegistrandoPagoSlug] = useState<string | null>(
     null
@@ -254,6 +289,29 @@ export default function SuperAdminClient({
       // Ignorar fallas de red
     }
   };
+
+  const cargarSaludSistema = async () => {
+    setCargandoSalud(true);
+    setErrorSalud(null);
+    try {
+      const res = await fetch("/api/health", { cache: "no-store" });
+      const data = (await res.json()) as SystemHealthReport;
+      setSaludSistema(data);
+      if (!res.ok) {
+        setErrorSalud("Uno o más servicios críticos reportaron fallo.");
+      }
+    } catch {
+      setErrorSalud("No se pudo conectar con /api/health.");
+    } finally {
+      setCargandoSalud(false);
+    }
+  };
+
+  useEffect(() => {
+    if (autenticado) {
+      void cargarSaludSistema();
+    }
+  }, [autenticado]);
 
   useEffect(() => {
     if (initialAuthenticated) {
@@ -1057,6 +1115,164 @@ export default function SuperAdminClient({
               Llave en Mano]
             </p>
           </div>
+        </section>
+
+        {/* A2) SALUD DEL SISTEMA EN VIVO (VERCEL + SUPABASE + ENV) */}
+        <section className="rounded-3xl border border-stone-200/90 bg-white p-5 shadow-sm sm:p-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-stone-700">
+                  <Activity className="h-4 w-4 text-[#EA580C]" />
+                  Salud del Sistema
+                </span>
+                {saludSistema ? (
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-[11px] font-extrabold ${
+                      saludSistema.status === "ok"
+                        ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                        : saludSistema.status === "degraded"
+                        ? "border-amber-300 bg-amber-50 text-amber-800"
+                        : "border-rose-300 bg-rose-50 text-rose-800"
+                    }`}
+                  >
+                    {saludSistema.status === "ok"
+                      ? "● 100% Operativo"
+                      : saludSistema.status === "degraded"
+                      ? "▲ Degradado"
+                      : "■ Con Fallo"}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-full border border-stone-200 bg-stone-50 px-2.5 py-0.5 text-[11px] font-bold text-stone-600">
+                    {cargandoSalud ? "Verificando..." : "Sin datos"}
+                  </span>
+                )}
+              </div>
+              <p className="mt-1 text-xs text-stone-500">
+                {saludSistema
+                  ? `Último chequeo: ${new Date(saludSistema.timestamp).toLocaleTimeString("es-CL", {
+                      timeZone: "America/Santiago",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false,
+                    })} · Latencia ${saludSistema.latencyMs}ms${
+                      saludSistema.commit ? ` · Deploy #${saludSistema.commit}` : ""
+                    }`
+                  : "Verifica en vivo Storage, SQL, sincronización y variables de entorno."}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => void cargarSaludSistema()}
+              disabled={cargandoSalud}
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-stone-200 bg-stone-50 px-4 py-2 text-xs font-bold text-stone-800 shadow-xs transition hover:bg-stone-100 active:scale-[0.98] disabled:opacity-60"
+            >
+              <RefreshCw
+                className={`h-3.5 w-3.5 ${cargandoSalud ? "animate-spin" : ""}`}
+              />
+              <span>{cargandoSalud ? "Revisando..." : "Revisar ahora"}</span>
+            </button>
+          </div>
+
+          {errorSalud && (
+            <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-bold text-rose-800">
+              {errorSalud}
+            </div>
+          )}
+
+          {saludSistema && (
+            <div className="mt-4 grid grid-cols-2 gap-2.5 lg:grid-cols-4">
+              <div className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-3">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                  Storage Catálogo
+                </p>
+                <p
+                  className={`mt-1 text-sm font-extrabold ${
+                    saludSistema.checks.storage ? "text-emerald-700" : "text-rose-700"
+                  }`}
+                >
+                  {saludSistema.checks.storage ? "OK · Activo" : "Error Storage"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-3">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                  SQL Locales & Sync
+                </p>
+                <p
+                  className={`mt-1 text-sm font-extrabold ${
+                    saludSistema.checks.sqlLocales &&
+                    saludSistema.checks.syncDriftCount === 0
+                      ? "text-emerald-700"
+                      : "text-amber-700"
+                  }`}
+                >
+                  {!saludSistema.checks.sqlLocales
+                    ? "Error SQL"
+                    : saludSistema.checks.syncDriftCount === 0
+                    ? `OK · 0 drift`
+                    : `Drift: ${saludSistema.checks.syncDriftCount}`}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-3">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                  SQL Pedidos
+                </p>
+                <p
+                  className={`mt-1 tabular-nums text-sm font-extrabold ${
+                    saludSistema.checks.sqlPedidos
+                      ? "text-emerald-700"
+                      : "text-rose-700"
+                  }`}
+                >
+                  {saludSistema.checks.sqlPedidos
+                    ? `OK (${saludSistema.pedidosCount ?? 0} reg.)`
+                    : "Error Pedidos"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-3">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-stone-500">
+                  Variables & IA
+                </p>
+                <p
+                  className={`mt-1 text-sm font-extrabold ${
+                    saludSistema.adminDetails?.env.hasServiceRoleKey &&
+                    saludSistema.adminDetails?.env.hasGeminiApiKey
+                      ? "text-emerald-700"
+                      : "text-amber-700"
+                  }`}
+                >
+                  {saludSistema.adminDetails
+                    ? saludSistema.adminDetails.env.hasServiceRoleKey &&
+                      saludSistema.adminDetails.env.hasGeminiApiKey
+                      ? "Keys Configuradas"
+                      : "Revisar Env Vars"
+                    : "Protegido"}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {saludSistema?.adminDetails &&
+            (saludSistema.adminDetails.driftSlugs.length > 0 ||
+              saludSistema.adminDetails.errors.length > 0) && (
+              <div className="mt-3 rounded-2xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+                {saludSistema.adminDetails.driftSlugs.length > 0 && (
+                  <p className="font-bold">
+                    Slugs con desincronización Storage/SQL:{" "}
+                    {saludSistema.adminDetails.driftSlugs.join(", ")}
+                  </p>
+                )}
+                {saludSistema.adminDetails.errors.map((err, i) => (
+                  <p key={i} className="mt-0.5 font-semibold">
+                    • {err}
+                  </p>
+                ))}
+              </div>
+            )}
         </section>
 
         {/* APARTADO: 💳 MIS DATOS DE COBRO (SUPERADMIN) */}

@@ -96,6 +96,18 @@ if (BASE.startsWith("https://www.pidetirua.cl")) {
   });
 }
 
+await check("Health /api/health responde 200 verde y sin detalles privados sin sesion", async () => {
+  const r = await req("/api/health");
+  assert.equal(r.status, 200, `/api/health devolvio ${r.status}`);
+  const data = JSON.parse(r.text);
+  assert.equal(data.ok, true);
+  assert.equal(data.checks?.storage, true, "Storage locales-state.json debe responder");
+  assert.equal(data.checks?.sqlLocales, true, "Tabla SQL locales debe responder");
+  assert.equal(data.checks?.sqlPedidos, true, "Tabla SQL pedidos debe responder");
+  assert.equal(data.checks?.syncDriftCount, 0, "Storage y SQL no deben tener drift");
+  assert.equal("adminDetails" in data, false, "Sin sesion no debe exponer adminDetails");
+});
+
 if (failures > 0) {
   console.error(`Auditoria de rutas fallo (${failures} checks).`);
   process.exit(1);

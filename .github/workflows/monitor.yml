@@ -1,0 +1,62 @@
+name: Monitor de Produccion
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 */6 * * *"
+  workflow_dispatch:
+
+jobs:
+  verify-and-monitor:
+    name: Verificar Codigo y Produccion
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Verificar tipos TypeScript y logica (TZ=UTC)
+        run: npm run verify
+
+      - name: Esperar deploy automatico en Vercel tras push
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "Esperando a que https://www.pidetirua.cl/api/health sirva el commit $SHORT_SHA..."
+          for i in $(seq 1 24); do
+            DEPLOYED=$(curl -fsS --max-time 6 "https://www.pidetirua.cl/api/health" | node -e "const d=JSON.parse(require('fs').readFileSync(0,'utf8')); console.log(d.commit||'');" 2>/dev/null || true)
+            echo "Intento $i/24 -> commit activo en produccion: '$DEPLOYED'"
+            if [ "$DEPLOYED" = "$SHORT_SHA" ]; then
+              echo "Deploy $SHORT_SHA activo en produccion."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Aviso: se alcanzo el tiempo de espera; auditando produccion actual de todas formas."
+
+      - name: Auditar rutas, /api/health y matriz de seguridad en produccion
+        run: npm run audit:routes
+
+      - name: Asegurar Chrome/Chromium en runner
+        shell: bash
+        run: |
+          if ! command -v google-chrome >/dev/null 2>&1 && ! command -v chromium >/dev/null 2>&1 && ! command -v chromium-browser >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y chromium-browser
+          fi
+
+      - name: Auditar UI, sticky, overflow e imagenes en produccion (Chrome CDP)
+        run: npm run audit:browser
