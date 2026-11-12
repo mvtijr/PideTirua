@@ -387,18 +387,18 @@ export default function DirectoryClient({
             noisePatternRefreshInterval={0}
           />
 
-          {/* Fondo visual: carrusel de locales activos o logo oficial de PideTirúa si aún no hay locales activos */}
-          {fotosHero.length > 0 ? (
-            <div
-              className="absolute right-0 top-0 bottom-0 w-full lg:w-7/12 overflow-hidden pointer-events-none z-0 opacity-40 lg:opacity-100 transition-opacity duration-700"
-              style={{
-                maskImage:
-                  "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
-                WebkitMaskImage:
-                  "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
-              }}
-            >
-              {fotosHero.map((foto, idx) =>
+          {/* Fondo visual sangrado: carrusel de locales activos o logo oficial de PideTirúa de fondo */}
+          <div
+            className="absolute right-0 top-0 bottom-0 w-full lg:w-7/12 overflow-hidden pointer-events-none z-0 opacity-40 lg:opacity-100 transition-opacity duration-700"
+            style={{
+              maskImage:
+                "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
+              WebkitMaskImage:
+                "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
+            }}
+          >
+            {fotosHero.length > 0 ? (
+              fotosHero.map((foto, idx) =>
                 idx === activeHeroIndex || heroCarouselReady ? (
                   <img
                     key={`${foto.localSlug}-${foto.url}`}
@@ -415,23 +415,21 @@ export default function DirectoryClient({
                     }`}
                   />
                 ) : null
-              )}
-              {/* Suave degradado vertical en la parte inferior para fundir con la división de sección */}
-              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FAF8F5] to-transparent opacity-80" />
-            </div>
-          ) : (
-            <div
-              aria-hidden="true"
-              className="absolute right-0 top-0 bottom-0 w-full lg:w-6/12 overflow-hidden pointer-events-none z-0 flex items-center justify-end lg:justify-center pr-2 sm:pr-8 lg:pr-10 opacity-20 lg:opacity-95 transition-opacity duration-700"
-            >
+              )
+            ) : (
               <img
-                src="/logo-pidetirua.jpg?v=2"
+                src="/og-image.jpg"
                 alt="Logo oficial PideTirúa"
-                decoding="async"
-                className="h-64 w-64 sm:h-80 sm:w-80 lg:h-[360px] lg:w-[360px] object-contain mix-blend-multiply drop-shadow-sm select-none"
+                loading="eager"
+                // @ts-ignore
+                fetchPriority="high"
+                decoding="sync"
+                className="absolute inset-0 h-full w-full object-cover object-center mix-blend-multiply"
               />
-            </div>
-          )}
+            )}
+            {/* Suave degradado vertical en la parte inferior para fundir con la división de sección */}
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FAF8F5] to-transparent opacity-80" />
+          </div>
 
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-2xl lg:max-w-xl text-left">
