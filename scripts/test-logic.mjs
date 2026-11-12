@@ -151,6 +151,18 @@ test("Guardas CSS sticky/overflow-x-clip y logica de categorias/blacklist", () =
     true,
     "RecomendadorPlatosModal debe omitir categorias pausadas"
   );
+
+  const dirSrc = fs.readFileSync(path.join(ROOT, "components/DirectoryClient.tsx"), "utf8");
+  assert.equal(
+    dirSrc.includes("FOTOS_HERO_FALLBACK"),
+    false,
+    "DirectoryClient no debe mostrar fotos ni botones fallback de locales inactivos"
+  );
+  assert.equal(
+    dirSrc.includes("Logo oficial PideTirúa"),
+    true,
+    "DirectoryClient debe mostrar el logo oficial de PideTirúa cuando no hay locales activos"
+  );
 });
 
 // 6. formatWhatsAppMessage no marca promo cuando fecha_oferta ya expiro

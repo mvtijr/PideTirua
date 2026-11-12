@@ -47,41 +47,6 @@ const ICONOS_CATEGORIA: Record<CategoriaFiltro, string> = {
   Cafetería: "☕",
 };
 
-const FOTOS_HERO_FALLBACK = [
-  {
-    localSlug: "kai-coffee",
-    nombreLocal: "Kai Coffee Tirúa",
-    plato: "Café Latte & Repostería Artesanal",
-    icono: "☕",
-    url: "https://images.unsplash.com/photo-1561047029-3000c68339ca?auto=format&fit=crop&w=720&q=75",
-    alt: "Café de Especialidad en Kai Coffee Tirúa",
-  },
-  {
-    localSlug: "benditosushi",
-    nombreLocal: "Bendito Sushi",
-    plato: "Tabla Costera 40 Piezas Tempura",
-    icono: "🍣",
-    url: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=720&q=75",
-    alt: "Sushi Costero en Bendito Sushi Tirúa",
-  },
-  {
-    localSlug: "rio-mar",
-    nombreLocal: "Río Mar Tirúa",
-    plato: "Salmón a la Plancha & Once Costera",
-    icono: "🐟",
-    url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=720&q=75",
-    alt: "Salmón a la Plancha en Río Mar Tirúa",
-  },
-  {
-    localSlug: "las-tranqueras",
-    nombreLocal: "Las Tranqueras Tirúa",
-    plato: "Pollo Asado con Papas Caseras",
-    icono: "🍗",
-    url: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?auto=format&fit=crop&w=720&q=75",
-    alt: "Pollo Asado en Las Tranqueras Tirúa",
-  },
-];
-
 interface DirectoryClientProps {
   locales: Local[];
   editorialContent?: React.ReactNode;
@@ -160,8 +125,15 @@ export default function DirectoryClient({
         }
       });
 
-    return items.length > 0 ? items : FOTOS_HERO_FALLBACK;
+    return items;
   }, [locales]);
+
+  const activeHeroIndex =
+    fotosHero.length > 0 ? fotoHeroIndex % fotosHero.length : 0;
+
+  useEffect(() => {
+    setFotoHeroIndex(0);
+  }, [fotosHero.length]);
 
   // Rotación automática suave del carrusel de fotos del hero cada 5.5s
   useEffect(() => {
@@ -415,37 +387,51 @@ export default function DirectoryClient({
             noisePatternRefreshInterval={0}
           />
 
-          {/* Fondo fotográfico con fundido orgánico (sin línea de separación ni cortes duros) */}
-          <div
-            className="absolute right-0 top-0 bottom-0 w-full lg:w-7/12 overflow-hidden pointer-events-none z-0 opacity-40 lg:opacity-100 transition-opacity duration-700"
-            style={{
-              maskImage:
-                "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
-              WebkitMaskImage:
-                "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
-            }}
-          >
-            {fotosHero.map((foto, idx) =>
-              idx === fotoHeroIndex || heroCarouselReady ? (
-                <img
-                  key={`${foto.localSlug}-${foto.url}`}
-                  src={foto.url}
-                  alt={foto.alt}
-                  loading={idx === 0 ? "eager" : "lazy"}
-                  // @ts-ignore
-                  fetchPriority={idx === 0 ? "high" : "auto"}
-                  decoding={idx === 0 ? "sync" : "async"}
-                  className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-in-out ${
-                    idx === fotoHeroIndex
-                      ? "opacity-100 scale-100"
-                      : "opacity-0 scale-105"
-                  }`}
-                />
-              ) : null
-            )}
-          {/* Suave degradado vertical en la parte inferior para fundir con la división de sección */}
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FAF8F5] to-transparent opacity-80" />
-        </div>
+          {/* Fondo visual: carrusel de locales activos o logo oficial de PideTirúa si aún no hay locales activos */}
+          {fotosHero.length > 0 ? (
+            <div
+              className="absolute right-0 top-0 bottom-0 w-full lg:w-7/12 overflow-hidden pointer-events-none z-0 opacity-40 lg:opacity-100 transition-opacity duration-700"
+              style={{
+                maskImage:
+                  "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to right, transparent 0%, rgba(0,0,0,0.05) 15%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.9) 75%, black 100%)",
+              }}
+            >
+              {fotosHero.map((foto, idx) =>
+                idx === activeHeroIndex || heroCarouselReady ? (
+                  <img
+                    key={`${foto.localSlug}-${foto.url}`}
+                    src={foto.url}
+                    alt={foto.alt}
+                    loading={idx === 0 ? "eager" : "lazy"}
+                    // @ts-ignore
+                    fetchPriority={idx === 0 ? "high" : "auto"}
+                    decoding={idx === 0 ? "sync" : "async"}
+                    className={`absolute inset-0 h-full w-full object-cover transition-all duration-1000 ease-in-out ${
+                      idx === activeHeroIndex
+                        ? "opacity-100 scale-100"
+                        : "opacity-0 scale-105"
+                    }`}
+                  />
+                ) : null
+              )}
+              {/* Suave degradado vertical en la parte inferior para fundir con la división de sección */}
+              <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#FAF8F5] to-transparent opacity-80" />
+            </div>
+          ) : (
+            <div
+              aria-hidden="true"
+              className="absolute right-0 top-0 bottom-0 w-full lg:w-6/12 overflow-hidden pointer-events-none z-0 flex items-center justify-end lg:justify-center pr-2 sm:pr-8 lg:pr-10 opacity-20 lg:opacity-95 transition-opacity duration-700"
+            >
+              <img
+                src="/logo-pidetirua.jpg?v=2"
+                alt="Logo oficial PideTirúa"
+                decoding="async"
+                className="h-64 w-64 sm:h-80 sm:w-80 lg:h-[360px] lg:w-[360px] object-contain mix-blend-multiply drop-shadow-sm select-none"
+              />
+            </div>
+          )}
 
         <div className="max-w-[1240px] mx-auto px-4 sm:px-6 relative z-10">
           <div className="max-w-2xl lg:max-w-xl text-left">
@@ -516,38 +502,47 @@ export default function DirectoryClient({
               </span>
             </div>
 
-            {/* Selector de Fotos de Locales (1-clic y auto-rotación) */}
-            <div className="mt-5 pt-3 border-t border-stone-200/60 flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-wider text-stone-500 mr-1 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-[#EA580C] animate-pulse"></span>
-                <span>En imagen:</span>
-                <strong className="text-stone-900 font-bold truncate max-w-[180px] sm:max-w-none">
-                  {fotosHero[fotoHeroIndex]?.plato || "Especialidad Local"}
-                </strong>
-                <span className="text-stone-300">·</span>
-              </span>
-              {fotosHero.map((f, idx) => {
-                const activa = idx === fotoHeroIndex;
-                return (
-                  <button
-                    key={`${f.localSlug}-${idx}`}
-                    type="button"
-                    onClick={() => {
-                      setHeroCarouselReady(true);
-                      setFotoHeroIndex(idx);
-                    }}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
-                      activa
-                        ? "bg-[#18181B] text-white shadow-xs"
-                        : "bg-white/80 hover:bg-white text-stone-700 border border-stone-200/80"
-                    }`}
-                  >
-                    <span>{f.icono}</span>
-                    <span>{f.nombreLocal.replace(" Tirúa", "").replace(" Quidico", "")}</span>
-                  </button>
-                );
-              })}
-            </div>
+            {/* Selector de Fotos de Locales Activos (1-clic y auto-rotación) */}
+            {fotosHero.length > 0 ? (
+              <div className="mt-5 pt-3 border-t border-stone-200/60 flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-stone-500 mr-1 flex items-center gap-1.5">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#EA580C] animate-pulse"></span>
+                  <span>En imagen:</span>
+                  <strong className="text-stone-900 font-bold truncate max-w-[180px] sm:max-w-none">
+                    {fotosHero[activeHeroIndex]?.plato || "Especialidad Local"}
+                  </strong>
+                  <span className="text-stone-300">·</span>
+                </span>
+                {fotosHero.map((f, idx) => {
+                  const activa = idx === activeHeroIndex;
+                  return (
+                    <button
+                      key={`${f.localSlug}-${idx}`}
+                      type="button"
+                      onClick={() => {
+                        setHeroCarouselReady(true);
+                        setFotoHeroIndex(idx);
+                      }}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
+                        activa
+                          ? "bg-[#18181B] text-white shadow-xs"
+                          : "bg-white/80 hover:bg-white text-stone-700 border border-stone-200/80"
+                      }`}
+                    >
+                      <span>{f.icono}</span>
+                      <span>{f.nombreLocal.replace(" Tirúa", "").replace(" Quidico", "")}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="mt-5 pt-3 border-t border-stone-200/60 flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-600 flex items-center gap-2">
+                  <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span>PideTirúa · Cartas digitales activándose próximamente</span>
+                </span>
+              </div>
+            )}
 
           </div>
         </div>
