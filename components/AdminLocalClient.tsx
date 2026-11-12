@@ -1288,10 +1288,6 @@ export default function AdminLocalClient({
         return {
           ...cat,
           activa: nuevaActiva,
-          productos: cat.productos.map((p) => ({
-            ...p,
-            disponible: nuevaActiva,
-          })),
         };
       }),
     }));
@@ -1738,6 +1734,7 @@ export default function AdminLocalClient({
         <div className="relative z-10 mx-auto flex w-full max-w-sm items-center justify-between">
           <Link
             href={`/${local.slug}`}
+            prefetch={false}
             className="inline-flex items-center gap-1.5 rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-xs font-bold text-stone-700 shadow-xs backdrop-blur-md transition hover:bg-stone-100 hover:text-stone-900"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
@@ -1940,7 +1937,7 @@ export default function AdminLocalClient({
 
   return (
     <div
-      className={`relative min-h-screen pb-24 print:min-h-0 print:bg-white print:pb-0 ${brand.bgBase} overflow-hidden`}
+      className={`relative min-h-screen pb-24 print:min-h-0 print:bg-white print:pb-0 ${brand.bgBase} overflow-x-clip`}
     >
       {/* Fondo ambiental con degradado suave y textura de ruido estática (Zero GPU loop) */}
       <GradientBackground
@@ -2072,6 +2069,7 @@ export default function AdminLocalClient({
           <div className="flex shrink-0 items-center gap-2">
             <Link
               href={`/${local.slug}`}
+              prefetch={false}
               target="_blank"
               className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold text-white bg-[#18181B] hover:bg-black shadow-xs transition"
               title="Abrir carta pública del cliente"

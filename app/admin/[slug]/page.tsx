@@ -36,7 +36,7 @@ export async function generateMetadata({
     openGraph: {
       title: `Panel Admin — ${local.nombre} | PideTirúa`,
       description: `Acceso protegido al panel de administración de ${local.nombre} en PideTirúa.`,
-      url: `https://pidetirua.cl/admin/${local.slug}`,
+      url: `https://www.pidetirua.cl/admin/${local.slug}`,
       siteName: "PideTirúa",
       locale: "es_CL",
       type: "website",

@@ -179,6 +179,7 @@ export default function PedidosStaffClient({
         <div className="relative z-10 w-full max-w-md mx-auto flex items-center justify-between">
           <Link
             href={`/${local.slug}`}
+            prefetch={false}
             className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-stone-600 hover:text-stone-900 transition"
           >
             <ArrowLeft className="h-4 w-4" />

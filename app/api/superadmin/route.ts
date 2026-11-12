@@ -281,7 +281,7 @@ export async function POST(req: NextRequest) {
           typeof telefono_whatsapp === "string" ? telefono_whatsapp : "",
         direccion: typeof direccion === "string" ? direccion : "",
         horario: typeof horario === "string" ? horario : "12:00 a 22:30 hrs",
-        pin: typeof pin === "string" ? pin : "1234",
+        pin: typeof pin === "string" ? pin : undefined,
         plan: planValido,
         precio_mensual:
           typeof precio_mensual === "number" ? precio_mensual : undefined,
@@ -299,10 +299,26 @@ export async function POST(req: NextRequest) {
           typeof fecha_ultimo_pago === "string" ? fecha_ultimo_pago : undefined,
       });
 
+      if (!res.ok) {
+        return NextResponse.json(res, { status: 400 });
+      }
+
+      const finalSlug = res.local?.slug || slug.trim().toLowerCase();
       revalidateTag("locales-catalog");
       revalidatePath("/");
-      revalidatePath(`/${slug}`);
-      revalidatePath(`/admin/${slug}`);
+      revalidatePath(`/${finalSlug}`);
+      revalidatePath(`/admin/${finalSlug}`);
+      revalidatePath(`/pedidos/${finalSlug}`);
+      if (
+        typeof originalSlug === "string" &&
+        originalSlug.trim() &&
+        originalSlug.trim().toLowerCase() !== finalSlug
+      ) {
+        const oldSlug = originalSlug.trim().toLowerCase();
+        revalidatePath(`/${oldSlug}`);
+        revalidatePath(`/admin/${oldSlug}`);
+        revalidatePath(`/pedidos/${oldSlug}`);
+      }
       revalidatePath("/superadmin");
       return NextResponse.json(res);
     }

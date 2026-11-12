@@ -1,12 +1,5 @@
 import { getSupabaseAdminClient } from "@/lib/supabase-server";
-import {
-  addPhoneToBlacklist,
-  BlacklistEntry,
-  getBlacklistedPhones,
-  isPhoneBlacklisted,
-  normalizePhone,
-  removePhoneFromBlacklist,
-} from "@/lib/security";
+import { BlacklistEntry, normalizePhone } from "@/lib/security";
 
 export interface PersistentBlacklistEntry extends BlacklistEntry {
   localSlug?: string;
@@ -14,29 +7,24 @@ export interface PersistentBlacklistEntry extends BlacklistEntry {
 
 const STORAGE_BUCKET = "pidetirua-db";
 const BLACKLIST_FILE = "blacklist-state.json";
-const CACHE_TTL_MS = 15 * 1000;
+const CACHE_TTL_MS = 2 * 1000;
 
 let cachedEntries: PersistentBlacklistEntry[] | null = null;
 let cacheLoadedAt = 0;
 
-function syncMemoryFromList(entries: PersistentBlacklistEntry[]): void {
-  for (const entry of entries) {
-    if (!isPhoneBlacklisted(entry.telefono)) {
-      addPhoneToBlacklist(entry.telefono, entry.motivo, entry.bloqueadoPor);
-    }
-  }
-}
-
-async function readBlacklistFromStorage(): Promise<PersistentBlacklistEntry[]> {
+/**
+ * Lee exclusivamente desde Supabase Storage (`blacklist-state.json`) como única fuente de verdad
+ * para evitar desincronización o resurrección de teléfonos entre instancias Serverless.
+ */
+async function readBlacklistFromStorage(
+  forceFresh = false
+): Promise<PersistentBlacklistEntry[]> {
   const now = Date.now();
-  if (cachedEntries && now - cacheLoadedAt < CACHE_TTL_MS) {
+  if (!forceFresh && cachedEntries && now - cacheLoadedAt < CACHE_TTL_MS) {
     return cachedEntries;
   }
 
   const mapByPhone = new Map<string, PersistentBlacklistEntry>();
-  for (const mem of getBlacklistedPhones()) {
-    mapByPhone.set(mem.telefono, { ...mem });
-  }
 
   try {
     const supabase = getSupabaseAdminClient();
@@ -62,16 +50,16 @@ async function readBlacklistFromStorage(): Promise<PersistentBlacklistEntry[]> {
         }
       }
     }
-  } catch {
-    // Usar fallback en memoria si Storage no está accesible
+  } catch (err) {
+    console.warn("No se pudo leer blacklist desde Storage:", err);
+    if (cachedEntries) return cachedEntries;
   }
 
   const list = Array.from(mapByPhone.values()).sort((a, b) =>
     b.fecha.localeCompare(a.fecha)
   );
-  syncMemoryFromList(list);
   cachedEntries = list;
-  cacheLoadedAt = now;
+  cacheLoadedAt = Date.now();
   return list;
 }
 
@@ -90,34 +78,36 @@ async function writeBlacklistToStorage(
     }
 
     const payload = JSON.stringify(entries, null, 2);
-    await supabase.storage
+    const { error } = await supabase.storage
       .from(STORAGE_BUCKET)
       .upload(BLACKLIST_FILE, new Blob([payload], { type: "application/json" }), {
         upsert: true,
         contentType: "application/json",
         cacheControl: "0",
       });
+    if (error) {
+      console.error("Error subiendo blacklist-state.json a Storage:", error);
+    }
   } catch (err) {
-    console.warn("No se pudo persistir blacklist en Storage:", err);
+    console.error("No se pudo persistir blacklist en Storage:", err);
   }
 }
 
 /**
- * Verifica si un teléfono está restringido para pago en efectivo (memoria + Storage).
+ * Verifica si un teléfono está restringido para pago en efectivo leyendo la fuente persistente.
  */
 export async function isPhoneBlacklistedPersistent(
   rawPhone: string
 ): Promise<boolean> {
   const norm = normalizePhone(rawPhone);
   if (!norm) return false;
-  if (isPhoneBlacklisted(norm)) return true;
 
   const list = await readBlacklistFromStorage();
   return list.some((e) => e.telefono === norm);
 }
 
 /**
- * Agrega o actualiza un número en la lista negra persistente y en memoria.
+ * Agrega o actualiza un número en la lista negra persistente en Storage.
  */
 export async function addPhoneToBlacklistPersistent(
   rawPhone: string,
@@ -125,14 +115,13 @@ export async function addPhoneToBlacklistPersistent(
   bloqueadoPor = "admin",
   localSlug?: string
 ): Promise<{ ok: boolean; telefono: string }> {
-  const res = addPhoneToBlacklist(rawPhone, motivo, bloqueadoPor);
-  if (!res.ok) return res;
+  const norm = normalizePhone(rawPhone);
+  if (!norm) return { ok: false, telefono: "" };
 
-  cachedEntries = null;
-  const current = await readBlacklistFromStorage();
+  const current = await readBlacklistFromStorage(true);
   const cleanSlug = localSlug?.toLowerCase().trim();
   const entry: PersistentBlacklistEntry = {
-    telefono: res.telefono,
+    telefono: norm,
     motivo,
     fecha: new Date().toISOString(),
     bloqueadoPor,
@@ -141,10 +130,10 @@ export async function addPhoneToBlacklistPersistent(
 
   const next = [
     entry,
-    ...current.filter((item) => item.telefono !== res.telefono),
+    ...current.filter((item) => item.telefono !== norm),
   ];
   await writeBlacklistToStorage(next);
-  return res;
+  return { ok: true, telefono: norm };
 }
 
 /**
@@ -153,15 +142,14 @@ export async function addPhoneToBlacklistPersistent(
 export async function listBlacklistedPhonesPersistent(
   localSlug?: string
 ): Promise<PersistentBlacklistEntry[]> {
-  cachedEntries = null;
-  const entries = await readBlacklistFromStorage();
+  const entries = await readBlacklistFromStorage(true);
   if (!localSlug) return entries;
   const cleanSlug = localSlug.toLowerCase().trim();
   return entries.filter((e) => !e.localSlug || e.localSlug === cleanSlug);
 }
 
 /**
- * Elimina un número de la lista negra persistente y de la caché en memoria.
+ * Elimina un número de la lista negra persistente.
  */
 export async function removePhoneFromBlacklistPersistent(
   rawPhone: string,
@@ -170,25 +158,48 @@ export async function removePhoneFromBlacklistPersistent(
   const norm = normalizePhone(rawPhone);
   if (!norm) return false;
 
-  cachedEntries = null;
-  const current = await readBlacklistFromStorage();
+  const current = await readBlacklistFromStorage(true);
   const cleanSlug = localSlug?.toLowerCase().trim();
   const target = current.find((e) => e.telefono === norm);
 
+  if (!target) {
+    return false;
+  }
+
   if (
     cleanSlug &&
-    target &&
     target.localSlug &&
     target.localSlug !== cleanSlug
   ) {
     return false;
   }
 
-  removePhoneFromBlacklist(norm);
   const next = current.filter((e) => e.telefono !== norm);
-  const removed = next.length !== current.length || Boolean(target);
-  if (removed) {
+  await writeBlacklistToStorage(next);
+  return true;
+}
+
+/**
+ * Migra los registros de blacklist asociados a un slug cuando SuperAdmin renombra el local.
+ */
+export async function migrateBlacklistSlugPersistent(
+  oldSlug: string,
+  newSlug: string
+): Promise<void> {
+  const from = oldSlug.toLowerCase().trim();
+  const to = newSlug.toLowerCase().trim();
+  if (!from || !to || from === to) return;
+
+  const current = await readBlacklistFromStorage(true);
+  let changed = false;
+  const next = current.map((entry) => {
+    if (entry.localSlug === from) {
+      changed = true;
+      return { ...entry, localSlug: to };
+    }
+    return entry;
+  });
+  if (changed) {
     await writeBlacklistToStorage(next);
   }
-  return removed;
 }

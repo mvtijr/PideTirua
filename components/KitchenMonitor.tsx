@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { EstadoPedido, Pedido, CategoriaMenu, Producto } from "@/types/local";
-import { formatCLP } from "@/lib/formatters";
+import { formatCLP, getFechaHoyChile } from "@/lib/formatters";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
 interface KitchenMonitorProps {
@@ -132,12 +132,8 @@ function formatHoraPedido(isoString: string): string {
 function esDeHoy(isoString: string): boolean {
   try {
     const fecha = new Date(isoString);
-    const hoy = new Date();
-    return (
-      fecha.getFullYear() === hoy.getFullYear() &&
-      fecha.getMonth() === hoy.getMonth() &&
-      fecha.getDate() === hoy.getDate()
-    );
+    if (Number.isNaN(fecha.getTime())) return true;
+    return getFechaHoyChile(fecha) === getFechaHoyChile();
   } catch {
     return true;
   }
@@ -437,6 +433,9 @@ export default function KitchenMonitor({
             p.id === pedido.id ? { ...p, estado: estadoAnterior } : p
           )
         );
+        onNotify?.(
+          data.error || "⚠️ No se pudo actualizar el estado del pedido"
+        );
         return;
       }
 
@@ -445,6 +444,8 @@ export default function KitchenMonitor({
           ? "🍳 En preparación"
           : nuevoEstado === "listo"
           ? "✅ Pedido listo"
+          : nuevoEstado === "cancelado"
+          ? "🗑️ Pedido cancelado"
           : "📦 Pedido entregado";
       onNotify?.(`${etiquetaEstado}: ${pedido.cliente_nombre}`);
     } catch {
@@ -453,6 +454,7 @@ export default function KitchenMonitor({
           p.id === pedido.id ? { ...p, estado: estadoAnterior } : p
         )
       );
+      onNotify?.("⚠️ Error de conexión al actualizar el pedido");
     } finally {
       setActualizandoId(null);
     }

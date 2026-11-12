@@ -1,4 +1,4 @@
-import { DatosCheckout, ItemCarrito, Local, Producto } from "@/types/local";
+import type { DatosCheckout, ItemCarrito, Local, Producto } from "@/types/local";
 
 /**
  * Formatea un número como Peso Chileno ($ CLP con puntos de miles, ej: $12.500).
@@ -33,19 +33,80 @@ interface WhatsAppOrderPayload {
 }
 
 /**
- * Retorna la fecha actual en Chile (zona horaria America/Santiago) en formato YYYY-MM-DD.
+ * Retorna la fecha en Chile (zona horaria America/Santiago) en formato YYYY-MM-DD.
  */
-export function getFechaHoyChile(): string {
+export function getFechaHoyChile(date: Date = new Date()): string {
   try {
     return new Intl.DateTimeFormat("en-CA", {
       timeZone: "America/Santiago",
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-    }).format(new Date());
+    }).format(date);
   } catch {
-    return new Date().toISOString().split("T")[0];
+    return date.toISOString().split("T")[0];
   }
+}
+
+/**
+ * Normaliza un PIN numérico de 4 dígitos evitando rellenos silenciosos tipo padStart("0000").
+ * Si rawPin viene vacío y se indica allowEmpty=true, retorna null para indicar "mantener actual".
+ */
+export function normalizeFourDigitPin(
+  rawPin: unknown,
+  options: { allowEmpty?: boolean; defaultOnEmpty?: string } = {}
+): { ok: true; pin: string | null } | { ok: false; error: string } {
+  const digits = typeof rawPin === "string" ? rawPin.replace(/\D/g, "") : "";
+  if (!digits) {
+    if (options.allowEmpty) return { ok: true, pin: null };
+    if (options.defaultOnEmpty) return { ok: true, pin: options.defaultOnEmpty };
+    return { ok: false, error: "El PIN debe tener exactamente 4 dígitos." };
+  }
+  if (digits.length !== 4) {
+    return { ok: false, error: "El PIN debe tener exactamente 4 dígitos numéricos." };
+  }
+  return { ok: true, pin: digits };
+}
+
+/**
+ * Calcula el estado de cobranza mensual de un local usando la fecha oficial de Chile.
+ */
+export function calcularEstadoCobranza(
+  loc: { dia_cobro?: number | null; fecha_ultimo_pago?: string | null },
+  fechaHoyChile: string = getFechaHoyChile()
+): {
+  alDia: boolean;
+  diaCobro: number;
+  fechaUltimoPago: string;
+} {
+  const diaCobro =
+    typeof loc.dia_cobro === "number" &&
+    loc.dia_cobro >= 1 &&
+    loc.dia_cobro <= 31
+      ? Math.round(loc.dia_cobro)
+      : 5;
+
+  const fechaUltimoPago = (loc.fecha_ultimo_pago || "").slice(0, 10);
+  const [hoyAnio, hoyMes, hoyDia] = fechaHoyChile.split("-").map(Number);
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaUltimoPago)) {
+    return {
+      alDia: hoyDia <= diaCobro,
+      diaCobro,
+      fechaUltimoPago: fechaHoyChile,
+    };
+  }
+
+  const [pagoAnio, pagoMes] = fechaUltimoPago.split("-").map(Number);
+  const mesesDiferencia = (hoyAnio - pagoAnio) * 12 + (hoyMes - pagoMes);
+
+  if (mesesDiferencia <= 0) {
+    return { alDia: true, diaCobro, fechaUltimoPago };
+  }
+  if (mesesDiferencia === 1 && hoyDia <= diaCobro) {
+    return { alDia: true, diaCobro, fechaUltimoPago };
+  }
+  return { alDia: false, diaCobro, fechaUltimoPago };
 }
 
 /**

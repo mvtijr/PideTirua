@@ -29,8 +29,10 @@ export default async function DirectorioComunalPage() {
   const hasOfertas = directoryLocales.some(
     (loc) =>
       loc.activo !== false &&
-      (loc.categorias || []).some((cat) =>
-        (cat.productos || []).some((p) => esOfertaValidaHoy(p))
+      (loc.categorias || []).some(
+        (cat) =>
+          cat.activa !== false &&
+          (cat.productos || []).some((p) => esOfertaValidaHoy(p))
       )
   );
 
@@ -44,7 +46,7 @@ export default async function DirectorioComunalPage() {
       "@type": "ListItem",
       position: idx + 1,
       name: loc.nombre,
-      url: `https://pidetirua.cl/${loc.slug}`,
+      url: `https://www.pidetirua.cl/${loc.slug}`,
     })),
   };
 

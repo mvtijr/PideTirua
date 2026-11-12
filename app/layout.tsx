@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     title: "PideTirúa — Sabores de nuestra tierra | Tirúa y Quidico",
     description:
       "Plataforma gastronómica de Tirúa y Quidico. Revisa cartas digitales, pide antes de salir y coordina directo por WhatsApp con cada restaurante.",
-    url: "https://pidetirua.cl",
+    url: "https://www.pidetirua.cl",
     siteName: "PideTirúa",
     locale: "es_CL",
     type: "website",
@@ -110,8 +110,8 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="192x192" href="/icon-192x192.png" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta property="og:site_name" content="PideTirúa" />
-        <meta property="og:image" content="https://pidetirua.cl/og-image.jpg" />
-        <meta property="og:image:secure_url" content="https://pidetirua.cl/og-image.jpg" />
+        <meta property="og:image" content="https://www.pidetirua.cl/og-image.jpg" />
+        <meta property="og:image:secure_url" content="https://www.pidetirua.cl/og-image.jpg" />
         <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -149,7 +149,7 @@ export default function RootLayout({
         />
 
       </head>
-      <body className="bg-[#FAF8F5] font-body text-[#18181B] antialiased selection:bg-[#EA580C] selection:text-white min-h-screen w-full max-w-full overflow-x-hidden">
+      <body className="bg-[#FAF8F5] font-body text-[#18181B] antialiased selection:bg-[#EA580C] selection:text-white min-h-screen w-full max-w-full overflow-x-clip">
         {/* Google Tag Manager (noscript fallback) */}
         <noscript>
           <iframe

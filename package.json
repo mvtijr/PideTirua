@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test:logic": "node scripts/test-logic.mjs",
+    "audit:routes": "node scripts/audit-routes.mjs",
+    "audit:browser": "node scripts/audit-browser.mjs",
+    "verify": "npm run typecheck && npm run test:logic"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

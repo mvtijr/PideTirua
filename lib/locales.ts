@@ -41,7 +41,8 @@ async function getEffectiveSupabaseClient(useIsrCache = false) {
 }
 
 import { timingSafeCompare } from "@/lib/security";
-import { getFechaHoyChile } from "@/lib/formatters";
+import { getFechaHoyChile, normalizeFourDigitPin } from "@/lib/formatters";
+import { migrateBlacklistSlugPersistent } from "@/lib/blacklist";
 
 export function verifySuperAdminKey(inputKey: string): boolean {
   const expected = (process.env.SUPERADMIN_KEY || "Tirua2026Admin").trim();
@@ -660,7 +661,7 @@ async function writeSupabaseCloudState(locales: Local[]): Promise<void> {
     }
 
     const payload = JSON.stringify(locales, null, 2);
-    await supabase.storage.from(STORAGE_BUCKET).upload(
+    const { error: uploadErr } = await supabase.storage.from(STORAGE_BUCKET).upload(
       STORAGE_STATE_FILE,
       new Blob([payload], { type: "application/json" }),
       {
@@ -669,8 +670,11 @@ async function writeSupabaseCloudState(locales: Local[]): Promise<void> {
         cacheControl: "0",
       }
     );
-  } catch {
-    // Ignorar errores de storage secundario
+    if (uploadErr) {
+      console.error("[locales] Error guardando locales-state.json:", uploadErr.message);
+    }
+  } catch (err) {
+    console.error("[locales] Excepción guardando locales-state.json:", err);
   }
 }
 
@@ -1173,17 +1177,7 @@ export async function toggleCategoriaActivaInSupabase(
     console.warn("Columna activa no existe en tabla categorias de Supabase:", catErr.message);
   }
 
-  // 2. Actualizar disponibilidad masiva de todos los productos de esa categoria
-  const { error: prodErr } = await supabase
-    .from("productos")
-    .update({ disponible: activa })
-    .eq("categoria_id", categoriaId);
-
-  if (prodErr) {
-    console.warn("Error actualizando disponibilidad de productos de categoría:", prodErr.message);
-  }
-
-  // 3. Actualizar memoria y cache cloud
+  // 2. Actualizar estado activa de la categoría sin pisar el stock individual de cada plato
   const locales = await fetchAllLocales();
   const actualizados = locales.map((loc) => {
     if (loc.slug.toLowerCase() !== slug.toLowerCase()) return loc;
@@ -1194,10 +1188,6 @@ export async function toggleCategoriaActivaInSupabase(
         return {
           ...cat,
           activa,
-          productos: cat.productos.map((prod) => ({
-            ...prod,
-            disponible: activa,
-          })),
         };
       }),
     };
@@ -1715,7 +1705,7 @@ export async function generarPinTemporalInSupabase(
     `⏱️ *Válido por exactamente 3 minutos* (expira a las ${horaExpiraFormateada} hrs).`,
     ``,
     `👉 *Ingresa ahora a tu panel:*`,
-    `https://pidetirua.cl/admin/${local.slug}`,
+    `https://www.pidetirua.cl/admin/${local.slug}`,
     ``,
     `🔒 _Por tu seguridad y privacidad, al ingresar el sistema te solicitará definir tu nuevo PIN secreto y personal de 4 dígitos._`,
   ].join("\n");
@@ -1858,7 +1848,7 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
   telefono_whatsapp: string;
   direccion: string;
   horario?: string;
-  pin: string;
+  pin?: string;
   plan: PlanComercial;
   precio_mensual?: number;
   logo_url?: string;
@@ -1889,6 +1879,16 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
       l.slug.toLowerCase() === slugLimpio
   );
 
+  const pinParsed = normalizeFourDigitPin(input.pin, {
+    allowEmpty: Boolean(existing),
+    defaultOnEmpty: existing ? undefined : "1234",
+  });
+  if (!pinParsed.ok) {
+    return { ok: false, error: pinParsed.error };
+  }
+  const pinLimpio = pinParsed.pin ?? existing?.pin ?? "1234";
+  const pinModificado = Boolean(existing && pinLimpio !== existing.pin);
+
   const localId = existing?.id || `loc-${Date.now()}`;
   const plan: PlanComercial =
     input.plan === "llave_en_mano" ? "llave_en_mano" : "autogestionado";
@@ -1918,8 +1918,6 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
 
   const telefonoLimpio =
     input.telefono_whatsapp.replace(/\D/g, "") || "56912345678";
-  const pinLimpio =
-    input.pin.replace(/\D/g, "").slice(0, 4).padStart(4, "0") || "1234";
   const sectorFinal: SectorComuna =
     input.sector === "Quidico" ? "Quidico" : existing?.sector || "Tirúa Centro";
   const horarioFinal =
@@ -1986,6 +1984,20 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
     return { ok: false, error: upsertErr.message };
   }
 
+  if (existing && existing.slug.toLowerCase() !== slugLimpio) {
+    const { error: pedErr } = await supabase
+      .from("pedidos")
+      .update({ local_slug: slugLimpio })
+      .eq("local_slug", existing.slug);
+    if (pedErr) {
+      console.warn(
+        "No se pudieron migrar pedidos históricos al renombrar slug:",
+        pedErr.message
+      );
+    }
+    await migrateBlacklistSlugPersistent(existing.slug, slugLimpio);
+  }
+
   // Si es un local nuevo sin categorías, crear una categoría inicial por defecto
   const catInicial: CategoriaMenu = {
     id: `cat-${slugLimpio}-1`,
@@ -2046,6 +2058,13 @@ export async function upsertLocalBySuperAdminInSupabase(input: {
     dia_cobro: rowToUpsert.dia_cobro,
     fecha_ultimo_pago: rowToUpsert.fecha_ultimo_pago,
     pin: rowToUpsert.pin,
+    ...(pinModificado
+      ? {
+          pin_temporal: undefined,
+          pin_temporal_expira: undefined,
+          requiere_cambio_pin: false,
+        }
+      : {}),
     categorias: categoriasFinales,
   };
 

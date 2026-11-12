@@ -36,7 +36,12 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Local, PlanComercial, SectorComuna } from "@/types/local";
-import { formatCLP, formatPhoneDisplay } from "@/lib/formatters";
+import {
+  calcularEstadoCobranza,
+  formatCLP,
+  formatPhoneDisplay,
+  getFechaHoyChile,
+} from "@/lib/formatters";
 import { getSupabaseClient } from "@/lib/supabase";
 import { GradientBackground } from "@/components/ui/noisy-gradient-backgrounds";
 
@@ -65,54 +70,7 @@ const DEFAULT_DATOS_COBRO: DatosCobroSuperAdmin = {
 };
 
 function getTodayDateStr(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, "0");
-  const d = String(now.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function calcularEstadoCobranza(loc: Local): {
-  alDia: boolean;
-  diaCobro: number;
-  fechaUltimoPago: string;
-} {
-  const diaCobro =
-    typeof loc.dia_cobro === "number" &&
-    loc.dia_cobro >= 1 &&
-    loc.dia_cobro <= 31
-      ? Math.round(loc.dia_cobro)
-      : 5;
-
-  const fechaUltimoPago = (loc.fecha_ultimo_pago || "").slice(0, 10);
-  const now = new Date();
-  const hoyAnio = now.getFullYear();
-  const hoyMes = now.getMonth() + 1;
-  const hoyDia = now.getDate();
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(fechaUltimoPago)) {
-    return {
-      alDia: hoyDia <= diaCobro,
-      diaCobro,
-      fechaUltimoPago: getTodayDateStr(),
-    };
-  }
-
-  const [pagoAnio, pagoMes] = fechaUltimoPago.split("-").map(Number);
-  const mesesDiferencia = (hoyAnio - pagoAnio) * 12 + (hoyMes - pagoMes);
-
-  // Si ya pagó en el mes en curso (o posterior), está al día.
-  if (mesesDiferencia <= 0) {
-    return { alDia: true, diaCobro, fechaUltimoPago };
-  }
-
-  // Si su último pago fue el mes pasado y aún no pasa el día de cobro de este mes, sigue al día.
-  if (mesesDiferencia === 1 && hoyDia <= diaCobro) {
-    return { alDia: true, diaCobro, fechaUltimoPago };
-  }
-
-  // En cualquier otro caso, el pago está vencido.
-  return { alDia: false, diaCobro, fechaUltimoPago };
+  return getFechaHoyChile();
 }
 
 function buildWhatsAppCobroUrl(
@@ -425,7 +383,7 @@ export default function SuperAdminClient({
     setFormTelefono(loc.telefono_whatsapp || loc.telefonoWhatsapp);
     setFormDireccion(loc.direccion || loc.direccionDetalle);
     setFormHorario(loc.horario || "12:00 a 22:30 hrs");
-    setFormPin(loc.pin || "1234");
+    setFormPin("");
     setFormPlan(planActual);
     setFormPrecioMensual(precioActual);
     setFormDiaCobro(
@@ -574,6 +532,12 @@ export default function SuperAdminClient({
       return;
     }
 
+    const pinLimpiado = formPin.replace(/\D/g, "").slice(0, 4);
+    if (pinLimpiado && pinLimpiado.length !== 4) {
+      setErrorForm("Si especificas un PIN, debe tener exactamente 4 dígitos numéricos.");
+      return;
+    }
+
     setGuardandoForm(true);
     setErrorForm(null);
 
@@ -592,7 +556,7 @@ export default function SuperAdminClient({
           telefono_whatsapp: formTelefono.trim(),
           direccion: formDireccion.trim() || "Tirúa",
           horario: formHorario.trim() || "12:00 a 22:30 hrs",
-          pin: formPin.trim() || "1234",
+          pin: pinLimpiado || (modoEdicionId ? undefined : "1234"),
           plan: formPlan,
           precio_mensual: formPrecioMensual,
           dia_cobro: formDiaCobro,
@@ -954,7 +918,7 @@ export default function SuperAdminClient({
   ).length;
 
   return (
-    <div className="relative min-h-screen bg-[#FAF8F5] pb-24 text-stone-900 overflow-hidden">
+    <div className="relative min-h-screen bg-[#FAF8F5] pb-24 text-stone-900 overflow-x-clip">
       {/* Fondo con degradado suave y textura de ruido estática (Zero GPU loop) */}
       <GradientBackground
         gradientType="radial-gradient"
@@ -1390,7 +1354,7 @@ export default function SuperAdminClient({
 
                     <div>
                       <label htmlFor="fn-pin" className="mb-1 block text-xs font-bold uppercase tracking-wider text-stone-600">
-                        PIN (4 dígitos) *
+                        {modoEdicionId ? "Nuevo PIN (opcional)" : "PIN (4 dígitos) *"}
                       </label>
                       <input
                         id="fn-pin"
@@ -1401,7 +1365,7 @@ export default function SuperAdminClient({
                         onChange={(e) =>
                           setFormPin(e.target.value.replace(/\D/g, "").slice(0, 4))
                         }
-                        placeholder="1234"
+                        placeholder={modoEdicionId ? "•••• (mantener actual)" : "1234"}
                         className="w-full rounded-xl border border-stone-200 bg-stone-50 px-3 py-2.5 font-mono text-xs font-bold text-stone-900 focus:border-[#EA580C] focus:bg-white focus:outline-none"
                       />
                     </div>
@@ -2044,6 +2008,7 @@ export default function SuperAdminClient({
                       {/* Ver carta pública */}
                       <Link
                         href={`/${loc.slug}`}
+                        prefetch={false}
                         className="inline-flex items-center justify-center rounded-full border border-stone-200 bg-stone-100 hover:bg-stone-200 p-2.5 text-stone-600 transition"
                         title="Ver menú público"
                       >

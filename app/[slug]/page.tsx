@@ -42,7 +42,7 @@ export async function generateMetadata({
     openGraph: {
       title: `${local.nombre} — Carta Digital QR | PideTirúa`,
       description: `${local.rubro} en ${local.ubicacion}. Revisa la carta digital completa y realiza tu pedido directo.`,
-      url: `https://pidetirua.cl/${local.slug}`,
+      url: `https://www.pidetirua.cl/${local.slug}`,
       siteName: "PideTirúa",
       locale: "es_CL",
       type: "website",
@@ -88,8 +88,8 @@ export default async function LocalMenuPage({ params }: LocalMenuPageProps) {
     "@context": "https://schema.org",
     "@type": "Restaurant",
     name: local.nombre,
-    image: local.banner_url || local.fotoPortada || "https://pidetirua.cl/og-image.jpg",
-    url: `https://pidetirua.cl/${local.slug}`,
+    image: local.banner_url || local.fotoPortada || "https://www.pidetirua.cl/og-image.jpg",
+    url: `https://www.pidetirua.cl/${local.slug}`,
     telephone: local.telefonoWhatsapp || local.telefono_whatsapp || "",
     servesCuisine: local.rubro,
     address: {

@@ -141,10 +141,6 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
             return {
               ...cat,
               activa,
-              productos: (cat.productos || []).map((p) => ({
-                ...p,
-                disponible: activa,
-              })),
             };
           }
           return cat;
@@ -496,6 +492,7 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
   const ofertasDelDiaLocal = useMemo(() => {
     const listado: Producto[] = [];
     local.categorias.forEach((cat) => {
+      if (cat.activa === false) return;
       cat.productos.forEach((p) => {
         if (esOfertaValidaHoy(p)) {
           listado.push(p);
@@ -533,7 +530,7 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
   };
 
   return (
-    <div className={`relative min-h-screen pb-28 ${theme.pageBg} overflow-hidden`}>
+    <div className={`relative min-h-screen pb-28 ${theme.pageBg} overflow-x-clip`}>
       {/* Notificación flotante de sincronización en tiempo real */}
       {notificacionRealtime && (
         <div
@@ -1273,7 +1270,7 @@ export default function MenuClient({ local: initialLocal }: MenuClientProps) {
             <div className="my-4 flex justify-center">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-                  `https://pidetirua.cl/${local.slug}`
+                  `https://www.pidetirua.cl/${local.slug}`
                 )}`}
                 alt={`QR ${local.nombre}`}
                 className="h-40 w-40 rounded-xl border border-outline-variant/40 bg-white p-2"

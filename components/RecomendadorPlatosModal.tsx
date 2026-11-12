@@ -153,6 +153,7 @@ export default function RecomendadorPlatosModal({
 
     for (const loc of localesCandidatos) {
       for (const cat of loc.categorias) {
+        if (cat.activa === false) continue;
         for (const prod of cat.productos) {
           if (prod.disponible !== false) {
             todosLosPlatos.push({

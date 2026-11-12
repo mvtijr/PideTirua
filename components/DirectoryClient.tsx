@@ -123,6 +123,7 @@ export default function DirectoryClient({
         const platosConFoto: Array<{ nombre: string; url: string }> = [];
 
         (loc.categorias || []).forEach((cat) => {
+          if (cat.activa === false) return;
           (cat.productos || []).forEach((p) => {
             const img = p.imagen_url || p.imagen;
             if (img && img.trim() && p.disponible !== false) {
@@ -198,6 +199,7 @@ export default function DirectoryClient({
       .filter((loc) => loc.activo !== false)
       .forEach((loc) => {
         (loc.categorias || []).forEach((cat) => {
+          if (cat.activa === false) return;
           (cat.productos || []).forEach((p) => {
             if (esOfertaValidaHoy(p)) {
               const precioOferta =
@@ -303,7 +305,7 @@ export default function DirectoryClient({
     soloAbiertos;
 
   return (
-    <div className="relative min-h-screen w-full max-w-full overflow-x-hidden bg-[#FAF8F5] text-[#18181B] selection:bg-[#EA580C] selection:text-white">
+    <div className="relative min-h-screen w-full max-w-full overflow-x-clip bg-[#FAF8F5] text-[#18181B] selection:bg-[#EA580C] selection:text-white">
       {/* 1. HEADER EDITORIAL */}
       <header className="sticky top-0 z-50 w-full bg-[#FAF8F5]/95 backdrop-blur-md border-b border-stone-200/80 transition-all">
         <div className="max-w-[1240px] mx-auto px-3 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
@@ -941,7 +943,7 @@ export default function DirectoryClient({
             <div className="my-5 flex flex-col items-center rounded-2xl border border-stone-200 bg-[#FAF8F5] p-5">
               <img
                 src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
-                  `https://pidetirua.cl/${localQrModal.slug}`
+                  `https://www.pidetirua.cl/${localQrModal.slug}`
                 )}`}
                 alt={`QR ${localQrModal.nombre}`}
                 width={176}
